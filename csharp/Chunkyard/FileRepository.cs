@@ -114,15 +114,17 @@ namespace Chunkyard
 
         private string ToFilePath(Uri contentUri)
         {
+            var hash = Hash.HashFromContentUri(contentUri);
             var directoryPath = Path.Combine(
                 _contentDirectory,
-                Hash.AlgorithmFromContentUri(contentUri).Name);
+                Hash.AlgorithmFromContentUri(contentUri).Name,
+                hash.Substring(0, 2));
 
             Directory.CreateDirectory(directoryPath);
 
             return Path.Combine(
                 directoryPath,
-                Hash.HashFromContentUri(contentUri));
+                hash);
         }
     }
 }
