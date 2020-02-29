@@ -37,27 +37,6 @@ namespace Chunkyard
             return repository.TryFetchLogPosition(logName, out var _);
         }
 
-        public static bool ValidContent(this IRepository repository, Uri contentUri, out byte[] content)
-        {
-            if (!repository.ContentExists(contentUri))
-            {
-                content = Array.Empty<byte>();
-                return false;
-            }
-
-            content = repository.RetrieveContent(contentUri);
-            var computedUri = Hash.ComputeContentUri(
-                Hash.AlgorithmFromContentUri(contentUri),
-                content);
-
-            return computedUri.Equals(contentUri);
-        }
-
-        public static bool ValidContent(this IRepository repository, Uri contentUri)
-        {
-            return repository.ValidContent(contentUri, out var _);
-        }
-
         public static void PushContent(this IRepository repository, Uri contentUri, IRepository remoteRepository)
         {
             remoteRepository.StoreContent(

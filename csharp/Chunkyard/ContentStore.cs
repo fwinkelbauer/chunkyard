@@ -7,11 +7,11 @@ namespace Chunkyard
 {
     public class ContentStore : IContentStore<ContentRef>
     {
-        private readonly IRepository _storeProvider;
+        private readonly IRepository _repository;
 
-        public ContentStore(IRepository storeProvider)
+        public ContentStore(IRepository repository)
         {
-            _storeProvider = storeProvider;
+            _repository = repository;
         }
 
         public ContentRef Store(Stream stream, HashAlgorithmName hashAlgorithmName, string contentName)
@@ -19,7 +19,7 @@ namespace Chunkyard
             using var memoryStream = new MemoryStream();
             stream.CopyTo(memoryStream);
 
-            var uri = _storeProvider.StoreContent(
+            var uri = _repository.StoreContent(
                 hashAlgorithmName,
                 memoryStream.ToArray());
 
@@ -30,7 +30,10 @@ namespace Chunkyard
 
         public void Retrieve(Stream stream, ContentRef contentRef)
         {
-            if (!_storeProvider.ValidContent(contentRef.Uri, out var content))
+            var content = _repository.RetrieveContent(
+                contentRef.Uri);
+
+            if (!IsContentValid(contentRef.Uri, content))
             {
                 throw new ChunkyardException($"Invalid content: {contentRef.Name}");
             }
@@ -40,8 +43,15 @@ namespace Chunkyard
 
         public bool Valid(ContentRef contentRef)
         {
-            return _storeProvider.ValidContent(
+            if (!_repository.ContentExists(contentRef.Uri))
+            {
+                return false;
+            }
+
+            var content = _repository.RetrieveContent(
                 contentRef.Uri);
+
+            return IsContentValid(contentRef.Uri, content);
         }
 
         public void Visit(ContentRef _)
@@ -51,6 +61,15 @@ namespace Chunkyard
         public IEnumerable<Uri> ListContentUris(ContentRef contentRef)
         {
             yield return contentRef.Uri;
+        }
+
+        private bool IsContentValid(Uri contentUri, byte[] content)
+        {
+            var computedUri = Hash.ComputeContentUri(
+                Hash.AlgorithmFromContentUri(contentUri),
+                content);
+
+            return contentUri.Equals(computedUri);
         }
     }
 }
