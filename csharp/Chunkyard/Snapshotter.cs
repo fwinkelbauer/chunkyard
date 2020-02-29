@@ -13,23 +13,23 @@ namespace Chunkyard
 
         private static readonly ILogger _log = Log.ForContext<Snapshotter<T>>();
 
+        private readonly IRepository _repository;
         private readonly IContentStore<T> _store;
-        private readonly IContentRefLog<T> _refLog;
         private readonly HashAlgorithmName _hashAlgorithmName;
 
-        public Snapshotter(IContentStore<T> store, IContentRefLog<T> refLog, HashAlgorithmName hashAlgorithmName)
+        public Snapshotter(IRepository repository, IContentStore<T> store, HashAlgorithmName hashAlgorithmName)
         {
+            _repository = repository;
             _store = store;
-            _refLog = refLog;
             _hashAlgorithmName = hashAlgorithmName;
         }
 
         public int Write(string logName, DateTime creationTime, IEnumerable<string> filePaths, Func<string, Stream> readFunc)
         {
-            if (_refLog.TryFetchLogPosition(logName, out var currentLogPosition))
+            if (_repository.TryFetchLogPosition(logName, out var currentLogPosition))
             {
                 var oldSnapshot = ParseSnapshotRef(
-                    _refLog.Retrieve(logName, currentLogPosition));
+                    _repository.RetrieveFromLog<T>(logName, currentLogPosition));
 
                 foreach (var contentRef in oldSnapshot.ContentRefs)
                 {
@@ -43,7 +43,7 @@ namespace Chunkyard
             var serialized = DataConvert.SerializeObject(snapshot);
             var snapshotRef = _store.StoreUtf8(serialized, _hashAlgorithmName, ContentName);
 
-            return _refLog.Store(snapshotRef, logName, currentLogPosition);
+            return _repository.AppendToLog(snapshotRef, logName, currentLogPosition);
         }
 
         public void Restore(Uri snapshotUri, Func<T, Stream> writeFunc, string restoreRegex)
@@ -90,7 +90,7 @@ namespace Chunkyard
         private Snapshot<T> RetrieveSnapshot(Uri snapshotUri)
         {
             return ParseSnapshotRef(
-                _refLog.Retrieve(snapshotUri));
+                _repository.RetrieveFromLog<T>(snapshotUri));
         }
 
         private Snapshot<T> ParseSnapshotRef(T snapshotRef)

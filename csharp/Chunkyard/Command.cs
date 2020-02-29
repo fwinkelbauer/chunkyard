@@ -21,19 +21,16 @@ namespace Chunkyard
         private static readonly string ChunkyardDirectoryPath = Path.Combine(RootDirectoryPath, RepositoryDirectoryName);
         private static readonly string FiltersFilePath = Path.Combine(RootDirectoryPath, FiltersFileName);
         private static readonly string ConfigFilePath = Path.Combine(RootDirectoryPath, ConfigFileName);
-        private static readonly string ContentDirectoryPath = Path.Combine(ChunkyardDirectoryPath, "content");
-        private static readonly string RefLogDirectoryPath = Path.Combine(ChunkyardDirectoryPath, "reflog");
 
         private readonly ChunkyardConfig _config;
-        private readonly IContentRefLog<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>> _refLog;
+        private readonly IRepository _repository;
 
         public Command()
         {
             _config = DataConvert.DeserializeObject<ChunkyardConfig>(
                 File.ReadAllText(ConfigFilePath));
 
-            _refLog = new FileRefLog<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>>(
-                RefLogDirectoryPath);
+            _repository = new FileRepository(ChunkyardDirectoryPath);
         }
 
         public static void Init()
@@ -83,7 +80,7 @@ namespace Chunkyard
         {
             _log.Information("Creating new snapshot for log {LogName}", _config.LogName);
 
-            var snapshotter = CreateSnapshotter(_refLog.Any(_config.LogName)
+            var snapshotter = CreateSnapshotter(_repository.AnyLog(_config.LogName)
                 ? PromptPassword()
                 : NewPassword());
 
@@ -135,7 +132,7 @@ namespace Chunkyard
 
         public void ListLog()
         {
-            foreach (var logPosition in _refLog.List(_config.LogName))
+            foreach (var logPosition in _repository.ListLog(_config.LogName))
             {
                 Console.WriteLine(LogNameToUri(logPosition));
             }
@@ -155,7 +152,7 @@ namespace Chunkyard
             var store = new FastCdcContentStore<LzmaContentRef<AesGcmContentRef<ContentRef>>>(
                 new LzmaContentStore<AesGcmContentRef<ContentRef>>(
                     new AesGcmContentStore<ContentRef>(
-                        new ContentStore(new FileStoreProvider(ContentDirectoryPath)),
+                        new ContentStore(_repository),
                         Crypto.PasswordToKey(password, _config.Salt.ToArray(), _config.Iterations))),
                 _config.MinChunkSizeInByte,
                 _config.AvgChunkSizeInByte,
@@ -163,8 +160,8 @@ namespace Chunkyard
                 Path.Combine(ChunkyardDirectoryPath, "tmp"));
 
             return new Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>>(
+                _repository,
                 store,
-                _refLog,
                 _config.HashAlgorithmName);
         }
 

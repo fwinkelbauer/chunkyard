@@ -5,9 +5,9 @@ namespace Chunkyard
 {
     public class ContentStore : IContentStore<ContentRef>
     {
-        private readonly IContentStoreProvider _storeProvider;
+        private readonly IRepository _storeProvider;
 
-        public ContentStore(IContentStoreProvider storeProvider)
+        public ContentStore(IRepository storeProvider)
         {
             _storeProvider = storeProvider;
         }
@@ -17,7 +17,7 @@ namespace Chunkyard
             using var memoryStream = new MemoryStream();
             stream.CopyTo(memoryStream);
 
-            var uri = _storeProvider.Store(
+            var uri = _storeProvider.StoreContent(
                 hashAlgorithmName,
                 memoryStream.ToArray());
 
@@ -28,7 +28,7 @@ namespace Chunkyard
 
         public void Retrieve(Stream stream, ContentRef contentRef)
         {
-            if (!_storeProvider.Valid(contentRef.Uri, out var content))
+            if (!_storeProvider.ValidContent(contentRef.Uri, out var content))
             {
                 throw new ChunkyardException($"Invalid content: {contentRef.Name}");
             }
@@ -38,7 +38,7 @@ namespace Chunkyard
 
         public bool Valid(ContentRef contentRef)
         {
-            return _storeProvider.Valid(
+            return _storeProvider.ValidContent(
                 contentRef.Uri);
         }
 
