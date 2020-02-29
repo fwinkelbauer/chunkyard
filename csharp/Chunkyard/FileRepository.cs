@@ -40,12 +40,6 @@ namespace Chunkyard
                 ToFilePath(contentUri));
         }
 
-        public void Remove(Uri contentUri)
-        {
-            File.Delete(
-                ToFilePath(contentUri));
-        }
-
         public bool ContentExists(Uri contentUri)
         {
             return File.Exists(
