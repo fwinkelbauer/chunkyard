@@ -87,13 +87,13 @@ namespace Chunkyard
             }
         }
 
-        public void Push(string logName, IRepository remoteRepository)
+        public void Push(string logName, IRepository destinationRepository)
         {
             var sourceExists = _repository.TryFetchLogPosition(
                 logName,
                 out var sourceLogPosition);
 
-            remoteRepository.TryFetchLogPosition(
+            destinationRepository.TryFetchLogPosition(
                 logName,
                 out var destinationLogPosition);
 
@@ -112,13 +112,27 @@ namespace Chunkyard
                 return;
             }
 
+            for (int i = 0; i < startLogPosition; i++)
+            {
+                var serializedSource = DataConvert.SerializeObject(
+                    _repository.RetrieveFromLog<T>(logName, i));
+
+                var serializedDestination = DataConvert.SerializeObject(
+                    destinationRepository.RetrieveFromLog<T>(logName, i));
+
+                if (!serializedSource.Equals(serializedDestination))
+                {
+                    throw new ChunkyardException($"Logs differ at position {i}");
+                }
+            }
+
             for (int i = startLogPosition; i <= sourceLogPosition; i++)
             {
+                _log.Information("Pushing snapshot with position: {LogPosition}", i);
+
                 var snapshotRef = _repository.RetrieveFromLog<T>(logName, i);
-
-                PushSnapshot(snapshotRef, remoteRepository);
-
-                remoteRepository.AppendToLog(snapshotRef, logName, i - 1);
+                PushSnapshot(snapshotRef, destinationRepository);
+                destinationRepository.AppendToLog(snapshotRef, logName, i - 1);
             }
         }
 
@@ -128,7 +142,7 @@ namespace Chunkyard
 
             foreach (var contentRef in snapshot.ContentRefs)
             {
-                _log.Information("Pushing: {File}", contentRef.Name);
+                _log.Information("Pushing content: {File}", contentRef.Name);
 
                 foreach (var contentUri in _store.ListContentUris(contentRef))
                 {
