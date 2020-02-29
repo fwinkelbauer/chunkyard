@@ -76,16 +76,20 @@ namespace Chunkyard
             }
         }
 
-        public void CreateSnapshot()
+        public void CreateSnapshot(CreateOptions o)
         {
-            _log.Information("Creating new snapshot for log {LogName}", _config.LogName);
+            var logName = string.IsNullOrEmpty(o.LogName)
+                ? _config.LogName
+                : o.LogName;
 
-            var snapshotter = CreateSnapshotter(_repository.AnyLog(_config.LogName)
+            _log.Information("Creating new snapshot for log {LogName}", logName);
+
+            var snapshotter = CreateSnapshotter(_repository.AnyLog(logName)
                 ? PromptPassword()
                 : NewPassword());
 
             var newLogPosition = snapshotter.Write(
-                _config.LogName,
+                logName,
                 DateTime.Now,
                 FindFiles(),
                 (path) => File.OpenRead(path));
@@ -140,11 +144,15 @@ namespace Chunkyard
 
         public void PushSnapshot(PushOptions o)
         {
-            _log.Information("Pushing log {LogName}", _config.LogName);
+            var logName = string.IsNullOrEmpty(o.LogName)
+                ? _config.LogName
+                : o.LogName;
+
+            _log.Information("Pushing log {LogName}", logName);
             var remoteRepository = new FileRepository(o.Remote);
 
             CreateSnapshotter(PromptPassword())
-                .Push(_config.LogName, remoteRepository);
+                .Push(logName, remoteRepository);
         }
 
         private static IEnumerable<string> FindFiles()

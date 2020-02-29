@@ -26,7 +26,7 @@ namespace Chunkyard
                 (FilterOptions _) => Run(Command.Filter),
                 (DirOptions o) => Run(() => new Command().DirSnapshot(o)),
                 (RestoreOptions o) => Run(() => new Command().RestoreSnapshot(o)),
-                (CreateOptions _) => Run(() => new Command().CreateSnapshot()),
+                (CreateOptions o) => Run(() => new Command().CreateSnapshot(o)),
                 (VerifyOptions o) => Run(() => new Command().VerifySnapshot(o)),
                 (LogOptions _) => Run(() => new Command().ListLog()),
                 (PushOptions o) => Run(() => new Command().PushSnapshot(o)),
