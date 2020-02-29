@@ -25,8 +25,17 @@ namespace Chunkyard
 
         public FastCdcContentRef<T> Store(Stream stream, HashAlgorithmName hashAlgorithmName, string contentName)
         {
-            if (stream is FileStream)
+            if (stream is FileStream fileStream)
             {
+                // Starting the chunker process is expensive, so we're only
+                // running it on files that are large enough
+                if (fileStream.Length <= _maxChunkSizeInByte)
+                {
+                    return new FastCdcContentRef<T>(
+                        contentName,
+                        new[] { _store.Store(fileStream, hashAlgorithmName, contentName) });
+                }
+
                 return new FastCdcContentRef<T>(
                     contentName,
                     StoreChunks(stream, hashAlgorithmName, contentName, contentName));
