@@ -106,7 +106,7 @@ namespace Chunkyard
                 sourceLogPosition,
                 destinationLogPosition) + 1;
 
-            if (startLogPosition >= sourceLogPosition)
+            if (destinationLogPosition >= sourceLogPosition)
             {
                 _log.Information("Already up-to-date");
                 return;
