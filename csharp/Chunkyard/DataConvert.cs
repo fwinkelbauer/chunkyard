@@ -6,9 +6,7 @@ namespace Chunkyard
     {
         public static string SerializeObject(object value)
         {
-            return JsonConvert.SerializeObject(
-                value,
-                Formatting.Indented);
+            return JsonConvert.SerializeObject(value);
         }
 
         public static T DeserializeObject<T>(string text)
