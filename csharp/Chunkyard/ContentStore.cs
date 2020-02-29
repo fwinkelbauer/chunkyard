@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace Chunkyard
@@ -44,6 +46,11 @@ namespace Chunkyard
 
         public void Visit(ContentRef _)
         {
+        }
+
+        public IEnumerable<Uri> ListContentUris(ContentRef contentRef)
+        {
+            yield return contentRef.Uri;
         }
     }
 }

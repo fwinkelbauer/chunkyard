@@ -21,7 +21,7 @@ namespace Chunkyard
 
         private static int ProcessArguments(string[] args)
         {
-            return Parser.Default.ParseArguments<InitOptions, FilterOptions, DirOptions, RestoreOptions, CreateOptions, VerifyOptions, LogOptions>(args).MapResult(
+            return Parser.Default.ParseArguments<InitOptions, FilterOptions, DirOptions, RestoreOptions, CreateOptions, VerifyOptions, LogOptions, PushOptions>(args).MapResult(
                 (InitOptions _) => Run(Command.Init),
                 (FilterOptions _) => Run(Command.Filter),
                 (DirOptions o) => Run(() => new Command().DirSnapshot(o)),
@@ -29,6 +29,7 @@ namespace Chunkyard
                 (CreateOptions _) => Run(() => new Command().CreateSnapshot()),
                 (VerifyOptions o) => Run(() => new Command().VerifySnapshot(o)),
                 (LogOptions _) => Run(() => new Command().ListLog()),
+                (PushOptions o) => Run(() => new Command().PushSnapshot(o)),
                 _ => 1);
         }
 

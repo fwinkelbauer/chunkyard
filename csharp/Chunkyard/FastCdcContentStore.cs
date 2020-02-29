@@ -86,6 +86,17 @@ namespace Chunkyard
             }
         }
 
+        public IEnumerable<Uri> ListContentUris(FastCdcContentRef<T> contentRef)
+        {
+            foreach (var chunkRef in contentRef.ChunkedContentRefs)
+            {
+                foreach (var chunkUris in _store.ListContentUris(chunkRef))
+                {
+                    yield return chunkUris;
+                }
+            }
+        }
+
         private IEnumerable<T> StoreChunks(Stream stream, HashAlgorithmName hashAlgorithmName, string filePath, string contentName)
         {
             foreach (var chunk in ComputeChunks(filePath))

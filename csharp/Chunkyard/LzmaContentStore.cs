@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -40,6 +41,11 @@ namespace Chunkyard
         public void Visit(LzmaContentRef<T> contentRef)
         {
             _store.Visit(contentRef.ContentRef);
+        }
+
+        public IEnumerable<Uri> ListContentUris(LzmaContentRef<T> contentRef)
+        {
+            return _store.ListContentUris(contentRef.ContentRef);
         }
 
         // https://stackoverflow.com/questions/7646328/how-to-use-the-7z-sdk-to-compress-and-decompress-a-file

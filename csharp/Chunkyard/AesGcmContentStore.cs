@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -57,6 +58,11 @@ namespace Chunkyard
         {
             _noncesByName[contentRef.Name] = contentRef.Nonce.ToArray();
             _store.Visit(contentRef.ContentRef);
+        }
+
+        public IEnumerable<Uri> ListContentUris(AesGcmContentRef<T> contentRef)
+        {
+            return _store.ListContentUris(contentRef.ContentRef);
         }
 
         private byte[] GetNonce(string name)

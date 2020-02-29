@@ -87,6 +87,61 @@ namespace Chunkyard
             }
         }
 
+        public void Push(string logName, IRepository remoteRepository)
+        {
+            var sourceExists = _repository.TryFetchLogPosition(
+                logName,
+                out var sourceLogPosition);
+
+            remoteRepository.TryFetchLogPosition(
+                logName,
+                out var destinationLogPosition);
+
+            if (!sourceExists)
+            {
+                return;
+            }
+
+            var startLogPosition = Math.Min(
+                sourceLogPosition,
+                destinationLogPosition) + 1;
+
+            if (startLogPosition >= sourceLogPosition)
+            {
+                _log.Information("Already up-to-date");
+                return;
+            }
+
+            for (int i = startLogPosition; i <= sourceLogPosition; i++)
+            {
+                var snapshotRef = _repository.RetrieveFromLog<T>(logName, i);
+
+                PushSnapshot(snapshotRef, remoteRepository);
+
+                remoteRepository.AppendToLog(snapshotRef, logName, i - 1);
+            }
+        }
+
+        private void PushSnapshot(T snapshotRef, IRepository remoteRepository)
+        {
+            var snapshot = ParseSnapshotRef(snapshotRef);
+
+            foreach (var contentRef in snapshot.ContentRefs)
+            {
+                _log.Information("Pushing: {File}", contentRef.Name);
+
+                foreach (var contentUri in _store.ListContentUris(contentRef))
+                {
+                    _repository.PushContent(contentUri, remoteRepository);
+                }
+            }
+
+            foreach (var contentUri in _store.ListContentUris(snapshotRef))
+            {
+                _repository.PushContent(contentUri, remoteRepository);
+            }
+        }
+
         private Snapshot<T> RetrieveSnapshot(Uri snapshotUri)
         {
             return ParseSnapshotRef(

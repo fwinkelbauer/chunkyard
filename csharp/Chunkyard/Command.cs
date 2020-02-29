@@ -138,6 +138,15 @@ namespace Chunkyard
             }
         }
 
+        public void PushSnapshot(PushOptions o)
+        {
+            _log.Information("Pushing log {LogName}", _config.LogName);
+            var remoteRepository = new FileRepository(o.Remote);
+
+            CreateSnapshotter(PromptPassword())
+                .Push(_config.LogName, remoteRepository);
+        }
+
         private static IEnumerable<string> FindFiles()
         {
             var filters = File.Exists(FiltersFilePath)

@@ -57,5 +57,12 @@ namespace Chunkyard
         {
             return repository.ValidContent(contentUri, out var _);
         }
+
+        public static void PushContent(this IRepository repository, Uri contentUri, IRepository remoteRepository)
+        {
+            remoteRepository.StoreContent(
+                Hash.AlgorithmFromContentUri(contentUri),
+                repository.RetrieveContent(contentUri));
+        }
     }
 }

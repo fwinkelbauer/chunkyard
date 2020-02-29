@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace Chunkyard
@@ -12,5 +14,7 @@ namespace Chunkyard
         bool Valid(T contentRef);
 
         void Visit(T contentRef);
+
+        IEnumerable<Uri> ListContentUris(T contentRef);
     }
 }
