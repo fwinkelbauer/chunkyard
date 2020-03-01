@@ -27,10 +27,12 @@ namespace Chunkyard
 
         public int Write(string logName, DateTime creationTime, IEnumerable<string> filePaths, Func<string, Stream> readFunc)
         {
-            if (_repository.TryFetchLogPosition(logName, out var currentLogPosition))
+            var currentLogPosition = _repository.FetchLogPosition(logName);
+
+            if (currentLogPosition.HasValue)
             {
                 var oldSnapshot = ParseSnapshotRef(
-                    _repository.RetrieveFromLog<T>(logName, currentLogPosition));
+                    _repository.RetrieveFromLog<T>(logName, currentLogPosition.Value));
 
                 foreach (var contentRef in oldSnapshot.ContentRefs)
                 {
@@ -90,30 +92,26 @@ namespace Chunkyard
 
         public void Push(string logName, IRepository destinationRepository)
         {
-            var sourceExists = _repository.TryFetchLogPosition(
-                logName,
-                out var sourceLogPosition);
+            var sourceLogPosition = _repository.FetchLogPosition(logName);
+            var destinationLogPosition = destinationRepository.FetchLogPosition(logName);
 
-            destinationRepository.TryFetchLogPosition(
-                logName,
-                out var destinationLogPosition);
-
-            if (!sourceExists)
+            if (!sourceLogPosition.HasValue)
             {
+                _log.Information("Cannot push an empty log");
                 return;
             }
 
-            var startLogPosition = Math.Min(
-                sourceLogPosition,
-                destinationLogPosition) + 1;
+            var commonLogPosition = destinationLogPosition.HasValue
+                ? Math.Min(sourceLogPosition.Value, destinationLogPosition.Value)
+                : 0;
 
-            if (destinationLogPosition >= sourceLogPosition)
+            if (commonLogPosition == sourceLogPosition)
             {
                 _log.Information("Already up-to-date");
                 return;
             }
 
-            for (int i = 0; i < startLogPosition; i++)
+            for (int i = 0; i <= commonLogPosition; i++)
             {
                 var serializedSource = DataConvert.SerializeObject(
                     _repository.RetrieveFromLog<T>(logName, i));
@@ -127,7 +125,7 @@ namespace Chunkyard
                 }
             }
 
-            for (int i = startLogPosition; i <= sourceLogPosition; i++)
+            for (int i = commonLogPosition + 1; i <= sourceLogPosition; i++)
             {
                 _log.Information("Pushing snapshot with position: {LogPosition}", i);
 

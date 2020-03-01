@@ -12,11 +12,11 @@ namespace Chunkyard.Core
 
         bool ContentExists(Uri contentUri);
 
-        int AppendToLog<T>(T contentRef, string logName, int currentLogPosition) where T : IContentRef;
+        int AppendToLog<T>(T contentRef, string logName, int? currentLogPosition) where T : IContentRef;
 
         T RetrieveFromLog<T>(string logName, int logPosition) where T : IContentRef;
 
-        bool TryFetchLogPosition(string logName, out int currentLogPosition);
+        int? FetchLogPosition(string logName);
 
         IEnumerable<int> ListLog(string logName);
     }

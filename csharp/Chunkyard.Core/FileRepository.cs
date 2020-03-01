@@ -46,9 +46,11 @@ namespace Chunkyard.Core
                 ToFilePath(contentUri));
         }
 
-        public int AppendToLog<T>(T contentRef, string logName, int currentLogPosition) where T : IContentRef
+        public int AppendToLog<T>(T contentRef, string logName, int? currentLogPosition) where T : IContentRef
         {
-            var newLogPosition = currentLogPosition + 1;
+            var newLogPosition = currentLogPosition.HasValue
+                ? currentLogPosition.Value + 1
+                : 0;
 
             using var fileStream = new FileStream(
                 ToFilePath(logName, newLogPosition),
@@ -68,19 +70,16 @@ namespace Chunkyard.Core
                     ToFilePath(logName, logPosition)));
         }
 
-        public bool TryFetchLogPosition(string logName, out int currentLogPosition)
+        public int? FetchLogPosition(string logName)
         {
             var logPositions = ListLog(logName).ToList();
 
             if (logPositions.Count == 0)
             {
-                currentLogPosition = -1;
-                return false;
+                return null;
             }
 
-            currentLogPosition = logPositions[logPositions.Count - 1];
-
-            return true;
+            return logPositions[logPositions.Count - 1];
         }
 
         public IEnumerable<int> ListLog(string logName)

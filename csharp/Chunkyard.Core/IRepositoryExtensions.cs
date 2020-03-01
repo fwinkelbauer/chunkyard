@@ -11,30 +11,29 @@ namespace Chunkyard.Core
             // TODO verify protocol
             var queryValues = System.Web.HttpUtility.ParseQueryString(uri.Query);
             var logText = queryValues.Get(QueryLog);
-            var hasValues = repository.TryFetchLogPosition(uri.Host, out var currentLogPosition);
+            var currentLogPosition = repository.FetchLogPosition(uri.Host);
 
-            if (string.IsNullOrEmpty(logText))
+            if (!currentLogPosition.HasValue)
             {
-                if (!hasValues)
-                {
-                    throw new ChunkyardException($"{uri} is empty");
-                }
-
-                return repository.RetrieveFromLog<T>(uri.Host, currentLogPosition);
+                throw new ChunkyardException($"{uri} is empty");
+            }
+            else if (string.IsNullOrEmpty(logText))
+            {
+                return repository.RetrieveFromLog<T>(uri.Host, currentLogPosition.Value);
             }
             else
             {
                 var logPosition = Convert.ToInt32(logText);
 
                 return repository.RetrieveFromLog<T>(uri.Host, logPosition < 0
-                    ? currentLogPosition + logPosition
+                    ? currentLogPosition.Value + logPosition
                     : logPosition);
             }
         }
 
         public static bool AnyLog(this IRepository repository, string logName)
         {
-            return repository.TryFetchLogPosition(logName, out var _);
+            return repository.FetchLogPosition(logName).HasValue;
         }
 
         public static void PushContent(this IRepository repository, Uri contentUri, IRepository remoteRepository)
