@@ -16,16 +16,14 @@ namespace Chunkyard
 
         private readonly IRepository _repository;
         private readonly IContentStore<T> _store;
-        private readonly HashAlgorithmName _hashAlgorithmName;
 
-        public Snapshotter(IRepository repository, IContentStore<T> store, HashAlgorithmName hashAlgorithmName)
+        public Snapshotter(IRepository repository, IContentStore<T> store)
         {
             _repository = repository;
             _store = store;
-            _hashAlgorithmName = hashAlgorithmName;
         }
 
-        public int Write(string logName, DateTime creationTime, IEnumerable<string> filePaths, Func<string, Stream> readFunc)
+        public int Write(string logName, DateTime creationTime, IEnumerable<string> filePaths, Func<string, Stream> readFunc, HashAlgorithmName hashAlgorithmName)
         {
             var currentLogPosition = _repository.FetchLogPosition(logName);
 
@@ -42,9 +40,9 @@ namespace Chunkyard
                 }
             }
 
-            var snapshot = new Snapshot<T>(creationTime, WriteFiles(filePaths, readFunc));
+            var snapshot = new Snapshot<T>(creationTime, WriteFiles(filePaths, readFunc, hashAlgorithmName));
             var serialized = DataConvert.SerializeObject(snapshot);
-            var snapshotRef = _store.StoreUtf8(serialized, _hashAlgorithmName, ContentName);
+            var snapshotRef = _store.StoreUtf8(serialized, hashAlgorithmName, ContentName);
 
             return _repository.AppendToLog(snapshotRef, logName, currentLogPosition);
         }
@@ -169,13 +167,13 @@ namespace Chunkyard
                 _store.RetrieveUtf8(snapshotRef));
         }
 
-        private IEnumerable<T> WriteFiles(IEnumerable<string> filePaths, Func<string, Stream> readFunc)
+        private IEnumerable<T> WriteFiles(IEnumerable<string> filePaths, Func<string, Stream> readFunc, HashAlgorithmName hashAlgorithmName)
         {
             foreach (var filePath in filePaths)
             {
                 _log.Information("Saving: {File}", filePath);
                 using var stream = readFunc(filePath);
-                yield return _store.Store(stream, _hashAlgorithmName, filePath);
+                yield return _store.Store(stream, hashAlgorithmName, filePath);
             }
         }
     }

@@ -91,7 +91,8 @@ namespace Chunkyard
                 logName,
                 DateTime.Now,
                 FindFiles(),
-                (path) => File.OpenRead(path));
+                (path) => File.OpenRead(path),
+                _config.HashAlgorithmName);
 
             _log.Information("Latest snapshot is now {Uri}", Id.LogNameToUri(logName, newLogPosition));
         }
@@ -187,8 +188,7 @@ namespace Chunkyard
 
             return new Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>>(
                 _repository,
-                store,
-                _config.HashAlgorithmName);
+                store);
         }
 
         private static IEnumerable<string> FindFiles()
