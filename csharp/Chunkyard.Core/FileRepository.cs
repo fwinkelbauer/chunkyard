@@ -20,7 +20,7 @@ namespace Chunkyard.Core
 
         public Uri StoreContent(HashAlgorithmName algorithm, byte[] value)
         {
-            var contentUri = Hash.ComputeContentUri(algorithm, value);
+            var contentUri = Id.ComputeContentUri(algorithm, value);
 
             if (!ContentExists(contentUri))
             {
@@ -113,10 +113,10 @@ namespace Chunkyard.Core
 
         private string ToFilePath(Uri contentUri)
         {
-            var hash = Hash.HashFromContentUri(contentUri);
+            var hash = Id.HashFromContentUri(contentUri);
             var directoryPath = Path.Combine(
                 _contentDirectory,
-                Hash.AlgorithmFromContentUri(contentUri).Name,
+                Id.AlgorithmFromContentUri(contentUri).Name,
                 hash.Substring(0, 2));
 
             Directory.CreateDirectory(directoryPath);

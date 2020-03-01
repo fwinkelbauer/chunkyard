@@ -4,30 +4,24 @@ namespace Chunkyard.Core
 {
     public static class IRepositoryExtensions
     {
-        private const string QueryLog = "id";
-
-        public static T RetrieveFromLog<T>(this IRepository repository, Uri uri) where T : IContentRef
+        public static T RetrieveFromLog<T>(this IRepository repository, Uri logUri) where T : IContentRef
         {
-            // TODO verify protocol
-            var queryValues = System.Web.HttpUtility.ParseQueryString(uri.Query);
-            var logText = queryValues.Get(QueryLog);
-            var currentLogPosition = repository.FetchLogPosition(uri.Host);
+            var (logName, logPositionCandidate) = Id.LogUriToParts(logUri);
+            var currentLogPosition = repository.FetchLogPosition(logName);
 
             if (!currentLogPosition.HasValue)
             {
-                throw new ChunkyardException($"{uri} is empty");
+                throw new ChunkyardException($"{logUri} is empty");
             }
-            else if (string.IsNullOrEmpty(logText))
+            else if (logPositionCandidate.HasValue)
             {
-                return repository.RetrieveFromLog<T>(uri.Host, currentLogPosition.Value);
+                return repository.RetrieveFromLog<T>(logUri.Host, logPositionCandidate.Value < 0
+                    ? currentLogPosition.Value + logPositionCandidate.Value
+                    : logPositionCandidate.Value);
             }
             else
             {
-                var logPosition = Convert.ToInt32(logText);
-
-                return repository.RetrieveFromLog<T>(uri.Host, logPosition < 0
-                    ? currentLogPosition.Value + logPosition
-                    : logPosition);
+                return repository.RetrieveFromLog<T>(logUri.Host, currentLogPosition.Value);
             }
         }
 
@@ -39,7 +33,7 @@ namespace Chunkyard.Core
         public static void PushContent(this IRepository repository, Uri contentUri, IRepository remoteRepository)
         {
             remoteRepository.StoreContent(
-                Hash.AlgorithmFromContentUri(contentUri),
+                Id.AlgorithmFromContentUri(contentUri),
                 repository.RetrieveContent(contentUri));
         }
     }

@@ -79,14 +79,12 @@ namespace Chunkyard
 
         public void CreateSnapshot(CreateOptions o)
         {
-            var logName = string.IsNullOrEmpty(o.LogName)
-                ? _config.LogName
-                : o.LogName;
+            var logName = GetLogName(o.LogName);
 
             _log.Information("Creating new snapshot for log {LogName}", logName);
 
             var snapshotter = CreateSnapshotter(_repository.AnyLog(logName)
-                ? PromptPassword()
+                ? ExistingPassword()
                 : NewPassword());
 
             var newLogPosition = snapshotter.Write(
@@ -95,22 +93,22 @@ namespace Chunkyard
                 FindFiles(),
                 (path) => File.OpenRead(path));
 
-            _log.Information("Latest snapshot is now {Uri}", LogNameToUri(newLogPosition));
+            _log.Information("Latest snapshot is now {Uri}", Id.LogNameToUri(logName, newLogPosition));
         }
 
         public void VerifySnapshot(VerifyOptions o)
         {
-            var uri = RefLogIdToUri(o.RefLogId);
+            var uri = GetUri(o.RefLogId);
             _log.Information("Verifying snapshot {Uri}", uri);
-            CreateSnapshotter(PromptPassword()).Verify(uri);
+            CreateSnapshotter(ExistingPassword()).Verify(uri);
         }
 
         public void RestoreSnapshot(RestoreOptions o)
         {
-            var uri = RefLogIdToUri(o.RefLogId);
+            var uri = GetUri(o.RefLogId);
             _log.Information("Restoring snapshot {Uri} to {Directory}", uri, o.Directory);
 
-            CreateSnapshotter(PromptPassword()).Restore(
+            CreateSnapshotter(ExistingPassword()).Restore(
                 uri,
                 (docRef) =>
                 {
@@ -123,10 +121,10 @@ namespace Chunkyard
 
         public void DirSnapshot(DirOptions o)
         {
-            var uri = RefLogIdToUri(o.RefLogId);
+            var uri = GetUri(o.RefLogId);
             _log.Information("Listing files in snapshot {Uri}", uri);
 
-            var names = CreateSnapshotter(PromptPassword())
+            var names = CreateSnapshotter(ExistingPassword())
                 .List(uri, o.IncludeRegex);
 
             foreach (var name in names)
@@ -135,34 +133,44 @@ namespace Chunkyard
             }
         }
 
-        public void ListLog()
+        public void ListLog(LogOptions o)
         {
-            foreach (var logPosition in _repository.ListLog(_config.LogName))
+            var logName = GetLogName(o.LogName);
+
+            foreach (var logPosition in _repository.ListLog(logName))
             {
-                Console.WriteLine(LogNameToUri(logPosition));
+                Console.WriteLine(Id.LogNameToUri(logName, logPosition));
             }
         }
 
         public void PushSnapshot(PushOptions o)
         {
-            var logName = string.IsNullOrEmpty(o.LogName)
-                ? _config.LogName
-                : o.LogName;
+            var logName = GetLogName(o.LogName);
 
             _log.Information("Pushing log {LogName}", logName);
             var remoteRepository = new FileRepository(o.Remote);
 
-            CreateSnapshotter(PromptPassword())
+            CreateSnapshotter(ExistingPassword())
                 .Push(logName, remoteRepository);
         }
 
-        private static IEnumerable<string> FindFiles()
+        private string GetLogName(string logName)
         {
-            var filters = File.Exists(FiltersFilePath)
-                ? File.ReadAllLines(FiltersFilePath)
-                : Array.Empty<string>();
+            return string.IsNullOrEmpty(logName)
+                ? _config.LogName
+                : logName;
+        }
 
-            return FileFetcher.FindRelative(RootDirectoryPath, filters);
+        private Uri GetUri(string refLogId)
+        {
+            if (string.IsNullOrEmpty(refLogId))
+            {
+                return Id.LogNameToUri(_config.LogName);
+            }
+            else
+            {
+                return new Uri(refLogId);
+            }
         }
 
         private Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>> CreateSnapshotter(string password)
@@ -183,21 +191,13 @@ namespace Chunkyard
                 _config.HashAlgorithmName);
         }
 
-        private Uri LogNameToUri(int logPosition)
+        private static IEnumerable<string> FindFiles()
         {
-            return new Uri($"log://{_config.LogName}?id={logPosition}");
-        }
+            var filters = File.Exists(FiltersFilePath)
+                ? File.ReadAllLines(FiltersFilePath)
+                : Array.Empty<string>();
 
-        private Uri RefLogIdToUri(string refLogId)
-        {
-            if (string.IsNullOrEmpty(refLogId))
-            {
-                return new Uri($"log://{_config.LogName}");
-            }
-            else
-            {
-                return new Uri(refLogId);
-            }
+            return FileFetcher.FindRelative(RootDirectoryPath, filters);
         }
 
         private static string NewPassword()
@@ -213,7 +213,7 @@ namespace Chunkyard
             return firstPassword;
         }
 
-        private static string PromptPassword()
+        private static string ExistingPassword()
         {
             return ReadPassword("Password: ");
         }

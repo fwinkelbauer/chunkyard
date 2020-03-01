@@ -65,8 +65,8 @@ namespace Chunkyard.Core
 
         private bool IsContentValid(Uri contentUri, byte[] content)
         {
-            var computedUri = Hash.ComputeContentUri(
-                Hash.AlgorithmFromContentUri(contentUri),
+            var computedUri = Id.ComputeContentUri(
+                Id.AlgorithmFromContentUri(contentUri),
                 content);
 
             return contentUri.Equals(computedUri);

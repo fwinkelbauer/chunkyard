@@ -103,7 +103,7 @@ namespace Chunkyard
 
             var commonLogPosition = destinationLogPosition.HasValue
                 ? Math.Min(sourceLogPosition.Value, destinationLogPosition.Value)
-                : 0;
+                : -1;
 
             if (commonLogPosition == sourceLogPosition)
             {

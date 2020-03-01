@@ -28,7 +28,7 @@ namespace Chunkyard
                 (RestoreOptions o) => Run(() => new Command().RestoreSnapshot(o)),
                 (CreateOptions o) => Run(() => new Command().CreateSnapshot(o)),
                 (VerifyOptions o) => Run(() => new Command().VerifySnapshot(o)),
-                (LogOptions _) => Run(() => new Command().ListLog()),
+                (LogOptions o) => Run(() => new Command().ListLog(o)),
                 (PushOptions o) => Run(() => new Command().PushSnapshot(o)),
                 _ => 1);
         }
