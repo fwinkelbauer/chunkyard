@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public class AesGcmContentStore<T> : IContentStore<AesGcmContentRef<T>> where T : IContentRef
     {

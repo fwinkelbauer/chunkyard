@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public interface IContentStore<T> where T : IContentRef
     {

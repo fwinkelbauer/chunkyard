@@ -5,7 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public class FileRepository : IRepository
     {

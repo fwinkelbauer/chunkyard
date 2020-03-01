@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     [Serializable]
     public class ChunkyardException : Exception

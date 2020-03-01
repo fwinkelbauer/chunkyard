@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public class FastCdcContentRef<T> : IContentRef where T : IContentRef
     {

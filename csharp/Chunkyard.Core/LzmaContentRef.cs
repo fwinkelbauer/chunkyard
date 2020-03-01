@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public class LzmaContentRef<T> : IContentRef where T : IContentRef
     {

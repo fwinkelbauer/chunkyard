@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public static class Crypto
     {

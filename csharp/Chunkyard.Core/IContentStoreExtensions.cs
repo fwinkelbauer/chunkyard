@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public static class IContentStoreExtensions
     {

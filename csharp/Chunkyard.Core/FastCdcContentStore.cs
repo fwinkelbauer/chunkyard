@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public class FastCdcContentStore<T> : IContentStore<FastCdcContentRef<T>> where T : IContentRef
     {

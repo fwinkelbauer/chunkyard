@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public class AesGcmContentRef<T> : IContentRef where T : IContentRef
     {

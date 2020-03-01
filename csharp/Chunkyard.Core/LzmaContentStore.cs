@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public class LzmaContentStore<T> : IContentStore<LzmaContentRef<T>> where T : IContentRef
     {

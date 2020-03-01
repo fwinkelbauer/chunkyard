@@ -1,4 +1,4 @@
-﻿namespace Chunkyard
+﻿namespace Chunkyard.Core
 {
     public interface IContentRef
     {

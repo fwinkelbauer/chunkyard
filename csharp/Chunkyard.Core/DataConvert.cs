@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public static class DataConvert
     {

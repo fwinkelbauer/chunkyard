@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Chunkyard
+namespace Chunkyard.Core
 {
     public static class IRepositoryExtensions
     {
