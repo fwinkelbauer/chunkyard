@@ -159,8 +159,6 @@ namespace Chunkyard
 
         private Snapshot<T> ParseSnapshotRef(T snapshotRef)
         {
-            _store.ThrowIfInvalid(snapshotRef);
-
             return DataConvert.DeserializeObject<Snapshot<T>>(
                 _store.RetrieveUtf8(snapshotRef));
         }
