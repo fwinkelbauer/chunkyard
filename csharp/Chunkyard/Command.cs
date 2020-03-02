@@ -197,7 +197,11 @@ namespace Chunkyard
                 _config.MaxChunkSizeInByte,
                 Path.Combine(ChunkyardDirectoryPath, "tmp"));
 
-            return new Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>>(store);
+            var cachedStore = new CachedContentStore<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>>(
+                store,
+                Path.Combine(ChunkyardDirectoryPath, "cache"));
+
+            return new Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>>(cachedStore);
         }
 
         private Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>> CreateSnapshotter(string password)
