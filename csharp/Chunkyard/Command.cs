@@ -155,6 +155,17 @@ namespace Chunkyard
                 .Push(logName, remoteRepository);
         }
 
+        public void PullSnapshot(PullOptions o)
+        {
+            var logName = GetLogName(o.LogName);
+
+            _log.Information("Pulling log {LogName}", logName);
+            var remoteRepository = new FileRepository(o.Remote);
+
+            CreateSnapshotter(remoteRepository, ExistingPassword())
+                .Push(logName, _repository);
+        }
+
         private string GetLogName(string logName)
         {
             return string.IsNullOrEmpty(logName)
@@ -174,12 +185,12 @@ namespace Chunkyard
             }
         }
 
-        private Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>> CreateSnapshotter(string password)
+        private Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>> CreateSnapshotter(IRepository repository, string password)
         {
             var store = new FastCdcContentStore<LzmaContentRef<AesGcmContentRef<ContentRef>>>(
                 new LzmaContentStore<AesGcmContentRef<ContentRef>>(
                     new AesGcmContentStore<ContentRef>(
-                        new ContentStore(_repository),
+                        new ContentStore(repository),
                         Crypto.PasswordToKey(password, _config.Salt.ToArray(), _config.Iterations))),
                 _config.MinChunkSizeInByte,
                 _config.AvgChunkSizeInByte,
@@ -187,8 +198,13 @@ namespace Chunkyard
                 Path.Combine(ChunkyardDirectoryPath, "tmp"));
 
             return new Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>>(
-                _repository,
+                repository,
                 store);
+        }
+
+        private Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>> CreateSnapshotter(string password)
+        {
+            return CreateSnapshotter(_repository, password);
         }
 
         private static IEnumerable<string> FindFiles()
