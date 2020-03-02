@@ -7,19 +7,19 @@ namespace Chunkyard.Core
 {
     public class ContentStore : IContentStore<ContentRef>
     {
-        private readonly IRepository _repository;
-
         public ContentStore(IRepository repository)
         {
-            _repository = repository;
+            Repository = repository;
         }
+
+        public IRepository Repository { get; }
 
         public ContentRef Store(Stream stream, HashAlgorithmName hashAlgorithmName, string contentName)
         {
             using var memoryStream = new MemoryStream();
             stream.CopyTo(memoryStream);
 
-            var uri = _repository.StoreContent(
+            var uri = Repository.StoreContent(
                 hashAlgorithmName,
                 memoryStream.ToArray());
 
@@ -30,7 +30,7 @@ namespace Chunkyard.Core
 
         public void Retrieve(Stream stream, ContentRef contentRef)
         {
-            var content = _repository.RetrieveContent(
+            var content = Repository.RetrieveContent(
                 contentRef.Uri);
 
             if (!IsContentValid(contentRef.Uri, content))
@@ -43,12 +43,12 @@ namespace Chunkyard.Core
 
         public bool Valid(ContentRef contentRef)
         {
-            if (!_repository.ContentExists(contentRef.Uri))
+            if (!Repository.ContentExists(contentRef.Uri))
             {
                 return false;
             }
 
-            var content = _repository.RetrieveContent(
+            var content = Repository.RetrieveContent(
                 contentRef.Uri);
 
             return IsContentValid(contentRef.Uri, content);

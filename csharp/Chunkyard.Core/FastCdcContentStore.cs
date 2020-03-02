@@ -23,6 +23,14 @@ namespace Chunkyard.Core
             _tempDirectory = tempDirectory;
         }
 
+        public IRepository Repository
+        {
+            get
+            {
+                return _store.Repository;
+            }
+        }
+
         public FastCdcContentRef<T> Store(Stream stream, HashAlgorithmName hashAlgorithmName, string contentName)
         {
             if (stream is FileStream fileStream)

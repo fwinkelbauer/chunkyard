@@ -14,6 +14,14 @@ namespace Chunkyard.Core
             _store = store;
         }
 
+        public IRepository Repository
+        {
+            get
+            {
+                return _store.Repository;
+            }
+        }
+
         public LzmaContentRef<T> Store(Stream stream, HashAlgorithmName hashAlgorithmName, string contentName)
         {
             using var compressedStream = new MemoryStream();

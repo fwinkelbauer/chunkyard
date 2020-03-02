@@ -7,6 +7,8 @@ namespace Chunkyard.Core
 {
     public interface IContentStore<T> where T : IContentRef
     {
+        IRepository Repository { get; }
+
         T Store(Stream stream, HashAlgorithmName hashAlgorithmName, string contentName);
 
         void Retrieve(Stream stream, T contentRef);

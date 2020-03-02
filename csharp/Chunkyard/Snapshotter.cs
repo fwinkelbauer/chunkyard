@@ -14,23 +14,21 @@ namespace Chunkyard
 
         private static readonly ILogger _log = Log.ForContext<Snapshotter<T>>();
 
-        private readonly IRepository _repository;
         private readonly IContentStore<T> _store;
 
-        public Snapshotter(IRepository repository, IContentStore<T> store)
+        public Snapshotter(IContentStore<T> store)
         {
-            _repository = repository;
             _store = store;
         }
 
         public int Write(string logName, DateTime creationTime, IEnumerable<string> filePaths, Func<string, Stream> readFunc, HashAlgorithmName hashAlgorithmName)
         {
-            var currentLogPosition = _repository.FetchLogPosition(logName);
+            var currentLogPosition = _store.Repository.FetchLogPosition(logName);
 
             if (currentLogPosition.HasValue)
             {
                 var oldSnapshot = ParseSnapshotRef(
-                    _repository.RetrieveFromLog<T>(logName, currentLogPosition.Value));
+                    _store.Repository.RetrieveFromLog<T>(logName, currentLogPosition.Value));
 
                 foreach (var contentRef in oldSnapshot.ContentRefs)
                 {
@@ -44,7 +42,7 @@ namespace Chunkyard
             var serialized = DataConvert.SerializeObject(snapshot);
             var snapshotRef = _store.StoreUtf8(serialized, hashAlgorithmName, ContentName);
 
-            return _repository.AppendToLog(snapshotRef, logName, currentLogPosition);
+            return _store.Repository.AppendToLog(snapshotRef, logName, currentLogPosition);
         }
 
         public void Restore(Uri snapshotUri, Func<T, Stream> writeFunc, string restoreRegex)
@@ -90,7 +88,7 @@ namespace Chunkyard
 
         public void Push(string logName, IRepository destinationRepository)
         {
-            var sourceLogPosition = _repository.FetchLogPosition(logName);
+            var sourceLogPosition = _store.Repository.FetchLogPosition(logName);
             var destinationLogPosition = destinationRepository.FetchLogPosition(logName);
 
             if (!sourceLogPosition.HasValue)
@@ -112,7 +110,7 @@ namespace Chunkyard
             for (int i = 0; i <= commonLogPosition; i++)
             {
                 var serializedSource = DataConvert.SerializeObject(
-                    _repository.RetrieveFromLog<T>(logName, i));
+                    _store.Repository.RetrieveFromLog<T>(logName, i));
 
                 var serializedDestination = DataConvert.SerializeObject(
                     destinationRepository.RetrieveFromLog<T>(logName, i));
@@ -127,7 +125,7 @@ namespace Chunkyard
             {
                 _log.Information("Pushing snapshot with position: {LogPosition}", i);
 
-                var snapshotRef = _repository.RetrieveFromLog<T>(logName, i);
+                var snapshotRef = _store.Repository.RetrieveFromLog<T>(logName, i);
                 PushSnapshot(snapshotRef, destinationRepository);
                 destinationRepository.AppendToLog(snapshotRef, logName, i - 1);
             }
@@ -143,20 +141,20 @@ namespace Chunkyard
 
                 foreach (var contentUri in _store.ListContentUris(contentRef))
                 {
-                    _repository.PushContent(contentUri, remoteRepository);
+                    _store.Repository.PushContent(contentUri, remoteRepository);
                 }
             }
 
             foreach (var contentUri in _store.ListContentUris(snapshotRef))
             {
-                _repository.PushContent(contentUri, remoteRepository);
+                _store.Repository.PushContent(contentUri, remoteRepository);
             }
         }
 
         private Snapshot<T> RetrieveSnapshot(Uri snapshotUri)
         {
             return ParseSnapshotRef(
-                _repository.RetrieveFromLog<T>(snapshotUri));
+                _store.Repository.RetrieveFromLog<T>(snapshotUri));
         }
 
         private Snapshot<T> ParseSnapshotRef(T snapshotRef)

@@ -19,6 +19,14 @@ namespace Chunkyard.Core
             _noncesByName = new Dictionary<string, byte[]>();
         }
 
+        public IRepository Repository
+        {
+            get
+            {
+                return _store.Repository;
+            }
+        }
+
         public AesGcmContentRef<T> Store(Stream stream, HashAlgorithmName hashAlgorithmName, string contentName)
         {
             var nonce = GetNonce(contentName);
