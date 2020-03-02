@@ -115,7 +115,7 @@ namespace Chunkyard
                 {
                     var file = Path.Combine(o.Directory, docRef.Name);
                     Directory.CreateDirectory(Path.GetDirectoryName(file));
-                    return File.OpenWrite(file);
+                    return new FileStream(file, FileMode.CreateNew);
                 },
                 o.IncludeRegex);
         }
