@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Chunkyard.Options;
 using CommandLine;
 using Serilog;
@@ -7,11 +8,17 @@ namespace Chunkyard
 {
     public static class Program
     {
+        public const string RepositoryDirectoryName = ".chunkyard";
+
+        public static readonly string RootDirectoryPath = Path.GetFullPath(".");
+        public static readonly string LogDirectoryPath = Path.Combine(RootDirectoryPath, "log");
+
         public static void Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
+                .WriteTo.File(Path.Combine(LogDirectoryPath, "chunkyard.log"), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 2)
                 .CreateLogger();
 
             Environment.ExitCode = ProcessArguments(args);

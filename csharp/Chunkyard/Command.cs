@@ -12,16 +12,14 @@ namespace Chunkyard
 {
     public class Command
     {
-        public const string RepositoryDirectoryName = ".chunkyard";
         public const string FiltersFileName = ".chunkyardfilter";
         public const string ConfigFileName = ".chunkyardconfig";
 
-        private static readonly ILogger _log = Log.ForContext<Command>();
+        private static readonly string ChunkyardDirectoryPath = Path.Combine(Program.RootDirectoryPath, Program.RepositoryDirectoryName);
+        private static readonly string FiltersFilePath = Path.Combine(Program.RootDirectoryPath, FiltersFileName);
+        private static readonly string ConfigFilePath = Path.Combine(Program.RootDirectoryPath, ConfigFileName);
 
-        private static readonly string RootDirectoryPath = Path.GetFullPath(".");
-        private static readonly string ChunkyardDirectoryPath = Path.Combine(RootDirectoryPath, RepositoryDirectoryName);
-        private static readonly string FiltersFilePath = Path.Combine(RootDirectoryPath, FiltersFileName);
-        private static readonly string ConfigFilePath = Path.Combine(RootDirectoryPath, ConfigFileName);
+        private static readonly ILogger _log = Log.ForContext<Command>();
 
         private readonly ChunkyardConfig _config;
         private readonly IRepository _repository;
@@ -215,7 +213,7 @@ namespace Chunkyard
                 ? File.ReadAllLines(FiltersFilePath)
                 : Array.Empty<string>();
 
-            return FileFetcher.FindRelative(RootDirectoryPath, filters);
+            return FileFetcher.FindRelative(Program.RootDirectoryPath, filters);
         }
 
         private static string NewPassword()
