@@ -15,7 +15,6 @@ namespace Chunkyard
         public const string FiltersFileName = ".chunkyardfilter";
         public const string ConfigFileName = ".chunkyardconfig";
 
-        private static readonly string ChunkyardDirectoryPath = Path.Combine(Program.RootDirectoryPath, Program.RepositoryDirectoryName);
         private static readonly string FiltersFilePath = Path.Combine(Program.RootDirectoryPath, FiltersFileName);
         private static readonly string ConfigFilePath = Path.Combine(Program.RootDirectoryPath, ConfigFileName);
 
@@ -29,7 +28,7 @@ namespace Chunkyard
             _config = DataConvert.DeserializeObject<ChunkyardConfig>(
                 File.ReadAllText(ConfigFilePath));
 
-            _repository = new FileRepository(ChunkyardDirectoryPath);
+            _repository = new FileRepository(Program.ChunkyardDirectoryPath);
         }
 
         public static void Init()
@@ -193,11 +192,11 @@ namespace Chunkyard
                 _config.MinChunkSizeInByte,
                 _config.AvgChunkSizeInByte,
                 _config.MaxChunkSizeInByte,
-                Path.Combine(ChunkyardDirectoryPath, "tmp"));
+                Path.Combine(Program.ChunkyardDirectoryPath, "tmp"));
 
             var cachedStore = new CachedContentStore<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>>(
                 store,
-                Path.Combine(ChunkyardDirectoryPath, "cache"));
+                Path.Combine(Program.ChunkyardDirectoryPath, "cache"));
 
             return new Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>>(cachedStore);
         }
