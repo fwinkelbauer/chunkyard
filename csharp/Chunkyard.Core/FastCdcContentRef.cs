@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Chunkyard.Core
 {
@@ -7,11 +8,11 @@ namespace Chunkyard.Core
         public FastCdcContentRef(string name, IEnumerable<T> chunkedContentRefs)
         {
             Name = name;
-            ChunkedContentRefs = new List<T>(chunkedContentRefs);
+            ChunkedContentRefs = chunkedContentRefs.ToImmutableArray();
         }
 
         public string Name { get; }
 
-        public IReadOnlyCollection<T> ChunkedContentRefs { get; }
+        public ImmutableArray<T> ChunkedContentRefs { get; }
     }
 }

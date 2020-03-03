@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 using Newtonsoft.Json;
 
 namespace Chunkyard.Core
@@ -8,8 +8,8 @@ namespace Chunkyard.Core
         public AesGcmContentRef(T contentRef, byte[] nonce, byte[] tag)
         {
             ContentRef = contentRef;
-            Nonce = nonce;
-            Tag = tag;
+            Nonce = nonce.ToImmutableArray();
+            Tag = tag.ToImmutableArray();
         }
 
         [JsonIgnore]
@@ -23,8 +23,8 @@ namespace Chunkyard.Core
 
         public T ContentRef { get; }
 
-        public IReadOnlyCollection<byte> Nonce { get; }
+        public ImmutableArray<byte> Nonce { get; }
 
-        public IReadOnlyCollection<byte> Tag { get; }
+        public ImmutableArray<byte> Tag { get; }
     }
 }

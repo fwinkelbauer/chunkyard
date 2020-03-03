@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 using System.Security.Cryptography;
 
 namespace Chunkyard
@@ -12,7 +12,7 @@ namespace Chunkyard
             MinChunkSizeInByte = minChunkSizeInByte;
             AvgChunkSizeInByte = avgChunkSizeInByte;
             MaxChunkSizeInByte = maxChunkSizeInByte;
-            Salt = salt;
+            Salt = salt.ToImmutableArray();
             Iterations = iterations;
         }
 
@@ -26,7 +26,7 @@ namespace Chunkyard
 
         public int MaxChunkSizeInByte { get; }
 
-        public IReadOnlyCollection<byte> Salt { get; }
+        public ImmutableArray<byte> Salt { get; }
 
         public int Iterations { get; }
     }
