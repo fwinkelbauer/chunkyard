@@ -74,7 +74,7 @@ namespace Chunkyard.Core
 
         private Cache<T>? RetrieveFromCache(string fileName)
         {
-            var cacheFile = Path.Combine(_cacheDirectory, fileName);
+            var cacheFile = ToCacheFile(fileName);
 
             if (!File.Exists(cacheFile))
             {
@@ -87,13 +87,18 @@ namespace Chunkyard.Core
 
         private void StoreInCache(string fileName, Cache<T> cache)
         {
-            var cacheFile = Path.Combine(_cacheDirectory, fileName);
+            var cacheFile = ToCacheFile(fileName);
 
             Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
 
             File.WriteAllText(
                 cacheFile,
                 DataConvert.SerializeObject(cache));
+        }
+
+        private string ToCacheFile(string fileName)
+        {
+            return Path.Combine(_cacheDirectory, fileName);
         }
 
         private class Cache<TC> where TC : IContentRef
