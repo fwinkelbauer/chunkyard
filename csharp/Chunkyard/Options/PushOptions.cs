@@ -14,7 +14,7 @@ namespace Chunkyard.Options
         [Option('r', "remote", Required = true, HelpText = "The remote repository")]
         public string Remote { get; }
 
-        [Option('l', "log", Required = false, HelpText = "The log name", Default = "")]
+        [Option('l', "log", Required = false, HelpText = "The log name")]
         public string LogName { get; }
     }
 }

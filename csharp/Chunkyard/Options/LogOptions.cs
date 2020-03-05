@@ -10,7 +10,7 @@ namespace Chunkyard.Options
             LogName = logName;
         }
 
-        [Option('l', "log", Required = false, HelpText = "The log name", Default = "")]
+        [Option('l', "log", Required = false, HelpText = "The log name")]
         public string LogName { get; }
     }
 }

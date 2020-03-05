@@ -2,14 +2,14 @@
 
 namespace Chunkyard.Core
 {
-    public static class Crypto
+    public static class AesGcmCrypto
     {
         private const int TAG_BYTES = 16;
         private const int KEY_BYTES = 32;
         private const int NONCE_BYTES = 12;
         private const int SALT_BYTES = 12;
 
-        public static (byte[], byte[]) AesGcmEncrypt(byte[] plaintext, byte[] key, byte[] nonce)
+        public static (byte[], byte[]) Encrypt(byte[] plaintext, byte[] key, byte[] nonce)
         {
             var tag = new byte[TAG_BYTES];
             var ciphertext = new byte[plaintext.Length];
@@ -20,7 +20,7 @@ namespace Chunkyard.Core
             return (ciphertext, tag);
         }
 
-        public static byte[] AesGcmDecrypt(byte[] ciphertext, byte[] tag, byte[] key, byte[] nonce)
+        public static byte[] Decrypt(byte[] ciphertext, byte[] tag, byte[] key, byte[] nonce)
         {
             byte[] plaintext = new byte[ciphertext.Length];
 

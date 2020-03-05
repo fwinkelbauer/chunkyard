@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Chunkyard.Core;
 
 namespace Chunkyard
 {
-    public class Snapshot<T> where T : IContentRef
+    internal class Snapshot
     {
-        public Snapshot(DateTime creationTime, IEnumerable<T> contentRefs)
+        public Snapshot(DateTime creationTime, IEnumerable<ContentReference> contentReferences)
         {
             CreationTime = creationTime;
-            ContentRefs = contentRefs.ToImmutableArray();
+            ContentReferences = contentReferences.ToImmutableArray();
         }
 
         public DateTime CreationTime { get; }
 
-        public ImmutableArray<T> ContentRefs { get; }
+        public ImmutableArray<ContentReference> ContentReferences { get; }
     }
 }

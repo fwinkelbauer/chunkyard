@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Chunkyard.Core;
 using Chunkyard.Options;
+using Newtonsoft.Json;
 using Serilog;
 
 namespace Chunkyard
 {
-    public class Command
+    internal class Command
     {
         public const string FiltersFileName = ".chunkyardfilter";
         public const string ConfigFileName = ".chunkyardconfig";
@@ -25,7 +25,7 @@ namespace Chunkyard
 
         public Command()
         {
-            _config = DataConvert.DeserializeObject<ChunkyardConfig>(
+            _config = JsonConvert.DeserializeObject<ChunkyardConfig>(
                 File.ReadAllText(ConfigFilePath));
 
             _repository = new FileRepository(Program.ChunkyardDirectoryPath);
@@ -46,13 +46,11 @@ namespace Chunkyard
                     HashAlgorithmName.SHA256,
                     2 * 1024 * 1024,
                     4 * 1024 * 1024,
-                    8 * 1024 * 1024,
-                    Crypto.GenerateSalt(),
-                    10000);
+                    8 * 1024 * 1024);
 
                 File.WriteAllText(
                     ConfigFilePath,
-                    DataConvert.SerializeObject(config));
+                    JsonConvert.SerializeObject(config));
             }
 
             if (File.Exists(FiltersFilePath))
@@ -80,16 +78,16 @@ namespace Chunkyard
 
             _log.Information("Creating new snapshot for log {LogName}", logName);
 
-            var snapshotter = CreateSnapshotter(_repository.AnyLog(logName)
+            var snapshotBuilder = CreateSnapshotBuilder(_repository.AnyLog(logName)
                 ? ExistingPassword()
                 : NewPassword());
 
-            var newLogPosition = snapshotter.Write(
-                logName,
-                DateTime.Now,
-                FindFiles(),
-                (path) => File.OpenRead(path),
-                _config.HashAlgorithmName);
+            foreach (var filePath in FindFiles())
+            {
+                snapshotBuilder.AddContent(() => File.OpenRead(filePath), filePath);
+            }
+
+            var newLogPosition = snapshotBuilder.WriteSnapshot(logName, DateTime.Now);
 
             _log.Information("Latest snapshot is now {Uri}", Id.LogNameToUri(logName, newLogPosition));
         }
@@ -98,7 +96,7 @@ namespace Chunkyard
         {
             var uri = GetUri(o.RefLogId);
             _log.Information("Verifying snapshot {Uri}", uri);
-            CreateSnapshotter(ExistingPassword()).Verify(uri);
+            CreateSnapshotBuilder(ExistingPassword()).VerifySnapshot(uri);
         }
 
         public void RestoreSnapshot(RestoreOptions o)
@@ -106,11 +104,11 @@ namespace Chunkyard
             var uri = GetUri(o.RefLogId);
             _log.Information("Restoring snapshot {Uri} to {Directory}", uri, o.Directory);
 
-            CreateSnapshotter(ExistingPassword()).Restore(
+            CreateSnapshotBuilder(ExistingPassword()).Restore(
                 uri,
-                (docRef) =>
+                (contentName) =>
                 {
-                    var file = Path.Combine(o.Directory, docRef.Name);
+                    var file = Path.Combine(o.Directory, contentName);
                     Directory.CreateDirectory(Path.GetDirectoryName(file));
                     return new FileStream(file, FileMode.CreateNew);
                 },
@@ -122,7 +120,7 @@ namespace Chunkyard
             var uri = GetUri(o.RefLogId);
             _log.Information("Listing files in snapshot {Uri}", uri);
 
-            var names = CreateSnapshotter(ExistingPassword())
+            var names = CreateSnapshotBuilder(ExistingPassword())
                 .List(uri, o.IncludeRegex);
 
             foreach (var name in names)
@@ -148,7 +146,7 @@ namespace Chunkyard
             _log.Information("Pushing log {LogName}", logName);
             var remoteRepository = new FileRepository(o.Remote);
 
-            CreateSnapshotter(ExistingPassword())
+            CreateSnapshotBuilder(ExistingPassword())
                 .Push(logName, remoteRepository);
         }
 
@@ -159,7 +157,7 @@ namespace Chunkyard
             _log.Information("Pulling log {LogName}", logName);
             var remoteRepository = new FileRepository(o.Remote);
 
-            CreateSnapshotter(remoteRepository, ExistingPassword())
+            CreateSnapshotBuilder(remoteRepository, ExistingPassword())
                 .Push(logName, _repository);
         }
 
@@ -182,28 +180,21 @@ namespace Chunkyard
             }
         }
 
-        private Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>> CreateSnapshotter(IRepository repository, string password)
+        private SnapshotBuilder CreateSnapshotBuilder(IRepository repository, string password)
         {
-            var store = new FastCdcContentStore<LzmaContentRef<AesGcmContentRef<ContentRef>>>(
-                new LzmaContentStore<AesGcmContentRef<ContentRef>>(
-                    new AesGcmContentStore<ContentRef>(
-                        new ContentStore(repository),
-                        Crypto.PasswordToKey(password, _config.Salt.ToArray(), _config.Iterations))),
+            return new SnapshotBuilder(
+                repository,
+                _config.HashAlgorithmName,
+                password,
                 _config.MinChunkSizeInByte,
                 _config.AvgChunkSizeInByte,
                 _config.MaxChunkSizeInByte,
-                Path.Combine(Program.ChunkyardDirectoryPath, "tmp"));
-
-            var cachedStore = new CachedContentStore<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>>(
-                store,
-                Path.Combine(Program.ChunkyardDirectoryPath, "cache"));
-
-            return new Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>>(cachedStore);
+                Program.ChunkyardDirectoryPath);
         }
 
-        private Snapshotter<FastCdcContentRef<LzmaContentRef<AesGcmContentRef<ContentRef>>>> CreateSnapshotter(string password)
+        private SnapshotBuilder CreateSnapshotBuilder(string password)
         {
-            return CreateSnapshotter(_repository, password);
+            return CreateSnapshotBuilder(_repository, password);
         }
 
         private static IEnumerable<string> FindFiles()

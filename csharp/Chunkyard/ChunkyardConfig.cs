@@ -1,19 +1,16 @@
-﻿using System.Collections.Immutable;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 
 namespace Chunkyard
 {
-    public class ChunkyardConfig
+    internal class ChunkyardConfig
     {
-        public ChunkyardConfig(string logName, HashAlgorithmName hashAlgorithmName, int minChunkSizeInByte, int avgChunkSizeInByte, int maxChunkSizeInByte, byte[] salt, int iterations)
+        public ChunkyardConfig(string logName, HashAlgorithmName hashAlgorithmName, int minChunkSizeInByte, int avgChunkSizeInByte, int maxChunkSizeInByte)
         {
             LogName = logName;
             HashAlgorithmName = hashAlgorithmName;
             MinChunkSizeInByte = minChunkSizeInByte;
             AvgChunkSizeInByte = avgChunkSizeInByte;
             MaxChunkSizeInByte = maxChunkSizeInByte;
-            Salt = salt.ToImmutableArray();
-            Iterations = iterations;
         }
 
         public string LogName { get; }
@@ -25,9 +22,5 @@ namespace Chunkyard
         public int AvgChunkSizeInByte { get; }
 
         public int MaxChunkSizeInByte { get; }
-
-        public ImmutableArray<byte> Salt { get; }
-
-        public int Iterations { get; }
     }
 }

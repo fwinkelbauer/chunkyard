@@ -18,7 +18,7 @@ namespace Chunkyard.Options
         [Option('i', "include", Required = false, HelpText = "The include regex", Default = ".*")]
         public string IncludeRegex { get; }
 
-        [Option('r', "refLogId", Required = false, HelpText = "The refLog URI", Default = "")]
+        [Option('r', "refLogId", Required = false, HelpText = "The refLog URI")]
         public string RefLogId { get; }
     }
 }

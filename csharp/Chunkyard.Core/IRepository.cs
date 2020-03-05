@@ -12,9 +12,9 @@ namespace Chunkyard.Core
 
         bool ContentExists(Uri contentUri);
 
-        int AppendToLog<T>(T contentRef, string logName, int? currentLogPosition) where T : IContentRef;
+        int AppendToLog(byte[] value, string logName, int? currentLogPosition);
 
-        T RetrieveFromLog<T>(string logName, int logPosition) where T : IContentRef;
+        byte[] RetrieveFromLog(string logName, int logPosition);
 
         int? FetchLogPosition(string logName);
 

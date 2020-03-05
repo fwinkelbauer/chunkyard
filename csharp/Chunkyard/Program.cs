@@ -11,7 +11,7 @@ namespace Chunkyard
         public const string RepositoryDirectoryName = ".chunkyard";
 
         public static readonly string RootDirectoryPath = Path.GetFullPath(".");
-        public static readonly string ChunkyardDirectoryPath = Path.Combine(RootDirectoryPath, Program.RepositoryDirectoryName);
+        public static readonly string ChunkyardDirectoryPath = Path.Combine(RootDirectoryPath, RepositoryDirectoryName);
 
         private static readonly string LogDirectoryPath = Path.Combine(ChunkyardDirectoryPath, "log");
 

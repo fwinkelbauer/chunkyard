@@ -6,7 +6,7 @@ using Chunkyard.Core;
 
 namespace Chunkyard
 {
-    public static class FileFetcher
+    internal static class FileFetcher
     {
         public static IEnumerable<string> FindRelative(string directory, IEnumerable<string> filters)
         {

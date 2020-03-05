@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Chunkyard.Core
 {
@@ -21,11 +20,15 @@ namespace Chunkyard.Core
         public Uri StoreContent(HashAlgorithmName algorithm, byte[] value)
         {
             var contentUri = Id.ComputeContentUri(algorithm, value);
+            var filePath = ToFilePath(contentUri);
 
-            if (!ContentExists(contentUri))
+            if (!File.Exists(filePath))
             {
+                Directory.CreateDirectory(
+                    Path.GetDirectoryName(filePath));
+
                 using var fileStream = new FileStream(
-                    ToFilePath(contentUri),
+                    filePath,
                     FileMode.CreateNew);
 
                 fileStream.Write(value);
@@ -46,28 +49,30 @@ namespace Chunkyard.Core
                 ToFilePath(contentUri));
         }
 
-        public int AppendToLog<T>(T contentRef, string logName, int? currentLogPosition) where T : IContentRef
+        public int AppendToLog(byte[] value, string logName, int? currentLogPosition)
         {
             var newLogPosition = currentLogPosition.HasValue
                 ? currentLogPosition.Value + 1
                 : 0;
 
+            var filePath = ToFilePath(logName, newLogPosition);
+
+            Directory.CreateDirectory(
+                Path.GetDirectoryName(filePath));
+
             using var fileStream = new FileStream(
-                ToFilePath(logName, newLogPosition),
+                filePath,
                 FileMode.CreateNew);
 
-            fileStream.Write(
-                Encoding.UTF8.GetBytes(
-                    DataConvert.SerializeObject(contentRef)));
+            fileStream.Write(value);
 
             return newLogPosition;
         }
 
-        public T RetrieveFromLog<T>(string logName, int logPosition) where T : IContentRef
+        public byte[] RetrieveFromLog(string logName, int logPosition)
         {
-            return DataConvert.DeserializeObject<T>(
-                File.ReadAllText(
-                    ToFilePath(logName, logPosition)));
+            return File.ReadAllBytes(
+                ToFilePath(logName, logPosition));
         }
 
         public int? FetchLogPosition(string logName)
@@ -85,6 +90,12 @@ namespace Chunkyard.Core
         public IEnumerable<int> ListLog(string logName)
         {
             var refDirectory = ToDirectoryPath(logName);
+
+            if (!Directory.Exists(refDirectory))
+            {
+                yield break;
+            }
+
             var files = Directory.GetFiles(
                 refDirectory,
                 "*.json");
@@ -98,10 +109,9 @@ namespace Chunkyard.Core
 
         private string ToDirectoryPath(string logName)
         {
-            var refDirectory = Path.Combine(_refLogDirectory, logName);
-            Directory.CreateDirectory(refDirectory);
-
-            return refDirectory;
+            return Path.Combine(
+                _refLogDirectory,
+                logName);
         }
 
         private string ToFilePath(string logName, int logPosition)
@@ -119,7 +129,6 @@ namespace Chunkyard.Core
                 Id.AlgorithmFromContentUri(contentUri).Name,
                 hash.Substring(0, 2));
 
-            Directory.CreateDirectory(directoryPath);
 
             return Path.Combine(
                 directoryPath,
