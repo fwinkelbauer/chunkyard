@@ -47,7 +47,8 @@ namespace Chunkyard
                     HashAlgorithmName.SHA256,
                     2 * 1024 * 1024,
                     4 * 1024 * 1024,
-                    8 * 1024 * 1024);
+                    8 * 1024 * 1024,
+                    true);
 
                 File.WriteAllText(
                     ConfigFilePath,
@@ -183,14 +184,23 @@ namespace Chunkyard
 
         private SnapshotBuilder CreateSnapshotBuilder(IRepository repository, string password)
         {
-            return new SnapshotBuilder(
+            IContentStore contentStore = new ContentStore(
                 repository,
                 _config.HashAlgorithmName,
-                password,
                 _config.MinChunkSizeInByte,
                 _config.AvgChunkSizeInByte,
-                _config.MaxChunkSizeInByte,
-                CacheDirectoryPath);
+                _config.MaxChunkSizeInByte);
+
+            if (_config.UseCache)
+            {
+                contentStore = new CachedContentStore(
+                    contentStore,
+                    CacheDirectoryPath);
+            }
+
+            return new SnapshotBuilder(
+                contentStore,
+                password);
         }
 
         private SnapshotBuilder CreateSnapshotBuilder(string password)

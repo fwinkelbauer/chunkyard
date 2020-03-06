@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Chunkyard.Core;
@@ -17,27 +16,17 @@ namespace Chunkyard
 
         private static readonly ILogger _log = Log.ForContext<SnapshotBuilder>();
 
-        private readonly IRepository _repository;
-        private readonly HashAlgorithmName _hashAlgorithmName;
+        private readonly IContentStore _contentStore;
         private readonly string _password;
-        private readonly int _minChunkSizeInByte;
-        private readonly int _avgChunkSizeInByte;
-        private readonly int _maxChunkSizeInByte;
-        private readonly string _cacheDirectory;
         private readonly List<(Func<Stream>, string)> _contentItems;
         private readonly Dictionary<string, byte[]> _noncesByName;
 
         private byte[] _key;
 
-        public SnapshotBuilder(IRepository repository, HashAlgorithmName hashAlgorithmName, string password, int minChunkSizeInByte, int avgChunkSizeInByte, int maxChunkSizeInByte, string cacheDirectory)
+        public SnapshotBuilder(IContentStore contentStore, string password)
         {
-            _repository = repository;
-            _hashAlgorithmName = hashAlgorithmName;
+            _contentStore = contentStore;
             _password = password;
-            _minChunkSizeInByte = minChunkSizeInByte;
-            _avgChunkSizeInByte = avgChunkSizeInByte;
-            _maxChunkSizeInByte = maxChunkSizeInByte;
-            _cacheDirectory = cacheDirectory;
             _contentItems = new List<(Func<Stream>, string)>();
             _noncesByName = new Dictionary<string, byte[]>();
 
@@ -51,7 +40,7 @@ namespace Chunkyard
 
         public int WriteSnapshot(string logName, DateTime creationTime)
         {
-            var currentLogPosition = _repository.FetchLogPosition(logName);
+            var currentLogPosition = _contentStore.Repository.FetchLogPosition(logName);
 
             var salt = AesGcmCrypto.GenerateSalt();
             var iterations = 1000;
@@ -59,35 +48,32 @@ namespace Chunkyard
 
             if (currentLogPosition.HasValue)
             {
-                var currentSnapshotRoot = _repository.RetrieveFromLog<ContentRoot>(logName, currentLogPosition.Value);
-                salt = currentSnapshotRoot.Salt;
-                iterations = currentSnapshotRoot.Iterations;
+                var currentSnapshotReference = _contentStore.Repository.RetrieveFromLog<SnapshotReference>(logName, currentLogPosition.Value);
+                salt = currentSnapshotReference.Salt;
+                iterations = currentSnapshotReference.Iterations;
                 InitializeKey(salt, iterations);
-                var currentSnapshot = ParseSnapshot(currentSnapshotRoot.ContentReference);
+                var currentSnapshot = ParseSnapshot(currentSnapshotReference);
 
                 foreach (var contentReference in currentSnapshot.ContentReferences)
                 {
                     // Known files should be encrypted using the existing
                     // parameters, so we register all previous references
-                    _noncesByName[contentReference.ContentName] = contentReference.Nonce;
+                    _noncesByName[contentReference.Name] = contentReference.Nonce;
                 }
             }
 
-            var snapshot = new Snapshot(creationTime, WriteContentItems());
-            using var snapshotBuffer = new MemoryStream(
-                ByteSerialize(snapshot));
-
-            var nonce = GetNonce(SnapshotContentName);
-            var snapshotRoot = new ContentRoot(
-                new ContentReference(
+            var snapshot = new Snapshot(creationTime, StoreContentItems());
+            using var snapshotStream = new MemoryStream(ByteSerialize(snapshot));
+            var snapshotReference = SnapshotReference.FromContentReference(
+                _contentStore.StoreContent(snapshotStream,
                     SnapshotContentName,
-                    nonce,
-                    WriteStream(snapshotBuffer, nonce)),
+                    GetNonce(SnapshotContentName),
+                    _key),
                 salt,
                 iterations);
 
-            return _repository.AppendToLog(
-                ByteSerialize(snapshotRoot),
+            return _contentStore.Repository.AppendToLog(
+                ByteSerialize(snapshotReference),
                 logName,
                 currentLogPosition);
         }
@@ -99,11 +85,11 @@ namespace Chunkyard
 
             foreach (var contentReference in snapshot.ContentReferences)
             {
-                if (compiledRegex.IsMatch(contentReference.ContentName))
+                if (compiledRegex.IsMatch(contentReference.Name))
                 {
-                    _log.Information("Restoring: {File}", contentReference.ContentName);
-                    using var stream = writeFunc(contentReference.ContentName);
-                    Read(contentReference, stream);
+                    _log.Information("Restoring: {File}", contentReference.Name);
+                    using var stream = writeFunc(contentReference.Name);
+                    _contentStore.RetrieveContent(contentReference, stream, _key);
                 }
             }
         }
@@ -114,11 +100,11 @@ namespace Chunkyard
 
             foreach (var contentReference in snapshot.ContentReferences)
             {
-                _log.Information("Verifying: {File}", contentReference.ContentName);
+                _log.Information("Verifying: {File}", contentReference.Name);
 
                 foreach (var chunk in contentReference.Chunks)
                 {
-                    _repository.ThrowIfInvalid(chunk.ContentUri);
+                    _contentStore.Repository.ThrowIfInvalid(chunk.ContentUri);
                 }
             }
         }
@@ -130,16 +116,16 @@ namespace Chunkyard
 
             foreach (var contentReferences in snapshot.ContentReferences)
             {
-                if (compiledRegex.IsMatch(contentReferences.ContentName))
+                if (compiledRegex.IsMatch(contentReferences.Name))
                 {
-                    yield return contentReferences.ContentName;
+                    yield return contentReferences.Name;
                 }
             }
         }
 
         public void Push(string logName, IRepository destinationRepository)
         {
-            var sourceLogPosition = _repository.FetchLogPosition(logName);
+            var sourceLogPosition = _contentStore.Repository.FetchLogPosition(logName);
             var destinationLogPosition = destinationRepository.FetchLogPosition(logName);
 
             if (!sourceLogPosition.HasValue)
@@ -160,7 +146,7 @@ namespace Chunkyard
 
             for (int i = 0; i <= commonLogPosition; i++)
             {
-                var source = _repository.RetrieveFromLog(logName, i);
+                var source = _contentStore.Repository.RetrieveFromLog(logName, i);
                 var destination = destinationRepository.RetrieveFromLog(logName, i);
 
                 if (!Enumerable.SequenceEqual(source, destination))
@@ -173,11 +159,11 @@ namespace Chunkyard
             {
                 _log.Information("Pushing snapshot with position: {LogPosition}", i);
 
-                var snapshotRoot = _repository.RetrieveFromLog<ContentRoot>(logName, i);
-                InitializeKey(snapshotRoot.Salt, snapshotRoot.Iterations);
-                PushSnapshot(snapshotRoot.ContentReference, destinationRepository);
+                var snapshotReference = _contentStore.Repository.RetrieveFromLog<SnapshotReference>(logName, i);
+                InitializeKey(snapshotReference.Salt, snapshotReference.Iterations);
+                PushSnapshot(snapshotReference, destinationRepository);
                 destinationRepository.AppendToLog(
-                    ByteSerialize(snapshotRoot),
+                    ByteSerialize(snapshotReference),
                     logName,
                     i - 1);
             }
@@ -193,15 +179,15 @@ namespace Chunkyard
 
         private Snapshot RetrieveSnapshot(Uri snapshotUri)
         {
-            var snapshotRoot = _repository.RetrieveFromLog<ContentRoot>(snapshotUri);
-            InitializeKey(snapshotRoot.Salt, snapshotRoot.Iterations);
-            return ParseSnapshot(snapshotRoot.ContentReference);
+            var snapshotReference = _contentStore.Repository.RetrieveFromLog<SnapshotReference>(snapshotUri);
+            InitializeKey(snapshotReference.Salt, snapshotReference.Iterations);
+            return ParseSnapshot(snapshotReference);
         }
 
         private Snapshot ParseSnapshot(ContentReference snapshotReference)
         {
             using var memoryBuffer = new MemoryStream();
-            Read(snapshotReference, memoryBuffer);
+            _contentStore.RetrieveContent(snapshotReference, memoryBuffer, _key);
 
             return Deserialize<Snapshot>(memoryBuffer.ToArray());
         }
@@ -218,71 +204,13 @@ namespace Chunkyard
                 Encoding.UTF8.GetString(value));
         }
 
-        private IEnumerable<ContentReference> WriteContentItems()
+        private IEnumerable<ContentReference> StoreContentItems()
         {
             foreach (var (readFunc, contentName) in _contentItems)
             {
-                yield return WriteContentItem(readFunc, contentName);
-            }
-        }
-
-        private ContentReference WriteContentItem(Func<Stream> readFunc, string contentName)
-        {
-            _log.Information("Storing: {Content}", contentName);
-
-            using var stream = readFunc();
-            var nonce = GetNonce(contentName);
-
-            if (!(stream is FileStream fileStream))
-            {
-                return new ContentReference(
-                    contentName,
-                    nonce,
-                    WriteStream(stream, nonce));
-            }
-
-            var storedCache = RetrieveFromCache(contentName);
-
-            if (storedCache != null
-                && storedCache.Length == fileStream.Length
-                && storedCache.CreationDateUtc.Equals(File.GetCreationTimeUtc(fileStream.Name))
-                && storedCache.LastWriteDateUtc.Equals(File.GetLastWriteTimeUtc(fileStream.Name)))
-            {
-                return storedCache.ContentReference;
-            }
-
-            var contentReference = new ContentReference(
-                contentName,
-                nonce,
-                WriteStream(stream, nonce));
-
-            StoreInCache(
-                contentName,
-                new Cache(
-                    contentReference,
-                    fileStream.Length,
-                    File.GetCreationTimeUtc(fileStream.Name),
-                    File.GetLastWriteTimeUtc(fileStream.Name)));
-
-            return contentReference;
-        }
-
-        private IEnumerable<Chunk> WriteStream(Stream stream, byte[] nonce)
-        {
-            var chunkedDataItems = FastCdc.SplitIntoChunks(
-                stream,
-                _minChunkSizeInByte,
-                _avgChunkSizeInByte,
-                _maxChunkSizeInByte);
-
-            foreach (var chunkedData in chunkedDataItems)
-            {
-                var (encryptedData, tag) = AesGcmCrypto.Encrypt(chunkedData, _key, nonce);
-                var compressedData = LzmaCompression.Compress(encryptedData);
-
-                yield return new Chunk(
-                    _repository.StoreContent(_hashAlgorithmName, compressedData),
-                    tag);
+                _log.Information("Storing: {Content}", contentName);
+                using var stream = readFunc();
+                yield return _contentStore.StoreContent(stream, contentName, GetNonce(contentName), _key);
             }
         }
 
@@ -292,33 +220,17 @@ namespace Chunkyard
 
             foreach (var contentReferences in snapshot.ContentReferences)
             {
-                _log.Information("Pushing content: {Content}", contentReferences.ContentName);
+                _log.Information("Pushing content: {Content}", contentReferences.Name);
 
                 foreach (var chunk in contentReferences.Chunks)
                 {
-                    _repository.PushContent(chunk.ContentUri, remoteRepository);
+                    _contentStore.Repository.PushContent(chunk.ContentUri, remoteRepository);
                 }
             }
 
             foreach (var chunk in snapshotReference.Chunks)
             {
-                _repository.PushContent(chunk.ContentUri, remoteRepository);
-            }
-        }
-
-        private void Read(ContentReference contentReference, Stream stream)
-        {
-            foreach (var chunk in contentReference.Chunks)
-            {
-                var compressedData = _repository.RetrieveContentChecked(chunk.ContentUri);
-                var decompressedData = LzmaCompression.Decompress(compressedData);
-                var decryptedData = AesGcmCrypto.Decrypt(
-                    decompressedData,
-                    chunk.Tag,
-                    _key,
-                    contentReference.Nonce);
-
-                stream.Write(decryptedData);
+                _contentStore.Repository.PushContent(chunk.ContentUri, remoteRepository);
             }
         }
 
@@ -335,54 +247,6 @@ namespace Chunkyard
 
                 return nonce;
             }
-        }
-
-        private Cache? RetrieveFromCache(string contentName)
-        {
-            var cacheFile = ToCacheFile(contentName);
-
-            if (!File.Exists(cacheFile))
-            {
-                return null;
-            }
-
-            return JsonConvert.DeserializeObject<Cache>(
-                File.ReadAllText(cacheFile));
-        }
-
-        private void StoreInCache(string contentName, Cache cache)
-        {
-            var cacheFile = ToCacheFile(contentName);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
-
-            File.WriteAllText(
-                cacheFile,
-                JsonConvert.SerializeObject(cache));
-        }
-
-        private string ToCacheFile(string contentName)
-        {
-            return Path.Combine(_cacheDirectory, contentName);
-        }
-
-        private class Cache
-        {
-            public Cache(ContentReference contentReference, long length, DateTime creationDateUtc, DateTime lastWriteDateUtc)
-            {
-                ContentReference = contentReference;
-                Length = length;
-                CreationDateUtc = creationDateUtc;
-                LastWriteDateUtc = lastWriteDateUtc;
-            }
-
-            public ContentReference ContentReference { get; }
-
-            public long Length { get; }
-
-            public DateTime CreationDateUtc { get; }
-
-            public DateTime LastWriteDateUtc { get; }
         }
     }
 }

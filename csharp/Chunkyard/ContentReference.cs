@@ -5,14 +5,14 @@ namespace Chunkyard
 {
     internal class ContentReference
     {
-        public ContentReference(string contentName, byte[] nonce, IEnumerable<Chunk> chunks)
+        public ContentReference(string name, byte[] nonce, IEnumerable<Chunk> chunks)
         {
-            ContentName = contentName;
+            Name = name;
             Nonce = nonce;
             Chunks = chunks.ToImmutableArray();
         }
 
-        public string ContentName { get; }
+        public string Name { get; }
 
         public byte[] Nonce { get; }
 

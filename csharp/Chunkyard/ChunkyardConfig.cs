@@ -4,13 +4,14 @@ namespace Chunkyard
 {
     internal class ChunkyardConfig
     {
-        public ChunkyardConfig(string logName, HashAlgorithmName hashAlgorithmName, int minChunkSizeInByte, int avgChunkSizeInByte, int maxChunkSizeInByte)
+        public ChunkyardConfig(string logName, HashAlgorithmName hashAlgorithmName, int minChunkSizeInByte, int avgChunkSizeInByte, int maxChunkSizeInByte, bool useCache)
         {
             LogName = logName;
             HashAlgorithmName = hashAlgorithmName;
             MinChunkSizeInByte = minChunkSizeInByte;
             AvgChunkSizeInByte = avgChunkSizeInByte;
             MaxChunkSizeInByte = maxChunkSizeInByte;
+            UseCache = useCache;
         }
 
         public string LogName { get; }
@@ -22,5 +23,7 @@ namespace Chunkyard
         public int AvgChunkSizeInByte { get; }
 
         public int MaxChunkSizeInByte { get; }
+
+        public bool UseCache { get; }
     }
 }
