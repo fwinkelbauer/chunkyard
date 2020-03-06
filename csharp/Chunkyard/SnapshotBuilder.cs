@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Chunkyard.Core;
-using Newtonsoft.Json;
 using Serilog;
 
 namespace Chunkyard
@@ -13,6 +11,7 @@ namespace Chunkyard
     internal class SnapshotBuilder
     {
         private const string SnapshotContentName = "snapshot";
+        private const int Iterations = 1000;
 
         private static readonly ILogger _log = Log.ForContext<SnapshotBuilder>();
 
@@ -43,12 +42,15 @@ namespace Chunkyard
             var currentLogPosition = _contentStore.Repository.FetchLogPosition(logName);
 
             var salt = AesGcmCrypto.GenerateSalt();
-            var iterations = 1000;
+            var iterations = Iterations;
             InitializeKey(salt, iterations);
 
             if (currentLogPosition.HasValue)
             {
-                var currentSnapshotReference = _contentStore.Repository.RetrieveFromLog<SnapshotReference>(logName, currentLogPosition.Value);
+                var currentSnapshotReference = _contentStore.Repository
+                    .RetrieveFromLog(logName, currentLogPosition.Value)
+                    .ToObject<SnapshotReference>();
+
                 salt = currentSnapshotReference.Salt;
                 iterations = currentSnapshotReference.Iterations;
                 InitializeKey(salt, iterations);
@@ -63,7 +65,7 @@ namespace Chunkyard
             }
 
             var snapshot = new Snapshot(creationTime, StoreContentItems());
-            using var snapshotStream = new MemoryStream(ByteSerialize(snapshot));
+            using var snapshotStream = new MemoryStream(snapshot.ToBytes());
             var snapshotReference = SnapshotReference.FromContentReference(
                 _contentStore.StoreContent(snapshotStream,
                     SnapshotContentName,
@@ -73,7 +75,7 @@ namespace Chunkyard
                 iterations);
 
             return _contentStore.Repository.AppendToLog(
-                ByteSerialize(snapshotReference),
+                snapshotReference.ToBytes(),
                 logName,
                 currentLogPosition);
         }
@@ -159,11 +161,13 @@ namespace Chunkyard
             {
                 _log.Information("Pushing snapshot with position: {LogPosition}", i);
 
-                var snapshotReference = _contentStore.Repository.RetrieveFromLog<SnapshotReference>(logName, i);
+                var snapshotReference = _contentStore.Repository.RetrieveFromLog(logName, i)
+                    .ToObject<SnapshotReference>();
+
                 InitializeKey(snapshotReference.Salt, snapshotReference.Iterations);
                 PushSnapshot(snapshotReference, destinationRepository);
                 destinationRepository.AppendToLog(
-                    ByteSerialize(snapshotReference),
+                    snapshotReference.ToBytes(),
                     logName,
                     i - 1);
             }
@@ -179,7 +183,10 @@ namespace Chunkyard
 
         private Snapshot RetrieveSnapshot(Uri snapshotUri)
         {
-            var snapshotReference = _contentStore.Repository.RetrieveFromLog<SnapshotReference>(snapshotUri);
+            var snapshotReference = _contentStore.Repository
+                .RetrieveFromLog(snapshotUri)
+                .ToObject<SnapshotReference>();
+
             InitializeKey(snapshotReference.Salt, snapshotReference.Iterations);
             return ParseSnapshot(snapshotReference);
         }
@@ -189,19 +196,7 @@ namespace Chunkyard
             using var memoryBuffer = new MemoryStream();
             _contentStore.RetrieveContent(snapshotReference, memoryBuffer, _key);
 
-            return Deserialize<Snapshot>(memoryBuffer.ToArray());
-        }
-
-        private static byte[] ByteSerialize(object o)
-        {
-            return Encoding.UTF8.GetBytes(
-                JsonConvert.SerializeObject(o));
-        }
-
-        private static T Deserialize<T>(byte[] value)
-        {
-            return JsonConvert.DeserializeObject<T>(
-                Encoding.UTF8.GetString(value));
+            return memoryBuffer.ToArray().ToObject<Snapshot>();
         }
 
         private IEnumerable<ContentReference> StoreContentItems()
