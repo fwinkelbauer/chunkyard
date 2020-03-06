@@ -24,13 +24,12 @@ namespace Chunkyard
         private readonly int _avgChunkSizeInByte;
         private readonly int _maxChunkSizeInByte;
         private readonly string _cacheDirectory;
-        private readonly string _tempDirectory;
         private readonly List<(Func<Stream>, string)> _contentItems;
         private readonly Dictionary<string, byte[]> _noncesByName;
 
         private byte[] _key;
 
-        public SnapshotBuilder(IRepository repository, HashAlgorithmName hashAlgorithmName, string password, int minChunkSizeInByte, int avgChunkSizeInByte, int maxChunkSizeInByte, string directory)
+        public SnapshotBuilder(IRepository repository, HashAlgorithmName hashAlgorithmName, string password, int minChunkSizeInByte, int avgChunkSizeInByte, int maxChunkSizeInByte, string cacheDirectory)
         {
             _repository = repository;
             _hashAlgorithmName = hashAlgorithmName;
@@ -38,8 +37,7 @@ namespace Chunkyard
             _minChunkSizeInByte = minChunkSizeInByte;
             _avgChunkSizeInByte = avgChunkSizeInByte;
             _maxChunkSizeInByte = maxChunkSizeInByte;
-            _cacheDirectory = Path.Join(directory, "cache");
-            _tempDirectory = Path.Join(directory, "tmp");
+            _cacheDirectory = cacheDirectory;
             _contentItems = new List<(Func<Stream>, string)>();
             _noncesByName = new Dictionary<string, byte[]>();
 
@@ -275,8 +273,7 @@ namespace Chunkyard
                 stream,
                 _minChunkSizeInByte,
                 _avgChunkSizeInByte,
-                _maxChunkSizeInByte,
-                _tempDirectory);
+                _maxChunkSizeInByte);
 
             foreach (var chunkedData in chunkedDataItems)
             {

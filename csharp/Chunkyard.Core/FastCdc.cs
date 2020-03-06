@@ -9,51 +9,26 @@ namespace Chunkyard.Core
     {
         private const string ProcessName = "chunker";
 
-        public static IEnumerable<byte[]> SplitIntoChunks(Stream stream, int minChunkSizeInByte, int avgChunkSizeInByte, int maxChunkSizeInByte, string tempDirectory)
+        public static IEnumerable<byte[]> SplitIntoChunks(Stream stream, int minChunkSizeInByte, int avgChunkSizeInByte, int maxChunkSizeInByte)
         {
-            if (stream is FileStream fileStream)
+            // Starting the chunker process is expensive, so we're only
+            // running it on files that are large enough
+            if (stream is FileStream fileStream
+                && fileStream.Length > maxChunkSizeInByte)
             {
-                // Starting the chunker process is expensive, so we're only
-                // running it on files that are large enough
-                if (fileStream.Length <= maxChunkSizeInByte)
-                {
-                    using var memoryBuffer = new MemoryStream();
-                    stream.CopyTo(memoryBuffer);
-
-                    return new[] { memoryBuffer.ToArray() };
-                }
-                else
-                {
-                    return ComputeChunks(stream, fileStream.Name, minChunkSizeInByte, avgChunkSizeInByte, maxChunkSizeInByte);
-                }
+                return ComputeChunks(
+                    stream,
+                    fileStream.Name,
+                    minChunkSizeInByte,
+                    avgChunkSizeInByte,
+                    maxChunkSizeInByte);
             }
             else
             {
-                Directory.CreateDirectory(tempDirectory);
+                using var memoryBuffer = new MemoryStream();
+                stream.CopyTo(memoryBuffer);
 
-                var tempFile = Path.Combine(
-                    tempDirectory,
-                    "temp");
-
-                try
-                {
-                    using (var writeStream = File.Create(tempFile))
-                    {
-                        stream.CopyTo(writeStream);
-                    }
-
-                    using var readStream = File.OpenRead(tempFile);
-                    return SplitIntoChunks(
-                        readStream,
-                        minChunkSizeInByte,
-                        avgChunkSizeInByte,
-                        maxChunkSizeInByte,
-                        tempDirectory);
-                }
-                finally
-                {
-                    File.Delete(tempFile);
-                }
+                return new[] { memoryBuffer.ToArray() };
             }
         }
 

@@ -17,6 +17,7 @@ namespace Chunkyard
 
         private static readonly string FiltersFilePath = Path.Combine(Program.RootDirectoryPath, FiltersFileName);
         private static readonly string ConfigFilePath = Path.Combine(Program.RootDirectoryPath, ConfigFileName);
+        private static readonly string CacheDirectoryPath = Path.Combine(Program.ChunkyardDirectoryPath, "cache");
 
         private static readonly ILogger _log = Log.ForContext<Command>();
 
@@ -189,7 +190,7 @@ namespace Chunkyard
                 _config.MinChunkSizeInByte,
                 _config.AvgChunkSizeInByte,
                 _config.MaxChunkSizeInByte,
-                Program.ChunkyardDirectoryPath);
+                CacheDirectoryPath);
         }
 
         private SnapshotBuilder CreateSnapshotBuilder(string password)
