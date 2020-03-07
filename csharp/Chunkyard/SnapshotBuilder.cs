@@ -16,14 +16,14 @@ namespace Chunkyard
         private static readonly ILogger _log = Log.ForContext<SnapshotBuilder>();
 
         private readonly IContentStore _contentStore;
-        private readonly string _password;
+        private readonly IPrompt _prompt;
         private readonly List<(Func<Stream>, string)> _contentItems;
         private readonly Dictionary<string, byte[]> _noncesByName;
 
-        public SnapshotBuilder(IContentStore contentStore, string password)
+        public SnapshotBuilder(IContentStore contentStore, IPrompt prompt)
         {
             _contentStore = contentStore;
-            _password = password;
+            _prompt = prompt;
             _contentItems = new List<(Func<Stream>, string)>();
             _noncesByName = new Dictionary<string, byte[]>();
         }
@@ -36,16 +36,20 @@ namespace Chunkyard
         public int WriteSnapshot(string logName, DateTime creationTime)
         {
             var currentLogPosition = _contentStore.Repository.FetchLogPosition(logName);
+            var password = currentLogPosition.HasValue
+                ? _prompt.ExistingPassword()
+                : _prompt.NewPassword();
 
             var salt = AesGcmCrypto.GenerateSalt();
             var iterations = Iterations;
-            var key = GenerateKey(salt, iterations);
+            var key = AesGcmCrypto.PasswordToKey(password, salt, iterations);
 
             if (currentLogPosition.HasValue)
             {
                 var snapshotTuple = RetrieveSnapshotReference(
                     logName,
-                    currentLogPosition.Value);
+                    currentLogPosition.Value,
+                    password);
 
                 var currentSnapshotReference = snapshotTuple.Item1;
                 salt = currentSnapshotReference.Salt;
@@ -79,8 +83,10 @@ namespace Chunkyard
 
         public void Restore(Uri snapshotUri, Func<string, Stream> writeFunc, string restoreRegex)
         {
-            var (snapshot, key) = RetrieveSnapshot(snapshotUri);
             var compiledRegex = new Regex(restoreRegex);
+            var (snapshot, key) = RetrieveSnapshot(
+                snapshotUri,
+                _prompt.ExistingPassword());
 
             foreach (var contentReference in snapshot.ContentReferences)
             {
@@ -95,7 +101,9 @@ namespace Chunkyard
 
         public void VerifySnapshot(Uri snapshotUri)
         {
-            var (snapshot, _) = RetrieveSnapshot(snapshotUri);
+            var (snapshot, _) = RetrieveSnapshot(
+                snapshotUri,
+                _prompt.ExistingPassword());
 
             foreach (var contentReference in snapshot.ContentReferences)
             {
@@ -110,8 +118,10 @@ namespace Chunkyard
 
         public IEnumerable<string> List(Uri snapshotUri, string listRegex)
         {
-            var (snapshot, _) = RetrieveSnapshot(snapshotUri);
             var compiledRegex = new Regex(listRegex);
+            var (snapshot, _) = RetrieveSnapshot(
+                snapshotUri,
+                _prompt.ExistingPassword());
 
             foreach (var contentReferences in snapshot.ContentReferences)
             {
@@ -124,6 +134,7 @@ namespace Chunkyard
 
         public void Push(string logName, IRepository destinationRepository)
         {
+            var password = _prompt.ExistingPassword();
             var sourceLogPosition = _contentStore.Repository.FetchLogPosition(logName);
             var destinationLogPosition = destinationRepository.FetchLogPosition(logName);
 
@@ -158,7 +169,10 @@ namespace Chunkyard
             {
                 _log.Information("Pushing snapshot with position: {LogPosition}", i);
 
-                var (snapshotReference, key) = RetrieveSnapshotReference(logName, i);
+                var (snapshotReference, key) = RetrieveSnapshotReference(
+                    logName,
+                    i,
+                    password);
 
                 PushSnapshot(
                     snapshotReference,
@@ -180,46 +194,41 @@ namespace Chunkyard
             return memoryBuffer.ToArray().ToObject<Snapshot>();
         }
 
-        private (SnapshotReference, byte[]) RetrieveSnapshotReference(string logName, int logPosition)
+        private (SnapshotReference, byte[]) RetrieveSnapshotReference(string logName, int logPosition, string password)
         {
             var snapshotReference = _contentStore.Repository
                 .RetrieveFromLog(logName, logPosition)
                 .ToObject<SnapshotReference>();
 
-            var key = GenerateKey(
+            var key = AesGcmCrypto.PasswordToKey(
+                password,
                 snapshotReference.Salt,
                 snapshotReference.Iterations);
 
             return (snapshotReference, key);
         }
 
-        private (SnapshotReference, byte[]) RetrieveSnapshotReference(Uri snapshotUri)
+        private (SnapshotReference, byte[]) RetrieveSnapshotReference(Uri snapshotUri, string password)
         {
             var snapshotReference = _contentStore.Repository
                 .RetrieveFromLog(snapshotUri)
                 .ToObject<SnapshotReference>();
 
-            var key = GenerateKey(
+            var key = AesGcmCrypto.PasswordToKey(
+                password,
                 snapshotReference.Salt,
                 snapshotReference.Iterations);
 
             return (snapshotReference, key);
         }
 
-        private (Snapshot, byte[]) RetrieveSnapshot(Uri snapshotUri)
+        private (Snapshot, byte[]) RetrieveSnapshot(Uri snapshotUri, string password)
         {
             var (snapshotReference, key) = RetrieveSnapshotReference(
-                snapshotUri);
+                snapshotUri,
+                password);
 
             return (ParseSnapshot(snapshotReference, key), key);
-        }
-
-        private byte[] GenerateKey(byte[] salt, int iterations)
-        {
-            return AesGcmCrypto.PasswordToKey(
-                _password,
-                salt,
-                iterations);
         }
 
         private IEnumerable<ContentReference> StoreContentItems(byte[] key)

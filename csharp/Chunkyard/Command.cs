@@ -80,9 +80,7 @@ namespace Chunkyard
 
             _log.Information("Creating new snapshot for log {LogName}", logName);
 
-            var snapshotBuilder = CreateSnapshotBuilder(_repository.AnyLog(logName)
-                ? ExistingPassword()
-                : NewPassword());
+            var snapshotBuilder = CreateSnapshotBuilder();
 
             foreach (var filePath in FindFiles())
             {
@@ -98,7 +96,7 @@ namespace Chunkyard
         {
             var uri = GetUri(o.RefLogId);
             _log.Information("Verifying snapshot {Uri}", uri);
-            CreateSnapshotBuilder(ExistingPassword()).VerifySnapshot(uri);
+            CreateSnapshotBuilder().VerifySnapshot(uri);
         }
 
         public void RestoreSnapshot(RestoreOptions o)
@@ -106,7 +104,7 @@ namespace Chunkyard
             var uri = GetUri(o.RefLogId);
             _log.Information("Restoring snapshot {Uri} to {Directory}", uri, o.Directory);
 
-            CreateSnapshotBuilder(ExistingPassword()).Restore(
+            CreateSnapshotBuilder().Restore(
                 uri,
                 (contentName) =>
                 {
@@ -122,7 +120,7 @@ namespace Chunkyard
             var uri = GetUri(o.RefLogId);
             _log.Information("Listing files in snapshot {Uri}", uri);
 
-            var names = CreateSnapshotBuilder(ExistingPassword())
+            var names = CreateSnapshotBuilder()
                 .List(uri, o.IncludeRegex);
 
             foreach (var name in names)
@@ -148,7 +146,7 @@ namespace Chunkyard
             _log.Information("Pushing log {LogName}", logName);
             var remoteRepository = new FileRepository(o.Remote);
 
-            CreateSnapshotBuilder(ExistingPassword())
+            CreateSnapshotBuilder()
                 .Push(logName, remoteRepository);
         }
 
@@ -159,7 +157,7 @@ namespace Chunkyard
             _log.Information("Pulling log {LogName}", logName);
             var remoteRepository = new FileRepository(o.Remote);
 
-            CreateSnapshotBuilder(remoteRepository, ExistingPassword())
+            CreateSnapshotBuilder(remoteRepository)
                 .Push(logName, _repository);
         }
 
@@ -182,7 +180,7 @@ namespace Chunkyard
             }
         }
 
-        private SnapshotBuilder CreateSnapshotBuilder(IRepository repository, string password)
+        private SnapshotBuilder CreateSnapshotBuilder(IRepository repository)
         {
             IContentStore contentStore = new ContentStore(
                 repository,
@@ -198,14 +196,12 @@ namespace Chunkyard
                     CacheDirectoryPath);
             }
 
-            return new SnapshotBuilder(
-                contentStore,
-                password);
+            return new SnapshotBuilder(contentStore, new ConsolePrompt());
         }
 
-        private SnapshotBuilder CreateSnapshotBuilder(string password)
+        private SnapshotBuilder CreateSnapshotBuilder()
         {
-            return CreateSnapshotBuilder(_repository, password);
+            return CreateSnapshotBuilder(_repository);
         }
 
         private static IEnumerable<string> FindFiles()
@@ -215,55 +211,6 @@ namespace Chunkyard
                 : Array.Empty<string>();
 
             return FileFetcher.FindRelative(Program.RootDirectoryPath, filters);
-        }
-
-        private static string NewPassword()
-        {
-            var firstPassword = ReadPassword("Enter new password: ");
-            var secondPassword = ReadPassword("Re-enter password: ");
-
-            if (!firstPassword.Equals(secondPassword))
-            {
-                throw new ChunkyardException("Passwords do not match");
-            }
-
-            return firstPassword;
-        }
-
-        private static string ExistingPassword()
-        {
-            return ReadPassword("Password: ");
-        }
-
-        // https://stackoverflow.com/questions/23433980/c-sharp-console-hide-the-input-from-console-window-while-typing
-        private static string ReadPassword(string prompt)
-        {
-            Console.Write(prompt);
-
-            var input = new StringBuilder();
-
-            while (true)
-            {
-                var key = Console.ReadKey(true);
-
-                if (key.Key == ConsoleKey.Enter)
-                {
-                    break;
-                }
-                else if (key.Key == ConsoleKey.Backspace
-                    && input.Length > 0)
-                {
-                    input.Remove(input.Length - 1, 1);
-                }
-                else
-                {
-                    input.Append(key.KeyChar);
-                }
-            }
-
-            Console.WriteLine();
-
-            return input.ToString();
         }
     }
 }

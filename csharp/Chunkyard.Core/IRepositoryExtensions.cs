@@ -63,11 +63,6 @@ namespace Chunkyard.Core
             }
         }
 
-        public static bool AnyLog(this IRepository repository, string logName)
-        {
-            return repository.FetchLogPosition(logName).HasValue;
-        }
-
         public static void PushContent(this IRepository repository, Uri contentUri, IRepository remoteRepository)
         {
             if (remoteRepository.ContentExists(contentUri))
