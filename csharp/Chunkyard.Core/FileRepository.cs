@@ -77,7 +77,7 @@ namespace Chunkyard.Core
 
         public int? FetchLogPosition(string logName)
         {
-            var logPositions = ListLog(logName).ToList();
+            var logPositions = ListLogPositions(logName).ToList();
 
             if (logPositions.Count == 0)
             {
@@ -87,7 +87,7 @@ namespace Chunkyard.Core
             return logPositions[logPositions.Count - 1];
         }
 
-        public IEnumerable<int> ListLog(string logName)
+        public IEnumerable<int> ListLogPositions(string logName)
         {
             var refDirectory = ToDirectoryPath(logName);
 
@@ -105,6 +105,12 @@ namespace Chunkyard.Core
                 yield return Convert.ToInt32(
                     Path.GetFileNameWithoutExtension(file));
             }
+        }
+
+        public IEnumerable<string> ListLogNames()
+        {
+            return Directory.GetDirectories(_refLogDirectory)
+                .Select(d => Path.GetFileName(d));
         }
 
         private string ToDirectoryPath(string logName)

@@ -18,6 +18,8 @@ namespace Chunkyard.Core
 
         int? FetchLogPosition(string logName);
 
-        IEnumerable<int> ListLog(string logName);
+        IEnumerable<int> ListLogPositions(string logName);
+
+        IEnumerable<string> ListLogNames();
     }
 }

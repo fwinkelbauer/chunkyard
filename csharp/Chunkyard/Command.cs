@@ -133,7 +133,7 @@ namespace Chunkyard
         {
             var logName = GetLogName(o.LogName);
 
-            foreach (var logPosition in _repository.ListLog(logName))
+            foreach (var logPosition in _repository.ListLogPositions(logName))
             {
                 Console.WriteLine(Id.LogNameToUri(logName, logPosition));
             }
