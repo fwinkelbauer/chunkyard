@@ -53,7 +53,9 @@ namespace Chunkyard
 
                 File.WriteAllText(
                     ConfigFilePath,
-                    JsonConvert.SerializeObject(config));
+                    JsonConvert.SerializeObject(
+                        config,
+                        Formatting.Indented));
             }
 
             if (File.Exists(FiltersFilePath))
