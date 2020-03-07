@@ -10,7 +10,7 @@ namespace Chunkyard.Options
             RefLogId = refLogId;
         }
 
-        [Option('r', "refLogId", Required = false, HelpText = "The reference log URI")]
+        [Option('r', "reflog", Required = false, HelpText = "The reference log URI", Default = Command.DefaultRefLog)]
         public string RefLogId { get; }
     }
 }

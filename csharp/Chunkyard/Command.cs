@@ -14,6 +14,8 @@ namespace Chunkyard
     {
         public const string FiltersFileName = ".chunkyardfilter";
         public const string ConfigFileName = ".chunkyardconfig";
+        public const string DefaultLogName = "master";
+        public const string DefaultRefLog = "log://master";
 
         private static readonly string FiltersFilePath = Path.Combine(Program.RootDirectoryPath, FiltersFileName);
         private static readonly string ConfigFilePath = Path.Combine(Program.RootDirectoryPath, ConfigFileName);
@@ -43,7 +45,6 @@ namespace Chunkyard
                 _log.Information("Creating {File}", ConfigFileName);
 
                 var config = new ChunkyardConfig(
-                    "master",
                     HashAlgorithmName.SHA256,
                     2 * 1024 * 1024,
                     4 * 1024 * 1024,
@@ -76,9 +77,7 @@ namespace Chunkyard
 
         public void CreateSnapshot(CreateOptions o)
         {
-            var logName = GetLogName(o.LogName);
-
-            _log.Information("Creating new snapshot for log {LogName}", logName);
+            _log.Information("Creating new snapshot for log {LogName}", o.LogName);
 
             var snapshotBuilder = CreateSnapshotBuilder();
 
@@ -87,21 +86,21 @@ namespace Chunkyard
                 snapshotBuilder.AddContent(() => File.OpenRead(filePath), filePath);
             }
 
-            var newLogPosition = snapshotBuilder.WriteSnapshot(logName, DateTime.Now);
+            var newLogPosition = snapshotBuilder.WriteSnapshot(o.LogName, DateTime.Now);
 
-            _log.Information("Latest snapshot is now {Uri}", Id.LogNameToUri(logName, newLogPosition));
+            _log.Information("Latest snapshot is now {Uri}", Id.LogNameToUri(o.LogName, newLogPosition));
         }
 
         public void VerifySnapshot(VerifyOptions o)
         {
-            var uri = GetUri(o.RefLogId);
+            var uri = new Uri(o.RefLogId);
             _log.Information("Verifying snapshot {Uri}", uri);
             CreateSnapshotBuilder().VerifySnapshot(uri);
         }
 
         public void RestoreSnapshot(RestoreOptions o)
         {
-            var uri = GetUri(o.RefLogId);
+            var uri = new Uri(o.RefLogId);
             _log.Information("Restoring snapshot {Uri} to {Directory}", uri, o.Directory);
 
             CreateSnapshotBuilder().Restore(
@@ -117,7 +116,7 @@ namespace Chunkyard
 
         public void DirSnapshot(DirOptions o)
         {
-            var uri = GetUri(o.RefLogId);
+            var uri = new Uri(o.RefLogId);
             _log.Information("Listing files in snapshot {Uri}", uri);
 
             var names = CreateSnapshotBuilder()
@@ -131,11 +130,9 @@ namespace Chunkyard
 
         public void ListLogPositions(LogOptions o)
         {
-            var logName = GetLogName(o.LogName);
-
-            foreach (var logPosition in _repository.ListLogPositions(logName))
+            foreach (var logPosition in _repository.ListLogPositions(o.LogName))
             {
-                Console.WriteLine(Id.LogNameToUri(logName, logPosition));
+                Console.WriteLine(Id.LogNameToUri(o.LogName, logPosition));
             }
         }
 
@@ -149,43 +146,20 @@ namespace Chunkyard
 
         public void PushSnapshot(PushOptions o)
         {
-            var logName = GetLogName(o.LogName);
-
-            _log.Information("Pushing log {LogName}", logName);
+            _log.Information("Pushing log {LogName}", o.LogName);
             var remoteRepository = new FileRepository(o.Remote);
 
             CreateSnapshotBuilder()
-                .Push(logName, remoteRepository);
+                .Push(o.LogName, remoteRepository);
         }
 
         public void PullSnapshot(PullOptions o)
         {
-            var logName = GetLogName(o.LogName);
-
-            _log.Information("Pulling log {LogName}", logName);
+            _log.Information("Pulling log {LogName}", o.LogName);
             var remoteRepository = new FileRepository(o.Remote);
 
             CreateSnapshotBuilder(remoteRepository)
-                .Push(logName, _repository);
-        }
-
-        private string GetLogName(string logName)
-        {
-            return string.IsNullOrEmpty(logName)
-                ? _config.LogName
-                : logName;
-        }
-
-        private Uri GetUri(string refLogId)
-        {
-            if (string.IsNullOrEmpty(refLogId))
-            {
-                return Id.LogNameToUri(_config.LogName);
-            }
-            else
-            {
-                return new Uri(refLogId);
-            }
+                .Push(o.LogName, _repository);
         }
 
         private SnapshotBuilder CreateSnapshotBuilder(IRepository repository)

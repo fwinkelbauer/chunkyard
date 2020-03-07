@@ -20,7 +20,10 @@ namespace Chunkyard
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
-                .WriteTo.File(Path.Combine(LogDirectoryPath, "chunkyard.log"), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 2)
+                .WriteTo.File(
+                    Path.Combine(LogDirectoryPath, "chunkyard.log"),
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 2)
                 .CreateLogger();
 
             Environment.ExitCode = ProcessArguments(args);
