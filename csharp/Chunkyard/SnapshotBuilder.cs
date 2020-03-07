@@ -140,7 +140,7 @@ namespace Chunkyard
 
             if (!sourceLogPosition.HasValue)
             {
-                _log.Information("Cannot push an empty log");
+                _log.Information("Cannot process an empty log");
                 return;
             }
 
@@ -167,7 +167,7 @@ namespace Chunkyard
 
             for (int i = commonLogPosition + 1; i <= sourceLogPosition; i++)
             {
-                _log.Information("Pushing snapshot with position: {LogPosition}", i);
+                _log.Information("Processing snapshot with position: {LogPosition}", i);
 
                 var (snapshotReference, key) = RetrieveSnapshotReference(
                     logName,

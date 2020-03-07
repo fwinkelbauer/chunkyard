@@ -74,10 +74,5 @@ namespace Chunkyard.Core
                 Id.AlgorithmFromContentUri(contentUri),
                 repository.RetrieveContent(contentUri));
         }
-
-        public static void PullContent(this IRepository repository, Uri contentUri, IRepository remoteRepository)
-        {
-            remoteRepository.PushContent(contentUri, repository);
-        }
     }
 }
