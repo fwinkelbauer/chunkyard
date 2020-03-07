@@ -129,13 +129,21 @@ namespace Chunkyard
             }
         }
 
-        public void ListLog(LogOptions o)
+        public void ListLogPositions(LogOptions o)
         {
             var logName = GetLogName(o.LogName);
 
             foreach (var logPosition in _repository.ListLogPositions(logName))
             {
                 Console.WriteLine(Id.LogNameToUri(logName, logPosition));
+            }
+        }
+
+        public void ListLogNames()
+        {
+            foreach (var logName in _repository.ListLogNames())
+            {
+                Console.WriteLine(logName);
             }
         }
 

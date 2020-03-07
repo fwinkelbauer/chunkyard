@@ -30,14 +30,15 @@ namespace Chunkyard
 
         private static int ProcessArguments(string[] args)
         {
-            return Parser.Default.ParseArguments<InitOptions, FilterOptions, DirOptions, RestoreOptions, CreateOptions, VerifyOptions, LogOptions, PushOptions, PullOptions>(args).MapResult(
+            return Parser.Default.ParseArguments<InitOptions, FilterOptions, DirOptions, RestoreOptions, CreateOptions, VerifyOptions, LogOptions, LogsOptions, PushOptions, PullOptions>(args).MapResult(
                 (InitOptions _) => Run(Command.Init),
                 (FilterOptions _) => Run(Command.Filter),
                 (DirOptions o) => Run(() => new Command().DirSnapshot(o)),
                 (RestoreOptions o) => Run(() => new Command().RestoreSnapshot(o)),
                 (CreateOptions o) => Run(() => new Command().CreateSnapshot(o)),
                 (VerifyOptions o) => Run(() => new Command().VerifySnapshot(o)),
-                (LogOptions o) => Run(() => new Command().ListLog(o)),
+                (LogOptions o) => Run(() => new Command().ListLogPositions(o)),
+                (LogsOptions _) => Run(() => new Command().ListLogNames()),
                 (PushOptions o) => Run(() => new Command().PushSnapshot(o)),
                 (PullOptions o) => Run(() => new Command().PullSnapshot(o)),
                 _ => 1);
