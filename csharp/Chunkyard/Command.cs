@@ -11,15 +11,18 @@ namespace Chunkyard
 {
     internal class Command
     {
+        public const string RepositoryDirectoryName = ".chunkyard";
         public const string FiltersFileName = ".chunkyardfilter";
         public const string ConfigFileName = ".chunkyardconfig";
         public const string DefaultLogName = "master";
         public const string DefaultLogId = "log://master/";
-        public const string DefaultRepository = "repo://local/";
 
-        private static readonly string FiltersFilePath = Path.Combine(Program.RootDirectoryPath, FiltersFileName);
-        private static readonly string ConfigFilePath = Path.Combine(Program.RootDirectoryPath, ConfigFileName);
-        private static readonly string CacheDirectoryPath = Path.Combine(Program.ChunkyardDirectoryPath, "cache");
+        public static readonly string RootDirectoryPath = Path.GetFullPath(".");
+        public static readonly string ChunkyardDirectoryPath = Path.Combine(RootDirectoryPath, RepositoryDirectoryName);
+
+        private static readonly string FiltersFilePath = Path.Combine(RootDirectoryPath, FiltersFileName);
+        private static readonly string ConfigFilePath = Path.Combine(RootDirectoryPath, ConfigFileName);
+        private static readonly string CacheDirectoryPath = Path.Combine(ChunkyardDirectoryPath, "cache");
 
         private static readonly ILogger _log = Log.ForContext<Command>();
 
@@ -175,13 +178,14 @@ namespace Chunkyard
 
         private static IRepository CreateRepository(string repositoryName)
         {
+            if (!repositoryName.Contains("://"))
+            {
+                repositoryName = Path.GetFullPath(repositoryName);
+            }
+
             var repositoryUri = new Uri(repositoryName);
 
-            if (repositoryUri.AbsoluteUri.Equals(DefaultRepository))
-            {
-                return new FileRepository(Program.ChunkyardDirectoryPath);
-            }
-            else if (repositoryUri.IsFile)
+            if (repositoryUri.IsFile)
             {
                 return new FileRepository(repositoryUri.AbsolutePath);
             }
@@ -197,7 +201,7 @@ namespace Chunkyard
                 ? File.ReadAllLines(FiltersFilePath)
                 : Array.Empty<string>();
 
-            return FileFetcher.FindRelative(Program.RootDirectoryPath, filters);
+            return FileFetcher.FindRelative(RootDirectoryPath, filters);
         }
     }
 }

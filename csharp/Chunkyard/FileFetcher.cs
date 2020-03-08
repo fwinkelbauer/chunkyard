@@ -67,7 +67,7 @@ namespace Chunkyard
                 .Select(f => Path.GetRelativePath(directory, f))
                 .ToList();
 
-            var internalExcludeRegex = $"\\{Program.RepositoryDirectoryName}[\\\\\\/]";
+            var internalExcludeRegex = $"\\{Command.RepositoryDirectoryName}[\\\\\\/]";
             var toDelete = new List<string>();
 
             foreach (var excludedFile in FindMatches(internalExcludeRegex, allFiles))

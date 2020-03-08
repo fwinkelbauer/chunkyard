@@ -13,7 +13,7 @@ namespace Chunkyard.Options
             LogId = logId;
         }
 
-        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.DefaultRepository)]
+        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.RepositoryDirectoryName)]
         public string Repository { get; }
 
         [Option('d', "directory", Required = true, HelpText = "The directory to restore into")]

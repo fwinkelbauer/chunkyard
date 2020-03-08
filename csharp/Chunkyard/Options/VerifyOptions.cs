@@ -11,7 +11,7 @@ namespace Chunkyard.Options
             LogId = logId;
         }
 
-        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.DefaultRepository)]
+        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.RepositoryDirectoryName)]
         public string Repository { get; }
 
         [Option('l', "log-uri", Required = false, HelpText = "The log URI", Default = Command.DefaultLogId)]
