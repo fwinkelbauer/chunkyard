@@ -24,7 +24,6 @@ namespace Chunkyard
 
             _cacheDirectory = Path.Combine(
                 cacheDirectory,
-                Id.AlgorithmFromContentUri(contentUri).Name.ToLower(),
                 Id.HashFromContentUri(contentUri));
         }
 
