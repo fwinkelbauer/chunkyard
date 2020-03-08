@@ -47,7 +47,7 @@ namespace Chunkyard
                     ConfigFilePath,
                     JsonConvert.SerializeObject(
                         config,
-                        Formatting.Indented));
+                        Formatting.Indented) + "\n");
             }
 
             if (File.Exists(FiltersFilePath))
@@ -57,7 +57,7 @@ namespace Chunkyard
             else
             {
                 _log.Information("Creating {File}", FiltersFileName);
-                File.WriteAllText(FiltersFilePath, string.Empty);
+                File.WriteAllText(FiltersFilePath, "& .\n");
             }
         }
 
@@ -201,7 +201,7 @@ namespace Chunkyard
                 ? File.ReadAllLines(FiltersFilePath)
                 : Array.Empty<string>();
 
-            return FileFetcher.FindRelative(RootDirectoryPath, filters);
+            return FileFetcher.FindRelative(filters);
         }
     }
 }

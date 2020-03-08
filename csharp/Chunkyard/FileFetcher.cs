@@ -8,10 +8,10 @@ namespace Chunkyard
 {
     internal static class FileFetcher
     {
-        public static IEnumerable<string> FindRelative(string directory, IEnumerable<string> filters)
+        public static IEnumerable<string> FindRelative(IEnumerable<string> filters)
         {
-            var allFiles = ListFiles(directory);
-            var selectedFiles = new List<string>(allFiles);
+            var allFiles = new List<string>();
+            var selectedFiles = new List<string>();
 
             foreach (var filter in filters)
             {
@@ -23,11 +23,17 @@ namespace Chunkyard
 
                 var split = filter.Split(' ', 2);
                 var sign = split[0];
-                var regex = split[1];
+                var value = split[1];
 
-                if (sign.Equals("+"))
+                if (sign.Equals("&"))
                 {
-                    foreach (var includedFile in FindMatches(regex, allFiles))
+                    var files = ListFiles(value);
+                    allFiles.AddRange(files);
+                    selectedFiles.AddRange(files);
+                }
+                else if (sign.Equals("+"))
+                {
+                    foreach (var includedFile in FindMatches(value, allFiles))
                     {
                         if (!selectedFiles.Contains(includedFile))
                         {
@@ -37,7 +43,7 @@ namespace Chunkyard
                 }
                 else if (sign.Equals("-"))
                 {
-                    foreach (var excludedFile in FindMatches(regex, allFiles))
+                    foreach (var excludedFile in FindMatches(value, allFiles))
                     {
                         selectedFiles.Remove(excludedFile);
                     }
@@ -51,8 +57,7 @@ namespace Chunkyard
             // Make sure that the our config files are saved
             foreach (var configFile in new[] { Command.FiltersFileName, Command.ConfigFileName })
             {
-                if (allFiles.Contains(configFile)
-                    && !selectedFiles.Contains(configFile))
+                if (!selectedFiles.Contains(configFile))
                 {
                     selectedFiles.Add(configFile);
                 }
