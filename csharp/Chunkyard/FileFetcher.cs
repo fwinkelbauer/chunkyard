@@ -57,7 +57,8 @@ namespace Chunkyard
             // Make sure that the our config files are saved
             foreach (var configFile in new[] { Command.FiltersFileName, Command.ConfigFileName })
             {
-                if (!selectedFiles.Contains(configFile))
+                if (File.Exists(configFile) &&
+                    !selectedFiles.Contains(configFile))
                 {
                     selectedFiles.Add(configFile);
                 }
@@ -69,7 +70,7 @@ namespace Chunkyard
         private static List<string> ListFiles(string directory)
         {
             var allFiles = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
-                .Select(f => Path.GetRelativePath(directory, f))
+                .Select(f => Path.Join(directory, Path.GetRelativePath(directory, f)))
                 .ToList();
 
             var internalExcludeRegex = $"\\{Command.RepositoryDirectoryName}[\\\\\\/]";
