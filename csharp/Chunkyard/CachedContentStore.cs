@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using Chunkyard.Core;
 using Newtonsoft.Json;
 
@@ -13,7 +15,17 @@ namespace Chunkyard
         public CachedContentStore(IContentStore contentStore, string cacheDirectory)
         {
             _contentStore = contentStore;
-            _cacheDirectory = cacheDirectory;
+
+            // Each repository should have its own cache
+            var contentUri = Id.ComputeContentUri(
+                HashAlgorithmName.SHA256,
+                Encoding.UTF8.GetBytes(
+                    _contentStore.Repository.RepositoryUri.AbsoluteUri));
+
+            _cacheDirectory = Path.Combine(
+                cacheDirectory,
+                Id.AlgorithmFromContentUri(contentUri).Name.ToLower(),
+                Id.HashFromContentUri(contentUri));
         }
 
         public IRepository Repository

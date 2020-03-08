@@ -15,7 +15,11 @@ namespace Chunkyard.Core
         {
             _contentDirectory = Path.Combine(directory, "content");
             _refLogDirectory = Path.Combine(directory, "reflog");
+
+            RepositoryUri = new Uri(directory);
         }
+
+        public Uri RepositoryUri { get; }
 
         public Uri StoreContent(HashAlgorithmName algorithm, byte[] value)
         {

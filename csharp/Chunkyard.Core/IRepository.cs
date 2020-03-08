@@ -6,6 +6,8 @@ namespace Chunkyard.Core
 {
     public interface IRepository
     {
+        public Uri RepositoryUri { get; }
+
         Uri StoreContent(HashAlgorithmName algorithm, byte[] value);
 
         byte[] RetrieveContent(Uri contentUri);
