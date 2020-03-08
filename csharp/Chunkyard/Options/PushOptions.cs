@@ -12,7 +12,7 @@ namespace Chunkyard.Options
             LogName = logName;
         }
 
-        [Option('s', "source", Required = true, HelpText = "The source repository")]
+        [Option('s', "source", Required = false, HelpText = "The source repository", Default = Command.RepositoryDirectoryName)]
         public string SourceRepository { get; }
 
         [Option('d', "destination", Required = true, HelpText = "The destination repository")]
