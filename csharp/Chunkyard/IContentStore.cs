@@ -9,6 +9,6 @@ namespace Chunkyard
 
         void RetrieveContent(ContentReference contentReference, Stream stream, byte[] key);
 
-        ContentReference StoreContent(Stream stream, string contentName, byte[] nonce, byte[] key);
+        ContentReference StoreContent(Stream stream, string contentName, byte[] nonce, byte[] key, ChunkyardConfig config);
     }
 }

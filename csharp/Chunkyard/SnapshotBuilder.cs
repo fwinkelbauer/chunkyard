@@ -33,7 +33,7 @@ namespace Chunkyard
             _contentItems.Add((readFunc, contentName));
         }
 
-        public int WriteSnapshot(string logName, DateTime creationTime)
+        public int WriteSnapshot(string logName, DateTime creationTime, ChunkyardConfig config)
         {
             var currentLogPosition = _contentStore.Repository.FetchLogPosition(logName);
             var password = currentLogPosition.HasValue
@@ -65,13 +65,14 @@ namespace Chunkyard
                 }
             }
 
-            var snapshot = new Snapshot(creationTime, StoreContentItems(key));
+            var snapshot = new Snapshot(creationTime, StoreContentItems(key, config));
             using var snapshotStream = new MemoryStream(snapshot.ToBytes());
             var snapshotReference = SnapshotReference.FromContentReference(
                 _contentStore.StoreContent(snapshotStream,
                     SnapshotContentName,
                     GetNonce(SnapshotContentName),
-                    key),
+                    key,
+                    config),
                 salt,
                 iterations);
 
@@ -231,7 +232,7 @@ namespace Chunkyard
             return (ParseSnapshot(snapshotReference, key), key);
         }
 
-        private IEnumerable<ContentReference> StoreContentItems(byte[] key)
+        private IEnumerable<ContentReference> StoreContentItems(byte[] key, ChunkyardConfig config)
         {
             foreach (var (readFunc, contentName) in _contentItems)
             {
@@ -241,7 +242,8 @@ namespace Chunkyard
                     stream,
                     contentName,
                     GetNonce(contentName),
-                    key);
+                    key,
+                    config);
             }
         }
 

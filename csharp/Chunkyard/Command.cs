@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
-using System.Text;
 using Chunkyard.Core;
 using Chunkyard.Options;
 using Newtonsoft.Json;
@@ -23,14 +22,6 @@ namespace Chunkyard
         private static readonly string CacheDirectoryPath = Path.Combine(Program.ChunkyardDirectoryPath, "cache");
 
         private static readonly ILogger _log = Log.ForContext<Command>();
-
-        private readonly ChunkyardConfig _config;
-
-        public Command()
-        {
-            _config = JsonConvert.DeserializeObject<ChunkyardConfig>(
-                File.ReadAllText(ConfigFilePath));
-        }
 
         public static void Init()
         {
@@ -75,23 +66,29 @@ namespace Chunkyard
             }
         }
 
-        public void CreateSnapshot(CreateOptions o)
+        public static void CreateSnapshot(CreateOptions o)
         {
+            var config = JsonConvert.DeserializeObject<ChunkyardConfig>(
+                File.ReadAllText(ConfigFilePath));
+
             _log.Information("Creating new snapshot for log {LogName}", o.LogName);
 
-            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+            var snapshotBuilder = CreateSnapshotBuilder(o.Repository, config.UseCache);
 
             foreach (var filePath in FindFiles())
             {
                 snapshotBuilder.AddContent(() => File.OpenRead(filePath), filePath);
             }
 
-            var newLogPosition = snapshotBuilder.WriteSnapshot(o.LogName, DateTime.Now);
+            var newLogPosition = snapshotBuilder.WriteSnapshot(
+                o.LogName,
+                DateTime.Now,
+                config);
 
             _log.Information("Latest snapshot is now {Uri}", Id.LogNameToUri(o.LogName, newLogPosition));
         }
 
-        public void VerifySnapshot(VerifyOptions o)
+        public static void VerifySnapshot(VerifyOptions o)
         {
             var logUri = new Uri(o.LogId);
             _log.Information("Verifying snapshot {LogUri}", logUri);
@@ -99,7 +96,7 @@ namespace Chunkyard
                 .VerifySnapshot(logUri);
         }
 
-        public void RestoreSnapshot(RestoreOptions o)
+        public static void RestoreSnapshot(RestoreOptions o)
         {
             var logUri = new Uri(o.LogId);
             _log.Information("Restoring snapshot {LogUri} to {Directory}", logUri, o.Directory);
@@ -115,7 +112,7 @@ namespace Chunkyard
                 o.IncludeRegex);
         }
 
-        public void DirSnapshot(DirOptions o)
+        public static void DirSnapshot(DirOptions o)
         {
             var logUri = new Uri(o.LogId);
             _log.Information("Listing files in snapshot {LogUri}", logUri);
@@ -129,7 +126,7 @@ namespace Chunkyard
             }
         }
 
-        public void ListLogPositions(LogOptions o)
+        public static void ListLogPositions(LogOptions o)
         {
             var repository = CreateRepository(o.Repository);
 
@@ -139,7 +136,7 @@ namespace Chunkyard
             }
         }
 
-        public void ListLogNames(LogsOptions o)
+        public static void ListLogNames(LogsOptions o)
         {
             var repository = CreateRepository(o.Repository);
 
@@ -149,37 +146,31 @@ namespace Chunkyard
             }
         }
 
-        public void PushSnapshot(PushOptions o)
+        public static void PushSnapshot(PushOptions o)
         {
             _log.Information("Pushing log {LogName}", o.LogName);
             CreateSnapshotBuilder(o.SourceRepository)
                 .Push(o.LogName, CreateRepository(o.DestinationRepository));
         }
 
-        public void PullSnapshot(PullOptions o)
+        public static void PullSnapshot(PullOptions o)
         {
             _log.Information("Pulling log {LogName}", o.LogName);
             CreateSnapshotBuilder(o.DestinationRepository)
                 .Push(o.LogName, CreateRepository(o.SourceRepository));
         }
 
-        private SnapshotBuilder CreateSnapshotBuilder(string repositoryName)
+        private static SnapshotBuilder CreateSnapshotBuilder(string repositoryName, bool cached = false)
         {
-            IContentStore contentStore = new ContentStore(
-                CreateRepository(repositoryName),
-                _config.HashAlgorithmName,
-                _config.MinChunkSizeInByte,
-                _config.AvgChunkSizeInByte,
-                _config.MaxChunkSizeInByte);
+            IContentStore contentStore = new ContentStore(CreateRepository(repositoryName));
 
-            if (_config.UseCache)
-            {
-                contentStore = new CachedContentStore(
-                    contentStore,
-                    CacheDirectoryPath);
-            }
+            contentStore = cached
+                ? new CachedContentStore(contentStore, CacheDirectoryPath)
+                : contentStore;
 
-            return new SnapshotBuilder(contentStore, new ConsolePrompt());
+            return new SnapshotBuilder(
+                contentStore,
+                new ConsolePrompt());
         }
 
         private static IRepository CreateRepository(string repositoryName)

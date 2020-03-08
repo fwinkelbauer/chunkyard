@@ -36,14 +36,14 @@ namespace Chunkyard
             return Parser.Default.ParseArguments<InitOptions, FilterOptions, DirOptions, RestoreOptions, CreateOptions, VerifyOptions, LogOptions, LogsOptions, PushOptions, PullOptions>(args).MapResult(
                 (InitOptions _) => Run(Command.Init),
                 (FilterOptions _) => Run(Command.Filter),
-                (DirOptions o) => Run(() => new Command().DirSnapshot(o)),
-                (RestoreOptions o) => Run(() => new Command().RestoreSnapshot(o)),
-                (CreateOptions o) => Run(() => new Command().CreateSnapshot(o)),
-                (VerifyOptions o) => Run(() => new Command().VerifySnapshot(o)),
-                (LogOptions o) => Run(() => new Command().ListLogPositions(o)),
-                (LogsOptions o) => Run(() => new Command().ListLogNames(o)),
-                (PushOptions o) => Run(() => new Command().PushSnapshot(o)),
-                (PullOptions o) => Run(() => new Command().PullSnapshot(o)),
+                (DirOptions o) => Run(() => Command.DirSnapshot(o)),
+                (RestoreOptions o) => Run(() => Command.RestoreSnapshot(o)),
+                (CreateOptions o) => Run(() => Command.CreateSnapshot(o)),
+                (VerifyOptions o) => Run(() => Command.VerifySnapshot(o)),
+                (LogOptions o) => Run(() => Command.ListLogPositions(o)),
+                (LogsOptions o) => Run(() => Command.ListLogNames(o)),
+                (PushOptions o) => Run(() => Command.PushSnapshot(o)),
+                (PullOptions o) => Run(() => Command.PullSnapshot(o)),
                 _ => 1);
         }
 

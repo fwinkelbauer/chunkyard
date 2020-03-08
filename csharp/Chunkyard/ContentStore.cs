@@ -1,25 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
 using Chunkyard.Core;
 
 namespace Chunkyard
 {
     internal class ContentStore : IContentStore
     {
-        private readonly HashAlgorithmName _hashAlgorithmName;
-        private readonly int _minChunkSizeInByte;
-        private readonly int _avgChunkSizeInByte;
-        private readonly int _maxChunkSizeInByte;
-
-        public ContentStore(IRepository repository, HashAlgorithmName hashAlgorithmName, int minChunkSizeInByte, int avgChunkSizeInByte, int maxChunkSizeInByte)
+        public ContentStore(IRepository repository)
         {
             Repository = repository;
-
-            _hashAlgorithmName = hashAlgorithmName;
-            _minChunkSizeInByte = minChunkSizeInByte;
-            _avgChunkSizeInByte = avgChunkSizeInByte;
-            _maxChunkSizeInByte = maxChunkSizeInByte;
         }
 
         public IRepository Repository { get; }
@@ -40,21 +29,21 @@ namespace Chunkyard
             }
         }
 
-        public ContentReference StoreContent(Stream stream, string contentName, byte[] nonce, byte[] key)
+        public ContentReference StoreContent(Stream stream, string contentName, byte[] nonce, byte[] key, ChunkyardConfig config)
         {
             return new ContentReference(
                 contentName,
                 nonce,
-                WriteStream(stream, nonce, key));
+                WriteStream(stream, nonce, key, config));
         }
 
-        private IEnumerable<Chunk> WriteStream(Stream stream, byte[] nonce, byte[] key)
+        private IEnumerable<Chunk> WriteStream(Stream stream, byte[] nonce, byte[] key, ChunkyardConfig config)
         {
             var chunkedDataItems = FastCdc.SplitIntoChunks(
                 stream,
-                _minChunkSizeInByte,
-                _avgChunkSizeInByte,
-                _maxChunkSizeInByte);
+                config.MinChunkSizeInByte,
+                config.AvgChunkSizeInByte,
+                config.MaxChunkSizeInByte);
 
             foreach (var chunkedData in chunkedDataItems)
             {
@@ -62,7 +51,7 @@ namespace Chunkyard
                 var compressedData = LzmaCompression.Compress(encryptedData);
 
                 yield return new Chunk(
-                    Repository.StoreContent(_hashAlgorithmName, compressedData),
+                    Repository.StoreContent(config.HashAlgorithmName, compressedData),
                     tag);
             }
         }

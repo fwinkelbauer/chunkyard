@@ -29,11 +29,16 @@ namespace Chunkyard
             _contentStore.RetrieveContent(contentReference, stream, key);
         }
 
-        public ContentReference StoreContent(Stream stream, string contentName, byte[] nonce, byte[] key)
+        public ContentReference StoreContent(Stream stream, string contentName, byte[] nonce, byte[] key, ChunkyardConfig config)
         {
             if (!(stream is FileStream fileStream))
             {
-                return _contentStore.StoreContent(stream, contentName, nonce, key);
+                return _contentStore.StoreContent(
+                    stream,
+                    contentName,
+                    nonce,
+                    key,
+                    config);
             }
 
             var storedCache = RetrieveFromCache(contentName);
@@ -46,7 +51,7 @@ namespace Chunkyard
                 return storedCache.ContentReference;
             }
 
-            var contentReference = _contentStore.StoreContent(stream, contentName, nonce, key);
+            var contentReference = _contentStore.StoreContent(stream, contentName, nonce, key, config);
 
             StoreInCache(
                 contentName,
