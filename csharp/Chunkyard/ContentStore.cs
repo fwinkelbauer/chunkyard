@@ -20,7 +20,6 @@ namespace Chunkyard
             _minChunkSizeInByte = minChunkSizeInByte;
             _avgChunkSizeInByte = avgChunkSizeInByte;
             _maxChunkSizeInByte = maxChunkSizeInByte;
-
         }
 
         public IRepository Repository { get; }

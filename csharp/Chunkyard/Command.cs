@@ -15,7 +15,8 @@ namespace Chunkyard
         public const string FiltersFileName = ".chunkyardfilter";
         public const string ConfigFileName = ".chunkyardconfig";
         public const string DefaultLogName = "master";
-        public const string DefaultRefLog = "log://master";
+        public const string DefaultLogId = "log://master/";
+        public const string DefaultRepository = "repo://local/";
 
         private static readonly string FiltersFilePath = Path.Combine(Program.RootDirectoryPath, FiltersFileName);
         private static readonly string ConfigFilePath = Path.Combine(Program.RootDirectoryPath, ConfigFileName);
@@ -24,14 +25,11 @@ namespace Chunkyard
         private static readonly ILogger _log = Log.ForContext<Command>();
 
         private readonly ChunkyardConfig _config;
-        private readonly IRepository _repository;
 
         public Command()
         {
             _config = JsonConvert.DeserializeObject<ChunkyardConfig>(
                 File.ReadAllText(ConfigFilePath));
-
-            _repository = new FileRepository(Program.ChunkyardDirectoryPath);
         }
 
         public static void Init()
@@ -81,7 +79,7 @@ namespace Chunkyard
         {
             _log.Information("Creating new snapshot for log {LogName}", o.LogName);
 
-            var snapshotBuilder = CreateSnapshotBuilder();
+            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
 
             foreach (var filePath in FindFiles())
             {
@@ -95,18 +93,19 @@ namespace Chunkyard
 
         public void VerifySnapshot(VerifyOptions o)
         {
-            var uri = new Uri(o.RefLogId);
-            _log.Information("Verifying snapshot {Uri}", uri);
-            CreateSnapshotBuilder().VerifySnapshot(uri);
+            var logUri = new Uri(o.LogId);
+            _log.Information("Verifying snapshot {LogUri}", logUri);
+            CreateSnapshotBuilder(o.Repository)
+                .VerifySnapshot(logUri);
         }
 
         public void RestoreSnapshot(RestoreOptions o)
         {
-            var uri = new Uri(o.RefLogId);
-            _log.Information("Restoring snapshot {Uri} to {Directory}", uri, o.Directory);
+            var logUri = new Uri(o.LogId);
+            _log.Information("Restoring snapshot {LogUri} to {Directory}", logUri, o.Directory);
 
-            CreateSnapshotBuilder().Restore(
-                uri,
+            CreateSnapshotBuilder(o.Repository).Restore(
+                logUri,
                 (contentName) =>
                 {
                     var file = Path.Combine(o.Directory, contentName);
@@ -118,11 +117,11 @@ namespace Chunkyard
 
         public void DirSnapshot(DirOptions o)
         {
-            var uri = new Uri(o.RefLogId);
-            _log.Information("Listing files in snapshot {Uri}", uri);
+            var logUri = new Uri(o.LogId);
+            _log.Information("Listing files in snapshot {LogUri}", logUri);
 
-            var names = CreateSnapshotBuilder()
-                .List(uri, o.IncludeRegex);
+            var names = CreateSnapshotBuilder(o.Repository)
+                .List(logUri, o.IncludeRegex);
 
             foreach (var name in names)
             {
@@ -132,15 +131,19 @@ namespace Chunkyard
 
         public void ListLogPositions(LogOptions o)
         {
-            foreach (var logPosition in _repository.ListLogPositions(o.LogName))
+            var repository = CreateRepository(o.Repository);
+
+            foreach (var logPosition in repository.ListLogPositions(o.LogName))
             {
                 Console.WriteLine(Id.LogNameToUri(o.LogName, logPosition));
             }
         }
 
-        public void ListLogNames()
+        public void ListLogNames(LogsOptions o)
         {
-            foreach (var logName in _repository.ListLogNames())
+            var repository = CreateRepository(o.Repository);
+
+            foreach (var logName in repository.ListLogNames())
             {
                 Console.WriteLine(logName);
             }
@@ -149,25 +152,21 @@ namespace Chunkyard
         public void PushSnapshot(PushOptions o)
         {
             _log.Information("Pushing log {LogName}", o.LogName);
-            var remoteRepository = new FileRepository(o.Remote);
-
-            CreateSnapshotBuilder()
-                .Push(o.LogName, remoteRepository);
+            CreateSnapshotBuilder(o.SourceRepository)
+                .Push(o.LogName, CreateRepository(o.DestinationRepository));
         }
 
         public void PullSnapshot(PullOptions o)
         {
             _log.Information("Pulling log {LogName}", o.LogName);
-            var remoteRepository = new FileRepository(o.Remote);
-
-            CreateSnapshotBuilder(remoteRepository)
-                .Push(o.LogName, _repository);
+            CreateSnapshotBuilder(o.DestinationRepository)
+                .Push(o.LogName, CreateRepository(o.SourceRepository));
         }
 
-        private SnapshotBuilder CreateSnapshotBuilder(IRepository repository)
+        private SnapshotBuilder CreateSnapshotBuilder(string repositoryName)
         {
             IContentStore contentStore = new ContentStore(
-                repository,
+                CreateRepository(repositoryName),
                 _config.HashAlgorithmName,
                 _config.MinChunkSizeInByte,
                 _config.AvgChunkSizeInByte,
@@ -183,9 +182,22 @@ namespace Chunkyard
             return new SnapshotBuilder(contentStore, new ConsolePrompt());
         }
 
-        private SnapshotBuilder CreateSnapshotBuilder()
+        private static IRepository CreateRepository(string repositoryName)
         {
-            return CreateSnapshotBuilder(_repository);
+            var repositoryUri = new Uri(repositoryName);
+
+            if (repositoryUri.AbsoluteUri.Equals(DefaultRepository))
+            {
+                return new FileRepository(Program.ChunkyardDirectoryPath);
+            }
+            else if (repositoryUri.IsFile)
+            {
+                return new FileRepository(repositoryUri.AbsolutePath);
+            }
+            else
+            {
+                throw new ChunkyardException($"Unsupported URI: {repositoryUri}");
+            }
         }
 
         private static IEnumerable<string> FindFiles()

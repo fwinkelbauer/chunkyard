@@ -5,20 +5,24 @@ namespace Chunkyard.Options
     [Verb("restore", HelpText = "Restores a snapshot")]
     public class RestoreOptions
     {
-        public RestoreOptions(string directory, string includeRegex, string refLogId)
+        public RestoreOptions(string repository, string directory, string includeRegex, string logId)
         {
+            Repository = repository;
             Directory = directory;
             IncludeRegex = includeRegex;
-            RefLogId = refLogId;
+            LogId = logId;
         }
 
-        [Option('d', "directory", Required = true, HelpText = "The restore directory")]
+        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.DefaultRepository)]
+        public string Repository { get; }
+
+        [Option('d', "directory", Required = true, HelpText = "The directory to restore into")]
         public string Directory { get; }
 
         [Option('i', "include", Required = false, HelpText = "The include regex", Default = ".*")]
         public string IncludeRegex { get; }
 
-        [Option('r', "reflog", Required = false, HelpText = "The reference log URI", Default = Command.DefaultRefLog)]
-        public string RefLogId { get; }
+        [Option('l', "log-uri", Required = false, HelpText = "The log URI", Default = Command.DefaultLogId)]
+        public string LogId { get; }
     }
 }

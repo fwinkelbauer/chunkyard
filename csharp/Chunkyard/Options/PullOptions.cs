@@ -2,19 +2,23 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("pull", HelpText = "Pulls the content of a snapshot in a given log from a remote repository")]
+    [Verb("pull", HelpText = "Pulls the content of a snapshot in a given log from one repository to another repository")]
     public class PullOptions
     {
-        public PullOptions(string remote, string logName)
+        public PullOptions(string sourceRepository, string destinationRepository, string logName)
         {
-            Remote = remote;
+            SourceRepository = sourceRepository;
+            DestinationRepository = destinationRepository;
             LogName = logName;
         }
 
-        [Option('r', "remote", Required = true, HelpText = "The remote repository")]
-        public string Remote { get; }
+        [Option('s', "source", Required = true, HelpText = "The source repository")]
+        public string SourceRepository { get; }
 
-        [Option('l', "log", Required = false, HelpText = "The log name", Default = Command.DefaultLogName)]
+        [Option('d', "destination", Required = true, HelpText = "The destination repository")]
+        public string DestinationRepository { get; }
+
+        [Option('l', "log-name", Required = false, HelpText = "The log name", Default = Command.DefaultLogName)]
         public string LogName { get; }
     }
 }

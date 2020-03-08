@@ -5,12 +5,16 @@ namespace Chunkyard.Options
     [Verb("verify", HelpText = "Verify a snapshot")]
     public class VerifyOptions
     {
-        public VerifyOptions(string refLogId)
+        public VerifyOptions(string repository, string logId)
         {
-            RefLogId = refLogId;
+            Repository = repository;
+            LogId = logId;
         }
 
-        [Option('r', "reflog", Required = false, HelpText = "The reference log URI", Default = Command.DefaultRefLog)]
-        public string RefLogId { get; }
+        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.DefaultRepository)]
+        public string Repository { get; }
+
+        [Option('l', "log-uri", Required = false, HelpText = "The log URI", Default = Command.DefaultLogId)]
+        public string LogId { get; }
     }
 }
