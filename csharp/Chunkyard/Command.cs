@@ -93,7 +93,7 @@ namespace Chunkyard
             var logUri = new Uri(o.LogId);
             _log.Information("Verifying snapshot {LogUri}", logUri);
             CreateSnapshotBuilder(o.Repository)
-                .VerifySnapshot(logUri);
+                .VerifySnapshot(logUri, o.IncludeRegex);
         }
 
         public static void RestoreSnapshot(RestoreOptions o)

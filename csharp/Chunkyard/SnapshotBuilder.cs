@@ -91,23 +91,31 @@ namespace Chunkyard
 
             foreach (var contentReference in snapshot.ContentReferences)
             {
-                if (compiledRegex.IsMatch(contentReference.Name))
+                if (!compiledRegex.IsMatch(contentReference.Name))
                 {
-                    _log.Information("Restoring: {File}", contentReference.Name);
-                    using var stream = writeFunc(contentReference.Name);
-                    _contentStore.RetrieveContent(contentReference, stream, key);
+                    continue;
                 }
+
+                _log.Information("Restoring: {File}", contentReference.Name);
+                using var stream = writeFunc(contentReference.Name);
+                _contentStore.RetrieveContent(contentReference, stream, key);
             }
         }
 
-        public void VerifySnapshot(Uri snapshotUri)
+        public void VerifySnapshot(Uri snapshotUri, string verifyRegex)
         {
+            var compiledRegex = new Regex(verifyRegex);
             var (snapshot, _) = RetrieveSnapshot(
                 snapshotUri,
                 _prompt.ExistingPassword());
 
             foreach (var contentReference in snapshot.ContentReferences)
             {
+                if (!compiledRegex.IsMatch(contentReference.Name))
+                {
+                    continue;
+                }
+
                 _log.Information("Verifying: {File}", contentReference.Name);
 
                 foreach (var chunk in contentReference.Chunks)
