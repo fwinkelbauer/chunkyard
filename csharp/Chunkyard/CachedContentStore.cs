@@ -101,7 +101,7 @@ namespace Chunkyard
 
         private string ToCacheFile(string contentName)
         {
-            return Path.Combine(_cacheDirectory, contentName);
+            return Path.Combine(_cacheDirectory, $"{contentName}.json");
         }
 
         private class Cache
