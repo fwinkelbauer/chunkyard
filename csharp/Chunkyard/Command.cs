@@ -148,16 +148,20 @@ namespace Chunkyard
 
         public static void PushSnapshot(PushOptions o)
         {
-            _log.Information("Pushing log {LogName}", o.LogName);
+            var destinationRepository = CreateRepository(o.DestinationRepository);
+
+            _log.Information("Pushing log {LogName} to {Repository}", o.LogName, destinationRepository.RepositoryUri);
             CreateSnapshotBuilder(o.SourceRepository)
-                .Push(o.LogName, CreateRepository(o.DestinationRepository));
+                .Push(o.LogName, destinationRepository);
         }
 
         public static void PullSnapshot(PullOptions o)
         {
-            _log.Information("Pulling log {LogName}", o.LogName);
+            var sourceRepository = CreateRepository(o.SourceRepository);
+
+            _log.Information("Pulling log {LogName} from {Repository}", o.LogName, sourceRepository.RepositoryUri);
             CreateSnapshotBuilder(o.DestinationRepository)
-                .Push(o.LogName, CreateRepository(o.SourceRepository));
+                .Push(o.LogName, sourceRepository);
         }
 
         private static SnapshotBuilder CreateSnapshotBuilder(string repositoryName, bool cached = false)
