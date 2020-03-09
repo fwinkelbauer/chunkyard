@@ -198,7 +198,9 @@ namespace Chunkyard
                 ? File.ReadAllLines(FiltersFilePath)
                 : Array.Empty<string>();
 
-            return FileFetcher.FindRelative(filters);
+            return FileFetcher.FindRelative(
+                RootDirectoryPath,
+                filters);
         }
     }
 }

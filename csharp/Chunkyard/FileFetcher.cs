@@ -8,7 +8,7 @@ namespace Chunkyard
 {
     internal static class FileFetcher
     {
-        public static IEnumerable<string> FindRelative(IEnumerable<string> filters)
+        public static IEnumerable<string> FindRelative(string rootDirectory, IEnumerable<string> filters)
         {
             var allFiles = new List<string>();
             var selectedFiles = new List<string>();
@@ -27,7 +27,7 @@ namespace Chunkyard
 
                 if (sign.Equals("&"))
                 {
-                    var files = ListFiles(value);
+                    var files = ListFiles(rootDirectory, value);
                     allFiles.AddRange(files);
                     selectedFiles.AddRange(files);
                 }
@@ -54,8 +54,14 @@ namespace Chunkyard
                 }
             }
 
+            var configFiles = new[]
+            {
+                ToRelative(rootDirectory, Command.FiltersFileName),
+                ToRelative(rootDirectory, Command.ConfigFileName)
+            };
+
             // Make sure that the our config files are saved
-            foreach (var configFile in new[] { Command.FiltersFileName, Command.ConfigFileName })
+            foreach (var configFile in configFiles)
             {
                 if (File.Exists(configFile) &&
                     !selectedFiles.Contains(configFile))
@@ -67,10 +73,10 @@ namespace Chunkyard
             return selectedFiles;
         }
 
-        private static List<string> ListFiles(string directory)
+        private static List<string> ListFiles(string rootDirectory, string subDirectory)
         {
-            var allFiles = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
-                .Select(f => Path.Join(directory, Path.GetRelativePath(directory, f)))
+            var allFiles = Directory.EnumerateFiles(subDirectory, "*", SearchOption.AllDirectories)
+                .Select(f => ToRelative(rootDirectory, f))
                 .ToList();
 
             var internalExcludeRegex = $"\\{Command.RepositoryDirectoryName}[\\\\\\/]";
@@ -92,6 +98,11 @@ namespace Chunkyard
         private static IEnumerable<string> FindMatches(string regex, IList<string> lines)
         {
             return lines.Where(l => Regex.IsMatch(l, regex));
+        }
+
+        private static string ToRelative(string rootDirectory, string file)
+        {
+            return Path.GetRelativePath(rootDirectory, Path.GetFullPath(file));
         }
     }
 }
