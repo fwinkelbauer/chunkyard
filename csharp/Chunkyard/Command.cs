@@ -40,8 +40,7 @@ namespace Chunkyard
                     HashAlgorithmName.SHA256,
                     2 * 1024 * 1024,
                     4 * 1024 * 1024,
-                    8 * 1024 * 1024,
-                    true);
+                    8 * 1024 * 1024);
 
                 File.WriteAllText(
                     ConfigFilePath,
@@ -71,12 +70,9 @@ namespace Chunkyard
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            var config = JsonConvert.DeserializeObject<ChunkyardConfig>(
-                File.ReadAllText(ConfigFilePath));
-
             _log.Information("Creating new snapshot for log {LogName}", o.LogName);
 
-            var snapshotBuilder = CreateSnapshotBuilder(o.Repository, config.UseCache);
+            var snapshotBuilder = CreateSnapshotBuilder(o.Repository, o.Cached);
 
             foreach (var filePath in FindFiles())
             {
@@ -86,7 +82,8 @@ namespace Chunkyard
             var newLogPosition = snapshotBuilder.WriteSnapshot(
                 o.LogName,
                 DateTime.Now,
-                config);
+                JsonConvert.DeserializeObject<ChunkyardConfig>(
+                    File.ReadAllText(ConfigFilePath)));
 
             _log.Information("Latest snapshot is now {Uri}", Id.LogNameToUri(o.LogName, newLogPosition));
         }
