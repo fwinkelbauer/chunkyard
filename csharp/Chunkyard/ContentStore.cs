@@ -17,15 +17,13 @@ namespace Chunkyard
         {
             foreach (var chunk in contentReference.Chunks)
             {
-                var compressedData = Repository.RetrieveContentChecked(chunk.ContentUri);
-                var decompressedData = LzmaCompression.Decompress(compressedData);
                 var decryptedData = AesGcmCrypto.Decrypt(
-                    decompressedData,
+                    Repository.RetrieveContentChecked(chunk.ContentUri),
                     chunk.Tag,
                     key,
                     contentReference.Nonce);
 
-                stream.Write(decryptedData);
+                stream.Write(LzmaCompression.Decompress(decryptedData));
             }
         }
 
@@ -47,11 +45,11 @@ namespace Chunkyard
 
             foreach (var chunkedData in chunkedDataItems)
             {
-                var (encryptedData, tag) = AesGcmCrypto.Encrypt(chunkedData, key, nonce);
-                var compressedData = LzmaCompression.Compress(encryptedData);
+                var compressedData = LzmaCompression.Compress(chunkedData);
+                var (encryptedData, tag) = AesGcmCrypto.Encrypt(compressedData, key, nonce);
 
                 yield return new Chunk(
-                    Repository.StoreContent(config.HashAlgorithmName, compressedData),
+                    Repository.StoreContent(config.HashAlgorithmName, encryptedData),
                     tag);
             }
         }
