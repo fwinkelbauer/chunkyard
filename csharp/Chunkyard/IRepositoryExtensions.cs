@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Chunkyard.Core
+namespace Chunkyard
 {
-    public static class IRepositoryExtensions
+    internal static class IRepositoryExtensions
     {
         public static bool Valid(this IRepository repository, Uri contentUri)
         {

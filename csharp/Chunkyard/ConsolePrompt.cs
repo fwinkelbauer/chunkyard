@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Text;
-using Chunkyard.Core;
-
 namespace Chunkyard
 {
     internal class ConsolePrompt : IPrompt

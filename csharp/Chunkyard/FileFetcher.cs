@@ -2,8 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Chunkyard.Core;
-
 namespace Chunkyard
 {
     internal static class FileFetcher

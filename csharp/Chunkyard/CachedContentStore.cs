@@ -2,7 +2,6 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Chunkyard.Core;
 using Newtonsoft.Json;
 
 namespace Chunkyard

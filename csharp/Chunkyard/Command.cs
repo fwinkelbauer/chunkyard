@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
-using Chunkyard.Core;
 using Chunkyard.Options;
 using Newtonsoft.Json;
 using Serilog;

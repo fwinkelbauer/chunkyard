@@ -1,6 +1,4 @@
 ﻿using System.IO;
-using Chunkyard.Core;
-
 namespace Chunkyard
 {
     interface IContentStore

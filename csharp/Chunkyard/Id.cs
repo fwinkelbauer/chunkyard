@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Security.Cryptography;
 
-namespace Chunkyard.Core
+namespace Chunkyard
 {
-    public static class Id
+    internal static class Id
     {
         private const string LogScheme = "log";
         private const string QueryId = "id";

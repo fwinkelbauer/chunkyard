@@ -1,8 +1,8 @@
 ﻿using System.Security.Cryptography;
 
-namespace Chunkyard.Core
+namespace Chunkyard
 {
-    public static class AesGcmCrypto
+    internal static class AesGcmCrypto
     {
         private const int TAG_BYTES = 16;
         private const int KEY_BYTES = 32;

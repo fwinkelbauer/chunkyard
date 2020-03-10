@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-namespace Chunkyard.Core
+namespace Chunkyard
 {
-    public static class FastCdc
+    internal static class FastCdc
     {
         private const string ProcessName = "chunker";
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 
-namespace Chunkyard.Core
+namespace Chunkyard
 {
     public interface IRepository
     {
