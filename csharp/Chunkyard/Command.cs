@@ -16,9 +16,8 @@ namespace Chunkyard
         public const string DefaultLogName = "master";
         public const string DefaultLogId = "log://master/";
 
-        public static readonly string RootDirectoryPath = Path.GetFullPath(".");
-        public static readonly string ChunkyardDirectoryPath = Path.Combine(RootDirectoryPath, RepositoryDirectoryName);
-
+        private static readonly string RootDirectoryPath = Path.GetFullPath(".");
+        private static readonly string ChunkyardDirectoryPath = Path.Combine(RootDirectoryPath, RepositoryDirectoryName);
         private static readonly string FiltersFilePath = Path.Combine(RootDirectoryPath, FiltersFileName);
         private static readonly string ConfigFilePath = Path.Combine(RootDirectoryPath, ConfigFileName);
         private static readonly string CacheDirectoryPath = Path.Combine(ChunkyardDirectoryPath, "cache");
