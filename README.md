@@ -1,8 +1,7 @@
 # Chunkyard
 
-An experimental library/application (Windows and Linux) for archiving files in a
-content addressable storage with support for dynamic chunking, encryption and
-compression.
+An experimental application (Windows and Linux) for archiving files in a content
+addressable storage with support for dynamic chunking and encryption.
 
 ## Build
 
