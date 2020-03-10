@@ -33,7 +33,8 @@ namespace Chunkyard
 
                 using var fileStream = new FileStream(
                     filePath,
-                    FileMode.CreateNew);
+                    FileMode.CreateNew,
+                    FileAccess.Write);
 
                 fileStream.Write(value);
             }
@@ -66,7 +67,8 @@ namespace Chunkyard
 
             using var fileStream = new FileStream(
                 filePath,
-                FileMode.CreateNew);
+                FileMode.CreateNew,
+                FileAccess.Write);
 
             fileStream.Write(value);
 

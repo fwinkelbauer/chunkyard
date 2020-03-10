@@ -10,13 +10,14 @@ namespace Chunkyard
 {
     internal class Command
     {
+        public const string RootDirectoryName = ".";
         public const string RepositoryDirectoryName = ".chunkyard";
         public const string FiltersFileName = ".chunkyardfilter";
         public const string ConfigFileName = ".chunkyardconfig";
         public const string DefaultLogName = "master";
         public const string DefaultLogId = "log://master/";
 
-        private static readonly string RootDirectoryPath = Path.GetFullPath(".");
+        private static readonly string RootDirectoryPath = Path.GetFullPath(RootDirectoryName);
         private static readonly string ChunkyardDirectoryPath = Path.Combine(RootDirectoryPath, RepositoryDirectoryName);
         private static readonly string FiltersFilePath = Path.Combine(RootDirectoryPath, FiltersFileName);
         private static readonly string ConfigFilePath = Path.Combine(RootDirectoryPath, ConfigFileName);
@@ -99,13 +100,17 @@ namespace Chunkyard
             var logUri = new Uri(o.LogId);
             _log.Information("Restoring snapshot {LogUri} to {Directory}", logUri, o.Directory);
 
+            var mode = o.Overwrite
+                ? FileMode.OpenOrCreate
+                : FileMode.CreateNew;
+
             CreateSnapshotBuilder(o.Repository).Restore(
                 logUri,
                 (contentName) =>
                 {
-                    var file = Path.Combine(o.Directory, contentName);
+                    var file = Path.Combine(Path.GetFullPath(o.Directory), contentName);
                     Directory.CreateDirectory(Path.GetDirectoryName(file));
-                    return new FileStream(file, FileMode.CreateNew);
+                    return new FileStream(file, mode, FileAccess.Write);
                 },
                 o.IncludeRegex);
         }
