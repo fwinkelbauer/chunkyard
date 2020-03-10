@@ -23,7 +23,7 @@ namespace Chunkyard
                     key,
                     contentReference.Nonce);
 
-                stream.Write(LzmaCompression.Decompress(decryptedData));
+                stream.Write(decryptedData);
             }
         }
 
@@ -45,8 +45,7 @@ namespace Chunkyard
 
             foreach (var chunkedData in chunkedDataItems)
             {
-                var compressedData = LzmaCompression.Compress(chunkedData);
-                var (encryptedData, tag) = AesGcmCrypto.Encrypt(compressedData, key, nonce);
+                var (encryptedData, tag) = AesGcmCrypto.Encrypt(chunkedData, key, nonce);
 
                 yield return new Chunk(
                     Repository.StoreContent(config.HashAlgorithmName, encryptedData),
