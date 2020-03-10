@@ -187,7 +187,7 @@ namespace Chunkyard
 
             if (repositoryUri.IsFile)
             {
-                return new FileRepository(repositoryUri.AbsolutePath);
+                return new FileRepository(repositoryUri.LocalPath);
             }
             else
             {
