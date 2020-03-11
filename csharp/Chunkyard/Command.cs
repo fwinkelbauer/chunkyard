@@ -201,13 +201,9 @@ namespace Chunkyard
 
         private static IEnumerable<string> FindFiles()
         {
-            var filters = File.Exists(FiltersFilePath)
-                ? File.ReadAllLines(FiltersFilePath)
-                : Array.Empty<string>();
-
             return FileFetcher.FindRelative(
                 RootDirectoryPath,
-                filters);
+                File.ReadAllLines(FiltersFilePath));
         }
     }
 }
