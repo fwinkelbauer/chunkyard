@@ -22,7 +22,7 @@ namespace Chunkyard
         {
             if (!logUri.Scheme.Equals(LogScheme))
             {
-                throw new ChunkyardException($"Not a reference log URI: {logUri}");
+                throw new ChunkyardException($"Not a log URI: {logUri}");
             }
 
             var queryValues = System.Web.HttpUtility.ParseQueryString(logUri.Query);

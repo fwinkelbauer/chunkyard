@@ -53,8 +53,12 @@ namespace Chunkyard
             }
             else if (logPositionCandidate.HasValue)
             {
+                //  0: the first element
+                //  1: the second element
+                // -2: the second-last element
+                // -1: the last element
                 return repository.RetrieveFromLog(logUri.Host, logPositionCandidate.Value < 0
-                    ? currentLogPosition.Value + logPositionCandidate.Value
+                    ? currentLogPosition.Value + logPositionCandidate.Value + 1
                     : logPositionCandidate.Value);
             }
             else
