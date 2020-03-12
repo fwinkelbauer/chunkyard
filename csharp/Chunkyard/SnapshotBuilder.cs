@@ -88,14 +88,21 @@ namespace Chunkyard
                 snapshotUri,
                 _prompt.ExistingPassword());
 
-            foreach (var contentReference in snapshot.ContentReferences)
+            for (int i = 0; i < snapshot.ContentReferences.Length; i++)
             {
+                var contentReference = snapshot.ContentReferences[i];
+
                 if (!compiledRegex.IsMatch(contentReference.Name))
                 {
                     continue;
                 }
 
-                _log.Information("Restoring: {File}", contentReference.Name);
+                _log.Information(
+                    "Restoring: {File} ({CurrentIndex}/{MaxIndex})",
+                    contentReference.Name,
+                    i + 1,
+                    snapshot.ContentReferences.Length);
+
                 using var stream = writeFunc(contentReference.Name);
                 _contentStore.RetrieveContent(contentReference, stream, key);
             }
@@ -108,14 +115,20 @@ namespace Chunkyard
                 snapshotUri,
                 _prompt.ExistingPassword());
 
-            foreach (var contentReference in snapshot.ContentReferences)
+            for (int i = 0; i < snapshot.ContentReferences.Length; i++)
             {
+                var contentReference = snapshot.ContentReferences[i];
+
                 if (!compiledRegex.IsMatch(contentReference.Name))
                 {
                     continue;
                 }
 
-                _log.Information("Verifying: {File}", contentReference.Name);
+                _log.Information(
+                    "Verifying: {File} ({CurrentIndex}/{MaxIndex})",
+                    contentReference.Name,
+                    i + 1,
+                    snapshot.ContentReferences.Length);
 
                 foreach (var chunk in contentReference.Chunks)
                 {
@@ -175,7 +188,7 @@ namespace Chunkyard
 
             for (int i = commonLogPosition + 1; i <= sourceLogPosition; i++)
             {
-                _log.Information("Processing snapshot with position: {LogPosition}", i);
+                _log.Information("Processing snapshot ({CurrentIndex}/{MaxIndex})", i, sourceLogPosition);
 
                 var (snapshotReference, key) = RetrieveSnapshotReference(
                     logName,
@@ -241,9 +254,16 @@ namespace Chunkyard
 
         private IEnumerable<ContentReference> StoreContentItems(byte[] key, ChunkyardConfig config)
         {
-            foreach (var (readFunc, contentName) in _contentItems)
+            for (int i = 0; i < _contentItems.Count; i++)
             {
-                _log.Information("Storing: {Content}", contentName);
+                var (readFunc, contentName) = _contentItems[i];
+
+                _log.Information(
+                    "Storing: {Content} ({CurrentIndex}/{MaxIndex})",
+                    contentName,
+                    i + 1,
+                    _contentItems.Count);
+
                 using var stream = readFunc();
                 yield return _contentStore.StoreContent(
                     stream,
@@ -258,9 +278,15 @@ namespace Chunkyard
         {
             var snapshot = ParseSnapshot(snapshotReference, key);
 
-            foreach (var contentReferences in snapshot.ContentReferences)
+            for (int i = 0; i < snapshot.ContentReferences.Length; i++)
             {
-                _log.Information("Pushing content: {Content}", contentReferences.Name);
+                var contentReferences = snapshot.ContentReferences[i];
+
+                _log.Information(
+                    "Pushing content: {Content} ({CurrentIndex}/{MaxIndex})",
+                    contentReferences.Name,
+                    i + 1,
+                    snapshot.ContentReferences.Length);
 
                 foreach (var chunk in contentReferences.Chunks)
                 {
