@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 
 namespace Chunkyard
 {
-    internal static class Id
+    public static class Id
     {
         private const string LogScheme = "log";
         private const string QueryId = "id";
@@ -20,7 +20,7 @@ namespace Chunkyard
 
         public static (string, int?) LogUriToParts(Uri logUri)
         {
-            if (!logUri.Scheme.Equals(LogScheme))
+            if (!logUri.EnsureNotNull(nameof(logUri)).Scheme.Equals(LogScheme))
             {
                 throw new ChunkyardException($"Not a log URI: {logUri}");
             }
@@ -48,7 +48,8 @@ namespace Chunkyard
 
         public static HashAlgorithmName AlgorithmFromContentUri(Uri contentUri)
         {
-            return new HashAlgorithmName(contentUri.Scheme);
+            return new HashAlgorithmName(
+                contentUri.EnsureNotNull(nameof(contentUri)).Scheme.ToUpper());
         }
 
         public static string HashFromContentUri(Uri contentUri)
@@ -56,7 +57,7 @@ namespace Chunkyard
             // Verify that this is a content URI
             _ = AlgorithmFromContentUri(contentUri);
 
-            return contentUri.Host;
+            return contentUri.EnsureNotNull(nameof(contentUri)).Host;
         }
 
         public static Uri ToContentUri(HashAlgorithmName algorithmName, string hash)
