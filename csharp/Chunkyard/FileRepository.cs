@@ -138,9 +138,8 @@ namespace Chunkyard
             var hash = Id.HashFromContentUri(contentUri);
             var directoryPath = Path.Combine(
                 _contentDirectory,
-                Id.AlgorithmFromContentUri(contentUri).Name,
+                Id.AlgorithmFromContentUri(contentUri).Name.ToLower(),
                 hash.Substring(0, 2));
-
 
             return Path.Combine(
                 directoryPath,
