@@ -14,8 +14,9 @@ namespace Chunkyard
         public const string RepositoryDirectoryName = ".chunkyard";
         public const string FiltersFileName = ".chunkyardfilter";
         public const string ConfigFileName = ".chunkyardconfig";
-        public const string DefaultLogName = "master";
-        public const string DefaultLogId = "log://master/";
+        public const int DefaultLogPosition = -1;
+
+        private const string SnapshotLogName = "snapshot";
 
         private static readonly string RootDirectoryPath = Path.GetFullPath(RootDirectoryName);
         private static readonly string ChunkyardDirectoryPath = Path.Combine(RootDirectoryPath, RepositoryDirectoryName);
@@ -69,7 +70,7 @@ namespace Chunkyard
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            _log.Information("Creating new snapshot for log {LogName}", o.LogName);
+            _log.Information("Creating new snapshot");
 
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository, o.Cached);
 
@@ -79,17 +80,17 @@ namespace Chunkyard
             }
 
             var newLogPosition = snapshotBuilder.WriteSnapshot(
-                o.LogName,
+                SnapshotLogName,
                 DateTime.Now,
                 JsonConvert.DeserializeObject<ChunkyardConfig>(
                     File.ReadAllText(ConfigFilePath)));
 
-            _log.Information("Latest snapshot is now {Uri}", Id.LogNameToUri(o.LogName, newLogPosition));
+            _log.Information("Latest snapshot is now {Uri}", Id.LogNameToUri(SnapshotLogName, newLogPosition));
         }
 
         public static void VerifySnapshot(VerifyOptions o)
         {
-            var logUri = new Uri(o.LogId);
+            var logUri = Id.LogNameToUri(SnapshotLogName, o.LogPosition);
             _log.Information("Verifying snapshot {LogUri}", logUri);
             CreateSnapshotBuilder(o.Repository)
                 .VerifySnapshot(logUri, o.IncludeRegex);
@@ -97,7 +98,7 @@ namespace Chunkyard
 
         public static void RestoreSnapshot(RestoreOptions o)
         {
-            var logUri = new Uri(o.LogId);
+            var logUri = Id.LogNameToUri(SnapshotLogName, o.LogPosition);
             _log.Information("Restoring snapshot {LogUri} to {Directory}", logUri, o.Directory);
 
             var mode = o.Overwrite
@@ -117,7 +118,7 @@ namespace Chunkyard
 
         public static void DirSnapshot(DirOptions o)
         {
-            var logUri = new Uri(o.LogId);
+            var logUri = Id.LogNameToUri(SnapshotLogName, o.LogPosition);
             _log.Information("Listing files in snapshot {LogUri}", logUri);
 
             var names = CreateSnapshotBuilder(o.Repository)
@@ -133,19 +134,9 @@ namespace Chunkyard
         {
             var repository = CreateRepository(o.Repository);
 
-            foreach (var logPosition in repository.ListLogPositions(o.LogName))
+            foreach (var logPosition in repository.ListLogPositions(SnapshotLogName))
             {
-                Console.WriteLine(Id.LogNameToUri(o.LogName, logPosition));
-            }
-        }
-
-        public static void ListLogNames(LogsOptions o)
-        {
-            var repository = CreateRepository(o.Repository);
-
-            foreach (var logName in repository.ListLogNames())
-            {
-                Console.WriteLine(logName);
+                Console.WriteLine(Id.LogNameToUri(SnapshotLogName, logPosition));
             }
         }
 
@@ -153,18 +144,18 @@ namespace Chunkyard
         {
             var destinationRepository = CreateRepository(o.DestinationRepository);
 
-            _log.Information("Pushing log {LogName} to {Repository}", o.LogName, destinationRepository.RepositoryUri);
+            _log.Information("Pushing log to {Repository}", destinationRepository.RepositoryUri);
             CreateSnapshotBuilder(o.SourceRepository)
-                .Push(o.LogName, destinationRepository);
+                .Push(SnapshotLogName, destinationRepository);
         }
 
         public static void PullSnapshot(PullOptions o)
         {
             var sourceRepository = CreateRepository(o.SourceRepository);
 
-            _log.Information("Pulling log {LogName} from {Repository}", o.LogName, sourceRepository.RepositoryUri);
+            _log.Information("Pulling log from {Repository}", sourceRepository.RepositoryUri);
             CreateSnapshotBuilder(o.DestinationRepository)
-                .Push(o.LogName, sourceRepository);
+                .Push(SnapshotLogName, sourceRepository);
         }
 
         private static SnapshotBuilder CreateSnapshotBuilder(string repositoryName, bool cached = false)

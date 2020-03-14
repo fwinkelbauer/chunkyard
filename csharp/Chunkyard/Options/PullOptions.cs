@@ -2,14 +2,13 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("pull", HelpText = "Pulls the content of a snapshot in a given log from one repository to another repository")]
+    [Verb("pull", HelpText = "Pulls the content of a snapshot from one repository to another repository")]
     public class PullOptions
     {
-        public PullOptions(string sourceRepository, string destinationRepository, string logName)
+        public PullOptions(string sourceRepository, string destinationRepository)
         {
             SourceRepository = sourceRepository;
             DestinationRepository = destinationRepository;
-            LogName = logName;
         }
 
         [Option('s', "source", Required = true, HelpText = "The source repository")]
@@ -17,8 +16,5 @@ namespace Chunkyard.Options
 
         [Option('d', "destination", Required = false, HelpText = "The destination repository", Default = Command.RepositoryDirectoryName)]
         public string DestinationRepository { get; }
-
-        [Option('l', "log-name", Required = false, HelpText = "The log name", Default = Command.DefaultLogName)]
-        public string LogName { get; }
     }
 }
