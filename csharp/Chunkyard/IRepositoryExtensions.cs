@@ -19,6 +19,14 @@ namespace Chunkyard
             return contentUri.Equals(computedUri);
         }
 
+        public static void ThrowIfNotExists(this IRepository repository, Uri contentUri)
+        {
+            if (!repository.ContentExists(contentUri))
+            {
+                throw new ChunkyardException($"Missing content: {contentUri}");
+            }
+        }
+
         public static void ThrowIfInvalid(this IRepository repository, Uri contentUri)
         {
             if (!repository.Valid(contentUri))

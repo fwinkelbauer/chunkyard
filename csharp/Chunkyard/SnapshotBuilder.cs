@@ -108,7 +108,7 @@ namespace Chunkyard
             }
         }
 
-        public void VerifySnapshot(Uri snapshotUri, string verifyRegex)
+        public void VerifySnapshot(Uri snapshotUri, string verifyRegex, bool shallow)
         {
             var compiledRegex = new Regex(verifyRegex);
             var (snapshot, _) = RetrieveSnapshot(
@@ -132,7 +132,14 @@ namespace Chunkyard
 
                 foreach (var chunk in contentReference.Chunks)
                 {
-                    _contentStore.Repository.ThrowIfInvalid(chunk.ContentUri);
+                    if (shallow)
+                    {
+                        _contentStore.Repository.ThrowIfNotExists(chunk.ContentUri);
+                    }
+                    else
+                    {
+                        _contentStore.Repository.ThrowIfInvalid(chunk.ContentUri);
+                    }
                 }
             }
         }
