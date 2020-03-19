@@ -81,7 +81,7 @@ namespace Chunkyard
                 currentLogPosition);
         }
 
-        public void Restore(Uri snapshotUri, Func<string, Stream> writeFunc, string restoreRegex)
+        public void RestoreSnapshot(Uri snapshotUri, Func<string, Stream> writeFunc, string restoreRegex)
         {
             var compiledRegex = new Regex(restoreRegex);
             var (snapshot, key) = RetrieveSnapshot(
@@ -144,20 +144,13 @@ namespace Chunkyard
             }
         }
 
-        public IEnumerable<string> List(Uri snapshotUri, string listRegex)
+        public Snapshot GetSnapshot(Uri snapshotUri)
         {
-            var compiledRegex = new Regex(listRegex);
             var (snapshot, _) = RetrieveSnapshot(
                 snapshotUri,
                 _prompt.ExistingPassword());
 
-            foreach (var contentReferences in snapshot.ContentReferences)
-            {
-                if (compiledRegex.IsMatch(contentReferences.Name))
-                {
-                    yield return contentReferences.Name;
-                }
-            }
+            return snapshot;
         }
 
         public void Push(string logName, IRepository destinationRepository)

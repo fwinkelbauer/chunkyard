@@ -2,10 +2,10 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("dir", HelpText = "Lists all files in a snapshot")]
-    public class DirOptions
+    [Verb("cat", HelpText = "Prints a snapshot and its content")]
+    public class CatOptions
     {
-        public DirOptions(string repository, string includeRegex, int logPosition)
+        public CatOptions(string repository, string includeRegex, int logPosition)
         {
             Repository = repository;
             IncludeRegex = includeRegex;

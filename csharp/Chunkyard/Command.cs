@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using Chunkyard.Options;
 using Newtonsoft.Json;
 using Serilog;
@@ -105,7 +106,7 @@ namespace Chunkyard
                 ? FileMode.OpenOrCreate
                 : FileMode.CreateNew;
 
-            CreateSnapshotBuilder(o.Repository).Restore(
+            CreateSnapshotBuilder(o.Repository).RestoreSnapshot(
                 logUri,
                 (contentName) =>
                 {
@@ -116,17 +117,23 @@ namespace Chunkyard
                 o.IncludeRegex);
         }
 
-        public static void DirSnapshot(DirOptions o)
+        public static void CatSnapshot(CatOptions o)
         {
+            var compiledRegex = new Regex(o.IncludeRegex);
             var logUri = Id.LogNameToUri(SnapshotLogName, o.LogPosition);
-            _log.Information("Listing files in snapshot {LogUri}", logUri);
 
-            var names = CreateSnapshotBuilder(o.Repository)
-                .List(logUri, o.IncludeRegex);
+            var snapshot = CreateSnapshotBuilder(o.Repository).GetSnapshot(logUri);
 
-            foreach (var name in names)
+            Console.WriteLine($"Uri: {logUri}");
+            Console.WriteLine($"Created: {snapshot.CreationTime.ToString("yyyy-mm-dd")}");
+            Console.WriteLine("Content:");
+
+            foreach (var contentReferences in snapshot.ContentReferences)
             {
-                Console.WriteLine(name);
+                if (compiledRegex.IsMatch(contentReferences.Name))
+                {
+                    Console.WriteLine($"- {contentReferences.Name}");
+                }
             }
         }
 
