@@ -69,6 +69,15 @@ namespace Chunkyard
             }
         }
 
+        public static void Clean()
+        {
+            foreach (var file in FindFiles())
+            {
+                _log.Information("Deleting {File}", file);
+                File.Delete(file);
+            }
+        }
+
         public static void CreateSnapshot(CreateOptions o)
         {
             _log.Information("Creating new snapshot");
