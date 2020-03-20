@@ -81,9 +81,9 @@ namespace Chunkyard
                 currentLogPosition);
         }
 
-        public void RestoreSnapshot(Uri snapshotUri, Func<string, Stream> writeFunc, string restoreRegex)
+        public void RestoreSnapshot(Uri snapshotUri, Func<string, Stream> writeFunc, string restoreFuzzy)
         {
-            var compiledRegex = new Regex(restoreRegex);
+            var fuzzy = new Fuzzy(restoreFuzzy);
             var (snapshot, key) = RetrieveSnapshot(
                 snapshotUri,
                 _prompt.ExistingPassword());
@@ -92,7 +92,7 @@ namespace Chunkyard
             {
                 var contentReference = snapshot.ContentReferences[i];
 
-                if (!compiledRegex.IsMatch(contentReference.Name))
+                if (!fuzzy.IsMatch(contentReference.Name))
                 {
                     continue;
                 }
@@ -108,9 +108,9 @@ namespace Chunkyard
             }
         }
 
-        public void VerifySnapshot(Uri snapshotUri, string verifyRegex, bool shallow)
+        public void VerifySnapshot(Uri snapshotUri, string verifyFuzzy, bool shallow)
         {
-            var compiledRegex = new Regex(verifyRegex);
+            var fuzzy = new Fuzzy(verifyFuzzy);
             var (snapshot, _) = RetrieveSnapshot(
                 snapshotUri,
                 _prompt.ExistingPassword());
@@ -119,7 +119,7 @@ namespace Chunkyard
             {
                 var contentReference = snapshot.ContentReferences[i];
 
-                if (!compiledRegex.IsMatch(contentReference.Name))
+                if (!fuzzy.IsMatch(contentReference.Name))
                 {
                     continue;
                 }

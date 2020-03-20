@@ -5,11 +5,11 @@ namespace Chunkyard.Options
     [Verb("verify", HelpText = "Verify a snapshot")]
     public class VerifyOptions
     {
-        public VerifyOptions(string repository, int logPosition, string includeRegex, bool shallow)
+        public VerifyOptions(string repository, int logPosition, string includeFuzzy, bool shallow)
         {
             Repository = repository;
             LogPosition = logPosition;
-            IncludeRegex = includeRegex;
+            IncludeFuzzy = includeFuzzy;
             Shallow = shallow;
         }
 
@@ -19,8 +19,8 @@ namespace Chunkyard.Options
         [Option('l', "log-position", Required = false, HelpText = "The log position", Default = Command.DefaultLogPosition)]
         public int LogPosition { get; }
 
-        [Option('i', "include", Required = false, HelpText = "The include regex", Default = ".*")]
-        public string IncludeRegex { get; }
+        [Option('i', "include", Required = false, HelpText = "The include fuzzy pattern", Default = ".*")]
+        public string IncludeFuzzy { get; }
 
         [Option('s', "shallow", Required = false, HelpText = "Do not verify chunk hashes", Default = false)]
         public bool Shallow { get; }

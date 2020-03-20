@@ -48,7 +48,7 @@ namespace Chunkyard
                 }
                 else
                 {
-                    throw new ChunkyardException("Invalid syntax. Use '+ <regex>' or '- <regex>'");
+                    throw new ChunkyardException("Invalid syntax. Use '+ <fuzzy pattern>' or '- <fuzzy pattern>'");
                 }
             }
 
@@ -77,10 +77,10 @@ namespace Chunkyard
                 .Select(f => ToRelative(rootDirectory, f))
                 .ToList();
 
-            var internalExcludeRegex = $"\\{Command.RepositoryDirectoryName}[\\\\\\/]";
+            var internalExcludeFuzzy = $"\\{Command.RepositoryDirectoryName}[\\\\\\/]";
             var toDelete = new List<string>();
 
-            foreach (var excludedFile in FindMatches(internalExcludeRegex, allFiles))
+            foreach (var excludedFile in FindMatches(internalExcludeFuzzy, allFiles))
             {
                 toDelete.Add(excludedFile);
             }
@@ -93,9 +93,11 @@ namespace Chunkyard
             return allFiles;
         }
 
-        private static IEnumerable<string> FindMatches(string regex, IList<string> lines)
+        private static IEnumerable<string> FindMatches(string fuzzyPattern, IList<string> lines)
         {
-            return lines.Where(l => Regex.IsMatch(l, regex));
+            var fuzzy = new Fuzzy(fuzzyPattern);
+
+            return lines.Where(l => fuzzy.IsMatch(l));
         }
 
         private static string ToRelative(string rootDirectory, string file)

@@ -103,7 +103,7 @@ namespace Chunkyard
             var logUri = Id.LogNameToUri(SnapshotLogName, o.LogPosition);
             _log.Information("Verifying snapshot {LogUri}", logUri);
             CreateSnapshotBuilder(o.Repository)
-                .VerifySnapshot(logUri, o.IncludeRegex, o.Shallow);
+                .VerifySnapshot(logUri, o.IncludeFuzzy, o.Shallow);
         }
 
         public static void RestoreSnapshot(RestoreOptions o)
@@ -123,12 +123,12 @@ namespace Chunkyard
                     Directory.CreateDirectory(Path.GetDirectoryName(file));
                     return new FileStream(file, mode, FileAccess.Write);
                 },
-                o.IncludeRegex);
+                o.IncludeFuzzy);
         }
 
         public static void CatSnapshot(CatOptions o)
         {
-            var compiledRegex = new Regex(o.IncludeRegex);
+            var fuzzy = new Fuzzy(o.IncludeFuzzy);
             var logUri = Id.LogNameToUri(SnapshotLogName, o.LogPosition);
 
             var snapshot = CreateSnapshotBuilder(o.Repository).GetSnapshot(logUri);
@@ -139,7 +139,7 @@ namespace Chunkyard
 
             foreach (var contentReferences in snapshot.ContentReferences)
             {
-                if (compiledRegex.IsMatch(contentReferences.Name))
+                if (fuzzy.IsMatch(contentReferences.Name))
                 {
                     Console.WriteLine($"- {contentReferences.Name}");
                 }
