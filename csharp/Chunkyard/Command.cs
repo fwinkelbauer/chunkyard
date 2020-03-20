@@ -134,7 +134,7 @@ namespace Chunkyard
             var snapshot = CreateSnapshotBuilder(o.Repository).GetSnapshot(logUri);
 
             Console.WriteLine($"Uri: {logUri}");
-            Console.WriteLine($"Created: {snapshot.CreationTime.ToString("yyyy-MM-dd")}");
+            Console.WriteLine($"Created: {snapshot.CreationTime.ToString("yyyy-MM-dd HH:mm:ss")}");
             Console.WriteLine("Content:");
 
             foreach (var contentReferences in snapshot.ContentReferences)
