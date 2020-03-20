@@ -307,7 +307,7 @@ namespace Chunkyard
             }
         }
 
-        public IEnumerable<ContentReference> FuzzyFilter(string fuzzyPattern, IEnumerable<ContentReference> contentReferences)
+        public static IEnumerable<ContentReference> FuzzyFilter(string fuzzyPattern, IEnumerable<ContentReference> contentReferences)
         {
             var fuzzy = new Fuzzy(fuzzyPattern);
 
