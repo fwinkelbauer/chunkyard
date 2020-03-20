@@ -16,7 +16,7 @@ namespace Chunkyard.Options
         [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.RepositoryDirectoryName)]
         public string Repository { get; }
 
-        [Option('l', "log-position", Required = false, HelpText = "The log URI", Default = Command.DefaultLogPosition)]
+        [Option('l', "log-position", Required = false, HelpText = "The log position", Default = Command.DefaultLogPosition)]
         public int LogPosition { get; }
 
         [Option('i', "include", Required = false, HelpText = "The include regex", Default = ".*")]

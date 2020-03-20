@@ -23,7 +23,7 @@ namespace Chunkyard.Options
         [Option('i', "include", Required = false, HelpText = "The include regex", Default = ".*")]
         public string IncludeRegex { get; }
 
-        [Option('l', "log-position", Required = false, HelpText = "The log URI", Default = Command.DefaultLogPosition)]
+        [Option('l', "log-position", Required = false, HelpText = "The log position", Default = Command.DefaultLogPosition)]
         public int LogPosition { get; }
 
         [Option('o', "overwrite", Required = false, HelpText = "If files should overwritten", Default = false)]
