@@ -83,25 +83,21 @@ namespace Chunkyard
 
         public void RestoreSnapshot(Uri snapshotUri, Func<string, Stream> writeFunc, string restoreFuzzy)
         {
-            var fuzzy = new Fuzzy(restoreFuzzy);
             var (snapshot, key) = RetrieveSnapshot(
                 snapshotUri,
                 _prompt.ExistingPassword());
 
-            for (int i = 0; i < snapshot.ContentReferences.Length; i++)
+            var index = 1;
+            var filteredContentReferences = FuzzyFilter(restoreFuzzy, snapshot.ContentReferences)
+                .ToArray();
+
+            foreach (var contentReference in filteredContentReferences)
             {
-                var contentReference = snapshot.ContentReferences[i];
-
-                if (!fuzzy.IsMatch(contentReference.Name))
-                {
-                    continue;
-                }
-
                 _log.Information(
                     "Restoring: {File} ({CurrentIndex}/{MaxIndex})",
                     contentReference.Name,
-                    i + 1,
-                    snapshot.ContentReferences.Length);
+                    index++,
+                    filteredContentReferences.Length);
 
                 using var stream = writeFunc(contentReference.Name);
                 _contentStore.RetrieveContent(contentReference, stream, key);
@@ -110,25 +106,21 @@ namespace Chunkyard
 
         public void VerifySnapshot(Uri snapshotUri, string verifyFuzzy, bool shallow)
         {
-            var fuzzy = new Fuzzy(verifyFuzzy);
             var (snapshot, _) = RetrieveSnapshot(
                 snapshotUri,
                 _prompt.ExistingPassword());
 
-            for (int i = 0; i < snapshot.ContentReferences.Length; i++)
+            var index = 1;
+            var filteredContentReferences = FuzzyFilter(verifyFuzzy, snapshot.ContentReferences)
+                .ToArray();
+
+            foreach (var contentReference in filteredContentReferences)
             {
-                var contentReference = snapshot.ContentReferences[i];
-
-                if (!fuzzy.IsMatch(contentReference.Name))
-                {
-                    continue;
-                }
-
                 _log.Information(
                     "Verifying: {File} ({CurrentIndex}/{MaxIndex})",
                     contentReference.Name,
-                    i + 1,
-                    snapshot.ContentReferences.Length);
+                    index++,
+                    filteredContentReferences.Length);
 
                 foreach (var chunk in contentReference.Chunks)
                 {
@@ -312,6 +304,19 @@ namespace Chunkyard
                 _noncesByName[name] = nonce;
 
                 return nonce;
+            }
+        }
+
+        public IEnumerable<ContentReference> FuzzyFilter(string fuzzyPattern, IEnumerable<ContentReference> contentReferences)
+        {
+            var fuzzy = new Fuzzy(fuzzyPattern);
+
+            foreach (var contentReference in contentReferences)
+            {
+                if (fuzzy.IsMatch(contentReference.Name))
+                {
+                    yield return contentReference;
+                }
             }
         }
     }
