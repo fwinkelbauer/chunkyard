@@ -47,7 +47,7 @@ namespace Chunkyard
                     ConfigFilePath,
                     JsonConvert.SerializeObject(
                         config,
-                        Formatting.Indented) + "\n");
+                        Formatting.Indented) + Environment.NewLine);
             }
 
             if (File.Exists(FiltersFilePath))
@@ -57,7 +57,7 @@ namespace Chunkyard
             else
             {
                 _log.Information("Creating {File}", FiltersFileName);
-                File.WriteAllText(FiltersFilePath, "& .\n");
+                File.WriteAllText(FiltersFilePath, "& ." + Environment.NewLine);
             }
         }
 
