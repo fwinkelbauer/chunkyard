@@ -77,13 +77,8 @@ namespace Chunkyard
 
         public static void PushContent(this IRepository repository, Uri contentUri, IRepository remoteRepository)
         {
-            if (remoteRepository.ContentExists(contentUri))
-            {
-                return;
-            }
-
             remoteRepository.StoreContent(
-                Id.AlgorithmFromContentUri(contentUri),
+                contentUri,
                 repository.RetrieveContent(contentUri));
         }
     }

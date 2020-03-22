@@ -24,6 +24,13 @@ namespace Chunkyard
         public Uri StoreContent(HashAlgorithmName algorithm, byte[] value)
         {
             var contentUri = Id.ComputeContentUri(algorithm, value);
+            StoreContent(contentUri, value);
+
+            return contentUri;
+        }
+
+        public void StoreContent(Uri contentUri, byte[] value)
+        {
             var filePath = ToFilePath(contentUri);
 
             if (!File.Exists(filePath))
@@ -38,8 +45,6 @@ namespace Chunkyard
 
                 fileStream.Write(value);
             }
-
-            return contentUri;
         }
 
         public byte[] RetrieveContent(Uri contentUri)
@@ -84,6 +89,7 @@ namespace Chunkyard
         public int? FetchLogPosition(string logName)
         {
             var logPositions = ListLogPositions(logName).ToList();
+            logPositions.Sort();
 
             if (logPositions.Count == 0)
             {

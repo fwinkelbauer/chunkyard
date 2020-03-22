@@ -10,6 +10,8 @@ namespace Chunkyard
 
         Uri StoreContent(HashAlgorithmName algorithm, byte[] value);
 
+        void StoreContent(Uri contentUri, byte[] value);
+
         byte[] RetrieveContent(Uri contentUri);
 
         bool ContentExists(Uri contentUri);
