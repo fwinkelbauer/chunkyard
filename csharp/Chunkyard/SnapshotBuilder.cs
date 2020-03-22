@@ -178,9 +178,12 @@ namespace Chunkyard
                 }
             }
 
+            var currentIndex = 1;
+            var maxIndex = sourceLogPosition - commonLogPosition;
+
             for (int i = commonLogPosition + 1; i <= sourceLogPosition; i++)
             {
-                _log.Information("Processing snapshot ({CurrentIndex}/{MaxIndex})", i, sourceLogPosition);
+                _log.Information("Processing snapshot #{LogPosition} ({CurrentIndex}/{MaxIndex})", i, currentIndex++, maxIndex);
 
                 var (snapshotReference, key) = RetrieveSnapshotReference(
                     logName,
