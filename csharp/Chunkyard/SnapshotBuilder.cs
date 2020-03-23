@@ -183,7 +183,7 @@ namespace Chunkyard
 
             for (int i = commonLogPosition + 1; i <= sourceLogPosition; i++)
             {
-                _log.Information("Processing snapshot #{LogPosition} ({CurrentIndex}/{MaxIndex})", i, currentIndex++, maxIndex);
+                _log.Information("Processing snapshot {LogPosition} ({CurrentIndex}/{MaxIndex})", $"#{i}", currentIndex++, maxIndex);
 
                 var (snapshotReference, key) = RetrieveSnapshotReference(
                     logName,
