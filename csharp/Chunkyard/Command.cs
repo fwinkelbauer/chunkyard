@@ -10,7 +10,6 @@ namespace Chunkyard
 {
     internal class Command
     {
-        public const string RootDirectoryName = ".";
         public const string RepositoryDirectoryName = ".chunkyard";
         public const string FiltersFileName = ".chunkyardfilter";
         public const string ConfigFileName = ".chunkyardconfig";
@@ -18,7 +17,7 @@ namespace Chunkyard
 
         private const string SnapshotLogName = "snapshot";
 
-        private static readonly string RootDirectoryPath = Path.GetFullPath(RootDirectoryName);
+        private static readonly string RootDirectoryPath = Path.GetFullPath(".");
         private static readonly string ChunkyardDirectoryPath = Path.Combine(RootDirectoryPath, RepositoryDirectoryName);
         private static readonly string FiltersFilePath = Path.Combine(RootDirectoryPath, FiltersFileName);
         private static readonly string ConfigFilePath = Path.Combine(RootDirectoryPath, ConfigFileName);
@@ -157,25 +156,34 @@ namespace Chunkyard
 
         public static void PushSnapshot(PushOptions o)
         {
+            var sourceRepository = CreateRepository(o.SourceRepository);
             var destinationRepository = CreateRepository(o.DestinationRepository);
 
             _log.Information("Pushing log to {Repository}", destinationRepository.RepositoryUri);
-            CreateSnapshotBuilder(o.SourceRepository)
+            CreateSnapshotBuilder(sourceRepository)
                 .Push(SnapshotLogName, destinationRepository);
         }
 
         public static void PullSnapshot(PullOptions o)
         {
             var sourceRepository = CreateRepository(o.SourceRepository);
+            var destinationRepository = CreateRepository(o.DestinationRepository);
 
             _log.Information("Pulling log from {Repository}", sourceRepository.RepositoryUri);
-            CreateSnapshotBuilder(o.DestinationRepository)
-                .Push(SnapshotLogName, sourceRepository);
+            CreateSnapshotBuilder(sourceRepository)
+                .Push(SnapshotLogName, destinationRepository);
         }
 
         private static SnapshotBuilder CreateSnapshotBuilder(string repositoryName, bool cached = false)
         {
-            IContentStore contentStore = new ContentStore(CreateRepository(repositoryName));
+            return CreateSnapshotBuilder(
+                CreateRepository(repositoryName),
+                cached);
+        }
+
+        private static SnapshotBuilder CreateSnapshotBuilder(IRepository repository, bool cached = false)
+        {
+            IContentStore contentStore = new ContentStore(repository);
 
             contentStore = cached
                 ? new CachedContentStore(contentStore, CacheDirectoryPath)

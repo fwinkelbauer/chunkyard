@@ -17,7 +17,7 @@ namespace Chunkyard.Options
         [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.RepositoryDirectoryName)]
         public string Repository { get; }
 
-        [Option('d', "directory", Required = false, HelpText = "The directory to restore into", Default = Command.RootDirectoryName)]
+        [Option('d', "directory", Required = false, HelpText = "The directory to restore into", Default = ".")]
         public string Directory { get; }
 
         [Option('i', "include", Required = false, HelpText = "The include fuzzy pattern", Default = ".*")]
