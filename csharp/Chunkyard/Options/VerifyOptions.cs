@@ -13,7 +13,7 @@ namespace Chunkyard.Options
             Shallow = shallow;
         }
 
-        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.RepositoryDirectoryName)]
+        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.LocalRepository)]
         public string Repository { get; }
 
         [Option('l', "log-position", Required = false, HelpText = "The log position", Default = Command.DefaultLogPosition)]

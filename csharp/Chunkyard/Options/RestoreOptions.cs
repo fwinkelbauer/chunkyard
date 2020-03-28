@@ -14,7 +14,7 @@ namespace Chunkyard.Options
             Overwrite = overwrite;
         }
 
-        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.RepositoryDirectoryName)]
+        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.LocalRepository)]
         public string Repository { get; }
 
         [Option('d', "directory", Required = false, HelpText = "The directory to restore into", Default = ".")]

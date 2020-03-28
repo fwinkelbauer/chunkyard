@@ -10,7 +10,7 @@ namespace Chunkyard.Options
             Repository = repository;
         }
 
-        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.RepositoryDirectoryName)]
+        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.LocalRepository)]
         public string Repository { get; }
     }
 }

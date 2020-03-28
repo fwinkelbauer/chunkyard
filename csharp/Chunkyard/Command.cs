@@ -10,6 +10,7 @@ namespace Chunkyard
 {
     internal class Command
     {
+        public const string LocalRepository = "local";
         public const string RepositoryDirectoryName = ".chunkyard";
         public const string FiltersFileName = ".chunkyardfilter";
         public const string ConfigFileName = ".chunkyardconfig";
@@ -36,6 +37,10 @@ namespace Chunkyard
                 _log.Information("Creating {File}", ConfigFileName);
 
                 var config = new ChunkyardConfig(
+                    new Dictionary<string, string>
+                    {
+                        { "local", Path.Combine(".", RepositoryDirectoryName) }
+                    },
                     HashAlgorithmName.SHA256,
                     2 * 1024 * 1024,
                     4 * 1024 * 1024,
@@ -90,8 +95,7 @@ namespace Chunkyard
             var newLogPosition = snapshotBuilder.WriteSnapshot(
                 SnapshotLogName,
                 DateTime.Now,
-                JsonConvert.DeserializeObject<ChunkyardConfig>(
-                    File.ReadAllText(ConfigFilePath)));
+                LoadConfig());
 
             _log.Information("Latest snapshot is now {Uri}", Id.LogNameToUri(SnapshotLogName, newLogPosition));
         }
@@ -196,12 +200,20 @@ namespace Chunkyard
 
         private static IRepository CreateRepository(string repositoryName)
         {
+            if (File.Exists(ConfigFilePath)
+                && LoadConfig().Lookup.TryGetValue(repositoryName, out var resolvedName))
+             {
+                repositoryName = resolvedName;
+            }
+
             if (!repositoryName.Contains("://"))
             {
                 repositoryName = Path.GetFullPath(repositoryName);
             }
 
             var repositoryUri = new Uri(repositoryName);
+
+            _log.Information("Using repository {Repository}", repositoryUri);
 
             if (repositoryUri.IsFile)
             {
@@ -211,6 +223,12 @@ namespace Chunkyard
             {
                 throw new ChunkyardException($"Unsupported URI: {repositoryUri}");
             }
+        }
+
+        private static ChunkyardConfig LoadConfig()
+        {
+            return JsonConvert.DeserializeObject<ChunkyardConfig>(
+                File.ReadAllText(ConfigFilePath));
         }
 
         private static IEnumerable<string> FindFiles()
