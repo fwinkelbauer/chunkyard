@@ -11,7 +11,7 @@ namespace Chunkyard.Options
             DestinationRepository = destinationRepository;
         }
 
-        [Option('s', "source", Required = true, HelpText = "The source repository")]
+        [Option('s', "source", Required = false, HelpText = "The source repository", Default = Command.RemoteRepository)]
         public string SourceRepository { get; }
 
         [Option('d', "destination", Required = false, HelpText = "The destination repository", Default = Command.LocalRepository)]

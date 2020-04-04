@@ -11,6 +11,7 @@ namespace Chunkyard
     internal class Command
     {
         public const string LocalRepository = "local";
+        public const string RemoteRepository = "remote";
         public const string RepositoryDirectoryName = ".chunkyard";
         public const string FiltersFileName = ".chunkyardfilter";
         public const string ConfigFileName = ".chunkyardconfig";
