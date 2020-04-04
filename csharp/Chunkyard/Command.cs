@@ -203,7 +203,7 @@ namespace Chunkyard
         {
             if (File.Exists(ConfigFilePath)
                 && LoadConfig().Lookup.TryGetValue(repositoryName, out var resolvedName))
-             {
+            {
                 repositoryName = resolvedName;
             }
 
