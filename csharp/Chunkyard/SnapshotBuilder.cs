@@ -63,7 +63,7 @@ namespace Chunkyard
                 }
             }
 
-            var snapshot = new Snapshot(creationTime, StoreContentItems(key, config));
+            var snapshot = new Snapshot(creationTime, Environment.MachineName, StoreContentItems(key, config));
             using var snapshotStream = new MemoryStream(snapshot.ToBytes());
             var snapshotReference = SnapshotReference.FromContentReference(
                 _contentStore.StoreContent(snapshotStream,

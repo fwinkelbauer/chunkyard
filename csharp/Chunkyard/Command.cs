@@ -138,6 +138,7 @@ namespace Chunkyard
 
             Console.WriteLine($"Uri: {logUri}");
             Console.WriteLine($"Created: {snapshot.CreationTime.ToString("yyyy-MM-dd HH:mm:ss")}");
+            Console.WriteLine($"Hostname: {snapshot.Hostname}");
             Console.WriteLine("Content:");
 
             foreach (var contentReferences in snapshot.ContentReferences)
