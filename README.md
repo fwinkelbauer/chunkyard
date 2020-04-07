@@ -19,8 +19,7 @@ order for the `chunkyard` binary to work.
 
 - **Content Reference:** A description of how a file is archived in the
   underlying storage
-- **Content URI:** The address of a single piece of a file (which might be
-  compressed, encrypted, etc.). Example:
+- **Content URI:** The address of an encrypted piece of a file. Example:
   `sha256://0ec7f158103de762a32f215490298c6bc47578f511955795df7d1a2a07343e3b`
 - **Reference Log:** A structure to store content references in an append-only
   log
