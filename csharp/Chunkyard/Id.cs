@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Chunkyard
 {
@@ -25,7 +26,9 @@ namespace Chunkyard
                 throw new ChunkyardException($"Not a log URI: {logUri}");
             }
 
-            var queryValues = System.Web.HttpUtility.ParseQueryString(logUri.Query);
+            var queryValues = System.Web.HttpUtility.ParseQueryString(
+                logUri.Query);
+
             var logText = queryValues.Get(QueryId);
             int? logPosition = null;
 
@@ -37,13 +40,31 @@ namespace Chunkyard
             return (logUri.Host, logPosition);
         }
 
-        public static Uri ComputeContentUri(HashAlgorithmName algorithmName, byte[] data)
+        public static Uri ComputeContentUri(
+            HashAlgorithmName hashAlgorithmName,
+            byte[] data)
         {
-            using var algorithm = HashAlgorithm.Create(algorithmName.Name);
-
             return ToContentUri(
-                algorithmName,
-                ToHexString(algorithm.ComputeHash(data)));
+                hashAlgorithmName,
+                ComputeHash(hashAlgorithmName, data));
+        }
+
+        public static string ComputeHash(
+            HashAlgorithmName hashAlgorithmName,
+            byte[] data)
+        {
+            using var algorithm = HashAlgorithm.Create(hashAlgorithmName.Name);
+
+            return ToHexString(algorithm.ComputeHash(data));
+        }
+
+        public static string ComputeHash(
+            HashAlgorithmName hashAlgorithmName,
+            string data)
+        {
+            return ComputeHash(
+                hashAlgorithmName,
+                Encoding.UTF8.GetBytes(data));
         }
 
         public static HashAlgorithmName AlgorithmFromContentUri(Uri contentUri)
@@ -60,9 +81,11 @@ namespace Chunkyard
             return contentUri.EnsureNotNull(nameof(contentUri)).Host;
         }
 
-        public static Uri ToContentUri(HashAlgorithmName algorithmName, string hash)
+        public static Uri ToContentUri(
+            HashAlgorithmName hashAlgorithmName,
+            string hash)
         {
-            return new Uri($"{algorithmName.Name.ToLower()}://{hash}");
+            return new Uri($"{hashAlgorithmName.Name.ToLower()}://{hash}");
         }
 
         private static string ToHexString(byte[] hash)

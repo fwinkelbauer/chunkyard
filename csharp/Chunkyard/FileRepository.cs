@@ -21,14 +21,6 @@ namespace Chunkyard
 
         public Uri RepositoryUri { get; }
 
-        public Uri StoreContent(HashAlgorithmName algorithm, byte[] value)
-        {
-            var contentUri = Id.ComputeContentUri(algorithm, value);
-            StoreContent(contentUri, value);
-
-            return contentUri;
-        }
-
         public void StoreContent(Uri contentUri, byte[] value)
         {
             var filePath = ToFilePath(contentUri);
@@ -59,7 +51,25 @@ namespace Chunkyard
                 ToFilePath(contentUri));
         }
 
-        public int AppendToLog(byte[] value, string logName, int? currentLogPosition)
+        public bool Valid(Uri contentUri)
+        {
+            if (contentUri == null || !ContentExists(contentUri))
+            {
+                return false;
+            }
+
+            var content = RetrieveContent(contentUri);
+            var computedUri = Id.ComputeContentUri(
+                Id.AlgorithmFromContentUri(contentUri),
+                content);
+
+            return contentUri.Equals(computedUri);
+        }
+
+        public int AppendToLog(
+            byte[] value,
+            string logName,
+            int? currentLogPosition)
         {
             var newLogPosition = currentLogPosition.HasValue
                 ? currentLogPosition.Value + 1

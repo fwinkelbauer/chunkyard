@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using Serilog;
 
 namespace Chunkyard
@@ -11,83 +12,100 @@ namespace Chunkyard
         private const string SnapshotContentName = "snapshot";
         private const int Iterations = 1000;
 
-        private static readonly ILogger _log = Log.ForContext<SnapshotBuilder>();
+        private static readonly ILogger _log =
+            Log.ForContext<SnapshotBuilder>();
 
         private readonly IContentStore _contentStore;
-        private readonly IPrompt _prompt;
-        private readonly List<(Func<Stream>, string)> _contentItems;
-        private readonly Dictionary<string, byte[]> _noncesByName;
+        private readonly HashAlgorithmName _hashAlgorithmName;
+        private readonly int _minChunkSizeInByte;
+        private readonly int _avgChunkSizeInByte;
+        private readonly int _maxChunkSizeInByte;
+        private readonly KeyInformation _key;
+        private readonly Dictionary<string, byte[]> _noncesByFingerprints;
+        private readonly List<ContentReference> _storedContentReferences;
 
-        public SnapshotBuilder(IContentStore contentStore, IPrompt prompt)
+        private int? _currentLogPosition;
+
+        // TODO Parameter vereinfachen. Auch für Config Objekte
+        private SnapshotBuilder(
+            IContentStore contentStore,
+            HashAlgorithmName hashAlgorithmName,
+            int minChunkSizeInByte,
+            int avgChunkSizeInByte,
+            int maxChunkSizeInByte,
+            KeyInformation key,
+            int? currentLogPosition,
+            Dictionary<string, byte[]> noncesByFingerprints)
         {
             _contentStore = contentStore;
-            _prompt = prompt;
-            _contentItems = new List<(Func<Stream>, string)>();
-            _noncesByName = new Dictionary<string, byte[]>();
+            _hashAlgorithmName = hashAlgorithmName;
+            _minChunkSizeInByte = minChunkSizeInByte;
+            _avgChunkSizeInByte = avgChunkSizeInByte;
+            _maxChunkSizeInByte = maxChunkSizeInByte;
+            _key = key;
+            _currentLogPosition = currentLogPosition;
+            _noncesByFingerprints = noncesByFingerprints;
+            _storedContentReferences = new List<ContentReference>();
         }
 
-        public void AddContent(Func<Stream> readFunc, string contentName)
+        public void AddContent(Stream inputStream, string contentName)
         {
-            _contentItems.Add((readFunc, contentName));
+            _storedContentReferences.Add(_contentStore.StoreContent(
+                inputStream,
+                new StoreConfig(
+                    contentName,
+                    _hashAlgorithmName,
+                    GenerateNonce,
+                    _key.Key,
+                    _minChunkSizeInByte,
+                    _avgChunkSizeInByte,
+                    _maxChunkSizeInByte)));
         }
 
-        public int WriteSnapshot(string logName, DateTime creationTime, ChunkyardConfig config)
+        public void WriteSnapshot(DateTime creationTime)
         {
-            var currentLogPosition = _contentStore.Repository.FetchLogPosition(logName);
-            var password = currentLogPosition.HasValue
-                ? _prompt.ExistingPassword()
-                : _prompt.NewPassword();
+            var contentReference = _contentStore.StoreContent(
+                new Snapshot(creationTime, _storedContentReferences),
+                new StoreConfig(
+                    SnapshotContentName,
+                    _hashAlgorithmName,
+                    GenerateNonce,
+                    _key.Key,
+                    _minChunkSizeInByte,
+                    _avgChunkSizeInByte,
+                    _maxChunkSizeInByte));
 
-            var salt = AesGcmCrypto.GenerateSalt();
-            var iterations = Iterations;
-            var key = AesGcmCrypto.PasswordToKey(password, salt, iterations);
+            _currentLogPosition = _contentStore.AppendToLog(
+                new SnapshotReference(
+                    contentReference,
+                    _key.Salt,
+                    _key.Iterations),
+                _currentLogPosition);
+        }
 
-            if (currentLogPosition.HasValue)
+        public void RestoreSnapshot(
+            int restoreLogPosition,
+            Func<string, Stream> writeFunc,
+            string restoreFuzzy)
+        {
+            if (!_currentLogPosition.HasValue)
             {
-                var snapshotTuple = RetrieveSnapshotReference(
-                    logName,
-                    currentLogPosition.Value,
-                    password);
-
-                var currentSnapshotReference = snapshotTuple.Item1;
-                salt = currentSnapshotReference.Salt;
-                iterations = currentSnapshotReference.Iterations;
-                key = snapshotTuple.Item2;
-                var currentSnapshot = ParseSnapshot(currentSnapshotReference, key);
-
-                foreach (var contentReference in currentSnapshot.ContentReferences)
-                {
-                    // Known files should be encrypted using the existing
-                    // parameters, so we register all previous references
-                    _noncesByName[contentReference.Name] = contentReference.Nonce;
-                }
+                throw new ChunkyardException(
+                    "Cannot restore snapshot from an empty repository");
             }
 
-            var snapshot = new Snapshot(creationTime, Environment.MachineName, StoreContentItems(key, config));
-            using var snapshotStream = new MemoryStream(snapshot.ToBytes());
-            var snapshotReference = SnapshotReference.FromContentReference(
-                _contentStore.StoreContent(snapshotStream,
-                    SnapshotContentName,
-                    GetNonce(SnapshotContentName),
-                    key,
-                    config),
-                salt,
-                iterations);
+            var snapshotReference = _contentStore
+                .RetrieveFromLog<SnapshotReference>(
+                    restoreLogPosition);
 
-            return _contentStore.Repository.AppendToLog(
-                snapshotReference.ToBytes(),
-                logName,
-                currentLogPosition);
-        }
-
-        public void RestoreSnapshot(Uri snapshotUri, Func<string, Stream> writeFunc, string restoreFuzzy)
-        {
-            var (snapshot, key) = RetrieveSnapshot(
-                snapshotUri,
-                _prompt.ExistingPassword());
+            var snapshot = _contentStore.RetrieveContent<Snapshot>(
+                snapshotReference.ContentReference,
+                new RetrieveConfig(_key.Key));
 
             var index = 1;
-            var filteredContentReferences = FuzzyFilter(restoreFuzzy, snapshot.ContentReferences)
+            var filteredContentReferences = FuzzyFilter(
+                restoreFuzzy,
+                snapshot.ContentReferences)
                 .ToArray();
 
             foreach (var contentReference in filteredContentReferences)
@@ -99,18 +117,109 @@ namespace Chunkyard
                     filteredContentReferences.Length);
 
                 using var stream = writeFunc(contentReference.Name);
-                _contentStore.RetrieveContent(contentReference, stream, key);
+                _contentStore.RetrieveContent(
+                    contentReference,
+                    new RetrieveConfig(_key.Key),
+                    stream);
             }
         }
 
-        public void VerifySnapshot(Uri snapshotUri, string verifyFuzzy, bool shallow)
+        private byte[] GenerateNonce(string fingerprint)
+        {
+            if (!_noncesByFingerprints.TryGetValue(fingerprint, out var nonce))
+            {
+                nonce = AesGcmCrypto.GenerateNonce();
+                _noncesByFingerprints[fingerprint] = nonce;
+            }
+
+            return nonce;
+        }
+
+        private static IEnumerable<ContentReference> FuzzyFilter(
+            string fuzzyPattern,
+            IEnumerable<ContentReference> contentReferences)
+        {
+            var fuzzy = new Fuzzy(fuzzyPattern);
+
+            foreach (var contentReference in contentReferences)
+            {
+                if (fuzzy.IsMatch(contentReference.Name))
+                {
+                    yield return contentReference;
+                }
+            }
+        }
+
+        public static SnapshotBuilder Create(
+            IPrompt prompt,
+            IContentStore contentStore,
+            HashAlgorithmName hashAlgorithmName,
+            int minChunkSizeInByte,
+            int avgChunkSizeInByte,
+            int maxChunkSizeInByte)
+        {
+            var currentLogPosition = contentStore.FetchLogPosition();
+            KeyInformation? key = null;
+            var noncesByFingerprints = new Dictionary<string, byte[]>();
+
+            if (currentLogPosition.HasValue)
+            {
+                var snapshotReference = contentStore
+                    .RetrieveFromLog<SnapshotReference>(
+                        currentLogPosition.Value);
+
+                key = AesGcmCrypto.PasswordToKey(
+                    prompt.ExistingPassword(),
+                    snapshotReference.Salt,
+                    snapshotReference.Iterations);
+
+                var snapshot = contentStore.RetrieveContent<Snapshot>(
+                    snapshotReference.ContentReference,
+                    new RetrieveConfig(key.Key));
+
+                // Known chunks should be encrypted using the existing
+                // parameters, so we register all previous references
+                foreach (var contentReference in snapshot.ContentReferences)
+                {
+                    foreach (var chunk in contentReference.Chunks)
+                    {
+                        noncesByFingerprints[chunk.Fingerprint] =
+                            chunk.Nonce;
+                    }
+                }
+            }
+            else
+            {
+                key = AesGcmCrypto.PasswordToKey(
+                    prompt.NewPassword(),
+                    AesGcmCrypto.GenerateSalt(),
+                    Iterations);
+            }
+
+            return new SnapshotBuilder(
+                contentStore,
+                hashAlgorithmName,
+                minChunkSizeInByte,
+                avgChunkSizeInByte,
+                maxChunkSizeInByte,
+                key,
+                currentLogPosition,
+                noncesByFingerprints);
+        }
+
+/*      public void VerifySnapshot(
+            Uri snapshotUri,
+            string verifyFuzzy,
+            bool shallow)
         {
             var (snapshot, _) = RetrieveSnapshot(
                 snapshotUri,
                 _prompt.ExistingPassword());
 
             var index = 1;
-            var filteredContentReferences = FuzzyFilter(verifyFuzzy, snapshot.ContentReferences)
+            var filteredContentReferences = FuzzyFilter(
+                verifyFuzzy,
+                snapshot.ContentReferences)
                 .ToArray();
 
             foreach (var contentReference in filteredContentReferences)
@@ -125,11 +234,13 @@ namespace Chunkyard
                 {
                     if (shallow)
                     {
-                        _contentStore.Repository.ThrowIfNotExists(chunk.ContentUri);
+                        _contentStore.Repository.ThrowIfNotExists(
+                            chunk.ContentUri);
                     }
                     else
                     {
-                        _contentStore.Repository.ThrowIfInvalid(chunk.ContentUri);
+                        _contentStore.Repository.ThrowIfInvalid(
+                            chunk.ContentUri);
                     }
                 }
             }
@@ -144,182 +255,21 @@ namespace Chunkyard
             return snapshot;
         }
 
-        public void Push(string logName, IRepository destinationRepository)
-        {
-            var password = _prompt.ExistingPassword();
-            var sourceLogPosition = _contentStore.Repository.FetchLogPosition(logName);
-            var destinationLogPosition = destinationRepository.FetchLogPosition(logName);
-
-            if (!sourceLogPosition.HasValue)
-            {
-                _log.Information("Cannot process an empty log");
-                return;
-            }
-
-            var commonLogPosition = destinationLogPosition.HasValue
-                ? Math.Min(sourceLogPosition.Value, destinationLogPosition.Value)
-                : -1;
-
-            if (commonLogPosition == sourceLogPosition)
-            {
-                _log.Information("Already up-to-date");
-                return;
-            }
-
-            for (int i = 0; i <= commonLogPosition; i++)
-            {
-                var source = _contentStore.Repository.RetrieveFromLog(logName, i);
-                var destination = destinationRepository.RetrieveFromLog(logName, i);
-
-                if (!Enumerable.SequenceEqual(source, destination))
-                {
-                    throw new ChunkyardException($"Logs differ at position {i}");
-                }
-            }
-
-            var currentIndex = 1;
-            var maxIndex = sourceLogPosition - commonLogPosition;
-
-            for (int i = commonLogPosition + 1; i <= sourceLogPosition; i++)
-            {
-                _log.Information("Processing snapshot {LogPosition} ({CurrentIndex}/{MaxIndex})", $"#{i}", currentIndex++, maxIndex);
-
-                var (snapshotReference, key) = RetrieveSnapshotReference(
-                    logName,
-                    i,
-                    password);
-
-                PushSnapshot(
-                    snapshotReference,
-                    destinationRepository,
-                    key);
-
-                destinationRepository.AppendToLog(
-                    snapshotReference.ToBytes(),
-                    logName,
-                    i - 1);
-            }
-        }
-
-        private Snapshot ParseSnapshot(ContentReference snapshotReference, byte[] key)
-        {
-            using var memoryBuffer = new MemoryStream();
-            _contentStore.RetrieveContent(snapshotReference, memoryBuffer, key);
-
-            return memoryBuffer.ToArray().ToObject<Snapshot>();
-        }
-
-        private (SnapshotReference, byte[]) RetrieveSnapshotReference(string logName, int logPosition, string password)
-        {
-            var snapshotReference = _contentStore.Repository
-                .RetrieveFromLog(logName, logPosition)
-                .ToObject<SnapshotReference>();
-
-            var key = AesGcmCrypto.PasswordToKey(
-                password,
-                snapshotReference.Salt,
-                snapshotReference.Iterations);
-
-            return (snapshotReference, key);
-        }
-
-        private (SnapshotReference, byte[]) RetrieveSnapshotReference(Uri snapshotUri, string password)
+        private Snapshot RetrieveSnapshot(Uri snapshotUri)
         {
             var snapshotReference = _contentStore.Repository
                 .RetrieveFromLog(snapshotUri)
                 .ToObject<SnapshotReference>();
 
-            var key = AesGcmCrypto.PasswordToKey(
-                password,
-                snapshotReference.Salt,
-                snapshotReference.Iterations);
-
-            return (snapshotReference, key);
+            return ParseSnapshot(snapshotReference);
         }
 
-        private (Snapshot, byte[]) RetrieveSnapshot(Uri snapshotUri, string password)
+        private Snapshot ParseSnapshot(SnapshotReference snapshotReference)
         {
-            var (snapshotReference, key) = RetrieveSnapshotReference(
-                snapshotUri,
-                password);
+            using var memoryBuffer = new MemoryStream();
+            _contentStore.RetrieveContent(snapshotReference.ContentReference, memoryBuffer, BuildKey());
 
-            return (ParseSnapshot(snapshotReference, key), key);
-        }
-
-        private IEnumerable<ContentReference> StoreContentItems(byte[] key, ChunkyardConfig config)
-        {
-            for (int i = 0; i < _contentItems.Count; i++)
-            {
-                var (readFunc, contentName) = _contentItems[i];
-
-                _log.Information(
-                    "Storing: {Content} ({CurrentIndex}/{MaxIndex})",
-                    contentName,
-                    i + 1,
-                    _contentItems.Count);
-
-                using var stream = readFunc();
-                yield return _contentStore.StoreContent(
-                    stream,
-                    contentName,
-                    GetNonce(contentName),
-                    key,
-                    config);
-            }
-        }
-
-        private void PushSnapshot(ContentReference snapshotReference, IRepository remoteRepository, byte[] key)
-        {
-            var snapshot = ParseSnapshot(snapshotReference, key);
-
-            for (int i = 0; i < snapshot.ContentReferences.Length; i++)
-            {
-                var contentReferences = snapshot.ContentReferences[i];
-
-                _log.Information(
-                    "Pushing content: {Content} ({CurrentIndex}/{MaxIndex})",
-                    contentReferences.Name,
-                    i + 1,
-                    snapshot.ContentReferences.Length);
-
-                foreach (var chunk in contentReferences.Chunks)
-                {
-                    _contentStore.Repository.PushContent(chunk.ContentUri, remoteRepository);
-                }
-            }
-
-            foreach (var chunk in snapshotReference.Chunks)
-            {
-                _contentStore.Repository.PushContent(chunk.ContentUri, remoteRepository);
-            }
-        }
-
-        private byte[] GetNonce(string name)
-        {
-            if (_noncesByName.TryGetValue(name, out var nonce))
-            {
-                return nonce;
-            }
-            else
-            {
-                nonce = AesGcmCrypto.GenerateNonce();
-                _noncesByName[name] = nonce;
-
-                return nonce;
-            }
-        }
-
-        public static IEnumerable<ContentReference> FuzzyFilter(string fuzzyPattern, IEnumerable<ContentReference> contentReferences)
-        {
-            var fuzzy = new Fuzzy(fuzzyPattern);
-
-            foreach (var contentReference in contentReferences)
-            {
-                if (fuzzy.IsMatch(contentReference.Name))
-                {
-                    yield return contentReference;
-                }
-            }
-        }
+            return memoryBuffer.ToArray().ToObject<Snapshot>();
+        }*/
     }
 }

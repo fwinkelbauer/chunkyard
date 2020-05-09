@@ -2,27 +2,22 @@
 
 namespace Chunkyard
 {
-    internal class SnapshotReference : ContentReference
+    internal class SnapshotReference
     {
-        public SnapshotReference(string name, byte[] nonce, IEnumerable<Chunk> chunks, byte[] salt, int iterations)
-            : base(name, nonce, chunks)
+        public SnapshotReference(
+            ContentReference contentReference,
+            byte[] salt,
+            int iterations)
         {
+            ContentReference = contentReference;
             Salt = salt;
             Iterations = iterations;
         }
 
+        public ContentReference ContentReference { get; }
+
         public byte[] Salt { get; }
 
         public int Iterations { get; }
-
-        public static SnapshotReference FromContentReference(ContentReference contentReference, byte[] salt, int iterations)
-        {
-            return new SnapshotReference(
-                contentReference.Name,
-                contentReference.Nonce,
-                contentReference.Chunks,
-                salt,
-                iterations);
-        }
     }
 }

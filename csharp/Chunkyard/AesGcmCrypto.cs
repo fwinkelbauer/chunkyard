@@ -9,7 +9,10 @@ namespace Chunkyard
         private const int NONCE_BYTES = 12;
         private const int SALT_BYTES = 12;
 
-        public static (byte[], byte[]) Encrypt(byte[] plaintext, byte[] key, byte[] nonce)
+        public static (byte[], byte[]) Encrypt(
+            byte[] plaintext,
+            byte[] key,
+            byte[] nonce)
         {
             var tag = new byte[TAG_BYTES];
             var ciphertext = new byte[plaintext.Length];
@@ -20,7 +23,11 @@ namespace Chunkyard
             return (ciphertext, tag);
         }
 
-        public static byte[] Decrypt(byte[] ciphertext, byte[] tag, byte[] key, byte[] nonce)
+        public static byte[] Decrypt(
+            byte[] ciphertext,
+            byte[] tag,
+            byte[] key,
+            byte[] nonce)
         {
             byte[] plaintext = new byte[ciphertext.Length];
 
@@ -30,7 +37,10 @@ namespace Chunkyard
             return plaintext;
         }
 
-        public static byte[] PasswordToKey(string password, byte[] salt, int iterations)
+        public static KeyInformation PasswordToKey(
+            string password,
+            byte[] salt,
+            int iterations)
         {
             using var rfc2898 = new Rfc2898DeriveBytes(
                 password,
@@ -38,7 +48,10 @@ namespace Chunkyard
                 iterations,
                 HashAlgorithmName.SHA256);
 
-            return rfc2898.GetBytes(KEY_BYTES);
+            return new KeyInformation(
+                rfc2898.GetBytes(KEY_BYTES),
+                salt,
+                iterations);
         }
 
         public static byte[] GenerateSalt()

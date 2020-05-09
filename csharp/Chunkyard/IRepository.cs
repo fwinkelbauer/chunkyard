@@ -8,13 +8,13 @@ namespace Chunkyard
     {
         public Uri RepositoryUri { get; }
 
-        Uri StoreContent(HashAlgorithmName algorithm, byte[] value);
-
         void StoreContent(Uri contentUri, byte[] value);
 
         byte[] RetrieveContent(Uri contentUri);
 
         bool ContentExists(Uri contentUri);
+
+        bool Valid(Uri contentUri);
 
         int AppendToLog(byte[] value, string logName, int? currentLogPosition);
 

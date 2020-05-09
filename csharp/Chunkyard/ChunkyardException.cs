@@ -20,7 +20,9 @@ namespace Chunkyard
         {
         }
 
-        protected ChunkyardException(SerializationInfo info, StreamingContext context)
+        protected ChunkyardException(
+            SerializationInfo info,
+            StreamingContext context)
             : base(info, context)
         {
         }

@@ -1,53 +1,39 @@
 ﻿using System;
-using Chunkyard.Options;
-using CommandLine;
-using Serilog;
+using System.IO;
+using System.Security.Cryptography;
 
 namespace Chunkyard
 {
     public static class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Console()
-                .CreateLogger();
+            var snapshotBuilder = SnapshotBuilder.Create(
+                new ConsolePrompt(),
+                new ContentStore(
+                    new FileRepository(Path.GetFullPath("./test"))),
+                HashAlgorithmName.SHA256,
+                2 * 1024 * 1024,
+                4 * 1024 * 1024,
+                8 * 1024 * 1024);
 
-            Environment.ExitCode = ProcessArguments(args);
+            //var file = "foo2.txt";
+            //using var stream = File.OpenRead("foo2.txt");
+            //snapshotBuilder.AddContent(stream, file);
+            //snapshotBuilder.WriteSnapshot(DateTime.Now);
 
-            Log.CloseAndFlush();
-        }
-
-        private static int ProcessArguments(string[] args)
-        {
-            return Parser.Default.ParseArguments<InitOptions, FilterOptions, CleanOptions, CatOptions, RestoreOptions, CreateOptions, VerifyOptions, LogOptions, PushOptions, PullOptions>(args).MapResult(
-                (InitOptions _) => Run(Command.Init),
-                (FilterOptions _) => Run(Command.Filter),
-                (CleanOptions _) => Run(Command.Clean),
-                (CatOptions o) => Run(() => Command.CatSnapshot(o)),
-                (RestoreOptions o) => Run(() => Command.RestoreSnapshot(o)),
-                (CreateOptions o) => Run(() => Command.CreateSnapshot(o)),
-                (VerifyOptions o) => Run(() => Command.VerifySnapshot(o)),
-                (LogOptions o) => Run(() => Command.ListLogPositions(o)),
-                (PushOptions o) => Run(() => Command.PushSnapshot(o)),
-                (PullOptions o) => Run(() => Command.PullSnapshot(o)),
-                _ => 1);
-        }
-
-        private static int Run(Action action)
-        {
-            try
-            {
-                action();
-                return 0;
-            }
-            catch (Exception e)
-            {
-                Log.Error("{Error}", e.Message);
-                Log.Debug(e, "An error occurred");
-                return 1;
-            }
+            snapshotBuilder.RestoreSnapshot(
+                2,
+                (contentName) =>
+                {
+                    var file = Path.Combine("test-restore", contentName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(file));
+                    return new FileStream(
+                        file,
+                        FileMode.CreateNew,
+                        FileAccess.Write);
+                },
+                ".*");
         }
     }
 }
