@@ -11,10 +11,17 @@ namespace Chunkyard
         private const string DefaultLogName = "master";
 
         private readonly IRepository _repository;
+        private readonly NonceGenerator _nonceGenerator;
+        private readonly ContentStoreConfig _config;
 
-        public ContentStore(IRepository repository)
+        public ContentStore(
+            IRepository repository,
+            NonceGenerator nonceGenerator,
+            ContentStoreConfig config)
         {
             _repository = repository;
+            _nonceGenerator = nonceGenerator;
+            _config = config;
         }
 
         public Uri StoreUri
@@ -27,7 +34,7 @@ namespace Chunkyard
 
         public void RetrieveContent(
             ContentReference contentReference,
-            RetrieveConfig retrieveConfig,
+            byte[] key,
             Stream outputStream)
         {
             foreach (var chunk in contentReference.Chunks)
@@ -35,7 +42,7 @@ namespace Chunkyard
                 var decryptedData = AesGcmCrypto.Decrypt(
                     _repository.RetrieveContent(chunk.ContentUri),
                     chunk.Tag,
-                    retrieveConfig.Key,
+                    key,
                     chunk.Nonce);
 
                 outputStream.Write(decryptedData);
@@ -44,35 +51,36 @@ namespace Chunkyard
 
         public T RetrieveContent<T>(
             ContentReference contentReference,
-            RetrieveConfig retrieveConfig) where T : notnull
+            byte[] key) where T : notnull
         {
             using var memoryStream = new MemoryStream();
             RetrieveContent(
                 contentReference,
-                retrieveConfig,
+                key,
                 memoryStream);
 
             return ToObject<T>(memoryStream.ToArray());
         }
 
-        // TODO StoreConfig vereinfachen, ContentName direkt als Param?
         public ContentReference StoreContent(
             Stream inputStream,
-            StoreConfig storeConfig)
+            byte[] key,
+            string contentName)
         {
             return new ContentReference(
-                storeConfig.ContentName,
-                WriteChunks(inputStream, storeConfig));
+                contentName,
+                WriteChunks(inputStream, key));
         }
 
         public ContentReference StoreContent<T>(
             T value,
-            StoreConfig storeConfig) where T : notnull
+            byte[] key,
+            string contentName) where T : notnull
         {
             using var memoryStream = new MemoryStream(ToBytes(value));
             return new ContentReference(
-                storeConfig.ContentName,
-                WriteChunks(memoryStream, storeConfig));
+                contentName,
+                WriteChunks(memoryStream, key));
         }
 
         public int? FetchLogPosition()
@@ -108,31 +116,29 @@ namespace Chunkyard
                 Encoding.UTF8.GetString(value));
         }
 
-        private IEnumerable<Chunk> WriteChunks(
-            Stream stream,
-            StoreConfig storeConfig)
+        private IEnumerable<Chunk> WriteChunks(Stream stream, byte[] key)
         {
             var chunkedDataItems = FastCdc.SplitIntoChunks(
                 stream,
-                storeConfig.MinChunkSizeInByte,
-                storeConfig.AvgChunkSizeInByte,
-                storeConfig.MaxChunkSizeInByte);
+                _config.MinChunkSizeInByte,
+                _config.AvgChunkSizeInByte,
+                _config.MaxChunkSizeInByte);
 
             foreach (var chunkedData in chunkedDataItems)
             {
                 var fingerprint = Id.ComputeHash(
-                    storeConfig.HashAlgorithmName,
+                    _config.HashAlgorithmName,
                     chunkedData);
 
-                var nonce = storeConfig.NonceGenerator(fingerprint);
+                var nonce = _nonceGenerator.GetNonce(fingerprint);
 
                 var (encryptedData, tag) = AesGcmCrypto.Encrypt(
                     chunkedData,
-                    storeConfig.Key,
+                    key,
                     nonce);
 
                 var contentUri = Id.ComputeContentUri(
-                    storeConfig.HashAlgorithmName,
+                    _config.HashAlgorithmName,
                     encryptedData);
 
                 _repository.StoreContent(contentUri, encryptedData);

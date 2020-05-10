@@ -16,35 +16,20 @@ namespace Chunkyard
             Log.ForContext<SnapshotBuilder>();
 
         private readonly IContentStore _contentStore;
-        private readonly HashAlgorithmName _hashAlgorithmName;
-        private readonly int _minChunkSizeInByte;
-        private readonly int _avgChunkSizeInByte;
-        private readonly int _maxChunkSizeInByte;
         private readonly KeyInformation _key;
-        private readonly Dictionary<string, byte[]> _noncesByFingerprints;
         private readonly List<ContentReference> _storedContentReferences;
 
         private int? _currentLogPosition;
 
-        // TODO Parameter vereinfachen. Auch für Config Objekte
         private SnapshotBuilder(
             IContentStore contentStore,
-            HashAlgorithmName hashAlgorithmName,
-            int minChunkSizeInByte,
-            int avgChunkSizeInByte,
-            int maxChunkSizeInByte,
             KeyInformation key,
-            int? currentLogPosition,
-            Dictionary<string, byte[]> noncesByFingerprints)
+            int? currentLogPosition)
         {
             _contentStore = contentStore;
-            _hashAlgorithmName = hashAlgorithmName;
-            _minChunkSizeInByte = minChunkSizeInByte;
-            _avgChunkSizeInByte = avgChunkSizeInByte;
-            _maxChunkSizeInByte = maxChunkSizeInByte;
             _key = key;
             _currentLogPosition = currentLogPosition;
-            _noncesByFingerprints = noncesByFingerprints;
+
             _storedContentReferences = new List<ContentReference>();
         }
 
@@ -52,28 +37,16 @@ namespace Chunkyard
         {
             _storedContentReferences.Add(_contentStore.StoreContent(
                 inputStream,
-                new StoreConfig(
-                    contentName,
-                    _hashAlgorithmName,
-                    GenerateNonce,
-                    _key.Key,
-                    _minChunkSizeInByte,
-                    _avgChunkSizeInByte,
-                    _maxChunkSizeInByte)));
+                _key.Key,
+                contentName));
         }
 
         public void WriteSnapshot(DateTime creationTime)
         {
             var contentReference = _contentStore.StoreContent(
                 new Snapshot(creationTime, _storedContentReferences),
-                new StoreConfig(
-                    SnapshotContentName,
-                    _hashAlgorithmName,
-                    GenerateNonce,
-                    _key.Key,
-                    _minChunkSizeInByte,
-                    _avgChunkSizeInByte,
-                    _maxChunkSizeInByte));
+                _key.Key,
+                SnapshotContentName);
 
             _currentLogPosition = _contentStore.AppendToLog(
                 new SnapshotReference(
@@ -100,7 +73,7 @@ namespace Chunkyard
 
             var snapshot = _contentStore.RetrieveContent<Snapshot>(
                 snapshotReference.ContentReference,
-                new RetrieveConfig(_key.Key));
+                _key.Key);
 
             var index = 1;
             var filteredContentReferences = FuzzyFilter(
@@ -119,20 +92,9 @@ namespace Chunkyard
                 using var stream = writeFunc(contentReference.Name);
                 _contentStore.RetrieveContent(
                     contentReference,
-                    new RetrieveConfig(_key.Key),
+                    _key.Key,
                     stream);
             }
-        }
-
-        private byte[] GenerateNonce(string fingerprint)
-        {
-            if (!_noncesByFingerprints.TryGetValue(fingerprint, out var nonce))
-            {
-                nonce = AesGcmCrypto.GenerateNonce();
-                _noncesByFingerprints[fingerprint] = nonce;
-            }
-
-            return nonce;
         }
 
         private static IEnumerable<ContentReference> FuzzyFilter(
@@ -152,15 +114,11 @@ namespace Chunkyard
 
         public static SnapshotBuilder Create(
             IPrompt prompt,
-            IContentStore contentStore,
-            HashAlgorithmName hashAlgorithmName,
-            int minChunkSizeInByte,
-            int avgChunkSizeInByte,
-            int maxChunkSizeInByte)
+            NonceGenerator nonceGenerator,
+            IContentStore contentStore)
         {
             var currentLogPosition = contentStore.FetchLogPosition();
             KeyInformation? key = null;
-            var noncesByFingerprints = new Dictionary<string, byte[]>();
 
             if (currentLogPosition.HasValue)
             {
@@ -175,7 +133,7 @@ namespace Chunkyard
 
                 var snapshot = contentStore.RetrieveContent<Snapshot>(
                     snapshotReference.ContentReference,
-                    new RetrieveConfig(key.Key));
+                    key.Key);
 
                 // Known chunks should be encrypted using the existing
                 // parameters, so we register all previous references
@@ -183,8 +141,7 @@ namespace Chunkyard
                 {
                     foreach (var chunk in contentReference.Chunks)
                     {
-                        noncesByFingerprints[chunk.Fingerprint] =
-                            chunk.Nonce;
+                        nonceGenerator.Register(chunk.Fingerprint, chunk.Nonce);
                     }
                 }
             }
@@ -198,13 +155,8 @@ namespace Chunkyard
 
             return new SnapshotBuilder(
                 contentStore,
-                hashAlgorithmName,
-                minChunkSizeInByte,
-                avgChunkSizeInByte,
-                maxChunkSizeInByte,
                 key,
-                currentLogPosition,
-                noncesByFingerprints);
+                currentLogPosition);
         }
 
 /*      public void VerifySnapshot(

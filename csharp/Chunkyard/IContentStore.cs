@@ -12,19 +12,22 @@ namespace Chunkyard
 
         void RetrieveContent(
             ContentReference contentReference,
-            RetrieveConfig retrieveConfig,
+            byte[] key,
             Stream outputStream);
 
         T RetrieveContent<T>(
             ContentReference contentReference,
-            RetrieveConfig retrieveConfig) where T : notnull;
+            byte[] key) where T : notnull;
 
         ContentReference StoreContent(
             Stream inputStream,
-            StoreConfig storeConfig);
+            byte[] key,
+            string contentName);
 
-        ContentReference StoreContent<T>(T value, StoreConfig storeConfig)
-            where T : notnull;
+        ContentReference StoreContent<T>(
+            T value,
+            byte[] key,
+            string contentName) where T : notnull;
 
         int? FetchLogPosition();
 

@@ -8,14 +8,18 @@ namespace Chunkyard
     {
         public static void Main()
         {
+            var nonceGenerator = new NonceGenerator();
             var snapshotBuilder = SnapshotBuilder.Create(
                 new ConsolePrompt(),
+                nonceGenerator,
                 new ContentStore(
-                    new FileRepository(Path.GetFullPath("./test"))),
-                HashAlgorithmName.SHA256,
-                2 * 1024 * 1024,
-                4 * 1024 * 1024,
-                8 * 1024 * 1024);
+                    new FileRepository(Path.GetFullPath("./test")),
+                    nonceGenerator,
+                    new ContentStoreConfig(
+                        HashAlgorithmName.SHA256,
+                        2 * 1024 * 1024,
+                        4 * 1024 * 1024,
+                        8 * 1024 * 1024)));
 
             //var file = "foo2.txt";
             //using var stream = File.OpenRead("foo2.txt");

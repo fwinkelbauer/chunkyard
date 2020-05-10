@@ -34,34 +34,33 @@ namespace Chunkyard
 
         public void RetrieveContent(
             ContentReference contentReference,
-            RetrieveConfig retrieveConfig,
+            byte[] key,
             Stream outputStream)
         {
-            _contentStore.RetrieveContent(
-                contentReference,
-                retrieveConfig,
-                outputStream);
+            _contentStore.RetrieveContent(contentReference, key, outputStream);
         }
 
         public T RetrieveContent<T>(
             ContentReference contentReference,
-            RetrieveConfig retrieveConfig) where T : notnull
+            byte[] key) where T : notnull
         {
-            return _contentStore.RetrieveContent<T>(
-                contentReference,
-                retrieveConfig);
+            return _contentStore.RetrieveContent<T>(contentReference, key);
         }
 
         public ContentReference StoreContent(
             Stream inputStream,
-            StoreConfig storeConfig)
+            byte[] key,
+            string contentName)
         {
             if (!(inputStream is FileStream fileStream))
             {
-                return _contentStore.StoreContent(inputStream, storeConfig);
+                return _contentStore.StoreContent(
+                    inputStream,
+                    key,
+                    contentName);
             }
 
-            var storedCache = RetrieveFromCache(storeConfig.ContentName);
+            var storedCache = RetrieveFromCache(contentName);
 
             if (storedCache != null
                 && storedCache.Length == fileStream.Length
@@ -75,10 +74,11 @@ namespace Chunkyard
 
             var contentReference = _contentStore.StoreContent(
                 inputStream,
-                storeConfig);
+                key,
+                contentName);
 
             StoreInCache(
-                storeConfig.ContentName,
+                contentName,
                 new Cache(
                     contentReference,
                     fileStream.Length,
@@ -90,9 +90,10 @@ namespace Chunkyard
 
         public ContentReference StoreContent<T>(
             T value,
-            StoreConfig storeConfig) where T : notnull
+            byte[] key,
+            string contentName) where T : notnull
         {
-            return _contentStore.StoreContent<T>(value, storeConfig);
+            return _contentStore.StoreContent<T>(value, key, contentName);
         }
 
         public int? FetchLogPosition()
