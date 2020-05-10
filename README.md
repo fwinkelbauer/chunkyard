@@ -23,9 +23,6 @@ order for the `chunkyard` binary to work.
   `sha256://0ec7f158103de762a32f215490298c6bc47578f511955795df7d1a2a07343e3b`
 - **Reference Log:** A structure to store content references in an append-only
   log
-- **Reference Log URI:** The address of a reference in a log. Examples:
-  `log://master` (the latst element), `log://master?id=-1` (the last element
-  again), or `log://master?id=0` (the first element)
 
 ## Usage
 

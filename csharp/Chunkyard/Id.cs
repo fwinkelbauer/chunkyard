@@ -6,40 +6,6 @@ namespace Chunkyard
 {
     public static class Id
     {
-        private const string LogScheme = "log";
-        private const string QueryId = "id";
-
-        public static Uri LogNameToUri(string logName)
-        {
-            return new Uri($"{LogScheme}://{logName}");
-        }
-
-        public static Uri LogNameToUri(string logName, int logPosition)
-        {
-            return new Uri($"{LogScheme}://{logName}?id={logPosition}");
-        }
-
-        public static (string, int?) LogUriToParts(Uri logUri)
-        {
-            if (!logUri.EnsureNotNull(nameof(logUri)).Scheme.Equals(LogScheme))
-            {
-                throw new ChunkyardException($"Not a log URI: {logUri}");
-            }
-
-            var queryValues = System.Web.HttpUtility.ParseQueryString(
-                logUri.Query);
-
-            var logText = queryValues.Get(QueryId);
-            int? logPosition = null;
-
-            if (int.TryParse(logText, out var number))
-            {
-                logPosition = number;
-            }
-
-            return (logUri.Host, logPosition);
-        }
-
         public static Uri ComputeContentUri(
             HashAlgorithmName hashAlgorithmName,
             byte[] data)
