@@ -48,9 +48,20 @@ namespace Chunkyard
                 _key.Key,
                 SnapshotContentName);
 
+            // We do not want to leak any fingerprints in an unencrypted
+            // reference
+            var safeContentReference = new ContentReference(
+                contentReference.Name,
+                contentReference.Chunks.Select(
+                    c => new Chunk(
+                        c.ContentUri,
+                        string.Empty,
+                        c.Nonce,
+                        c.Tag)));
+
             _currentLogPosition = _contentStore.AppendToLog(
                 new SnapshotReference(
-                    contentReference,
+                    safeContentReference,
                     _key.Salt,
                     _key.Iterations),
                 _currentLogPosition);
