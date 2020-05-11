@@ -57,6 +57,19 @@ namespace Chunkyard
 
         private static List<string> ListFiles(string directory)
         {
+            // In the future we should support:
+            // - Home directories: "~/Pictures"
+            // - Rooted directories: "C:\Users" and "/home/somebody"
+            //
+            // We also have to find a sane implementation for combining paths
+            // when restoring a snapshot:
+            //
+            // Path.Combine("C:\Users", "C:\Something")
+            if (Path.IsPathRooted(directory))
+            {
+                throw new ChunkyardException($"Rooted paths are currently not supported: {directory}");
+            }
+
             var allFiles = Directory.EnumerateFiles(
                 directory,
                 "*",
