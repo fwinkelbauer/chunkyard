@@ -67,21 +67,32 @@ namespace Chunkyard
             // Path.Combine("C:\Users", "C:\Something")
             if (Path.IsPathRooted(directory))
             {
-                throw new ChunkyardException($"Rooted paths are currently not supported: {directory}");
+                throw new ChunkyardException(
+                    $"Rooted paths are currently not supported: {directory}");
             }
 
             return Directory.EnumerateFiles(
                 directory,
                 "*",
                 SearchOption.AllDirectories)
+                .Select(ToRelative)
                 .ToList();
         }
 
-        private static IEnumerable<string> FindMatches(string fuzzyPattern, IEnumerable<string> lines)
+        private static IEnumerable<string> FindMatches(
+            string fuzzyPattern,
+            IEnumerable<string> lines)
         {
             var fuzzy = new Fuzzy(fuzzyPattern);
 
             return lines.Where(l => fuzzy.IsMatch(l));
+        }
+
+        private static string ToRelative(string file)
+        {
+            return Path.GetRelativePath(
+                Path.GetFullPath("."),
+                Path.GetFullPath(file));
         }
     }
 }
