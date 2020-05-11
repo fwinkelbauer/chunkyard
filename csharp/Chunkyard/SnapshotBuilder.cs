@@ -74,12 +74,6 @@ namespace Chunkyard
             Func<string, Stream> writeFunc,
             string restoreFuzzy)
         {
-            if (!_currentLogPosition.HasValue)
-            {
-                throw new ChunkyardException(
-                    "Cannot restore snapshot from an empty repository");
-            }
-
             var snapshot = LoadSnapshotFromLog(restoreLogPosition);
 
             var index = 1;
@@ -148,8 +142,22 @@ namespace Chunkyard
 
         private Snapshot LoadSnapshotFromLog(int logPosition)
         {
+            if (!_currentLogPosition.HasValue)
+            {
+                throw new ChunkyardException(
+                    "Cannot load snapshot from an empty repository");
+            }
+
+            //  0: the first element
+            //  1: the second element
+            // -2: the second-last element
+            // -1: the last element
+            var resolveLogPosition = logPosition >= 0
+                ? logPosition
+                : _currentLogPosition.Value + logPosition + 1;
+
             var snapshotReference = _contentStore.RetrieveFromLog<SnapshotReference>(
-                logPosition);
+                resolveLogPosition);
 
             return _contentStore.RetrieveContent<Snapshot>(
                 snapshotReference.ContentReference,
