@@ -34,7 +34,7 @@ namespace Chunkyard
             }
         }
 
-        public static void Filter()
+        public static void ShowFiles()
         {
             foreach (var file in FindFiles())
             {
@@ -94,7 +94,7 @@ namespace Chunkyard
                 o.IncludeFuzzy);
         }
 
-        public static void ListLogPositions(LogOptions o)
+        public static void ShowLogPositions(LogOptions o)
         {
             var snapshots = CreateSnapshotBuilder(o.Repository)
                 .GetSnapshots();

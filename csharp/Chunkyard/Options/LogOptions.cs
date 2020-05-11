@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("log", HelpText = "Lists all log entries")]
+    [Verb("log", HelpText = "List all log entries")]
     public class LogOptions
     {
         public LogOptions(string repository)
