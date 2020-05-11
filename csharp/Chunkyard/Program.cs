@@ -1,43 +1,49 @@
 ﻿using System;
-using System.IO;
-using System.Security.Cryptography;
+using Chunkyard.Options;
+using CommandLine;
+using Serilog;
 
 namespace Chunkyard
 {
     public static class Program
     {
-        public static void Main()
+        public static void Main(string[] args)
         {
-            var nonceGenerator = new NonceGenerator();
-            var snapshotBuilder = SnapshotBuilder.OpenRepository(
-                new ConsolePrompt(),
-                nonceGenerator,
-                new ContentStore(
-                    new FileRepository(Path.GetFullPath("./test")),
-                    nonceGenerator,
-                    new ContentStoreConfig(
-                        HashAlgorithmName.SHA256,
-                        2 * 1024 * 1024,
-                        4 * 1024 * 1024,
-                        8 * 1024 * 1024)));
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .CreateLogger();
 
-            //var file = "foo2.txt";
-            //using var stream = File.OpenRead("foo2.txt");
-            //snapshotBuilder.AddContent(stream, file);
-            //snapshotBuilder.WriteSnapshot(DateTime.Now);
+            Environment.ExitCode = ProcessArguments(args);
 
-            snapshotBuilder.RestoreSnapshot(
-                2,
-                (contentName) =>
-                {
-                    var file = Path.Combine("test-restore", contentName);
-                    Directory.CreateDirectory(Path.GetDirectoryName(file));
-                    return new FileStream(
-                        file,
-                        FileMode.CreateNew,
-                        FileAccess.Write);
-                },
-                ".*");
+            Log.CloseAndFlush();
+        }
+
+        private static int ProcessArguments(string[] args)
+        {
+            return Parser.Default.ParseArguments<InitOptions, FilterOptions, RestoreOptions, CreateOptions, VerifyOptions, LogOptions>(args).MapResult(
+                (InitOptions _) => Run(Command.Init),
+                (FilterOptions _) => Run(Command.Filter),
+                (RestoreOptions o) => Run(() => Command.RestoreSnapshot(o)),
+                (CreateOptions o) => Run(() => Command.CreateSnapshot(o)),
+                (VerifyOptions o) => Run(() => Command.VerifySnapshot(o)),
+                (LogOptions o) => Run(() => Command.ListLogPositions(o)),
+                _ => 1);
+        }
+
+        private static int Run(Action action)
+        {
+            try
+            {
+                action();
+                return 0;
+            }
+            catch (Exception e)
+            {
+                Log.Error("{Error}", e.Message);
+                Log.Debug(e, "An error occurred");
+                return 1;
+            }
         }
     }
 }

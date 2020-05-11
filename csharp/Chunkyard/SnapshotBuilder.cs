@@ -41,7 +41,7 @@ namespace Chunkyard
                 contentName));
         }
 
-        public void WriteSnapshot(DateTime creationTime)
+        public int WriteSnapshot(DateTime creationTime)
         {
             var contentReference = _contentStore.StoreContent(
                 new Snapshot(creationTime, _storedContentReferences),
@@ -65,6 +65,8 @@ namespace Chunkyard
                     _key.Salt,
                     _key.Iterations),
                 _currentLogPosition);
+
+            return _currentLogPosition.Value;
         }
 
         public void RestoreSnapshot(
@@ -133,6 +135,14 @@ namespace Chunkyard
                     throw new ChunkyardException(
                         $"Corrupted content: {contentReference.Name}");
                 }
+            }
+        }
+
+        public IEnumerable<(int, Snapshot)> GetSnapshots()
+        {
+            foreach (var logPosition in _contentStore.ListLogPositions())
+            {
+                yield return (logPosition, LoadSnapshotFromLog(logPosition));
             }
         }
 

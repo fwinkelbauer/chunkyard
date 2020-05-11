@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
@@ -121,6 +122,11 @@ namespace Chunkyard
             where T : notnull
         {
             return _contentStore.RetrieveFromLog<T>(logPosition);
+        }
+
+        public IEnumerable<int> ListLogPositions()
+        {
+            return _contentStore.ListLogPositions();
         }
 
         private Cache? RetrieveFromCache(string contentName)

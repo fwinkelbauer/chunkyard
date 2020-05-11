@@ -16,7 +16,7 @@ namespace Chunkyard
             _contentDirectory = Path.Combine(directory, "content");
             _refLogDirectory = Path.Combine(directory, "reflog");
 
-            RepositoryUri = new Uri(directory);
+            RepositoryUri = new Uri(Path.GetFullPath(directory));
         }
 
         public Uri RepositoryUri { get; }

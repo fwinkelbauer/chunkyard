@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -39,5 +40,7 @@ namespace Chunkyard
             where T : notnull;
 
         T RetrieveFromLog<T>(int logPosition) where T : notnull;
+
+        IEnumerable<int> ListLogPositions();
     }
 }

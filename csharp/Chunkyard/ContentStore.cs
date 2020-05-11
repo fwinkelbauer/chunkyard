@@ -128,6 +128,11 @@ namespace Chunkyard
                 _repository.RetrieveFromLog(DefaultLogName, logPosition));
         }
 
+        public IEnumerable<int> ListLogPositions()
+        {
+            return _repository.ListLogPositions(DefaultLogName);
+        }
+
         private static byte[] ToBytes(object o)
         {
             return Encoding.UTF8.GetBytes(
