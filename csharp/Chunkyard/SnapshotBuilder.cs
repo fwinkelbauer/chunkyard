@@ -112,7 +112,7 @@ namespace Chunkyard
             }
         }
 
-        public static SnapshotBuilder Create(
+        public static SnapshotBuilder OpenRepository(
             IPrompt prompt,
             NonceGenerator nonceGenerator,
             IContentStore contentStore)

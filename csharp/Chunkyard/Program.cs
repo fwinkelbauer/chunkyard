@@ -9,7 +9,7 @@ namespace Chunkyard
         public static void Main()
         {
             var nonceGenerator = new NonceGenerator();
-            var snapshotBuilder = SnapshotBuilder.Create(
+            var snapshotBuilder = SnapshotBuilder.OpenRepository(
                 new ConsolePrompt(),
                 nonceGenerator,
                 new ContentStore(

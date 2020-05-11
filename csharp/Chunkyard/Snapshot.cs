@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Chunkyard
 {
@@ -9,11 +8,11 @@ namespace Chunkyard
         public Snapshot(DateTime creationTime, IEnumerable<ContentReference> contentReferences)
         {
             CreationTime = creationTime;
-            ContentReferences = contentReferences.ToImmutableArray();
+            ContentReferences = new List<ContentReference>(contentReferences);
         }
 
         public DateTime CreationTime { get; }
 
-        public ImmutableArray<ContentReference> ContentReferences { get; }
+        public IReadOnlyCollection<ContentReference> ContentReferences { get; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Chunkyard
 {
@@ -8,11 +7,11 @@ namespace Chunkyard
         public ContentReference(string name, IEnumerable<Chunk> chunks)
         {
             Name = name;
-            Chunks = chunks.ToImmutableArray();
+            Chunks = new List<Chunk>(chunks);
         }
 
         public string Name { get; }
 
-        public ImmutableArray<Chunk> Chunks { get; }
+        public IReadOnlyCollection<Chunk> Chunks { get; }
     }
 }
