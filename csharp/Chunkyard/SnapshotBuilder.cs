@@ -78,13 +78,7 @@ namespace Chunkyard
                     "Cannot restore snapshot from an empty repository");
             }
 
-            var snapshotReference = _contentStore
-                .RetrieveFromLog<SnapshotReference>(
-                    restoreLogPosition);
-
-            var snapshot = _contentStore.RetrieveContent<Snapshot>(
-                snapshotReference.ContentReference,
-                _key.Key);
+            var snapshot = LoadSnapshotFromLog(restoreLogPosition);
 
             var index = 1;
             var filteredContentReferences = FuzzyFilter(
@@ -113,13 +107,7 @@ namespace Chunkyard
             string verifyFuzzy,
             bool shallow)
         {
-            var snapshotReference = _contentStore
-                .RetrieveFromLog<SnapshotReference>(
-                    verifyLogPosition);
-
-            var snapshot = _contentStore.RetrieveContent<Snapshot>(
-                snapshotReference.ContentReference,
-                _key.Key);
+            var snapshot = LoadSnapshotFromLog(verifyLogPosition);
 
             var index = 1;
             var filteredContentReferences = FuzzyFilter(
@@ -146,6 +134,16 @@ namespace Chunkyard
                         $"Corrupted content: {contentReference.Name}");
                 }
             }
+        }
+
+        private Snapshot LoadSnapshotFromLog(int logPosition)
+        {
+            var snapshotReference = _contentStore.RetrieveFromLog<SnapshotReference>(
+                logPosition);
+
+            return _contentStore.RetrieveContent<Snapshot>(
+                snapshotReference.ContentReference,
+                _key.Key);
         }
 
         private static IEnumerable<ContentReference> FuzzyFilter(
