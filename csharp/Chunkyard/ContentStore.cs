@@ -83,6 +83,30 @@ namespace Chunkyard
                 WriteChunks(memoryStream, key));
         }
 
+        public bool ContentExists(ContentReference contentReference)
+        {
+            var exists = true;
+
+            foreach (var chunk in contentReference.Chunks)
+            {
+                exists &= _repository.ContentExists(chunk.ContentUri);
+            }
+
+            return exists;
+        }
+
+        public bool ContentValid(ContentReference contentReference)
+        {
+            var valid = true;
+
+            foreach (var chunk in contentReference.Chunks)
+            {
+                valid &= _repository.ContentValid(chunk.ContentUri);
+            }
+
+            return valid;
+        }
+
         public int? FetchLogPosition()
         {
             return _repository.FetchLogPosition(DefaultLogName);

@@ -51,7 +51,7 @@ namespace Chunkyard
                 ToFilePath(contentUri));
         }
 
-        public bool Valid(Uri contentUri)
+        public bool ContentValid(Uri contentUri)
         {
             if (contentUri == null || !ContentExists(contentUri))
             {

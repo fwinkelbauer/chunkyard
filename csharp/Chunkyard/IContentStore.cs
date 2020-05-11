@@ -29,6 +29,10 @@ namespace Chunkyard
             byte[] key,
             string contentName) where T : notnull;
 
+        bool ContentExists(ContentReference contentReference);
+
+        bool ContentValid(ContentReference contentReference);
+
         int? FetchLogPosition();
 
         int AppendToLog<T>(T value, int? currentLogPosition)

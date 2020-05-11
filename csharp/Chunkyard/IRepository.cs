@@ -14,7 +14,7 @@ namespace Chunkyard
 
         bool ContentExists(Uri contentUri);
 
-        bool Valid(Uri contentUri);
+        bool ContentValid(Uri contentUri);
 
         int AppendToLog(byte[] value, string logName, int? currentLogPosition);
 

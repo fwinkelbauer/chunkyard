@@ -108,6 +108,46 @@ namespace Chunkyard
             }
         }
 
+        public void VerifySnapshot(
+            int verifyLogPosition,
+            string verifyFuzzy,
+            bool shallow)
+        {
+            var snapshotReference = _contentStore
+                .RetrieveFromLog<SnapshotReference>(
+                    verifyLogPosition);
+
+            var snapshot = _contentStore.RetrieveContent<Snapshot>(
+                snapshotReference.ContentReference,
+                _key.Key);
+
+            var index = 1;
+            var filteredContentReferences = FuzzyFilter(
+                verifyFuzzy,
+                snapshot.ContentReferences)
+                .ToArray();
+
+            foreach (var contentReference in filteredContentReferences)
+            {
+                _log.Information(
+                    "Verifying: {File} ({CurrentIndex}/{MaxIndex})",
+                    contentReference.Name,
+                    index++,
+                    filteredContentReferences.Length);
+
+                if (shallow && !_contentStore.ContentExists(contentReference))
+                {
+                    throw new ChunkyardException(
+                        $"Missing content: {contentReference.Name}");
+                }
+                else if (!_contentStore.ContentValid(contentReference))
+                {
+                    throw new ChunkyardException(
+                        $"Corrupted content: {contentReference.Name}");
+                }
+            }
+        }
+
         private static IEnumerable<ContentReference> FuzzyFilter(
             string fuzzyPattern,
             IEnumerable<ContentReference> contentReferences)
@@ -169,70 +209,5 @@ namespace Chunkyard
                 key,
                 currentLogPosition);
         }
-
-/*      public void VerifySnapshot(
-            Uri snapshotUri,
-            string verifyFuzzy,
-            bool shallow)
-        {
-            var (snapshot, _) = RetrieveSnapshot(
-                snapshotUri,
-                _prompt.ExistingPassword());
-
-            var index = 1;
-            var filteredContentReferences = FuzzyFilter(
-                verifyFuzzy,
-                snapshot.ContentReferences)
-                .ToArray();
-
-            foreach (var contentReference in filteredContentReferences)
-            {
-                _log.Information(
-                    "Verifying: {File} ({CurrentIndex}/{MaxIndex})",
-                    contentReference.Name,
-                    index++,
-                    filteredContentReferences.Length);
-
-                foreach (var chunk in contentReference.Chunks)
-                {
-                    if (shallow)
-                    {
-                        _contentStore.Repository.ThrowIfNotExists(
-                            chunk.ContentUri);
-                    }
-                    else
-                    {
-                        _contentStore.Repository.ThrowIfInvalid(
-                            chunk.ContentUri);
-                    }
-                }
-            }
-        }
-
-        public Snapshot GetSnapshot(Uri snapshotUri)
-        {
-            var (snapshot, _) = RetrieveSnapshot(
-                snapshotUri,
-                _prompt.ExistingPassword());
-
-            return snapshot;
-        }
-
-        private Snapshot RetrieveSnapshot(Uri snapshotUri)
-        {
-            var snapshotReference = _contentStore.Repository
-                .RetrieveFromLog(snapshotUri)
-                .ToObject<SnapshotReference>();
-
-            return ParseSnapshot(snapshotReference);
-        }
-
-        private Snapshot ParseSnapshot(SnapshotReference snapshotReference)
-        {
-            using var memoryBuffer = new MemoryStream();
-            _contentStore.RetrieveContent(snapshotReference.ContentReference, memoryBuffer, BuildKey());
-
-            return memoryBuffer.ToArray().ToObject<Snapshot>();
-        }*/
     }
 }

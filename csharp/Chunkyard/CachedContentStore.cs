@@ -96,6 +96,16 @@ namespace Chunkyard
             return _contentStore.StoreContent<T>(value, key, contentName);
         }
 
+        public bool ContentExists(ContentReference contentReference)
+        {
+            return _contentStore.ContentExists(contentReference);
+        }
+
+        public bool ContentValid(ContentReference contentReference)
+        {
+            return _contentStore.ContentValid(contentReference);
+        }
+
         public int? FetchLogPosition()
         {
             return _contentStore.FetchLogPosition();
