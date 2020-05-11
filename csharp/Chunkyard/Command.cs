@@ -10,26 +10,27 @@ namespace Chunkyard
 {
     internal class Command
     {
-        public const string DefaultRepository = ".chunkyard";
         public const int LatestLogPosition = -1;
 
-        private static readonly string RootDirectoryPath = Path.GetFullPath(".");
-        private static readonly string ChunkyardDirectoryPath = Path.Combine(RootDirectoryPath, DefaultRepository);
-        private static readonly string ProjectFilePath = Path.Combine(RootDirectoryPath, ".chunkyardproject");
-        private static readonly string CacheDirectoryPath = Path.Combine(ChunkyardDirectoryPath, "cache");
+        private const string DefaultProjectFile = ".chunkyardproject";
+
+        private static readonly string CacheDirectoryPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Chunkyard",
+            "cache");
 
         private static readonly ILogger _log = Log.ForContext<Command>();
 
         public static void Init()
         {
-            if (File.Exists(ProjectFilePath))
+            if (File.Exists(DefaultProjectFile))
             {
-                _log.Information("{File} already exists", ProjectFilePath);
+                _log.Information("{File} already exists", DefaultProjectFile);
             }
             else
             {
-                _log.Information("Creating {File}", ProjectFilePath);
-                File.WriteAllText(ProjectFilePath, "& ." + Environment.NewLine);
+                _log.Information("Creating {File}", DefaultProjectFile);
+                File.WriteAllText(DefaultProjectFile, "& ." + Environment.NewLine);
             }
         }
 
@@ -136,7 +137,7 @@ namespace Chunkyard
         private static IEnumerable<string> FindFiles()
         {
             return FileFetcher.Find(
-                File.ReadAllLines(ProjectFilePath));
+                File.ReadAllLines(DefaultProjectFile));
         }
     }
 }

@@ -70,28 +70,11 @@ namespace Chunkyard
                 throw new ChunkyardException($"Rooted paths are currently not supported: {directory}");
             }
 
-            var allFiles = Directory.EnumerateFiles(
+            return Directory.EnumerateFiles(
                 directory,
                 "*",
                 SearchOption.AllDirectories)
                 .ToList();
-
-            // TODO
-            var internalExcludeFuzzy = $"\\{Command.DefaultRepository}[\\\\\\/]";
-            var toRemove = new List<string>();
-            var matches = FindMatches(internalExcludeFuzzy, allFiles);
-
-            foreach (var excludedFile in matches)
-            {
-                toRemove.Add(excludedFile);
-            }
-
-            foreach (var file in toRemove)
-            {
-                allFiles.Remove(file);
-            }
-
-            return allFiles;
         }
 
         private static IEnumerable<string> FindMatches(string fuzzyPattern, IEnumerable<string> lines)

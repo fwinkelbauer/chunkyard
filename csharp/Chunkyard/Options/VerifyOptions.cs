@@ -17,7 +17,7 @@ namespace Chunkyard.Options
             Shallow = shallow;
         }
 
-        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.DefaultRepository)]
+        [Option('r', "repository", Required = true, HelpText = "The repository")]
         public string Repository { get; }
 
         [Option('l', "log-position", Required = false, HelpText = "The log position", Default = Command.LatestLogPosition)]

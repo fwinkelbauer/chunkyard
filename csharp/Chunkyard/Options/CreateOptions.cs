@@ -11,7 +11,7 @@ namespace Chunkyard.Options
             Cached = cached;
         }
 
-        [Option('r', "repository", Required = false, HelpText = "The repository", Default = Command.DefaultRepository)]
+        [Option('r', "repository", Required = true, HelpText = "The repository")]
         public string Repository { get; }
 
         [Option('c', "cached", Required = false, HelpText = "Use a file cache to improve performance", Default = false)]
