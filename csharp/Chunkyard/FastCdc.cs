@@ -44,14 +44,14 @@ namespace Chunkyard
         }
 
         private static IEnumerable<int> ComputeCuts(
-            string filePath,
+            string file,
             int minChunkSizeInByte,
             int avgChunkSizeInByte,
             int maxChunkSizeInByte)
         {
             var startInfo = new ProcessStartInfo(
                 ProcessName,
-                $"\"{filePath}\" {minChunkSizeInByte} {avgChunkSizeInByte} {maxChunkSizeInByte}")
+                $"\"{file}\" {minChunkSizeInByte} {avgChunkSizeInByte} {maxChunkSizeInByte}")
             {
                 RedirectStandardOutput = true
             };

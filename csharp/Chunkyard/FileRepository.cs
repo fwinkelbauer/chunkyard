@@ -23,15 +23,15 @@ namespace Chunkyard
 
         public void StoreContent(Uri contentUri, byte[] value)
         {
-            var filePath = ToFilePath(contentUri);
+            var file = ToFilePath(contentUri);
 
-            if (!File.Exists(filePath))
+            if (!File.Exists(file))
             {
                 Directory.CreateDirectory(
-                    Path.GetDirectoryName(filePath));
+                    Path.GetDirectoryName(file));
 
                 using var fileStream = new FileStream(
-                    filePath,
+                    file,
                     FileMode.CreateNew,
                     FileAccess.Write);
 
@@ -76,13 +76,13 @@ namespace Chunkyard
                 ? currentLogPosition.Value + 1
                 : 0;
 
-            var filePath = ToFilePath(logName, newLogPosition);
+            var file = ToFilePath(logName, newLogPosition);
 
             Directory.CreateDirectory(
-                Path.GetDirectoryName(filePath));
+                Path.GetDirectoryName(file));
 
             using var fileStream = new FileStream(
-                filePath,
+                file,
                 FileMode.CreateNew,
                 FileAccess.Write);
 
@@ -154,13 +154,13 @@ namespace Chunkyard
         private string ToFilePath(Uri contentUri)
         {
             var hash = Id.HashFromContentUri(contentUri);
-            var directoryPath = Path.Combine(
+            var directory = Path.Combine(
                 _contentDirectory,
                 Id.AlgorithmFromContentUri(contentUri).Name.ToLower(),
                 hash.Substring(0, 2));
 
             return Path.Combine(
-                directoryPath,
+                directory,
                 hash);
         }
     }

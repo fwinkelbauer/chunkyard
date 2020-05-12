@@ -12,8 +12,6 @@ namespace Chunkyard
     {
         public const int LatestLogPosition = -1;
 
-        private const string DefaultProjectFile = ".chunkyardproject";
-
         private static readonly string CacheDirectoryPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "chunkyard",
@@ -21,22 +19,9 @@ namespace Chunkyard
 
         private static readonly ILogger _log = Log.ForContext<Command>();
 
-        public static void Init()
+        public static void PreviewFiles(PreviewOptions o)
         {
-            if (File.Exists(DefaultProjectFile))
-            {
-                _log.Information("{File} already exists", DefaultProjectFile);
-            }
-            else
-            {
-                _log.Information("Creating {File}", DefaultProjectFile);
-                File.WriteAllText(DefaultProjectFile, "& ." + Environment.NewLine);
-            }
-        }
-
-        public static void ShowFiles()
-        {
-            foreach (var file in FindFiles())
+            foreach (var file in FileFetcher.Find(o.Files, o.ExcludePatterns))
             {
                 Console.WriteLine(file);
             }
@@ -48,10 +33,10 @@ namespace Chunkyard
 
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository, o.Cached);
 
-            foreach (var filePath in FindFiles())
+            foreach (var file in FileFetcher.Find(o.Files, o.ExcludePatterns))
             {
-                using var fileStream = File.OpenRead(filePath);
-                snapshotBuilder.AddContent(fileStream, filePath);
+                using var fileStream = File.OpenRead(file);
+                snapshotBuilder.AddContent(fileStream, file);
             }
 
             var newLogPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
@@ -109,14 +94,14 @@ namespace Chunkyard
         }
 
         private static SnapshotBuilder CreateSnapshotBuilder(
-            string repositoryPath,
+            string repository,
             bool cached = false)
         {
-            _log.Information("Using repository {Repository}", repositoryPath);
+            _log.Information("Using repository {Repository}", repository);
 
             var nonceGenerator = new NonceGenerator();
             IContentStore contentStore = new ContentStore(
-                new FileRepository(repositoryPath),
+                new FileRepository(repository),
                 nonceGenerator,
                 new ContentStoreConfig(
                     HashAlgorithmName.SHA256,
@@ -133,12 +118,6 @@ namespace Chunkyard
                     new ConsolePrompt()),
                 nonceGenerator,
                 contentStore);
-        }
-
-        private static IEnumerable<string> FindFiles()
-        {
-            return FileFetcher.Find(
-                File.ReadAllLines(DefaultProjectFile));
         }
     }
 }
