@@ -16,7 +16,7 @@ namespace Chunkyard
 
         private static readonly string CacheDirectoryPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "Chunkyard",
+            "chunkyard",
             "cache");
 
         private static readonly ILogger _log = Log.ForContext<Command>();
