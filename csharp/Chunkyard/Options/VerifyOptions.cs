@@ -13,7 +13,7 @@ namespace Chunkyard.Options
         {
             Repository = repository;
             LogPosition = logPosition;
-            IncludeFuzzy = includeFuzzy;
+            IncludeFuzzy = includeFuzzy ?? string.Empty;
             Shallow = shallow;
         }
 
@@ -23,7 +23,7 @@ namespace Chunkyard.Options
         [Option('l', "log-position", Required = false, HelpText = "The log position", Default = Command.LatestLogPosition)]
         public int LogPosition { get; }
 
-        [Option('i', "include", Required = false, HelpText = "The include fuzzy pattern", Default = ".*")]
+        [Option('i', "include", Required = false, HelpText = "The include fuzzy pattern")]
         public string IncludeFuzzy { get; }
 
         [Option('s', "shallow", Required = false, HelpText = "Do not verify chunk hashes", Default = false)]

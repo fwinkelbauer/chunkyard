@@ -8,9 +8,9 @@ namespace Chunkyard
 
         public Fuzzy(string pattern)
         {
-            _compiledRegex = new Regex(pattern
-                .EnsureNotNull(nameof(pattern))
-                .Replace(" ", ".*"));
+            _compiledRegex = new Regex(string.IsNullOrEmpty(pattern)
+                ? ".*"
+                : pattern.Replace(" ", ".*"));
         }
 
         public bool IsMatch(string input)

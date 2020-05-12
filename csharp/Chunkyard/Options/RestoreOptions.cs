@@ -14,7 +14,7 @@ namespace Chunkyard.Options
         {
             Repository = repository;
             Directory = directory;
-            IncludeFuzzy = includeFuzzy;
+            IncludeFuzzy = includeFuzzy ?? string.Empty;
             LogPosition = logPosition;
             Overwrite = overwrite;
         }
@@ -25,7 +25,7 @@ namespace Chunkyard.Options
         [Option('d', "directory", Required = false, HelpText = "The directory to restore into", Default = ".")]
         public string Directory { get; }
 
-        [Option('i', "include", Required = false, HelpText = "The include fuzzy pattern", Default = ".*")]
+        [Option('i', "include", Required = false, HelpText = "The include fuzzy pattern")]
         public string IncludeFuzzy { get; }
 
         [Option('l', "log-position", Required = false, HelpText = "The log position", Default = Command.LatestLogPosition)]
