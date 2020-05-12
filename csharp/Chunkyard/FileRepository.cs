@@ -36,6 +36,7 @@ namespace Chunkyard
                     FileAccess.Write);
 
                 fileStream.Write(value);
+                fileStream.Flush(true);
             }
         }
 
@@ -86,6 +87,7 @@ namespace Chunkyard
                 FileAccess.Write);
 
             fileStream.Write(value);
+            fileStream.Flush(true);
 
             return newLogPosition;
         }
