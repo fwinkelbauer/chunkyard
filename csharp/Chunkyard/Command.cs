@@ -129,7 +129,8 @@ namespace Chunkyard
                 : contentStore;
 
             return SnapshotBuilder.OpenRepository(
-                new ConsolePrompt(),
+                new EnvironmentPrompt(
+                    new ConsolePrompt()),
                 nonceGenerator,
                 contentStore);
         }

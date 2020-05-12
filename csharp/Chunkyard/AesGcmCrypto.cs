@@ -43,7 +43,7 @@ namespace Chunkyard
             int iterations)
         {
             using var rfc2898 = new Rfc2898DeriveBytes(
-                password,
+                password.EnsureNotNullOrEmpty(nameof(password)),
                 salt,
                 iterations,
                 HashAlgorithmName.SHA256);

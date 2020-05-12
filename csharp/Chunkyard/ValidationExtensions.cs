@@ -15,5 +15,17 @@ namespace Chunkyard
 
             return value;
         }
+
+        public static string EnsureNotNullOrEmpty(
+            this string value,
+            string paramName)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentNullException(paramName);
+            }
+
+            return value;
+        }
     }
 }
