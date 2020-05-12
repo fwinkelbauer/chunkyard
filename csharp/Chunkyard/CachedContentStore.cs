@@ -22,7 +22,9 @@ namespace Chunkyard
                 HashAlgorithmName.SHA256,
                 _contentStore.StoreUri.AbsoluteUri);
 
-            _cacheDirectory = Path.Combine(cacheDirectory, hash);
+            var shortHash = hash.Substring(0, 8);
+
+            _cacheDirectory = Path.Combine(cacheDirectory, shortHash);
         }
 
         public Uri StoreUri
