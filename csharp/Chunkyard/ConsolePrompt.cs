@@ -22,35 +22,40 @@ namespace Chunkyard
             return ReadPassword("Password: ");
         }
 
-        // https://stackoverflow.com/questions/23433980/c-sharp-console-hide-the-input-from-console-window-while-typing
-        private static string ReadPassword(string prompt)
+        // https://stackoverflow.com/questions/3404421/password-masking-console-application
+        public static string ReadPassword(string prompt)
         {
             Console.Write(prompt);
 
-            var input = new StringBuilder();
+            var result = new StringBuilder();
 
             while (true)
             {
                 var key = Console.ReadKey(true);
 
-                if (key.Key == ConsoleKey.Enter)
+                switch (key.Key)
                 {
-                    break;
-                }
-                else if (key.Key == ConsoleKey.Backspace
-                    && input.Length > 0)
-                {
-                    input.Remove(input.Length - 1, 1);
-                }
-                else
-                {
-                    input.Append(key.KeyChar);
+                    case ConsoleKey.Enter:
+                        Console.WriteLine();
+
+                        return result.ToString();
+                    case ConsoleKey.Backspace:
+                        if (result.Length == 0)
+                        {
+                            continue;
+                        }
+
+                        result.Length--;
+                        Console.Write("\b \b");
+
+                        continue;
+                    default:
+                        result.Append(key.KeyChar);
+                        Console.Write("*");
+
+                        continue;
                 }
             }
-
-            Console.WriteLine();
-
-            return input.ToString();
         }
     }
 }
