@@ -9,7 +9,6 @@ namespace Chunkyard
 {
     internal class SnapshotBuilder
     {
-        private const string SnapshotContentName = "snapshot";
         private const int Iterations = 1000;
 
         private static readonly ILogger _log =
@@ -46,7 +45,7 @@ namespace Chunkyard
             var contentReference = _contentStore.StoreContent(
                 new Snapshot(creationTime, _storedContentReferences),
                 _key.Key,
-                SnapshotContentName);
+                string.Empty);
 
             // We do not want to leak any fingerprints in an unencrypted
             // reference

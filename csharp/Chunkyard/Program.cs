@@ -41,7 +41,6 @@ namespace Chunkyard
             catch (Exception e)
             {
                 Log.Error("{Error}", e.Message);
-                Log.Debug(e, "An error occurred");
                 return 1;
             }
         }
