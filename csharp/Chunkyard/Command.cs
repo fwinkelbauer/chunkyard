@@ -21,9 +21,11 @@ namespace Chunkyard
 
         public static void PreviewFiles(PreviewOptions o)
         {
-            foreach (var file in FileFetcher.Find(o.Files, o.ExcludePatterns))
+            var found = FileFetcher.Find(o.Files, o.ExcludePatterns);
+
+            foreach ((_, var contentName) in found)
             {
-                Console.WriteLine(file);
+                Console.WriteLine(contentName);
             }
         }
 
@@ -32,11 +34,12 @@ namespace Chunkyard
             _log.Information("Creating new snapshot");
 
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository, o.Cached);
+            var found = FileFetcher.Find(o.Files, o.ExcludePatterns);
 
-            foreach (var file in FileFetcher.Find(o.Files, o.ExcludePatterns))
+            foreach ((var foundFile, var contentName) in found)
             {
-                using var fileStream = File.OpenRead(file);
-                snapshotBuilder.AddContent(fileStream, file);
+                using var fileStream = File.OpenRead(foundFile);
+                snapshotBuilder.AddContent(fileStream, contentName);
             }
 
             var newLogPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);

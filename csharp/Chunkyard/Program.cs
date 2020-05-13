@@ -39,7 +39,7 @@ namespace Chunkyard
             }
             catch (Exception e)
             {
-                Log.Error("{Error}", e.Message);
+                Log.Error(e, "Unexpected error");
                 return 1;
             }
         }
