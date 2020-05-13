@@ -5,7 +5,9 @@ namespace Chunkyard
 {
     internal class Snapshot
     {
-        public Snapshot(DateTime creationTime, IEnumerable<ContentReference> contentReferences)
+        public Snapshot(
+            DateTime creationTime,
+            IEnumerable<ContentReference> contentReferences)
         {
             CreationTime = creationTime;
             ContentReferences = new List<ContentReference>(contentReferences);
@@ -13,6 +15,6 @@ namespace Chunkyard
 
         public DateTime CreationTime { get; }
 
-        public IReadOnlyCollection<ContentReference> ContentReferences { get; }
+        public IEnumerable<ContentReference> ContentReferences { get; }
     }
 }

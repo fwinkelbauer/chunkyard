@@ -12,6 +12,6 @@ namespace Chunkyard
 
         public string Name { get; }
 
-        public IReadOnlyCollection<Chunk> Chunks { get; }
+        public IEnumerable<Chunk> Chunks { get; }
     }
 }
