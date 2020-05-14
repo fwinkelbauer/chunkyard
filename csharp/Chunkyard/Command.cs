@@ -86,7 +86,7 @@ namespace Chunkyard
                         index++,
                         filteredContentReferences.Count);
 
-                    error |= true;
+                    error = true;
                 }
                 else if (!o.Shallow && !snapshotBuilder.ContentStore.ContentValid(contentReference))
                 {
@@ -96,7 +96,7 @@ namespace Chunkyard
                         index++,
                         filteredContentReferences.Count);
 
-                    error |= true;
+                    error = true;
                 }
                 else
                 {
@@ -150,25 +150,51 @@ namespace Chunkyard
                 o.IncludeFuzzy,
                 snapshot.ContentReferences);
 
+            var error = false;
+
             foreach (var contentReference in filteredContentReferences)
             {
                 var file = Path.Combine(
                     o.Directory,
                     contentReference.Name);
 
-                _log.Information(
-                    "Restoring: {File} ({CurrentIndex}/{MaxIndex})",
-                    file,
-                    index++,
-                    filteredContentReferences.Count);
+                try
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(file));
 
-                Directory.CreateDirectory(Path.GetDirectoryName(file));
-                using var stream = new FileStream(file, mode, FileAccess.Write);
+                    using var stream = new FileStream(
+                        file,
+                        mode,
+                        FileAccess.Write);
 
-                snapshotBuilder.ContentStore.RetrieveContent(
-                    contentReference,
-                    snapshotBuilder.Key.Key,
-                    stream);
+                    snapshotBuilder.ContentStore.RetrieveContent(
+                        contentReference,
+                        snapshotBuilder.Key.Key,
+                        stream);
+
+                    _log.Information(
+                        "Restored: {File} ({CurrentIndex}/{MaxIndex})",
+                        file,
+                        index++,
+                        filteredContentReferences.Count);
+                }
+                catch (Exception e)
+                {
+                    _log.Error(
+                        e,
+                        "Error: {File} ({CurrentIndex}/{MaxIndex})",
+                        file,
+                        index++,
+                        filteredContentReferences.Count);
+
+                    error = true;
+                }
+            }
+
+            if (error)
+            {
+                throw new ChunkyardException(
+                    "Detected errors while restoring snapshot");
             }
         }
 
