@@ -44,24 +44,39 @@ namespace Chunkyard
             string file,
             IEnumerable<string> excludePatterns)
         {
-            var files = Directory.EnumerateFiles(
-                file,
-                "*",
-                SearchOption.AllDirectories)
-                .ToList();
+            if (Directory.Exists(file))
+            {
+                return Filter(
+                    Directory.EnumerateFiles(
+                        file,
+                        "*",
+                        SearchOption.AllDirectories),
+                    excludePatterns);
+            }
+
+            return Filter(
+                new[] { file },
+                excludePatterns);
+        }
+
+        private static List<string> Filter(
+            IEnumerable<string> files,
+            IEnumerable<string> excludePatterns)
+        {
+            var filteredFiles = files.ToList();
 
             foreach (var excludePattern in excludePatterns)
             {
                 var fuzzy = new Fuzzy(excludePattern);
-                var excludedFiles = files.Where(f => fuzzy.IsMatch(f));
+                var excludedFiles = filteredFiles.Where(f => fuzzy.IsMatch(f));
 
                 foreach (var excludedFile in excludedFiles)
                 {
-                    files.Remove(excludedFile);
+                    filteredFiles.Remove(excludedFile);
                 }
             }
 
-            return files;
+            return filteredFiles;
         }
     }
 }
