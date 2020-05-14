@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using Serilog;
 
 namespace Chunkyard
 {
@@ -11,11 +10,6 @@ namespace Chunkyard
     {
         private const int Iterations = 1000;
 
-        private static readonly ILogger _log =
-            Log.ForContext<SnapshotBuilder>();
-
-        private readonly IContentStore _contentStore;
-        private readonly KeyInformation _key;
         private readonly List<ContentReference> _storedContentReferences;
 
         private int? _currentLogPosition;
@@ -25,26 +19,31 @@ namespace Chunkyard
             KeyInformation key,
             int? currentLogPosition)
         {
-            _contentStore = contentStore;
-            _key = key;
+            ContentStore = contentStore;
+            Key = key;
+
             _currentLogPosition = currentLogPosition;
 
             _storedContentReferences = new List<ContentReference>();
         }
 
+        public IContentStore ContentStore { get; }
+
+        public KeyInformation Key { get; }
+
         public void AddContent(Stream inputStream, string contentName)
         {
-            _storedContentReferences.Add(_contentStore.StoreContent(
+            _storedContentReferences.Add(ContentStore.StoreContent(
                 inputStream,
-                _key.Key,
+                Key.Key,
                 contentName));
         }
 
         public int WriteSnapshot(DateTime creationTime)
         {
-            var contentReference = _contentStore.StoreContent(
+            var contentReference = ContentStore.StoreContent(
                 new Snapshot(creationTime, _storedContentReferences),
-                _key.Key,
+                Key.Key,
                 string.Empty);
 
             // We do not want to leak any fingerprints in an unencrypted
@@ -58,88 +57,25 @@ namespace Chunkyard
                         c.Nonce,
                         c.Tag)));
 
-            _currentLogPosition = _contentStore.AppendToLog(
+            _currentLogPosition = ContentStore.AppendToLog(
                 new SnapshotReference(
                     safeContentReference,
-                    _key.Salt,
-                    _key.Iterations),
+                    Key.Salt,
+                    Key.Iterations),
                 _currentLogPosition);
 
             return _currentLogPosition.Value;
         }
 
-        public void RestoreSnapshot(
-            int restoreLogPosition,
-            Func<string, Stream> writeFunc,
-            string restoreFuzzy)
-        {
-            var snapshot = LoadSnapshotFromLog(restoreLogPosition);
-
-            var index = 1;
-            var filteredContentReferences = FuzzyFilter(
-                restoreFuzzy,
-                snapshot.ContentReferences)
-                .ToArray();
-
-            foreach (var contentReference in filteredContentReferences)
-            {
-                _log.Information(
-                    "Restoring: {File} ({CurrentIndex}/{MaxIndex})",
-                    contentReference.Name,
-                    index++,
-                    filteredContentReferences.Length);
-
-                using var stream = writeFunc(contentReference.Name);
-                _contentStore.RetrieveContent(
-                    contentReference,
-                    _key.Key,
-                    stream);
-            }
-        }
-
-        public void VerifySnapshot(
-            int verifyLogPosition,
-            string verifyFuzzy,
-            bool shallow)
-        {
-            var snapshot = LoadSnapshotFromLog(verifyLogPosition);
-
-            var index = 1;
-            var filteredContentReferences = FuzzyFilter(
-                verifyFuzzy,
-                snapshot.ContentReferences)
-                .ToArray();
-
-            foreach (var contentReference in filteredContentReferences)
-            {
-                _log.Information(
-                    "Verifying: {File} ({CurrentIndex}/{MaxIndex})",
-                    contentReference.Name,
-                    index++,
-                    filteredContentReferences.Length);
-
-                if (shallow && !_contentStore.ContentExists(contentReference))
-                {
-                    throw new ChunkyardException(
-                        $"Missing content: {contentReference.Name}");
-                }
-                else if (!_contentStore.ContentValid(contentReference))
-                {
-                    throw new ChunkyardException(
-                        $"Corrupted content: {contentReference.Name}");
-                }
-            }
-        }
-
         public IEnumerable<(int, Snapshot)> GetSnapshots()
         {
-            foreach (var logPosition in _contentStore.ListLogPositions())
+            foreach (var logPosition in ContentStore.ListLogPositions())
             {
-                yield return (logPosition, LoadSnapshotFromLog(logPosition));
+                yield return (logPosition, GetSnapshot(logPosition));
             }
         }
 
-        private Snapshot LoadSnapshotFromLog(int logPosition)
+        public Snapshot GetSnapshot(int logPosition)
         {
             if (!_currentLogPosition.HasValue)
             {
@@ -155,27 +91,12 @@ namespace Chunkyard
                 ? logPosition
                 : _currentLogPosition.Value + logPosition + 1;
 
-            var snapshotReference = _contentStore.RetrieveFromLog<SnapshotReference>(
+            var snapshotReference = ContentStore.RetrieveFromLog<SnapshotReference>(
                 resolveLogPosition);
 
-            return _contentStore.RetrieveContent<Snapshot>(
+            return ContentStore.RetrieveContent<Snapshot>(
                 snapshotReference.ContentReference,
-                _key.Key);
-        }
-
-        private static IEnumerable<ContentReference> FuzzyFilter(
-            string fuzzyPattern,
-            IEnumerable<ContentReference> contentReferences)
-        {
-            var fuzzy = new Fuzzy(fuzzyPattern);
-
-            foreach (var contentReference in contentReferences)
-            {
-                if (fuzzy.IsMatch(contentReference.Name))
-                {
-                    yield return contentReference;
-                }
-            }
+                Key.Key);
         }
 
         public static SnapshotBuilder OpenRepository(
