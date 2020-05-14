@@ -114,6 +114,24 @@ namespace Chunkyard
             }
         }
 
+        public static void ListSnapshot(ListOptions o)
+        {
+            var snapshotBuilder = CreateSnapshotBuilder(
+                o.Repository);
+
+            _log.Information("Listing snapshot {LogPosition}", o.LogPosition);
+
+            var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
+            var filteredContentReferences = FuzzyFilter(
+                o.IncludeFuzzy,
+                snapshot.ContentReferences);
+
+            foreach (var contentReference in filteredContentReferences)
+            {
+                Console.WriteLine(contentReference.Name);
+            }
+        }
+
         public static void RestoreSnapshot(RestoreOptions o)
         {
             var snapshotBuilder = CreateSnapshotBuilder(

@@ -21,11 +21,12 @@ namespace Chunkyard
 
         private static int ProcessArguments(string[] args)
         {
-            return Parser.Default.ParseArguments<PreviewOptions, RestoreOptions, CreateOptions, VerifyOptions, LogOptions>(args).MapResult(
+            return Parser.Default.ParseArguments<PreviewOptions, RestoreOptions, CreateOptions, VerifyOptions, ListOptions, LogOptions>(args).MapResult(
                 (PreviewOptions o) => Run(() => Command.PreviewFiles(o)),
                 (RestoreOptions o) => Run(() => Command.RestoreSnapshot(o)),
                 (CreateOptions o) => Run(() => Command.CreateSnapshot(o)),
                 (VerifyOptions o) => Run(() => Command.VerifySnapshot(o)),
+                (ListOptions o) => Run(() => Command.ListSnapshot(o)),
                 (LogOptions o) => Run(() => Command.ShowLogPositions(o)),
                 _ => 1);
         }
