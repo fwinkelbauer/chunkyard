@@ -76,6 +76,8 @@ namespace Chunkyard
                 }
             }
 
+            filteredFiles.Sort();
+
             return filteredFiles;
         }
     }
