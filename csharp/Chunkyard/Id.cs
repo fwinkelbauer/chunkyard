@@ -41,13 +41,13 @@ namespace Chunkyard
 
         public static string HashFromContentUri(Uri contentUri)
         {
-            // Verify that this is a content URI
+            // Verify that this is a valid content URI
             _ = AlgorithmFromContentUri(contentUri);
 
             return contentUri.EnsureNotNull(nameof(contentUri)).Host;
         }
 
-        public static Uri ToContentUri(
+        private static Uri ToContentUri(
             HashAlgorithmName hashAlgorithmName,
             string hash)
         {

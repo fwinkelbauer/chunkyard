@@ -2,7 +2,7 @@
 
 namespace Chunkyard
 {
-    internal class NonceGenerator
+    public class NonceGenerator
     {
         private readonly Dictionary<string, byte[]> _noncesByFingerprints;
 
