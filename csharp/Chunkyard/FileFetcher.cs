@@ -53,10 +53,16 @@ namespace Chunkyard
                         SearchOption.AllDirectories),
                     excludePatterns);
             }
-
-            return Filter(
-                new[] { file },
-                excludePatterns);
+            else if (File.Exists(file))
+            {
+                return Filter(
+                    new[] { file },
+                    excludePatterns);
+            }
+            else
+            {
+                throw new FileNotFoundException("Could not find file", file);
+            }
         }
 
         private static List<string> Filter(
