@@ -14,7 +14,8 @@ namespace Chunkyard
         public const int LatestLogPosition = -1;
 
         private static readonly string CacheDirectoryPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.ApplicationData),
             "chunkyard",
             "cache");
 
