@@ -78,7 +78,7 @@ namespace Chunkyard
 
             foreach (var contentReference in filteredContentReferences)
             {
-                if (!snapshotBuilder.ContentStore.ContentExists(contentReference))
+                if (!snapshotBuilder.ContentExists(contentReference))
                 {
                     _log.Warning(
                         "Missing: {Content} ({CurrentIndex}/{MaxIndex})",
@@ -88,7 +88,7 @@ namespace Chunkyard
 
                     error = true;
                 }
-                else if (!o.Shallow && !snapshotBuilder.ContentStore.ContentValid(contentReference))
+                else if (!o.Shallow && !snapshotBuilder.ContentValid(contentReference))
                 {
                     _log.Warning(
                         "Corrupted: {Content} ({CurrentIndex}/{MaxIndex})",
@@ -167,9 +167,8 @@ namespace Chunkyard
                         mode,
                         FileAccess.Write);
 
-                    snapshotBuilder.ContentStore.RetrieveContent(
+                    snapshotBuilder.RetrieveContent(
                         contentReference,
-                        snapshotBuilder.Key.Key,
                         stream);
 
                     _log.Information(

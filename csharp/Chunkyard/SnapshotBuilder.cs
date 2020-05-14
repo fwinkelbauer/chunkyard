@@ -10,6 +10,8 @@ namespace Chunkyard
     {
         private const int Iterations = 1000;
 
+        private readonly IContentStore _contentStore;
+        private readonly KeyInformation _key;
         private readonly List<ContentReference> _storedContentReferences;
 
         private int? _currentLogPosition;
@@ -19,31 +21,26 @@ namespace Chunkyard
             KeyInformation key,
             int? currentLogPosition)
         {
-            ContentStore = contentStore;
-            Key = key;
-
+            _contentStore = contentStore;
+            _key = key;
             _currentLogPosition = currentLogPosition;
 
             _storedContentReferences = new List<ContentReference>();
         }
 
-        public IContentStore ContentStore { get; }
-
-        public KeyInformation Key { get; }
-
         public void AddContent(Stream inputStream, string contentName)
         {
-            _storedContentReferences.Add(ContentStore.StoreContent(
+            _storedContentReferences.Add(_contentStore.StoreContent(
                 inputStream,
-                Key.Key,
+                _key.Key,
                 contentName));
         }
 
         public int WriteSnapshot(DateTime creationTime)
         {
-            var contentReference = ContentStore.StoreContent(
+            var contentReference = _contentStore.StoreContent(
                 new Snapshot(creationTime, _storedContentReferences),
-                Key.Key,
+                _key.Key,
                 string.Empty);
 
             // We do not want to leak any fingerprints in an unencrypted
@@ -57,11 +54,11 @@ namespace Chunkyard
                         c.Nonce,
                         c.Tag)));
 
-            _currentLogPosition = ContentStore.AppendToLog(
+            _currentLogPosition = _contentStore.AppendToLog(
                 new SnapshotReference(
                     safeContentReference,
-                    Key.Salt,
-                    Key.Iterations),
+                    _key.Salt,
+                    _key.Iterations),
                 _currentLogPosition);
 
             return _currentLogPosition.Value;
@@ -69,7 +66,7 @@ namespace Chunkyard
 
         public IEnumerable<(int, Snapshot)> GetSnapshots()
         {
-            foreach (var logPosition in ContentStore.ListLogPositions())
+            foreach (var logPosition in _contentStore.ListLogPositions())
             {
                 yield return (logPosition, GetSnapshot(logPosition));
             }
@@ -91,12 +88,32 @@ namespace Chunkyard
                 ? logPosition
                 : _currentLogPosition.Value + logPosition + 1;
 
-            var snapshotReference = ContentStore.RetrieveFromLog<SnapshotReference>(
+            var snapshotReference = _contentStore.RetrieveFromLog<SnapshotReference>(
                 resolveLogPosition);
 
-            return ContentStore.RetrieveContent<Snapshot>(
+            return _contentStore.RetrieveContent<Snapshot>(
                 snapshotReference.ContentReference,
-                Key.Key);
+                _key.Key);
+        }
+
+        public bool ContentExists(ContentReference contentReference)
+        {
+            return _contentStore.ContentExists(contentReference);
+        }
+
+        public bool ContentValid(ContentReference contentReference)
+        {
+            return _contentStore.ContentValid(contentReference);
+        }
+
+        public void RetrieveContent(
+            ContentReference contentReference,
+            Stream outputStream)
+        {
+            _contentStore.RetrieveContent(
+                contentReference,
+                _key.Key,
+                outputStream);
         }
 
         public static SnapshotBuilder OpenRepository(
