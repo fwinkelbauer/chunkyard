@@ -74,7 +74,9 @@ namespace Chunkyard
             foreach (var excludePattern in excludePatterns)
             {
                 var fuzzy = new Fuzzy(excludePattern);
-                var excludedFiles = filteredFiles.Where(f => fuzzy.IsMatch(f));
+                var excludedFiles = filteredFiles
+                    .Where(f => fuzzy.IsMatch(f))
+                    .ToList();
 
                 foreach (var excludedFile in excludedFiles)
                 {
