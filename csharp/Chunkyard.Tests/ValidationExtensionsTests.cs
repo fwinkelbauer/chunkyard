@@ -48,5 +48,30 @@ namespace Chunkyard.Tests
 
             Assert.Equal(expectedValue, actualValue);
         }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(11)]
+        public static void EnsureBetween_Throws_If_Value_Is_Not_In_Range(
+            int value)
+        {
+            var ex = Assert.Throws<ArgumentOutOfRangeException>(
+                () => value.EnsureBetween(0, 10, nameof(value)));
+
+            Assert.Equal(nameof(value), ex.ParamName);
+        }
+
+        [Fact]
+        public static void EnsureBetween_Returns_Value_If_In_Range()
+        {
+            var expectedValue = 5;
+
+            var actualValue = expectedValue.EnsureBetween(
+                0,
+                10,
+                nameof(expectedValue));
+
+            Assert.Equal(expectedValue, actualValue);
+        }
     }
 }
