@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using Xunit;
+﻿using Xunit;
 
 namespace Chunkyard.Tests
 {

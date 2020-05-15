@@ -1,5 +1,4 @@
-﻿using System;
-using Xunit;
+﻿using Xunit;
 
 namespace Chunkyard.Tests
 {
@@ -25,7 +24,7 @@ namespace Chunkyard.Tests
         {
             var generator = new NonceGenerator();
             var fingerprint = "some fingerprint";
-            var expectedNonce = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF};
+            var expectedNonce = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
             generator.Register(fingerprint, expectedNonce);
             var actualNonce = generator.GetNonce(fingerprint);
