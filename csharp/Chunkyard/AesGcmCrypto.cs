@@ -2,7 +2,7 @@
 
 namespace Chunkyard
 {
-    internal static class AesGcmCrypto
+    public static class AesGcmCrypto
     {
         private const int TAG_BYTES = 16;
         private const int KEY_BYTES = 32;
@@ -15,7 +15,8 @@ namespace Chunkyard
             byte[] nonce)
         {
             var tag = new byte[TAG_BYTES];
-            var ciphertext = new byte[plaintext.Length];
+            var ciphertext = new byte[
+                plaintext.EnsureNotNull(nameof(plaintext)).Length];
 
             using var aesGcm = new AesGcm(key);
             aesGcm.Encrypt(nonce, plaintext, ciphertext, tag);
@@ -29,7 +30,8 @@ namespace Chunkyard
             byte[] key,
             byte[] nonce)
         {
-            byte[] plaintext = new byte[ciphertext.Length];
+            byte[] plaintext = new byte[
+                ciphertext.EnsureNotNull(nameof(ciphertext)).Length];
 
             using var aesGcm = new AesGcm(key);
             aesGcm.Decrypt(nonce, ciphertext, tag, plaintext);

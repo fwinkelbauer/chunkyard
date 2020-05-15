@@ -1,6 +1,6 @@
 ﻿namespace Chunkyard
 {
-    internal class KeyInformation
+    public class KeyInformation
     {
         public KeyInformation(byte[] key, byte[] salt, int iterations)
         {
