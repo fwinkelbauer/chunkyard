@@ -78,33 +78,23 @@ namespace Chunkyard
 
             foreach (var contentReference in filteredContentReferences)
             {
+                _log.Information(
+                    "Validating: {File} ({CurrentIndex}/{MaxIndex})",
+                        contentReference.Name,
+                    index++,
+                    filteredContentReferences.Count);
+
                 if (!snapshotBuilder.ContentExists(contentReference))
                 {
-                    _log.Warning(
-                        "Missing: {Content} ({CurrentIndex}/{MaxIndex})",
-                        contentReference.Name,
-                        index++,
-                        filteredContentReferences.Count);
+                    _log.Warning("Missing: {Content}", contentReference.Name);
 
                     error = true;
                 }
                 else if (!o.Shallow && !snapshotBuilder.ContentValid(contentReference))
                 {
-                    _log.Warning(
-                        "Corrupted: {Content} ({CurrentIndex}/{MaxIndex})",
-                        contentReference.Name,
-                        index++,
-                        filteredContentReferences.Count);
+                    _log.Warning("Corrupted: {Content}", contentReference.Name);
 
                     error = true;
-                }
-                else
-                {
-                    _log.Information(
-                        "Valid: {File} ({CurrentIndex}/{MaxIndex})",
-                        contentReference.Name,
-                        index++,
-                        filteredContentReferences.Count);
                 }
             }
 
@@ -160,6 +150,12 @@ namespace Chunkyard
 
                 try
                 {
+                    _log.Information(
+                        "Restoring: {File} ({CurrentIndex}/{MaxIndex})",
+                        file,
+                        index++,
+                        filteredContentReferences.Count);
+
                     Directory.CreateDirectory(Path.GetDirectoryName(file));
 
                     using var stream = new FileStream(
@@ -170,21 +166,10 @@ namespace Chunkyard
                     snapshotBuilder.RetrieveContent(
                         contentReference,
                         stream);
-
-                    _log.Information(
-                        "Restored: {File} ({CurrentIndex}/{MaxIndex})",
-                        file,
-                        index++,
-                        filteredContentReferences.Count);
                 }
                 catch (Exception e)
                 {
-                    _log.Error(
-                        e,
-                        "Error: {File} ({CurrentIndex}/{MaxIndex})",
-                        file,
-                        index++,
-                        filteredContentReferences.Count);
+                    _log.Error(e, "Error: {File}", file);
 
                     error = true;
                 }
