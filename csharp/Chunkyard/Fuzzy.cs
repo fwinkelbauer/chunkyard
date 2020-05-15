@@ -2,7 +2,7 @@
 
 namespace Chunkyard
 {
-    internal class Fuzzy
+    public class Fuzzy
     {
         private readonly Regex _compiledRegex;
 
