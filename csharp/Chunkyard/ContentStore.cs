@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -34,7 +35,7 @@ namespace Chunkyard
 
         public void RetrieveContent(
             ContentReference contentReference,
-            byte[] key,
+            KeyInformation key,
             Stream outputStream)
         {
             foreach (var chunk in contentReference.Chunks)
@@ -42,7 +43,7 @@ namespace Chunkyard
                 var decryptedData = AesGcmCrypto.Decrypt(
                     _repository.RetrieveContent(chunk.ContentUri),
                     chunk.Tag,
-                    key,
+                    key.Key,
                     chunk.Nonce);
 
                 outputStream.Write(decryptedData);
@@ -51,7 +52,7 @@ namespace Chunkyard
 
         public T RetrieveContent<T>(
             ContentReference contentReference,
-            byte[] key) where T : notnull
+            KeyInformation key) where T : notnull
         {
             using var memoryStream = new MemoryStream();
             RetrieveContent(
@@ -64,23 +65,27 @@ namespace Chunkyard
 
         public ContentReference StoreContent(
             Stream inputStream,
-            byte[] key,
+            KeyInformation key,
             string contentName)
         {
             return new ContentReference(
                 contentName,
-                WriteChunks(inputStream, key));
+                WriteChunks(inputStream, key),
+                key.Salt,
+                key.Iterations);
         }
 
         public ContentReference StoreContent<T>(
             T value,
-            byte[] key,
+            KeyInformation key,
             string contentName) where T : notnull
         {
             using var memoryStream = new MemoryStream(ToBytes(value));
             return new ContentReference(
                 contentName,
-                WriteChunks(memoryStream, key));
+                WriteChunks(memoryStream, key),
+                key.Salt,
+                key.Iterations);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -112,19 +117,32 @@ namespace Chunkyard
             return _repository.FetchLogPosition(DefaultLogName);
         }
 
-        public int AppendToLog<T>(
-            T value,
-            int? currentLogPosition) where T : notnull
+        public int AppendToLog(
+            ContentReference contentReference,
+            int? currentLogPosition)
         {
+            // We do not want to leak any fingerprints in an unencrypted
+            // reference
+            var safeContentReference = new ContentReference(
+                contentReference.Name,
+                contentReference.Chunks.Select(
+                    c => new Chunk(
+                        c.ContentUri,
+                        string.Empty,
+                        c.Nonce,
+                        c.Tag)),
+                contentReference.Salt,
+                contentReference.Iterations);
+
             return _repository.AppendToLog(
-                ToBytes(value),
+                ToBytes(safeContentReference),
                 DefaultLogName,
                 currentLogPosition);
         }
 
-        public T RetrieveFromLog<T>(int logPosition) where T : notnull
+        public ContentReference RetrieveFromLog(int logPosition)
         {
-            return ToObject<T>(
+            return ToObject<ContentReference>(
                 _repository.RetrieveFromLog(DefaultLogName, logPosition));
         }
 
@@ -145,7 +163,9 @@ namespace Chunkyard
                 Encoding.UTF8.GetString(value));
         }
 
-        private IEnumerable<Chunk> WriteChunks(Stream stream, byte[] key)
+        private IEnumerable<Chunk> WriteChunks(
+            Stream stream,
+            KeyInformation key)
         {
             var chunkedDataItems = FastCdc.SplitIntoChunks(
                 stream,
@@ -163,7 +183,7 @@ namespace Chunkyard
 
                 var (encryptedData, tag) = AesGcmCrypto.Encrypt(
                     chunkedData,
-                    key,
+                    key.Key,
                     nonce);
 
                 var contentUri = Id.ComputeContentUri(

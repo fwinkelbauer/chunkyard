@@ -37,7 +37,7 @@ namespace Chunkyard
 
         public void RetrieveContent(
             ContentReference contentReference,
-            byte[] key,
+            KeyInformation key,
             Stream outputStream)
         {
             _contentStore.RetrieveContent(contentReference, key, outputStream);
@@ -45,14 +45,14 @@ namespace Chunkyard
 
         public T RetrieveContent<T>(
             ContentReference contentReference,
-            byte[] key) where T : notnull
+            KeyInformation key) where T : notnull
         {
             return _contentStore.RetrieveContent<T>(contentReference, key);
         }
 
         public ContentReference StoreContent(
             Stream inputStream,
-            byte[] key,
+            KeyInformation key,
             string contentName)
         {
             if (!(inputStream is FileStream fileStream))
@@ -93,7 +93,7 @@ namespace Chunkyard
 
         public ContentReference StoreContent<T>(
             T value,
-            byte[] key,
+            KeyInformation key,
             string contentName) where T : notnull
         {
             return _contentStore.StoreContent<T>(value, key, contentName);
@@ -114,16 +114,18 @@ namespace Chunkyard
             return _contentStore.FetchLogPosition();
         }
 
-        public int AppendToLog<T>(T value, int? currentLogPosition)
-            where T : notnull
+        public int AppendToLog(
+            ContentReference contentReference,
+            int? currentLogPosition)
         {
-            return _contentStore.AppendToLog<T>(value, currentLogPosition);
+            return _contentStore.AppendToLog(
+                contentReference,
+                currentLogPosition);
         }
 
-        public T RetrieveFromLog<T>(int logPosition)
-            where T : notnull
+        public ContentReference RetrieveFromLog(int logPosition)
         {
-            return _contentStore.RetrieveFromLog<T>(logPosition);
+            return _contentStore.RetrieveFromLog(logPosition);
         }
 
         public IEnumerable<int> ListLogPositions()

@@ -32,7 +32,7 @@ namespace Chunkyard
         {
             _storedContentReferences.Add(_contentStore.StoreContent(
                 inputStream,
-                _key.Key,
+                _key,
                 contentName));
         }
 
@@ -40,25 +40,11 @@ namespace Chunkyard
         {
             var contentReference = _contentStore.StoreContent(
                 new Snapshot(creationTime, _storedContentReferences),
-                _key.Key,
+                _key,
                 string.Empty);
 
-            // We do not want to leak any fingerprints in an unencrypted
-            // reference
-            var safeContentReference = new ContentReference(
-                contentReference.Name,
-                contentReference.Chunks.Select(
-                    c => new Chunk(
-                        c.ContentUri,
-                        string.Empty,
-                        c.Nonce,
-                        c.Tag)));
-
             _currentLogPosition = _contentStore.AppendToLog(
-                new SnapshotReference(
-                    safeContentReference,
-                    _key.Salt,
-                    _key.Iterations),
+                contentReference,
                 _currentLogPosition);
 
             return _currentLogPosition.Value;
@@ -88,12 +74,12 @@ namespace Chunkyard
                 ? logPosition
                 : _currentLogPosition.Value + logPosition + 1;
 
-            var snapshotReference = _contentStore.RetrieveFromLog<SnapshotReference>(
+            var contentReference = _contentStore.RetrieveFromLog(
                 resolveLogPosition);
 
             return _contentStore.RetrieveContent<Snapshot>(
-                snapshotReference.ContentReference,
-                _key.Key);
+                contentReference,
+                _key);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -112,7 +98,7 @@ namespace Chunkyard
         {
             _contentStore.RetrieveContent(
                 contentReference,
-                _key.Key,
+                _key,
                 outputStream);
         }
 
@@ -126,24 +112,23 @@ namespace Chunkyard
 
             if (currentLogPosition.HasValue)
             {
-                var snapshotReference = contentStore
-                    .RetrieveFromLog<SnapshotReference>(
-                        currentLogPosition.Value);
+                var contentReference = contentStore.RetrieveFromLog(
+                    currentLogPosition.Value);
 
                 key = AesGcmCrypto.PasswordToKey(
                     prompt.ExistingPassword(),
-                    snapshotReference.Salt,
-                    snapshotReference.Iterations);
+                    contentReference.Salt,
+                    contentReference.Iterations);
 
                 var snapshot = contentStore.RetrieveContent<Snapshot>(
-                    snapshotReference.ContentReference,
-                    key.Key);
+                    contentReference,
+                    key);
 
                 // Known chunks should be encrypted using the existing
                 // parameters, so we register all previous references
-                foreach (var contentReference in snapshot.ContentReferences)
+                foreach (var innerReference in snapshot.ContentReferences)
                 {
-                    foreach (var chunk in contentReference.Chunks)
+                    foreach (var chunk in innerReference.Chunks)
                     {
                         nonceGenerator.Register(chunk.Fingerprint, chunk.Nonce);
                     }

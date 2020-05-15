@@ -13,21 +13,21 @@ namespace Chunkyard
 
         void RetrieveContent(
             ContentReference contentReference,
-            byte[] key,
+            KeyInformation key,
             Stream outputStream);
 
         T RetrieveContent<T>(
             ContentReference contentReference,
-            byte[] key) where T : notnull;
+            KeyInformation key) where T : notnull;
 
         ContentReference StoreContent(
             Stream inputStream,
-            byte[] key,
+            KeyInformation key,
             string contentName);
 
         ContentReference StoreContent<T>(
             T value,
-            byte[] key,
+            KeyInformation key,
             string contentName) where T : notnull;
 
         bool ContentExists(ContentReference contentReference);
@@ -36,10 +36,11 @@ namespace Chunkyard
 
         int? FetchLogPosition();
 
-        int AppendToLog<T>(T value, int? currentLogPosition)
-            where T : notnull;
+        int AppendToLog(
+            ContentReference contentReference,
+            int? currentLogPosition);
 
-        T RetrieveFromLog<T>(int logPosition) where T : notnull;
+        ContentReference RetrieveFromLog(int logPosition);
 
         IEnumerable<int> ListLogPositions();
     }
