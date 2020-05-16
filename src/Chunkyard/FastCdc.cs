@@ -5,6 +5,8 @@ using System.Linq;
 
 namespace Chunkyard
 {
+    // A C# port of the Rust crate fastcdc-rc found here:
+    // https://github.com/nlfiedler/fastcdc-rs
     public class FastCdc
     {
         public const int MinimumMin = 64;
