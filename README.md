@@ -3,17 +3,17 @@
 An experimental application (Windows and Linux) for archiving files in a content
 addressable storage with support for dynamic chunking and encryption.
 
+The FastCdc chunking algorithm is a C# port of these libraries:
+
+- [fastcdc-rs](https://github.com/nlfiedler/fastcdc-rs)
+- [fastcdc-py](https://github.com/titusz/fastcdc-py)
+
 ## Build
 
 ``` powershell
-cd rust
-cargo build
 cd ../csharp
 dotnet build
 ```
-
-The `chunker` binary (created by the Rust source code) must be on the path in
-order for the `chunkyard` binary to work.
 
 ## Concepts
 

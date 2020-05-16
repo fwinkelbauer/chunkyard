@@ -14,6 +14,7 @@ namespace Chunkyard
         private readonly IRepository _repository;
         private readonly NonceGenerator _nonceGenerator;
         private readonly ContentStoreConfig _config;
+        private readonly FastCdc _fastCdc;
 
         public ContentStore(
             IRepository repository,
@@ -23,6 +24,10 @@ namespace Chunkyard
             _repository = repository;
             _nonceGenerator = nonceGenerator;
             _config = config;
+            _fastCdc = new FastCdc(
+                _config.MinChunkSizeInByte,
+                _config.AvgChunkSizeInByte,
+                _config.MaxChunkSizeInByte);
         }
 
         public Uri StoreUri
@@ -167,11 +172,7 @@ namespace Chunkyard
             Stream stream,
             KeyInformation key)
         {
-            var chunkedDataItems = FastCdc.SplitIntoChunks(
-                stream,
-                _config.MinChunkSizeInByte,
-                _config.AvgChunkSizeInByte,
-                _config.MaxChunkSizeInByte);
+            var chunkedDataItems = _fastCdc.SplitIntoChunks(stream);
 
             foreach (var chunkedData in chunkedDataItems)
             {

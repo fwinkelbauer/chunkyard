@@ -38,5 +38,21 @@ namespace Chunkyard
 
             return value;
         }
+
+        public static uint EnsureBetween(
+            this uint value,
+            uint min,
+            uint max,
+            string paramName)
+        {
+            if (value < min || value > max)
+            {
+                throw new ArgumentOutOfRangeException(
+                    paramName,
+                    $"Value must be between {min} and {max}");
+            }
+
+            return value;
+        }
     }
 }
