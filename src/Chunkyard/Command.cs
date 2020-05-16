@@ -206,11 +206,11 @@ namespace Chunkyard
             IContentStore contentStore = new ContentStore(
                 new FileRepository(repository),
                 nonceGenerator,
-                new ContentStoreConfig(
-                    HashAlgorithmName.SHA256,
+                new FastCdc(
                     2 * 1024 * 1024,
                     4 * 1024 * 1024,
-                    8 * 1024 * 1024));
+                    8 * 1024 * 1024),
+                HashAlgorithmName.SHA256);
 
             contentStore = cached
                 ? new CachedContentStore(contentStore, CacheDirectoryPath)

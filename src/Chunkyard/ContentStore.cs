@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -13,21 +14,19 @@ namespace Chunkyard
 
         private readonly IRepository _repository;
         private readonly NonceGenerator _nonceGenerator;
-        private readonly ContentStoreConfig _config;
         private readonly FastCdc _fastCdc;
+        private readonly HashAlgorithmName _hashAlgorithmName;
 
         public ContentStore(
             IRepository repository,
             NonceGenerator nonceGenerator,
-            ContentStoreConfig config)
+            FastCdc fastCdc,
+            HashAlgorithmName hashAlgorithmName)
         {
             _repository = repository;
             _nonceGenerator = nonceGenerator;
-            _config = config;
-            _fastCdc = new FastCdc(
-                _config.MinChunkSizeInByte,
-                _config.AvgChunkSizeInByte,
-                _config.MaxChunkSizeInByte);
+            _fastCdc = fastCdc;
+            _hashAlgorithmName = hashAlgorithmName;
         }
 
         public Uri StoreUri
@@ -177,7 +176,7 @@ namespace Chunkyard
             foreach (var chunkedData in chunkedDataItems)
             {
                 var fingerprint = Id.ComputeHash(
-                    _config.HashAlgorithmName,
+                    _hashAlgorithmName,
                     chunkedData);
 
                 var nonce = _nonceGenerator.GetNonce(fingerprint);
@@ -188,7 +187,7 @@ namespace Chunkyard
                     nonce);
 
                 var contentUri = Id.ComputeContentUri(
-                    _config.HashAlgorithmName,
+                    _hashAlgorithmName,
                     encryptedData);
 
                 _repository.StoreContent(contentUri, encryptedData);
