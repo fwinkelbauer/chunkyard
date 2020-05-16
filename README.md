@@ -11,7 +11,7 @@ The FastCdc chunking algorithm is a C# port of these libraries:
 ## Build
 
 ``` powershell
-cd ../csharp
+cd src
 dotnet build
 ```
 
