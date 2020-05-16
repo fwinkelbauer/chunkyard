@@ -6,19 +6,19 @@ namespace Chunkyard
     {
         public ContentReference(
             string name,
-            IEnumerable<Chunk> chunks,
+            IEnumerable<ChunkReference> chunks,
             byte[] salt,
             int iterations)
         {
             Name = name;
-            Chunks = new List<Chunk>(chunks);
+            Chunks = new List<ChunkReference>(chunks);
             Salt = salt;
             Iterations = iterations;
         }
 
         public string Name { get; }
 
-        public IEnumerable<Chunk> Chunks { get; }
+        public IEnumerable<ChunkReference> Chunks { get; }
 
         public byte[] Salt { get; }
 

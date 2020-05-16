@@ -2,9 +2,9 @@
 
 namespace Chunkyard
 {
-    internal class Chunk
+    internal class ChunkReference
     {
-        public Chunk(
+        public ChunkReference(
             Uri contentUri,
             string fingerprint,
             byte[] nonce,

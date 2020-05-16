@@ -131,7 +131,7 @@ namespace Chunkyard
             var safeContentReference = new ContentReference(
                 contentReference.Name,
                 contentReference.Chunks.Select(
-                    c => new Chunk(
+                    c => new ChunkReference(
                         c.ContentUri,
                         string.Empty,
                         c.Nonce,
@@ -168,7 +168,7 @@ namespace Chunkyard
                 Encoding.UTF8.GetString(value));
         }
 
-        private IEnumerable<Chunk> WriteChunks(
+        private IEnumerable<ChunkReference> WriteChunks(
             Stream stream,
             KeyInformation key)
         {
@@ -193,7 +193,7 @@ namespace Chunkyard
 
                 _repository.StoreContent(contentUri, encryptedData);
 
-                yield return new Chunk(
+                yield return new ChunkReference(
                     contentUri,
                     fingerprint,
                     nonce,
