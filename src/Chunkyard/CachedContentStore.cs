@@ -37,29 +37,25 @@ namespace Chunkyard
 
         public void RetrieveContent(
             ContentReference contentReference,
-            ContentStoreConfig config,
             Stream outputStream)
         {
-            _contentStore.RetrieveContent(contentReference, config, outputStream);
+            _contentStore.RetrieveContent(contentReference, outputStream);
         }
 
-        public T RetrieveContent<T>(
-            ContentReference contentReference,
-            ContentStoreConfig config) where T : notnull
+        public T RetrieveContent<T>(ContentReference contentReference)
+            where T : notnull
         {
-            return _contentStore.RetrieveContent<T>(contentReference, config);
+            return _contentStore.RetrieveContent<T>(contentReference);
         }
 
         public ContentReference StoreContent(
             Stream inputStream,
-            ContentStoreConfig config,
             string contentName)
         {
             if (!(inputStream is FileStream fileStream))
             {
                 return _contentStore.StoreContent(
                     inputStream,
-                    config,
                     contentName);
             }
 
@@ -77,7 +73,6 @@ namespace Chunkyard
 
             var contentReference = _contentStore.StoreContent(
                 inputStream,
-                config,
                 contentName);
 
             StoreInCache(
@@ -91,12 +86,10 @@ namespace Chunkyard
             return contentReference;
         }
 
-        public ContentReference StoreContent<T>(
-            T value,
-            ContentStoreConfig config,
-            string contentName) where T : notnull
+        public ContentReference StoreContent<T>(T value, string contentName)
+            where T : notnull
         {
-            return _contentStore.StoreContent<T>(value, config, contentName);
+            return _contentStore.StoreContent<T>(value, contentName);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -114,18 +107,17 @@ namespace Chunkyard
             return _contentStore.FetchLogPosition();
         }
 
-        public int AppendToLog(
-            ContentReference contentReference,
-            int? currentLogPosition)
+        public int AppendToLog<T>(T value, int? currentLogPosition)
+            where T : notnull
         {
             return _contentStore.AppendToLog(
-                contentReference,
+                value,
                 currentLogPosition);
         }
 
-        public ContentReference RetrieveFromLog(int logPosition)
+        public T RetrieveFromLog<T>(int logPosition) where T : notnull
         {
-            return _contentStore.RetrieveFromLog(logPosition);
+            return _contentStore.RetrieveFromLog<T>(logPosition);
         }
 
         public IEnumerable<int> ListLogPositions()

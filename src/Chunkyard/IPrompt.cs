@@ -1,6 +1,6 @@
 ﻿namespace Chunkyard
 {
-    internal interface IPrompt
+    public interface IPrompt
     {
         string NewPassword();
 

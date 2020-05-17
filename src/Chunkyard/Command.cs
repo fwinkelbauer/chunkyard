@@ -202,10 +202,10 @@ namespace Chunkyard
         {
             _log.Information("Using repository {Repository}", repository);
 
-            var nonceGenerator = new NonceGenerator();
+            var encryptionProvider = new EncryptionProvider();
             IContentStore contentStore = new ContentStore(
                 new FileRepository(repository),
-                nonceGenerator,
+                encryptionProvider,
                 new FastCdc(
                     2 * 1024 * 1024,
                     4 * 1024 * 1024,
@@ -219,7 +219,7 @@ namespace Chunkyard
             return SnapshotBuilder.OpenRepository(
                 new EnvironmentPrompt(
                     new ConsolePrompt()),
-                nonceGenerator,
+                encryptionProvider,
                 contentStore);
         }
 

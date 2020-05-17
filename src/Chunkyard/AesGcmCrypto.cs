@@ -4,6 +4,8 @@ namespace Chunkyard
 {
     public static class AesGcmCrypto
     {
+        public const int Iterations = 1000;
+
         private const int TAG_BYTES = 16;
         private const int KEY_BYTES = 32;
         private const int NONCE_BYTES = 12;

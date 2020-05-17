@@ -8,22 +8,23 @@ namespace Chunkyard
 {
     internal class SnapshotBuilder
     {
-        private const int Iterations = 1000;
-
         private readonly IContentStore _contentStore;
-        private readonly ContentStoreConfig _config;
         private readonly List<ContentReference> _storedContentReferences;
+        private readonly byte[] _salt;
+        private readonly int _iterations;
 
         private int? _currentLogPosition;
 
         private SnapshotBuilder(
             IContentStore contentStore,
-            ContentStoreConfig config,
-            int? currentLogPosition)
+            int? currentLogPosition,
+            IEnumerable<byte> salt,
+            int iterations)
         {
             _contentStore = contentStore;
-            _config = config;
             _currentLogPosition = currentLogPosition;
+            _salt = salt.ToArray();
+            _iterations = iterations;
 
             _storedContentReferences = new List<ContentReference>();
         }
@@ -32,7 +33,6 @@ namespace Chunkyard
         {
             _storedContentReferences.Add(_contentStore.StoreContent(
                 inputStream,
-                _config,
                 contentName));
         }
 
@@ -40,11 +40,24 @@ namespace Chunkyard
         {
             var contentReference = _contentStore.StoreContent(
                 new Snapshot(creationTime, _storedContentReferences),
-                _config,
                 string.Empty);
 
+            // We do not want to leak any fingerprints in an unencrypted
+            // reference
+            var safeContentReference = new ContentReference(
+                contentReference.Name,
+                contentReference.Chunks.Select(
+                    c => new ChunkReference(
+                        c.ContentUri,
+                        string.Empty,
+                        c.Nonce,
+                        c.Tag)));
+
             _currentLogPosition = _contentStore.AppendToLog(
-                contentReference,
+                new SnapshotReference(
+                    safeContentReference,
+                    _salt,
+                    _iterations),
                 _currentLogPosition);
 
             return _currentLogPosition.Value;
@@ -74,12 +87,11 @@ namespace Chunkyard
                 ? logPosition
                 : _currentLogPosition.Value + logPosition + 1;
 
-            var contentReference = _contentStore.RetrieveFromLog(
-                resolveLogPosition);
+            var snapshotReference = _contentStore
+                .RetrieveFromLog<SnapshotReference>(resolveLogPosition);
 
             return _contentStore.RetrieveContent<Snapshot>(
-                contentReference,
-                _config);
+                snapshotReference.ContentReference);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -98,34 +110,28 @@ namespace Chunkyard
         {
             _contentStore.RetrieveContent(
                 contentReference,
-                _config,
                 outputStream);
         }
 
         public static SnapshotBuilder OpenRepository(
             IPrompt prompt,
-            NonceGenerator nonceGenerator,
+            EncryptionProvider encryptionProvider,
             IContentStore contentStore)
         {
             var currentLogPosition = contentStore.FetchLogPosition();
-            ContentStoreConfig? config = null;
 
             if (currentLogPosition.HasValue)
             {
-                var contentReference = contentStore.RetrieveFromLog(
-                    currentLogPosition.Value);
+                var snapshotReference = contentStore
+                    .RetrieveFromLog<SnapshotReference>(
+                        currentLogPosition.Value);
 
-                config = new ContentStoreConfig(
-                    AesGcmCrypto.PasswordToKey(
-                        prompt.ExistingPassword(),
-                        contentReference.Salt,
-                        contentReference.Iterations),
-                    contentReference.Salt,
-                    contentReference.Iterations);
+                encryptionProvider.Salt = snapshotReference.Salt;
+                encryptionProvider.Iterations = snapshotReference.Iterations;
+                encryptionProvider.Password = prompt.ExistingPassword();
 
                 var snapshot = contentStore.RetrieveContent<Snapshot>(
-                    contentReference,
-                    config);
+                    snapshotReference.ContentReference);
 
                 // Known chunks should be encrypted using the existing
                 // parameters, so we register all previous references
@@ -133,27 +139,22 @@ namespace Chunkyard
                 {
                     foreach (var chunk in innerReference.Chunks)
                     {
-                        nonceGenerator.Register(chunk.Fingerprint, chunk.Nonce);
+                        encryptionProvider.RegisterNonce(
+                            chunk.Fingerprint,
+                            chunk.Nonce);
                     }
                 }
             }
             else
             {
-                var salt = AesGcmCrypto.GenerateSalt();
-
-                config = new ContentStoreConfig(
-                    AesGcmCrypto.PasswordToKey(
-                        prompt.NewPassword(),
-                        salt,
-                        Iterations),
-                    salt,
-                    Iterations);
+                encryptionProvider.Password = prompt.NewPassword();
             }
 
             return new SnapshotBuilder(
                 contentStore,
-                config,
-                currentLogPosition);
+                currentLogPosition,
+                encryptionProvider.Salt,
+                encryptionProvider.Iterations);
         }
     }
 }

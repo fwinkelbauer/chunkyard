@@ -13,18 +13,20 @@ namespace Chunkyard
         private const string DefaultLogName = "master";
 
         private readonly IRepository _repository;
-        private readonly NonceGenerator _nonceGenerator;
+        private readonly EncryptionProvider _encryptionProvider;
         private readonly FastCdc _fastCdc;
         private readonly HashAlgorithmName _hashAlgorithmName;
 
+        private byte[]? _key;
+
         public ContentStore(
             IRepository repository,
-            NonceGenerator nonceGenerator,
+            EncryptionProvider encryptionProvider,
             FastCdc fastCdc,
             HashAlgorithmName hashAlgorithmName)
         {
             _repository = repository;
-            _nonceGenerator = nonceGenerator;
+            _encryptionProvider = encryptionProvider;
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
         }
@@ -39,7 +41,6 @@ namespace Chunkyard
 
         public void RetrieveContent(
             ContentReference contentReference,
-            ContentStoreConfig config,
             Stream outputStream)
         {
             foreach (var chunk in contentReference.Chunks)
@@ -47,21 +48,19 @@ namespace Chunkyard
                 var decryptedData = AesGcmCrypto.Decrypt(
                     _repository.RetrieveContent(chunk.ContentUri),
                     chunk.Tag,
-                    config.Key.ToArray(),
+                    GenerateKey(),
                     chunk.Nonce);
 
                 outputStream.Write(decryptedData);
             }
         }
 
-        public T RetrieveContent<T>(
-            ContentReference contentReference,
-            ContentStoreConfig config) where T : notnull
+        public T RetrieveContent<T>(ContentReference contentReference)
+            where T : notnull
         {
             using var memoryStream = new MemoryStream();
             RetrieveContent(
                 contentReference,
-                config,
                 memoryStream);
 
             return ToObject<T>(memoryStream.ToArray());
@@ -69,23 +68,19 @@ namespace Chunkyard
 
         public ContentReference StoreContent(
             Stream inputStream,
-            ContentStoreConfig config,
             string contentName)
         {
             return new ContentReference(
                 contentName,
-                WriteChunks(inputStream, config),
-                config.Salt.ToArray(),
-                config.Iterations);
+                WriteChunks(inputStream));
         }
 
-        public ContentReference StoreContent<T>(
-            T value,
-            ContentStoreConfig config,
-            string contentName) where T : notnull
+        public ContentReference StoreContent<T>(T value, string contentName)
+            where T : notnull
         {
             using var memoryStream = new MemoryStream(ToBytes(value));
-            return StoreContent(memoryStream, config, contentName);
+            return StoreContent(
+                (Stream)memoryStream, contentName);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -117,38 +112,42 @@ namespace Chunkyard
             return _repository.FetchLogPosition(DefaultLogName);
         }
 
-        public int AppendToLog(
-            ContentReference contentReference,
-            int? currentLogPosition)
+        public int AppendToLog<T>(T value, int? currentLogPosition)
+            where T : notnull
         {
-            // We do not want to leak any fingerprints in an unencrypted
-            // reference
-            var safeContentReference = new ContentReference(
-                contentReference.Name,
-                contentReference.Chunks.Select(
-                    c => new ChunkReference(
-                        c.ContentUri,
-                        string.Empty,
-                        c.Nonce,
-                        c.Tag)),
-                contentReference.Salt,
-                contentReference.Iterations);
-
             return _repository.AppendToLog(
-                ToBytes(safeContentReference),
+                ToBytes(value),
                 DefaultLogName,
                 currentLogPosition);
         }
 
-        public ContentReference RetrieveFromLog(int logPosition)
+        public T RetrieveFromLog<T>(int logPosition) where T : notnull
         {
-            return ToObject<ContentReference>(
+            return ToObject<T>(
                 _repository.RetrieveFromLog(DefaultLogName, logPosition));
         }
 
         public IEnumerable<int> ListLogPositions()
         {
             return _repository.ListLogPositions(DefaultLogName);
+        }
+
+        private byte[] GenerateKey()
+        {
+            if (_key != null)
+            {
+                return _key;
+            }
+
+            var password = _encryptionProvider.Password
+                ?? throw new ChunkyardException("No password was provided");
+
+            _key = AesGcmCrypto.PasswordToKey(
+                password,
+                _encryptionProvider.Salt.ToArray(),
+                _encryptionProvider.Iterations);
+
+            return _key;
         }
 
         private static byte[] ToBytes(object o)
@@ -163,9 +162,7 @@ namespace Chunkyard
                 Encoding.UTF8.GetString(value));
         }
 
-        private IEnumerable<ChunkReference> WriteChunks(
-            Stream stream,
-            ContentStoreConfig config)
+        private IEnumerable<ChunkReference> WriteChunks(Stream stream)
         {
             var chunkedDataItems = _fastCdc.SplitIntoChunks(stream);
 
@@ -175,11 +172,11 @@ namespace Chunkyard
                     _hashAlgorithmName,
                     chunkedData);
 
-                var nonce = _nonceGenerator.GetNonce(fingerprint);
+                var nonce = _encryptionProvider.GetNonce(fingerprint);
 
                 var (encryptedData, tag) = AesGcmCrypto.Encrypt(
                     chunkedData,
-                    config.Key.ToArray(),
+                    GenerateKey(),
                     nonce);
 
                 var contentUri = Id.ComputeContentUri(
