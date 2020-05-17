@@ -39,7 +39,7 @@ namespace Chunkyard
             return plaintext;
         }
 
-        public static KeyInformation PasswordToKey(
+        public static byte[] PasswordToKey(
             string password,
             byte[] salt,
             int iterations)
@@ -50,10 +50,7 @@ namespace Chunkyard
                 iterations,
                 HashAlgorithmName.SHA256);
 
-            return new KeyInformation(
-                rfc2898.GetBytes(KEY_BYTES),
-                salt,
-                iterations);
+            return rfc2898.GetBytes(KEY_BYTES);
         }
 
         public static byte[] GenerateSalt()

@@ -13,21 +13,21 @@ namespace Chunkyard
 
         void RetrieveContent(
             ContentReference contentReference,
-            KeyInformation key,
+            ContentStoreConfig config,
             Stream outputStream);
 
         T RetrieveContent<T>(
             ContentReference contentReference,
-            KeyInformation key) where T : notnull;
+            ContentStoreConfig config) where T : notnull;
 
         ContentReference StoreContent(
             Stream inputStream,
-            KeyInformation key,
+            ContentStoreConfig config,
             string contentName);
 
         ContentReference StoreContent<T>(
             T value,
-            KeyInformation key,
+            ContentStoreConfig config,
             string contentName) where T : notnull;
 
         bool ContentExists(ContentReference contentReference);

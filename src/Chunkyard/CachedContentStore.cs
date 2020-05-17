@@ -37,29 +37,29 @@ namespace Chunkyard
 
         public void RetrieveContent(
             ContentReference contentReference,
-            KeyInformation key,
+            ContentStoreConfig config,
             Stream outputStream)
         {
-            _contentStore.RetrieveContent(contentReference, key, outputStream);
+            _contentStore.RetrieveContent(contentReference, config, outputStream);
         }
 
         public T RetrieveContent<T>(
             ContentReference contentReference,
-            KeyInformation key) where T : notnull
+            ContentStoreConfig config) where T : notnull
         {
-            return _contentStore.RetrieveContent<T>(contentReference, key);
+            return _contentStore.RetrieveContent<T>(contentReference, config);
         }
 
         public ContentReference StoreContent(
             Stream inputStream,
-            KeyInformation key,
+            ContentStoreConfig config,
             string contentName)
         {
             if (!(inputStream is FileStream fileStream))
             {
                 return _contentStore.StoreContent(
                     inputStream,
-                    key,
+                    config,
                     contentName);
             }
 
@@ -77,7 +77,7 @@ namespace Chunkyard
 
             var contentReference = _contentStore.StoreContent(
                 inputStream,
-                key,
+                config,
                 contentName);
 
             StoreInCache(
@@ -93,10 +93,10 @@ namespace Chunkyard
 
         public ContentReference StoreContent<T>(
             T value,
-            KeyInformation key,
+            ContentStoreConfig config,
             string contentName) where T : notnull
         {
-            return _contentStore.StoreContent<T>(value, key, contentName);
+            return _contentStore.StoreContent<T>(value, config, contentName);
         }
 
         public bool ContentExists(ContentReference contentReference)

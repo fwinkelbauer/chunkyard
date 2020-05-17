@@ -11,18 +11,18 @@ namespace Chunkyard
         private const int Iterations = 1000;
 
         private readonly IContentStore _contentStore;
-        private readonly KeyInformation _key;
+        private readonly ContentStoreConfig _config;
         private readonly List<ContentReference> _storedContentReferences;
 
         private int? _currentLogPosition;
 
         private SnapshotBuilder(
             IContentStore contentStore,
-            KeyInformation key,
+            ContentStoreConfig config,
             int? currentLogPosition)
         {
             _contentStore = contentStore;
-            _key = key;
+            _config = config;
             _currentLogPosition = currentLogPosition;
 
             _storedContentReferences = new List<ContentReference>();
@@ -32,7 +32,7 @@ namespace Chunkyard
         {
             _storedContentReferences.Add(_contentStore.StoreContent(
                 inputStream,
-                _key,
+                _config,
                 contentName));
         }
 
@@ -40,7 +40,7 @@ namespace Chunkyard
         {
             var contentReference = _contentStore.StoreContent(
                 new Snapshot(creationTime, _storedContentReferences),
-                _key,
+                _config,
                 string.Empty);
 
             _currentLogPosition = _contentStore.AppendToLog(
@@ -79,7 +79,7 @@ namespace Chunkyard
 
             return _contentStore.RetrieveContent<Snapshot>(
                 contentReference,
-                _key);
+                _config);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -98,7 +98,7 @@ namespace Chunkyard
         {
             _contentStore.RetrieveContent(
                 contentReference,
-                _key,
+                _config,
                 outputStream);
         }
 
@@ -108,21 +108,24 @@ namespace Chunkyard
             IContentStore contentStore)
         {
             var currentLogPosition = contentStore.FetchLogPosition();
-            KeyInformation? key = null;
+            ContentStoreConfig? config = null;
 
             if (currentLogPosition.HasValue)
             {
                 var contentReference = contentStore.RetrieveFromLog(
                     currentLogPosition.Value);
 
-                key = AesGcmCrypto.PasswordToKey(
-                    prompt.ExistingPassword(),
+                config = new ContentStoreConfig(
+                    AesGcmCrypto.PasswordToKey(
+                        prompt.ExistingPassword(),
+                        contentReference.Salt,
+                        contentReference.Iterations),
                     contentReference.Salt,
                     contentReference.Iterations);
 
                 var snapshot = contentStore.RetrieveContent<Snapshot>(
                     contentReference,
-                    key);
+                    config);
 
                 // Known chunks should be encrypted using the existing
                 // parameters, so we register all previous references
@@ -136,15 +139,20 @@ namespace Chunkyard
             }
             else
             {
-                key = AesGcmCrypto.PasswordToKey(
-                    prompt.NewPassword(),
-                    AesGcmCrypto.GenerateSalt(),
+                var salt = AesGcmCrypto.GenerateSalt();
+
+                config = new ContentStoreConfig(
+                    AesGcmCrypto.PasswordToKey(
+                        prompt.NewPassword(),
+                        salt,
+                        Iterations),
+                    salt,
                     Iterations);
             }
 
             return new SnapshotBuilder(
                 contentStore,
-                key,
+                config,
                 currentLogPosition);
         }
     }

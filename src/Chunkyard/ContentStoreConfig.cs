@@ -1,8 +1,8 @@
 ﻿namespace Chunkyard
 {
-    public class KeyInformation
+    public class ContentStoreConfig
     {
-        public KeyInformation(byte[] key, byte[] salt, int iterations)
+        public ContentStoreConfig(byte[] key, byte[] salt, int iterations)
         {
             Key = key;
             Salt = salt;

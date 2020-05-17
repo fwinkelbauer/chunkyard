@@ -39,7 +39,7 @@ namespace Chunkyard
 
         public void RetrieveContent(
             ContentReference contentReference,
-            KeyInformation key,
+            ContentStoreConfig config,
             Stream outputStream)
         {
             foreach (var chunk in contentReference.Chunks)
@@ -47,7 +47,7 @@ namespace Chunkyard
                 var decryptedData = AesGcmCrypto.Decrypt(
                     _repository.RetrieveContent(chunk.ContentUri),
                     chunk.Tag,
-                    key.Key,
+                    config.Key,
                     chunk.Nonce);
 
                 outputStream.Write(decryptedData);
@@ -56,12 +56,12 @@ namespace Chunkyard
 
         public T RetrieveContent<T>(
             ContentReference contentReference,
-            KeyInformation key) where T : notnull
+            ContentStoreConfig config) where T : notnull
         {
             using var memoryStream = new MemoryStream();
             RetrieveContent(
                 contentReference,
-                key,
+                config,
                 memoryStream);
 
             return ToObject<T>(memoryStream.ToArray());
@@ -69,27 +69,23 @@ namespace Chunkyard
 
         public ContentReference StoreContent(
             Stream inputStream,
-            KeyInformation key,
+            ContentStoreConfig config,
             string contentName)
         {
             return new ContentReference(
                 contentName,
-                WriteChunks(inputStream, key),
-                key.Salt,
-                key.Iterations);
+                WriteChunks(inputStream, config),
+                config.Salt,
+                config.Iterations);
         }
 
         public ContentReference StoreContent<T>(
             T value,
-            KeyInformation key,
+            ContentStoreConfig config,
             string contentName) where T : notnull
         {
             using var memoryStream = new MemoryStream(ToBytes(value));
-            return new ContentReference(
-                contentName,
-                WriteChunks(memoryStream, key),
-                key.Salt,
-                key.Iterations);
+            return StoreContent(memoryStream, config, contentName);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -169,7 +165,7 @@ namespace Chunkyard
 
         private IEnumerable<ChunkReference> WriteChunks(
             Stream stream,
-            KeyInformation key)
+            ContentStoreConfig config)
         {
             var chunkedDataItems = _fastCdc.SplitIntoChunks(stream);
 
@@ -183,7 +179,7 @@ namespace Chunkyard
 
                 var (encryptedData, tag) = AesGcmCrypto.Encrypt(
                     chunkedData,
-                    key.Key,
+                    config.Key,
                     nonce);
 
                 var contentUri = Id.ComputeContentUri(

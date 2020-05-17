@@ -19,14 +19,14 @@ namespace Chunkyard.Tests
 
             var (secretText, tag) = AesGcmCrypto.Encrypt(
                 Encoding.UTF8.GetBytes(expectedText),
-                key.Key,
+                key,
                 nonce);
 
             var actualText = Encoding.UTF8.GetString(
                 AesGcmCrypto.Decrypt(
                     secretText,
                     tag,
-                    key.Key,
+                    key,
                     nonce));
 
             Assert.Equal(expectedText, actualText);
