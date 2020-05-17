@@ -1,4 +1,6 @@
-﻿namespace Chunkyard
+﻿using System.Collections.Generic;
+
+namespace Chunkyard
 {
     public class ContentStoreConfig
     {
@@ -9,9 +11,9 @@
             Iterations = iterations;
         }
 
-        public byte[] Key { get; }
+        public IEnumerable<byte> Key { get; }
 
-        public byte[] Salt { get; }
+        public IEnumerable<byte> Salt { get; }
 
         public int Iterations { get; }
     }

@@ -47,7 +47,7 @@ namespace Chunkyard
                 var decryptedData = AesGcmCrypto.Decrypt(
                     _repository.RetrieveContent(chunk.ContentUri),
                     chunk.Tag,
-                    config.Key,
+                    config.Key.ToArray(),
                     chunk.Nonce);
 
                 outputStream.Write(decryptedData);
@@ -75,7 +75,7 @@ namespace Chunkyard
             return new ContentReference(
                 contentName,
                 WriteChunks(inputStream, config),
-                config.Salt,
+                config.Salt.ToArray(),
                 config.Iterations);
         }
 
@@ -179,7 +179,7 @@ namespace Chunkyard
 
                 var (encryptedData, tag) = AesGcmCrypto.Encrypt(
                     chunkedData,
-                    config.Key,
+                    config.Key.ToArray(),
                     nonce);
 
                 var contentUri = Id.ComputeContentUri(
