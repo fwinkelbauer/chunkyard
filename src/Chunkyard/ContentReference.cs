@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Chunkyard
 {
-    internal class ContentReference
+    public class ContentReference
     {
         public ContentReference(
             string name,
             IEnumerable<ChunkReference> chunks)
         {
             Name = name;
-            Chunks = new List<ChunkReference>(chunks);
+            Chunks = chunks.ToList();
         }
 
         public string Name { get; }

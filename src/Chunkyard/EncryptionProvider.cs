@@ -65,12 +65,12 @@ namespace Chunkyard
             }
         }
 
-        public void RegisterNonce(string fingerprint, byte[] nonce)
+        public void RegisterNonce(string fingerprint, IEnumerable<byte> nonce)
         {
-            _noncesByFingerprints[fingerprint] = nonce;
+            _noncesByFingerprints[fingerprint] = nonce.ToArray();
         }
 
-        public byte[] GetNonce(string fingerprint)
+        public IEnumerable<byte> GetNonce(string fingerprint)
         {
             if (!_noncesByFingerprints.TryGetValue(fingerprint, out var nonce))
             {

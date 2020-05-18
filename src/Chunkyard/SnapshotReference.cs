@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Chunkyard
 {
-    internal class SnapshotReference
+    public class SnapshotReference
     {
         public SnapshotReference(
             ContentReference contentReference,
@@ -10,13 +11,13 @@ namespace Chunkyard
             int iterations)
         {
             ContentReference = contentReference;
-            Salt = salt;
+            Salt = salt.ToList();
             Iterations = iterations;
         }
 
         public ContentReference ContentReference { get; }
 
-        public byte[] Salt { get; }
+        public IEnumerable<byte> Salt { get; }
 
         public int Iterations { get; }
 

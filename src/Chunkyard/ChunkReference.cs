@@ -1,27 +1,29 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Chunkyard
 {
-    internal class ChunkReference
+    public class ChunkReference
     {
         public ChunkReference(
             Uri contentUri,
             string fingerprint,
-            byte[] nonce,
-            byte[] tag)
+            IEnumerable<byte> nonce,
+            IEnumerable<byte> tag)
         {
             ContentUri = contentUri;
             Fingerprint = fingerprint;
-            Nonce = nonce;
-            Tag = tag;
+            Nonce = nonce.ToList();
+            Tag = tag.ToList();
         }
 
         public Uri ContentUri { get; }
 
         public string Fingerprint { get; }
 
-        public byte[] Nonce { get; }
+        public IEnumerable<byte> Nonce { get; }
 
-        public byte[] Tag { get; }
+        public IEnumerable<byte> Tag { get; }
     }
 }
