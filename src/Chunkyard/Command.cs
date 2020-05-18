@@ -200,8 +200,6 @@ namespace Chunkyard
             string repository,
             bool cached = false)
         {
-            _log.Information("Using repository {Repository}", repository);
-
             var encryptionProvider = new EncryptionProvider();
             IContentStore contentStore = new ContentStore(
                 new FileRepository(repository),
