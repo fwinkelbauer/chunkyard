@@ -112,16 +112,13 @@ namespace Chunkyard
                 var snapshot = contentStore.RetrieveContent<Snapshot>(
                     logReference.ContentReference);
 
-                // Known chunks should be encrypted using the existing
+                // Known files should be encrypted using the existing
                 // parameters, so we register all previous references
-                foreach (var innerReference in snapshot.ContentReferences)
+                foreach (var contentReference in snapshot.ContentReferences)
                 {
-                    foreach (var chunk in innerReference.Chunks)
-                    {
-                        encryptionProvider.RegisterNonce(
-                            chunk.Fingerprint,
-                            chunk.Nonce);
-                    }
+                    encryptionProvider.RegisterNonce(
+                        contentReference.Name,
+                        contentReference.Nonce);
                 }
             }
             else

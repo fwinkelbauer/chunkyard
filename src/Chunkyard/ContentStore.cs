@@ -49,7 +49,7 @@ namespace Chunkyard
                     _repository.RetrieveContent(chunk.ContentUri),
                     chunk.Tag,
                     GenerateKey(),
-                    chunk.Nonce);
+                    contentReference.Nonce);
 
                 outputStream.Write(decryptedData);
             }
@@ -70,9 +70,12 @@ namespace Chunkyard
             Stream inputStream,
             string contentName)
         {
+            var nonce = _encryptionProvider.GetNonce(contentName);
+
             return new ContentReference(
                 contentName,
-                WriteChunks(inputStream));
+                nonce,
+                WriteChunks(nonce, inputStream));
         }
 
         public ContentReference StoreContent<T>(T value, string contentName)
@@ -116,19 +119,8 @@ namespace Chunkyard
             ContentReference contentReference,
             int? currentLogPosition)
         {
-            // We do not want to leak any fingerprints in an unencrypted
-            // reference
-            var safeContentReference = new ContentReference(
-                contentReference.Name,
-                contentReference.Chunks.Select(
-                    c => new ChunkReference(
-                        c.ContentUri,
-                        string.Empty,
-                        c.Nonce,
-                        c.Tag)));
-
             var logReference = new LogReference(
-                safeContentReference,
+                contentReference,
                 _encryptionProvider.Salt,
                 _encryptionProvider.Iterations);
 
@@ -179,18 +171,14 @@ namespace Chunkyard
                 Encoding.UTF8.GetString(value));
         }
 
-        private IEnumerable<ChunkReference> WriteChunks(Stream stream)
+        private IEnumerable<ChunkReference> WriteChunks(
+            byte[] nonce,
+            Stream stream)
         {
             var chunkedDataItems = _fastCdc.SplitIntoChunks(stream);
 
             foreach (var chunkedData in chunkedDataItems)
             {
-                var fingerprint = Id.ComputeHash(
-                    _hashAlgorithmName,
-                    chunkedData);
-
-                var nonce = _encryptionProvider.GetNonce(fingerprint);
-
                 var (encryptedData, tag) = AesGcmCrypto.Encrypt(
                     chunkedData,
                     GenerateKey(),
@@ -204,8 +192,6 @@ namespace Chunkyard
 
                 yield return new ChunkReference(
                     contentUri,
-                    fingerprint,
-                    nonce,
                     tag);
             }
         }

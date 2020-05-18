@@ -4,7 +4,7 @@ namespace Chunkyard
 {
     public class EncryptionProvider
     {
-        private readonly Dictionary<string, byte[]> _noncesByFingerprints;
+        private readonly Dictionary<string, byte[]> _noncesByFile;
 
         private string? _password;
         private byte[]? _salt;
@@ -12,7 +12,7 @@ namespace Chunkyard
 
         public EncryptionProvider()
         {
-            _noncesByFingerprints = new Dictionary<string, byte[]>();
+            _noncesByFile = new Dictionary<string, byte[]>();
 
             _salt = null;
             _iterations = null;
@@ -64,17 +64,17 @@ namespace Chunkyard
             }
         }
 
-        public void RegisterNonce(string fingerprint, byte[] nonce)
+        public void RegisterNonce(string name, byte[] nonce)
         {
-            _noncesByFingerprints[fingerprint] = nonce;
+            _noncesByFile[name] = nonce;
         }
 
-        public byte[] GetNonce(string fingerprint)
+        public byte[] GetNonce(string name)
         {
-            if (!_noncesByFingerprints.TryGetValue(fingerprint, out var nonce))
+            if (!_noncesByFile.TryGetValue(name, out var nonce))
             {
                 nonce = AesGcmCrypto.GenerateNonce();
-                _noncesByFingerprints[fingerprint] = nonce;
+                _noncesByFile[name] = nonce;
             }
 
             return nonce;
