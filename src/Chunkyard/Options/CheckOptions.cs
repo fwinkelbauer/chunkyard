@@ -2,10 +2,10 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("verify", HelpText = "Verify a snapshot")]
-    public class VerifyOptions
+    [Verb("check", HelpText = "Checks if a snapshot is valid")]
+    public class CheckOptions
     {
-        public VerifyOptions(
+        public CheckOptions(
             string repository,
             int logPosition,
             string includeFuzzy,

@@ -60,12 +60,12 @@ namespace Chunkyard
                 newLogPosition);
         }
 
-        public static void VerifySnapshot(VerifyOptions o)
+        public static void CheckSnapshot(CheckOptions o)
         {
             var snapshotBuilder = CreateSnapshotBuilder(
                 o.Repository);
 
-            _log.Information("Verifying snapshot {LogPosition}", o.LogPosition);
+            _log.Information("Checking snapshot {LogPosition}", o.LogPosition);
 
             var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
 

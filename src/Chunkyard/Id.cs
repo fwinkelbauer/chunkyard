@@ -41,7 +41,7 @@ namespace Chunkyard
 
         public static string HashFromContentUri(Uri contentUri)
         {
-            // Verify that this is a valid content URI
+            // Check that this is a valid content URI
             _ = AlgorithmFromContentUri(contentUri);
 
             return contentUri.EnsureNotNull(nameof(contentUri)).Host;
