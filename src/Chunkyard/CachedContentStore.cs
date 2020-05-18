@@ -107,17 +107,18 @@ namespace Chunkyard
             return _contentStore.FetchLogPosition();
         }
 
-        public int AppendToLog<T>(T value, int? currentLogPosition)
-            where T : notnull
+        public int AppendToLog(
+            ContentReference contentReference,
+            int? currentLogPosition)
         {
             return _contentStore.AppendToLog(
-                value,
+                contentReference,
                 currentLogPosition);
         }
 
-        public T RetrieveFromLog<T>(int logPosition) where T : notnull
+        public LogReference RetrieveFromLog(int logPosition)
         {
-            return _contentStore.RetrieveFromLog<T>(logPosition);
+            return _contentStore.RetrieveFromLog(logPosition);
         }
 
         public IEnumerable<int> ListLogPositions()

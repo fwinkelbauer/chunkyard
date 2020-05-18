@@ -3,11 +3,11 @@ using System.Linq;
 
 namespace Chunkyard
 {
-    public class SnapshotReference
+    public class LogReference
     {
-        public SnapshotReference(
+        public LogReference(
             ContentReference contentReference,
-            byte[] salt,
+            IEnumerable<byte> salt,
             int iterations)
         {
             ContentReference = contentReference;

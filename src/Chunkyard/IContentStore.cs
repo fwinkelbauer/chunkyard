@@ -29,12 +29,11 @@ namespace Chunkyard
 
         int? FetchLogPosition();
 
-        int AppendToLog<T>(
-            T value,
-            int? currentLogPosition) where T : notnull;
+        int AppendToLog(
+            ContentReference contentReference,
+            int? currentLogPosition);
 
-        T RetrieveFromLog<T>(int logPosition)
-            where T : notnull;
+        LogReference RetrieveFromLog(int logPosition);
 
         IEnumerable<int> ListLogPositions();
     }

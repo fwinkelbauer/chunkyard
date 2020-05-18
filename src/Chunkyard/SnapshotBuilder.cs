@@ -10,21 +10,15 @@ namespace Chunkyard
     {
         private readonly IContentStore _contentStore;
         private readonly List<ContentReference> _storedContentReferences;
-        private readonly byte[] _salt;
-        private readonly int _iterations;
 
         private int? _currentLogPosition;
 
         private SnapshotBuilder(
             IContentStore contentStore,
-            int? currentLogPosition,
-            IEnumerable<byte> salt,
-            int iterations)
+            int? currentLogPosition)
         {
             _contentStore = contentStore;
             _currentLogPosition = currentLogPosition;
-            _salt = salt.ToArray();
-            _iterations = iterations;
 
             _storedContentReferences = new List<ContentReference>();
         }
@@ -42,22 +36,8 @@ namespace Chunkyard
                 new Snapshot(creationTime, _storedContentReferences),
                 string.Empty);
 
-            // We do not want to leak any fingerprints in an unencrypted
-            // reference
-            var safeContentReference = new ContentReference(
-                contentReference.Name,
-                contentReference.Chunks.Select(
-                    c => new ChunkReference(
-                        c.ContentUri,
-                        string.Empty,
-                        c.Nonce,
-                        c.Tag)));
-
             _currentLogPosition = _contentStore.AppendToLog(
-                new SnapshotReference(
-                    safeContentReference,
-                    _salt,
-                    _iterations),
+                contentReference,
                 _currentLogPosition);
 
             return _currentLogPosition.Value;
@@ -87,11 +67,11 @@ namespace Chunkyard
                 ? logPosition
                 : _currentLogPosition.Value + logPosition + 1;
 
-            var snapshotReference = _contentStore
-                .RetrieveFromLog<SnapshotReference>(resolveLogPosition);
+            var logReference = _contentStore
+                .RetrieveFromLog(resolveLogPosition);
 
             return _contentStore.RetrieveContent<Snapshot>(
-                snapshotReference.ContentReference);
+                logReference.ContentReference);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -122,16 +102,15 @@ namespace Chunkyard
 
             if (currentLogPosition.HasValue)
             {
-                var snapshotReference = contentStore
-                    .RetrieveFromLog<SnapshotReference>(
-                        currentLogPosition.Value);
+                var logReference = contentStore.RetrieveFromLog(
+                    currentLogPosition.Value);
 
-                encryptionProvider.Salt = snapshotReference.Salt;
-                encryptionProvider.Iterations = snapshotReference.Iterations;
+                encryptionProvider.Salt = logReference.Salt;
+                encryptionProvider.Iterations = logReference.Iterations;
                 encryptionProvider.Password = prompt.ExistingPassword();
 
                 var snapshot = contentStore.RetrieveContent<Snapshot>(
-                    snapshotReference.ContentReference);
+                    logReference.ContentReference);
 
                 // Known chunks should be encrypted using the existing
                 // parameters, so we register all previous references
@@ -152,9 +131,7 @@ namespace Chunkyard
 
             return new SnapshotBuilder(
                 contentStore,
-                currentLogPosition,
-                encryptionProvider.Salt,
-                encryptionProvider.Iterations);
+                currentLogPosition);
         }
     }
 }

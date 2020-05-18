@@ -112,18 +112,35 @@ namespace Chunkyard
             return _repository.FetchLogPosition(DefaultLogName);
         }
 
-        public int AppendToLog<T>(T value, int? currentLogPosition)
-            where T : notnull
+        public int AppendToLog(
+            ContentReference contentReference,
+            int? currentLogPosition)
         {
+            // We do not want to leak any fingerprints in an unencrypted
+            // reference
+            var safeContentReference = new ContentReference(
+                contentReference.Name,
+                contentReference.Chunks.Select(
+                    c => new ChunkReference(
+                        c.ContentUri,
+                        string.Empty,
+                        c.Nonce,
+                        c.Tag)));
+
+            var logReference = new LogReference(
+                safeContentReference,
+                _encryptionProvider.Salt,
+                _encryptionProvider.Iterations);
+
             return _repository.AppendToLog(
-                ToBytes(value),
+                ToBytes(logReference),
                 DefaultLogName,
                 currentLogPosition);
         }
 
-        public T RetrieveFromLog<T>(int logPosition) where T : notnull
+        public LogReference RetrieveFromLog(int logPosition)
         {
-            return ToObject<T>(
+            return ToObject<LogReference>(
                 _repository.RetrieveFromLog(DefaultLogName, logPosition));
         }
 
