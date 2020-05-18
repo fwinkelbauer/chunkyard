@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Chunkyard
 {
@@ -10,7 +9,7 @@ namespace Chunkyard
             IEnumerable<ChunkReference> chunks)
         {
             Name = name;
-            Chunks = chunks.ToList();
+            Chunks = new List<ChunkReference>(chunks);
         }
 
         public string Name { get; }

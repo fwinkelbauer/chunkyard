@@ -47,9 +47,9 @@ namespace Chunkyard
             {
                 var decryptedData = AesGcmCrypto.Decrypt(
                     _repository.RetrieveContent(chunk.ContentUri),
-                    chunk.Tag.ToArray(),
+                    chunk.Tag,
                     GenerateKey(),
-                    chunk.Nonce.ToArray());
+                    chunk.Nonce);
 
                 outputStream.Write(decryptedData);
             }
@@ -161,7 +161,7 @@ namespace Chunkyard
 
             _key = AesGcmCrypto.PasswordToKey(
                 password,
-                _encryptionProvider.Salt.ToArray(),
+                _encryptionProvider.Salt,
                 _encryptionProvider.Iterations);
 
             return _key;
@@ -189,8 +189,7 @@ namespace Chunkyard
                     _hashAlgorithmName,
                     chunkedData);
 
-                var nonce = _encryptionProvider.GetNonce(fingerprint)
-                    .ToArray();
+                var nonce = _encryptionProvider.GetNonce(fingerprint);
 
                 var (encryptedData, tag) = AesGcmCrypto.Encrypt(
                     chunkedData,

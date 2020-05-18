@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Chunkyard
 {
@@ -31,7 +30,7 @@ namespace Chunkyard
             }
         }
 
-        public IEnumerable<byte> Salt
+        public byte[] Salt
         {
             get
             {
@@ -44,7 +43,7 @@ namespace Chunkyard
             }
             set
             {
-                _salt = value.ToArray();
+                _salt = value;
             }
         }
 
@@ -65,12 +64,12 @@ namespace Chunkyard
             }
         }
 
-        public void RegisterNonce(string fingerprint, IEnumerable<byte> nonce)
+        public void RegisterNonce(string fingerprint, byte[] nonce)
         {
-            _noncesByFingerprints[fingerprint] = nonce.ToArray();
+            _noncesByFingerprints[fingerprint] = nonce;
         }
 
-        public IEnumerable<byte> GetNonce(string fingerprint)
+        public byte[] GetNonce(string fingerprint)
         {
             if (!_noncesByFingerprints.TryGetValue(fingerprint, out var nonce))
             {
