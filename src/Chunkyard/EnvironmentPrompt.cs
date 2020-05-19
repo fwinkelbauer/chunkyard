@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Text;
+
 namespace Chunkyard
 {
     internal class EnvironmentPrompt : IPrompt
@@ -33,7 +33,7 @@ namespace Chunkyard
             return _prompt.ExistingPassword();
         }
 
-        private bool TryGetPassword(out string password)
+        private static bool TryGetPassword(out string password)
         {
             password = Environment.GetEnvironmentVariable(PasswordVariable)
                 ?? string.Empty;

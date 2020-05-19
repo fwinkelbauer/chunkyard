@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using Chunkyard.Options;
-using Newtonsoft.Json;
 using Serilog;
 
 namespace Chunkyard

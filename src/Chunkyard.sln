@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard", "Chunkyard\Chunkyard.csproj", "{B9ED583A-D64E-4E35-B2B7-B1BD9CC9549F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chunkyard.Tests", "Chunkyard.Tests\Chunkyard.Tests.csproj", "{ECEF842F-8D64-4581-B1AA-F720BF6B72F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard.Tests", "Chunkyard.Tests\Chunkyard.Tests.csproj", "{ECEF842F-8D64-4581-B1AA-F720BF6B72F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

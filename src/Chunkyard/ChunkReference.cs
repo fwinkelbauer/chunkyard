@@ -6,7 +6,7 @@ namespace Chunkyard
     {
         public ChunkReference(
             Uri contentUri,
-            byte[]tag)
+            byte[] tag)
         {
             ContentUri = contentUri;
             Tag = tag;
