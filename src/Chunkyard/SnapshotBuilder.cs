@@ -11,7 +11,7 @@ namespace Chunkyard
 
         private int? _currentLogPosition;
 
-        private SnapshotBuilder(
+        public SnapshotBuilder(
             IContentStore contentStore,
             int? currentLogPosition)
         {
@@ -41,7 +41,7 @@ namespace Chunkyard
             return _currentLogPosition.Value;
         }
 
-        public IEnumerable<(int, Snapshot)> GetSnapshots()
+        public IEnumerable<(int LogPosition, Snapshot Snapshot)> GetSnapshots()
         {
             foreach (var logPosition in _contentStore.ListLogPositions())
             {
@@ -89,44 +89,6 @@ namespace Chunkyard
             _contentStore.RetrieveContent(
                 contentReference,
                 outputStream);
-        }
-
-        public static SnapshotBuilder OpenRepository(
-            IPrompt prompt,
-            EncryptionProvider encryptionProvider,
-            IContentStore contentStore)
-        {
-            var currentLogPosition = contentStore.FetchLogPosition();
-
-            if (currentLogPosition.HasValue)
-            {
-                var logReference = contentStore.RetrieveFromLog(
-                    currentLogPosition.Value);
-
-                encryptionProvider.Salt = logReference.Salt;
-                encryptionProvider.Iterations = logReference.Iterations;
-                encryptionProvider.Password = prompt.ExistingPassword();
-
-                var snapshot = contentStore.RetrieveContent<Snapshot>(
-                    logReference.ContentReference);
-
-                // Known files should be encrypted using the existing
-                // parameters, so we register all previous references
-                foreach (var contentReference in snapshot.ContentReferences)
-                {
-                    encryptionProvider.RegisterNonce(
-                        contentReference.Name,
-                        contentReference.Nonce);
-                }
-            }
-            else
-            {
-                encryptionProvider.Password = prompt.NewPassword();
-            }
-
-            return new SnapshotBuilder(
-                contentStore,
-                currentLogPosition);
         }
     }
 }

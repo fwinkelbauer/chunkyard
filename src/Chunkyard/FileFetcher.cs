@@ -10,7 +10,7 @@ namespace Chunkyard
         private static readonly string HomeDirectory =
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        public static IEnumerable<(string, string)> Find(
+        public static IEnumerable<(string FoundFile, string ContentName)> Find(
             IEnumerable<string> files,
             IEnumerable<string> excludePatterns)
         {
@@ -83,8 +83,6 @@ namespace Chunkyard
                     filteredFiles.Remove(excludedFile);
                 }
             }
-
-            filteredFiles.Sort();
 
             return filteredFiles;
         }

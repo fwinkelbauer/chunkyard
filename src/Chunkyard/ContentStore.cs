@@ -11,23 +11,33 @@ namespace Chunkyard
     {
         private const string DefaultLogName = "master";
 
+        private static readonly object Lock = new object();
+
         private readonly IRepository _repository;
-        private readonly EncryptionProvider _encryptionProvider;
         private readonly FastCdc _fastCdc;
         private readonly HashAlgorithmName _hashAlgorithmName;
+        private readonly byte[] _salt;
+        private readonly int _iterations;
+        private readonly byte[] _key;
 
-        private byte[]? _key;
+        private readonly Dictionary<string, byte[]> _noncesByFile;
 
         public ContentStore(
             IRepository repository,
-            EncryptionProvider encryptionProvider,
             FastCdc fastCdc,
-            HashAlgorithmName hashAlgorithmName)
+            HashAlgorithmName hashAlgorithmName,
+            string password,
+            byte[] salt,
+            int iterations)
         {
             _repository = repository;
-            _encryptionProvider = encryptionProvider;
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
+            _salt = salt;
+            _iterations = iterations;
+            _key = AesGcmCrypto.PasswordToKey(password, salt, iterations);
+
+            _noncesByFile = new Dictionary<string, byte[]>();
         }
 
         public Uri StoreUri
@@ -47,7 +57,7 @@ namespace Chunkyard
                 var decryptedData = AesGcmCrypto.Decrypt(
                     _repository.RetrieveContent(chunk.ContentUri),
                     chunk.Tag,
-                    GenerateKey(),
+                    _key,
                     contentReference.Nonce);
 
                 outputStream.Write(decryptedData);
@@ -69,7 +79,7 @@ namespace Chunkyard
             Stream inputStream,
             string contentName)
         {
-            var nonce = _encryptionProvider.GetNonce(contentName);
+            var nonce = GetNonce(contentName);
 
             return new ContentReference(
                 contentName,
@@ -111,7 +121,7 @@ namespace Chunkyard
 
         public int? FetchLogPosition()
         {
-            return _repository.FetchLogPosition(DefaultLogName);
+            return FetchLogPosition(_repository);
         }
 
         public int AppendToLog(
@@ -120,8 +130,8 @@ namespace Chunkyard
         {
             var logReference = new LogReference(
                 contentReference,
-                _encryptionProvider.Salt,
-                _encryptionProvider.Iterations);
+                _salt,
+                _iterations);
 
             return _repository.AppendToLog(
                 ToBytes(logReference),
@@ -131,8 +141,7 @@ namespace Chunkyard
 
         public LogReference RetrieveFromLog(int logPosition)
         {
-            return ToObject<LogReference>(
-                _repository.RetrieveFromLog(DefaultLogName, logPosition));
+            return RetrieveFromLog(_repository, logPosition);
         }
 
         public IEnumerable<int> ListLogPositions()
@@ -140,22 +149,37 @@ namespace Chunkyard
             return _repository.ListLogPositions(DefaultLogName);
         }
 
-        private byte[] GenerateKey()
+        public void RegisterNonce(string name, byte[] nonce)
         {
-            if (_key != null)
+            _noncesByFile[name] = nonce;
+        }
+
+        private byte[] GetNonce(string name)
+        {
+            lock (Lock)
             {
-                return _key;
+                if (!_noncesByFile.TryGetValue(name, out var nonce))
+                {
+                    nonce = AesGcmCrypto.GenerateNonce();
+                    _noncesByFile[name] = nonce;
+                }
+
+                return nonce;
             }
+        }
 
-            var password = _encryptionProvider.Password
-                ?? throw new ChunkyardException("No password was provided");
+        public static int? FetchLogPosition(
+            IRepository repository)
+        {
+            return repository.FetchLogPosition(DefaultLogName);
+        }
 
-            _key = AesGcmCrypto.PasswordToKey(
-                password,
-                _encryptionProvider.Salt,
-                _encryptionProvider.Iterations);
-
-            return _key;
+        public static LogReference RetrieveFromLog(
+            IRepository repository,
+            int logPosition)
+        {
+            return ToObject<LogReference>(
+                repository.RetrieveFromLog(DefaultLogName, logPosition));
         }
 
         private static byte[] ToBytes(object o)
@@ -180,7 +204,7 @@ namespace Chunkyard
             {
                 var (encryptedData, tag) = AesGcmCrypto.Encrypt(
                     chunkedData,
-                    GenerateKey(),
+                    _key,
                     nonce);
 
                 var contentUri = Id.ComputeContentUri(

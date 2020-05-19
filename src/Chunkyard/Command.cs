@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Chunkyard.Options;
 using Serilog;
 
@@ -22,9 +23,9 @@ namespace Chunkyard
 
         public static void PreviewFiles(PreviewOptions o)
         {
-            var found = FileFetcher.Find(o.Files, o.ExcludePatterns);
+            var foundTuples = FileFetcher.Find(o.Files, o.ExcludePatterns);
 
-            foreach ((_, var contentName) in found)
+            foreach ((_, var contentName) in foundTuples)
             {
                 Console.WriteLine(contentName);
             }
@@ -36,21 +37,18 @@ namespace Chunkyard
 
             _log.Information("Creating new snapshot");
 
-            var index = 1;
-            var found = FileFetcher.Find(o.Files, o.ExcludePatterns)
+            var foundTuples = FileFetcher.Find(o.Files, o.ExcludePatterns)
                 .ToList();
 
-            foreach ((var foundFile, var contentName) in found)
-            {
-                _log.Information(
-                    "Storing: {Content} ({CurrentIndex}/{MaxIndex})",
-                    contentName,
-                    index++,
-                    found.Count);
+            Parallel.ForEach(
+                foundTuples,
+                t =>
+                {
+                    using var fileStream = File.OpenRead(t.FoundFile);
+                    snapshotBuilder.AddContent(fileStream, t.ContentName);
 
-                using var fileStream = File.OpenRead(foundFile);
-                snapshotBuilder.AddContent(fileStream, contentName);
-            }
+                    _log.Information("Stored: {Content}", t.ContentName);
+                });
 
             var newLogPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
 
@@ -67,35 +65,40 @@ namespace Chunkyard
             _log.Information("Checking snapshot {LogPosition}", o.LogPosition);
 
             var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
-
-            var index = 1;
             var filteredContentReferences = FuzzyFilter(
                 o.IncludeFuzzy,
                 snapshot.ContentReferences);
 
             var error = false;
 
-            foreach (var contentReference in filteredContentReferences)
-            {
-                _log.Information(
-                    "Validating: {File} ({CurrentIndex}/{MaxIndex})",
-                        contentReference.Name,
-                    index++,
-                    filteredContentReferences.Count);
-
-                if (!snapshotBuilder.ContentExists(contentReference))
+            Parallel.ForEach(
+                filteredContentReferences,
+                contentReference =>
                 {
-                    _log.Warning("Missing: {Content}", contentReference.Name);
+                    if (!snapshotBuilder.ContentExists(contentReference))
+                    {
+                        _log.Warning(
+                            "Missing: {Content}",
+                            contentReference.Name);
 
-                    error = true;
-                }
-                else if (!o.Shallow && !snapshotBuilder.ContentValid(contentReference))
-                {
-                    _log.Warning("Corrupted: {Content}", contentReference.Name);
+                        error = true;
+                    }
+                    else if (!o.Shallow
+                        && !snapshotBuilder.ContentValid(contentReference))
+                    {
+                        _log.Warning(
+                            "Corrupted: {Content}",
+                            contentReference.Name);
 
-                    error = true;
-                }
-            }
+                        error = true;
+                    }
+                    else
+                    {
+                        _log.Information(
+                            "Validated: {File}",
+                            contentReference.Name);
+                    }
+                });
 
             if (error)
             {
@@ -134,45 +137,45 @@ namespace Chunkyard
                 ? FileMode.OpenOrCreate
                 : FileMode.CreateNew;
 
-            var index = 1;
             var filteredContentReferences = FuzzyFilter(
                 o.IncludeFuzzy,
                 snapshot.ContentReferences);
 
             var error = false;
 
-            foreach (var contentReference in filteredContentReferences)
-            {
-                var file = Path.Combine(
-                    o.Directory,
-                    contentReference.Name);
-
-                try
+            Parallel.ForEach(
+                filteredContentReferences,
+                contentReference =>
                 {
-                    _log.Information(
-                        "Restoring: {File} ({CurrentIndex}/{MaxIndex})",
-                        file,
-                        index++,
-                        filteredContentReferences.Count);
+                    var file = Path.Combine(
+                        o.Directory,
+                        contentReference.Name);
 
-                    Directory.CreateDirectory(Path.GetDirectoryName(file));
+                    try
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(file));
 
-                    using var stream = new FileStream(
+                        using var stream = new FileStream(
                         file,
                         mode,
                         FileAccess.Write);
 
-                    snapshotBuilder.RetrieveContent(
-                        contentReference,
-                        stream);
-                }
-                catch (Exception e)
-                {
-                    _log.Error(e, "Error: {File}", file);
+                        snapshotBuilder.RetrieveContent(
+                            contentReference,
+                            stream);
 
-                    error = true;
-                }
-            }
+                        _log.Information(
+                            "Restored: {File}",
+                            file);
+
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error(e, "Error: {File}", file);
+
+                        error = true;
+                    }
+                });
 
             if (error)
             {
@@ -183,41 +186,85 @@ namespace Chunkyard
 
         public static void ShowLogPositions(LogOptions o)
         {
-            var snapshots = CreateSnapshotBuilder(o.Repository)
+            var snapshotTuples = CreateSnapshotBuilder(o.Repository)
                 .GetSnapshots();
 
-            foreach (var snapshotTuple in snapshots)
+            foreach (var tuple in snapshotTuples)
             {
-                var logPosition = snapshotTuple.Item1;
-                var snapshot = snapshotTuple.Item2;
-
-                Console.WriteLine($"{logPosition}: {snapshot.CreationTime}");
+                Console.WriteLine(
+                    $"{tuple.LogPosition}: {tuple.Snapshot.CreationTime}");
             }
         }
 
         private static SnapshotBuilder CreateSnapshotBuilder(
-            string repository,
+            string repositoryPath,
             bool cached = false)
         {
-            var encryptionProvider = new EncryptionProvider();
-            IContentStore contentStore = new ContentStore(
-                new FileRepository(repository),
-                encryptionProvider,
+            var repository = new FileRepository(repositoryPath);
+            var logPosition = ContentStore.FetchLogPosition(repository);
+            var prompt = new EnvironmentPrompt(
+                new ConsolePrompt());
+
+            string? password = null;
+            byte[]? salt = null;
+            int? iterations = null;
+            LogReference? logReference = null;
+
+            if (logPosition == null)
+            {
+                password = prompt.NewPassword();
+                salt = AesGcmCrypto.GenerateSalt();
+                iterations = AesGcmCrypto.Iterations;
+            }
+            else
+            {
+                logReference = ContentStore.RetrieveFromLog(
+                    repository,
+                    logPosition.Value);
+
+                password = prompt.ExistingPassword();
+                salt = logReference.Salt;
+                iterations = logReference.Iterations;
+            }
+
+            var contentStore = new ContentStore(
+                repository,
                 new FastCdc(
                     2 * 1024 * 1024,
                     4 * 1024 * 1024,
                     8 * 1024 * 1024),
-                HashAlgorithmName.SHA256);
+                HashAlgorithmName.SHA256,
+                password,
+                salt,
+                iterations.Value);
 
-            contentStore = cached
-                ? new CachedContentStore(contentStore, CacheDirectoryPath)
-                : contentStore;
+            if (logReference != null)
+            {
+                var snapshot = contentStore.RetrieveContent<Snapshot>(
+                    logReference.ContentReference);
 
-            return SnapshotBuilder.OpenRepository(
-                new EnvironmentPrompt(
-                    new ConsolePrompt()),
-                encryptionProvider,
-                contentStore);
+                // Known files should be encrypted using the existing
+                // parameters, so we register all previous references
+                foreach (var contentReference in snapshot.ContentReferences)
+                {
+                    contentStore.RegisterNonce(
+                        contentReference.Name,
+                        contentReference.Nonce);
+                }
+            }
+
+            IContentStore nestedContentStore = contentStore;
+
+            if (cached)
+            {
+                nestedContentStore = new CachedContentStore(
+                    contentStore,
+                    CacheDirectoryPath);
+            }
+
+            return new SnapshotBuilder(
+                nestedContentStore,
+                logPosition);
         }
 
         private static List<ContentReference> FuzzyFilter(
