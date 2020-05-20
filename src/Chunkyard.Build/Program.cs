@@ -59,7 +59,10 @@ namespace Chunkyard.Build
 
         private static void Clean()
         {
-            Directory.Delete(ArtifactsDirectory, true);
+            if (Directory.Exists(ArtifactsDirectory))
+            {
+                Directory.Delete(ArtifactsDirectory, true);
+            }
         }
 
         private static void Lint()
