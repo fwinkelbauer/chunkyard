@@ -90,6 +90,21 @@ namespace Chunkyard
             }
         }
 
+        public void RemoveContent(Uri contentUri)
+        {
+            var filePath = ToFilePath(contentUri);
+            var directoryPath = Path.GetDirectoryName(filePath);
+
+            File.Delete(filePath);
+
+            if (Directory.EnumerateFileSystemEntries(directoryPath).Any())
+            {
+                return;
+            }
+
+            Directory.Delete(directoryPath);
+        }
+
         public int AppendToLog(
             byte[] value,
             string logName,

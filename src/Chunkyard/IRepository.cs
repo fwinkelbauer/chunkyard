@@ -17,6 +17,8 @@ namespace Chunkyard
 
         IEnumerable<Uri> ListContents();
 
+        void RemoveContent(Uri contentUri);
+
         int AppendToLog(byte[] value, string logName, int? currentLogPosition);
 
         byte[] RetrieveFromLog(string logName, int logPosition);

@@ -186,21 +186,77 @@ namespace Chunkyard
 
         public static void ShowLogPositions(LogOptions o)
         {
-            var snapshotTuples = CreateSnapshotBuilder(o.Repository)
-                .GetSnapshots();
+            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+            var logPositions = snapshotBuilder.ListLogPositions();
 
-            foreach (var tuple in snapshotTuples)
+            foreach (var logPosition in logPositions)
             {
-                Console.WriteLine(
-                    $"{tuple.LogPosition}: {tuple.Snapshot.CreationTime}");
+                var snapshot = snapshotBuilder.GetSnapshot(logPosition);
+
+                _log.Information(
+                    "{LogPosition}: {Time}",
+                    logPosition,
+                    snapshot.CreationTime);
             }
+        }
+
+        public static void GarbageCollect(GarbageCollectOptions o)
+        {
+            var repository = CreateRepository(o.Repository);
+            var usedUris = new Dictionary<Uri, bool>();
+
+            foreach (var contentUri in repository.ListContents())
+            {
+                usedUris[contentUri] = false;
+            }
+
+            var snapshotBuilder = CreateSnapshotBuilder(repository);
+            var logPositions = snapshotBuilder.ListLogPositions();
+
+            foreach (var logPosition in logPositions)
+            {
+                var contentUris = snapshotBuilder.ListContents(logPosition);
+
+                foreach (var contentUri in contentUris)
+                {
+                    usedUris[contentUri] = true;
+                }
+            }
+
+            foreach (var contentUri in usedUris.Keys)
+            {
+                if (usedUris[contentUri])
+                {
+                    continue;
+                }
+
+                _log.Information("Unused: {ContentUri}", contentUri);
+
+                if (!o.Preview)
+                {
+                    repository.RemoveContent(contentUri);
+                }
+            }
+        }
+
+        private static IRepository CreateRepository(string repositoryPath)
+        {
+            return new FileRepository(repositoryPath);
         }
 
         private static SnapshotBuilder CreateSnapshotBuilder(
             string repositoryPath,
             bool cached = false)
         {
-            var repository = new FileRepository(repositoryPath);
+            return CreateSnapshotBuilder(
+                CreateRepository(repositoryPath),
+                cached);
+        }
+
+        private static SnapshotBuilder CreateSnapshotBuilder(
+            IRepository repository,
+            bool cached = false)
+        {
             var logPosition = ContentStore.FetchLogPosition(repository);
             var prompt = new EnvironmentPrompt(
                 new ConsolePrompt());

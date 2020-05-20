@@ -41,12 +41,9 @@ namespace Chunkyard
             return _currentLogPosition.Value;
         }
 
-        public IEnumerable<(int LogPosition, Snapshot Snapshot)> GetSnapshots()
+        public IEnumerable<int> ListLogPositions()
         {
-            foreach (var logPosition in _contentStore.ListLogPositions())
-            {
-                yield return (logPosition, GetSnapshot(logPosition));
-            }
+            return _contentStore.ListLogPositions();
         }
 
         public Snapshot GetSnapshot(int logPosition)
@@ -70,6 +67,33 @@ namespace Chunkyard
 
             return _contentStore.RetrieveContent<Snapshot>(
                 logReference.ContentReference);
+        }
+
+        public IEnumerable<Uri> ListContents(int logPosition)
+        {
+            var logReference = _contentStore
+                .RetrieveFromLog(logPosition);
+
+            foreach (var chunk in logReference.ContentReference.Chunks)
+            {
+                yield return chunk.ContentUri;
+            }
+
+            if (!_contentStore.ContentExists(logReference.ContentReference))
+            {
+                yield break;
+            }
+
+            var snapshot = _contentStore.RetrieveContent<Snapshot>(
+                logReference.ContentReference);
+
+            foreach (var contentReference in snapshot.ContentReferences)
+            {
+                foreach (var chunk in contentReference.Chunks)
+                {
+                    yield return chunk.ContentUri;
+                }
+            }
         }
 
         public bool ContentExists(ContentReference contentReference)
