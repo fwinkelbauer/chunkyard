@@ -15,6 +15,8 @@ namespace Chunkyard
 
         bool ContentValid(Uri contentUri);
 
+        IEnumerable<Uri> ListContents();
+
         int AppendToLog(byte[] value, string logName, int? currentLogPosition);
 
         byte[] RetrieveFromLog(string logName, int logPosition);

@@ -58,5 +58,17 @@ namespace Chunkyard.Tests
 
             Assert.Equal(expectedhash, actualHash);
         }
+
+        [Fact]
+        public static void ToContentUri_Creates_Uri_From_Algorithm_And_Hash()
+        {
+            var hashAlgorithmName = "sha256";
+            var hash = "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e";
+            var expectedUri = new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e");
+
+            var actualUri = Id.ToContentUri(hashAlgorithmName, hash);
+
+            Assert.Equal(expectedUri, actualUri);
+        }
     }
 }

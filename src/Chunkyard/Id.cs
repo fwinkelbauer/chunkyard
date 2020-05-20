@@ -35,16 +35,30 @@ namespace Chunkyard
 
         public static HashAlgorithmName AlgorithmFromContentUri(Uri contentUri)
         {
-            return new HashAlgorithmName(
-                contentUri.EnsureNotNull(nameof(contentUri)).Scheme.ToUpper());
+            contentUri.EnsureNotNull(nameof(contentUri));
+
+            return new HashAlgorithmName(contentUri.Scheme.ToUpper());
         }
 
         public static string HashFromContentUri(Uri contentUri)
         {
+            contentUri.EnsureNotNull(nameof(contentUri));
+
             // Check that this is a valid content URI
             _ = AlgorithmFromContentUri(contentUri);
 
-            return contentUri.EnsureNotNull(nameof(contentUri)).Host;
+            return contentUri.Host;
+        }
+
+        public static Uri ToContentUri(
+            string hashAlgorithmName,
+            string hash)
+        {
+            hashAlgorithmName.EnsureNotNull(nameof(hashAlgorithmName));
+
+            return ToContentUri(
+                new HashAlgorithmName(hashAlgorithmName.ToUpper()),
+                hash);
         }
 
         private static Uri ToContentUri(

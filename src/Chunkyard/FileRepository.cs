@@ -66,6 +66,30 @@ namespace Chunkyard
             return contentUri.Equals(computedUri);
         }
 
+        public IEnumerable<Uri> ListContents()
+        {
+            if (!Directory.Exists(_contentDirectory))
+            {
+                yield break;
+            }
+
+            var hashDirectories = Directory.GetDirectories(
+                _contentDirectory);
+
+            foreach (var hashDirectory in hashDirectories)
+            {
+                var contentFiles = Directory.EnumerateFiles(
+                    hashDirectory,
+                    "*",
+                    SearchOption.AllDirectories);
+
+                foreach (var contentFile in contentFiles)
+                {
+                    yield return ToContentUri(contentFile);
+                }
+            }
+        }
+
         public int AppendToLog(
             byte[] value,
             string logName,
@@ -134,6 +158,19 @@ namespace Chunkyard
         {
             return Directory.GetDirectories(_refLogDirectory)
                 .Select(d => Path.GetFileName(d));
+        }
+
+        private static Uri ToContentUri(string filePath)
+        {
+            var hashAlgorithmName = Path.GetFileName(
+                Path.GetDirectoryName(
+                    Path.GetDirectoryName(filePath)
+                    ?? string.Empty))
+                ?? string.Empty;
+
+            return Id.ToContentUri(
+                hashAlgorithmName,
+                Path.GetFileNameWithoutExtension(filePath));
         }
 
         private string ToDirectoryPath(string logName)
