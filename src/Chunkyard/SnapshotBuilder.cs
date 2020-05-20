@@ -6,6 +6,8 @@ namespace Chunkyard
 {
     internal class SnapshotBuilder
     {
+        private static readonly object Lock = new object();
+
         private readonly List<ContentReference> _storedContentReferences;
 
         private int? _currentLogPosition;
@@ -25,9 +27,14 @@ namespace Chunkyard
 
         public void AddContent(Stream inputStream, string contentName)
         {
-            _storedContentReferences.Add(ContentStore.StoreContent(
+            var contentReference = ContentStore.StoreContent(
                 inputStream,
-                contentName));
+                contentName);
+
+            lock (Lock)
+            {
+                _storedContentReferences.Add(contentReference);
+            }
         }
 
         public int WriteSnapshot(DateTime creationTime)
