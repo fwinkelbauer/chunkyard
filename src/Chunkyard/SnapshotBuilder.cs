@@ -6,7 +6,6 @@ namespace Chunkyard
 {
     internal class SnapshotBuilder
     {
-        private readonly IContentStore _contentStore;
         private readonly List<ContentReference> _storedContentReferences;
 
         private int? _currentLogPosition;
@@ -15,76 +14,61 @@ namespace Chunkyard
             IContentStore contentStore,
             int? currentLogPosition)
         {
-            _contentStore = contentStore;
+            ContentStore = contentStore;
+
             _currentLogPosition = currentLogPosition;
 
             _storedContentReferences = new List<ContentReference>();
         }
 
+        public IContentStore ContentStore { get; }
+
         public void AddContent(Stream inputStream, string contentName)
         {
-            _storedContentReferences.Add(_contentStore.StoreContent(
+            _storedContentReferences.Add(ContentStore.StoreContent(
                 inputStream,
                 contentName));
         }
 
         public int WriteSnapshot(DateTime creationTime)
         {
-            var contentReference = _contentStore.StoreContent(
+            var contentReference = ContentStore.StoreContent(
                 new Snapshot(creationTime, _storedContentReferences),
                 string.Empty);
 
-            _currentLogPosition = _contentStore.AppendToLog(
+            _currentLogPosition = ContentStore.AppendToLog(
                 contentReference,
                 _currentLogPosition);
 
             return _currentLogPosition.Value;
         }
 
-        public IEnumerable<int> ListLogPositions()
-        {
-            return _contentStore.ListLogPositions();
-        }
-
         public Snapshot GetSnapshot(int logPosition)
         {
-            if (!_currentLogPosition.HasValue)
-            {
-                throw new ChunkyardException(
-                    "Cannot load snapshot from an empty repository");
-            }
-
-            //  0: the first element
-            //  1: the second element
-            // -2: the second-last element
-            // -1: the last element
-            var resolveLogPosition = logPosition >= 0
-                ? logPosition
-                : _currentLogPosition.Value + logPosition + 1;
-
-            var logReference = _contentStore
+            var resolveLogPosition = Resolve(logPosition);
+            var logReference = ContentStore
                 .RetrieveFromLog(resolveLogPosition);
 
-            return _contentStore.RetrieveContent<Snapshot>(
+            return ContentStore.RetrieveContent<Snapshot>(
                 logReference.ContentReference);
         }
 
         public IEnumerable<Uri> ListContents(int logPosition)
         {
-            var logReference = _contentStore
-                .RetrieveFromLog(logPosition);
+            var logReference = ContentStore
+                .RetrieveFromLog(Resolve(logPosition));
 
             foreach (var chunk in logReference.ContentReference.Chunks)
             {
                 yield return chunk.ContentUri;
             }
 
-            if (!_contentStore.ContentExists(logReference.ContentReference))
+            if (!ContentStore.ContentExists(logReference.ContentReference))
             {
                 yield break;
             }
 
-            var snapshot = _contentStore.RetrieveContent<Snapshot>(
+            var snapshot = ContentStore.RetrieveContent<Snapshot>(
                 logReference.ContentReference);
 
             foreach (var contentReference in snapshot.ContentReferences)
@@ -96,23 +80,30 @@ namespace Chunkyard
             }
         }
 
-        public bool ContentExists(ContentReference contentReference)
-        {
-            return _contentStore.ContentExists(contentReference);
-        }
-
-        public bool ContentValid(ContentReference contentReference)
-        {
-            return _contentStore.ContentValid(contentReference);
-        }
-
         public void RetrieveContent(
             ContentReference contentReference,
             Stream outputStream)
         {
-            _contentStore.RetrieveContent(
+            ContentStore.RetrieveContent(
                 contentReference,
                 outputStream);
+        }
+
+        private int Resolve(int logPosition)
+        {
+            if (!_currentLogPosition.HasValue)
+            {
+                throw new ChunkyardException(
+                    "Cannot load snapshot from an empty repository");
+            }
+
+            //  0: the first element
+            //  1: the second element
+            // -2: the second-last element
+            // -1: the last element
+            return logPosition >= 0
+                ? logPosition
+                : _currentLogPosition.Value + logPosition + 1;
         }
     }
 }

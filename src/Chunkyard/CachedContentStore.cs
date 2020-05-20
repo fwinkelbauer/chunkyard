@@ -20,20 +20,14 @@ namespace Chunkyard
             // Each repository should have its own cache
             var hash = Id.ComputeHash(
                 HashAlgorithmName.SHA256,
-                _contentStore.StoreUri.AbsoluteUri);
+                _contentStore.Repository.RepositoryUri.AbsoluteUri);
 
             var shortHash = hash.Substring(0, 8);
 
             _cacheDirectory = Path.Combine(cacheDirectory, shortHash);
         }
 
-        public Uri StoreUri
-        {
-            get
-            {
-                return _contentStore.StoreUri;
-            }
-        }
+        public IRepository Repository => _contentStore.Repository;
 
         public void RetrieveContent(
             ContentReference contentReference,

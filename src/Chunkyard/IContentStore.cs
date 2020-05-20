@@ -6,7 +6,7 @@ namespace Chunkyard
 {
     internal interface IContentStore
     {
-        public Uri StoreUri { get; }
+        public IRepository Repository { get; }
 
         void RetrieveContent(
             ContentReference contentReference,

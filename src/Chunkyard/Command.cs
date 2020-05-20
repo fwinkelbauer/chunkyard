@@ -75,7 +75,8 @@ namespace Chunkyard
                 filteredContentReferences,
                 contentReference =>
                 {
-                    if (!snapshotBuilder.ContentExists(contentReference))
+                    if (!snapshotBuilder.ContentStore
+                        .ContentExists(contentReference))
                     {
                         _log.Warning(
                             "Missing: {Content}",
@@ -84,7 +85,8 @@ namespace Chunkyard
                         error = true;
                     }
                     else if (!o.Shallow
-                        && !snapshotBuilder.ContentValid(contentReference))
+                        && !snapshotBuilder.ContentStore
+                             .ContentValid(contentReference))
                     {
                         _log.Warning(
                             "Corrupted: {Content}",
@@ -187,7 +189,7 @@ namespace Chunkyard
         public static void ShowLogPositions(LogOptions o)
         {
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
-            var logPositions = snapshotBuilder.ListLogPositions();
+            var logPositions = snapshotBuilder.ContentStore.ListLogPositions();
 
             foreach (var logPosition in logPositions)
             {
@@ -202,16 +204,17 @@ namespace Chunkyard
 
         public static void GarbageCollect(GarbageCollectOptions o)
         {
-            var repository = CreateRepository(o.Repository);
+            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
             var usedUris = new Dictionary<Uri, bool>();
+            var allContentUris = snapshotBuilder.ContentStore.Repository
+                .ListUris();
 
-            foreach (var contentUri in repository.ListContents())
+            foreach (var contentUri in allContentUris)
             {
                 usedUris[contentUri] = false;
             }
 
-            var snapshotBuilder = CreateSnapshotBuilder(repository);
-            var logPositions = snapshotBuilder.ListLogPositions();
+            var logPositions = snapshotBuilder.ContentStore.ListLogPositions();
 
             foreach (var logPosition in logPositions)
             {
@@ -234,29 +237,17 @@ namespace Chunkyard
 
                 if (!o.Preview)
                 {
-                    repository.RemoveContent(contentUri);
+                    snapshotBuilder.ContentStore.Repository
+                        .RemoveUri(contentUri);
                 }
             }
-        }
-
-        private static IRepository CreateRepository(string repositoryPath)
-        {
-            return new FileRepository(repositoryPath);
         }
 
         private static SnapshotBuilder CreateSnapshotBuilder(
             string repositoryPath,
             bool cached = false)
         {
-            return CreateSnapshotBuilder(
-                CreateRepository(repositoryPath),
-                cached);
-        }
-
-        private static SnapshotBuilder CreateSnapshotBuilder(
-            IRepository repository,
-            bool cached = false)
-        {
+            var repository = new FileRepository(repositoryPath);
             var logPosition = ContentStore.FetchLogPosition(repository);
             var prompt = new EnvironmentPrompt(
                 new ConsolePrompt());

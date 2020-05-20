@@ -7,17 +7,17 @@ namespace Chunkyard
     {
         public Uri RepositoryUri { get; }
 
-        void StoreContent(Uri contentUri, byte[] value);
+        void StoreUri(Uri contentUri, byte[] value);
 
-        byte[] RetrieveContent(Uri contentUri);
+        byte[] RetrieveUri(Uri contentUri);
 
-        bool ContentExists(Uri contentUri);
+        bool UriExists(Uri contentUri);
 
-        bool ContentValid(Uri contentUri);
+        bool UriValid(Uri contentUri);
 
-        IEnumerable<Uri> ListContents();
+        IEnumerable<Uri> ListUris();
 
-        void RemoveContent(Uri contentUri);
+        void RemoveUri(Uri contentUri);
 
         int AppendToLog(byte[] value, string logName, int? currentLogPosition);
 

@@ -13,7 +13,6 @@ namespace Chunkyard
 
         private static readonly object Lock = new object();
 
-        private readonly IRepository _repository;
         private readonly FastCdc _fastCdc;
         private readonly HashAlgorithmName _hashAlgorithmName;
         private readonly byte[] _salt;
@@ -30,7 +29,8 @@ namespace Chunkyard
             byte[] salt,
             int iterations)
         {
-            _repository = repository;
+            Repository = repository;
+
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
             _salt = salt;
@@ -40,13 +40,7 @@ namespace Chunkyard
             _noncesByFile = new Dictionary<string, byte[]>();
         }
 
-        public Uri StoreUri
-        {
-            get
-            {
-                return _repository.RepositoryUri;
-            }
-        }
+        public IRepository Repository { get; }
 
         public void RetrieveContent(
             ContentReference contentReference,
@@ -55,7 +49,7 @@ namespace Chunkyard
             foreach (var chunk in contentReference.Chunks)
             {
                 var decryptedData = AesGcmCrypto.Decrypt(
-                    _repository.RetrieveContent(chunk.ContentUri),
+                    Repository.RetrieveUri(chunk.ContentUri),
                     chunk.Tag,
                     _key,
                     contentReference.Nonce);
@@ -68,6 +62,7 @@ namespace Chunkyard
             where T : notnull
         {
             using var memoryStream = new MemoryStream();
+
             RetrieveContent(
                 contentReference,
                 memoryStream);
@@ -91,6 +86,7 @@ namespace Chunkyard
             where T : notnull
         {
             using var memoryStream = new MemoryStream(ToBytes(value));
+
             return StoreContent(
                 (Stream)memoryStream, contentName);
         }
@@ -101,7 +97,7 @@ namespace Chunkyard
 
             foreach (var chunk in contentReference.Chunks)
             {
-                exists &= _repository.ContentExists(chunk.ContentUri);
+                exists &= Repository.UriExists(chunk.ContentUri);
             }
 
             return exists;
@@ -113,7 +109,7 @@ namespace Chunkyard
 
             foreach (var chunk in contentReference.Chunks)
             {
-                valid &= _repository.ContentValid(chunk.ContentUri);
+                valid &= Repository.UriValid(chunk.ContentUri);
             }
 
             return valid;
@@ -121,7 +117,7 @@ namespace Chunkyard
 
         public int? FetchLogPosition()
         {
-            return FetchLogPosition(_repository);
+            return FetchLogPosition(Repository);
         }
 
         public int AppendToLog(
@@ -133,7 +129,7 @@ namespace Chunkyard
                 _salt,
                 _iterations);
 
-            return _repository.AppendToLog(
+            return Repository.AppendToLog(
                 ToBytes(logReference),
                 DefaultLogName,
                 currentLogPosition);
@@ -141,12 +137,12 @@ namespace Chunkyard
 
         public LogReference RetrieveFromLog(int logPosition)
         {
-            return RetrieveFromLog(_repository, logPosition);
+            return RetrieveFromLog(Repository, logPosition);
         }
 
         public IEnumerable<int> ListLogPositions()
         {
-            return _repository.ListLogPositions(DefaultLogName);
+            return Repository.ListLogPositions(DefaultLogName);
         }
 
         public void RegisterNonce(string name, byte[] nonce)
@@ -168,8 +164,7 @@ namespace Chunkyard
             }
         }
 
-        public static int? FetchLogPosition(
-            IRepository repository)
+        public static int? FetchLogPosition(IRepository repository)
         {
             return repository.FetchLogPosition(DefaultLogName);
         }
@@ -211,7 +206,7 @@ namespace Chunkyard
                     _hashAlgorithmName,
                     encryptedData);
 
-                _repository.StoreContent(contentUri, encryptedData);
+                Repository.StoreUri(contentUri, encryptedData);
 
                 yield return new ChunkReference(
                     contentUri,

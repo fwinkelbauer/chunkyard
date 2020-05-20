@@ -20,7 +20,7 @@ namespace Chunkyard
 
         public Uri RepositoryUri { get; }
 
-        public void StoreContent(Uri contentUri, byte[] value)
+        public void StoreUri(Uri contentUri, byte[] value)
         {
             var file = ToFilePath(contentUri);
 
@@ -39,26 +39,26 @@ namespace Chunkyard
             }
         }
 
-        public byte[] RetrieveContent(Uri contentUri)
+        public byte[] RetrieveUri(Uri contentUri)
         {
             return File.ReadAllBytes(
                 ToFilePath(contentUri));
         }
 
-        public bool ContentExists(Uri contentUri)
+        public bool UriExists(Uri contentUri)
         {
             return File.Exists(
                 ToFilePath(contentUri));
         }
 
-        public bool ContentValid(Uri contentUri)
+        public bool UriValid(Uri contentUri)
         {
-            if (contentUri == null || !ContentExists(contentUri))
+            if (contentUri == null || !UriExists(contentUri))
             {
                 return false;
             }
 
-            var content = RetrieveContent(contentUri);
+            var content = RetrieveUri(contentUri);
             var computedUri = Id.ComputeContentUri(
                 Id.AlgorithmFromContentUri(contentUri),
                 content);
@@ -66,7 +66,7 @@ namespace Chunkyard
             return contentUri.Equals(computedUri);
         }
 
-        public IEnumerable<Uri> ListContents()
+        public IEnumerable<Uri> ListUris()
         {
             if (!Directory.Exists(_contentDirectory))
             {
@@ -90,7 +90,7 @@ namespace Chunkyard
             }
         }
 
-        public void RemoveContent(Uri contentUri)
+        public void RemoveUri(Uri contentUri)
         {
             var filePath = ToFilePath(contentUri);
             var directoryPath = Path.GetDirectoryName(filePath);
