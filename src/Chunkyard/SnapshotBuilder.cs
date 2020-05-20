@@ -53,7 +53,7 @@ namespace Chunkyard
                 logReference.ContentReference);
         }
 
-        public IEnumerable<Uri> ListContents(int logPosition)
+        public IEnumerable<Uri> ListUris(int logPosition)
         {
             var logReference = ContentStore
                 .RetrieveFromLog(Resolve(logPosition));
@@ -78,15 +78,6 @@ namespace Chunkyard
                     yield return chunk.ContentUri;
                 }
             }
-        }
-
-        public void RetrieveContent(
-            ContentReference contentReference,
-            Stream outputStream)
-        {
-            ContentStore.RetrieveContent(
-                contentReference,
-                outputStream);
         }
 
         private int Resolve(int logPosition)

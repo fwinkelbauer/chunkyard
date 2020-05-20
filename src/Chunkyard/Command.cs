@@ -162,9 +162,8 @@ namespace Chunkyard
                         mode,
                         FileAccess.Write);
 
-                        snapshotBuilder.RetrieveContent(
-                            contentReference,
-                            stream);
+                        snapshotBuilder.ContentStore.
+                            RetrieveContent(contentReference, stream);
 
                         _log.Information(
                             "Restored: {File}",
@@ -218,7 +217,7 @@ namespace Chunkyard
 
             foreach (var logPosition in logPositions)
             {
-                var contentUris = snapshotBuilder.ListContents(logPosition);
+                var contentUris = snapshotBuilder.ListUris(logPosition);
 
                 foreach (var contentUri in contentUris)
                 {
