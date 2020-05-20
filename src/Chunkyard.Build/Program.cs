@@ -1,58 +1,130 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Diagnostics;
-using CommandLine;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Chunkyard.Build
 {
     public static class Program
     {
+        private const string ArtifactsDirectory = "artifacts";
         private const string Solution = "src/Chunkyard.sln";
+        private const string Configuration = "Release";
+
+        private static readonly string Runtime =
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? "win-x64"
+            : "linux-x64";
+
+        private static readonly Dictionary<string, Action> RunTargets =
+            new Dictionary<string, Action>(
+                StringComparer.OrdinalIgnoreCase)
+            {
+                { "clean", Clean },
+                { "lint", Lint },
+                { "build", Build },
+                { "test", Test },
+                { "publish", Publish },
+                { "help", Help }
+            };
 
         public static void Main(string[] args)
         {
-            Environment.ExitCode = ProcessArguments(args);
-        }
+            var target = args?.Length == 1
+                ? args[0]
+                : "build";
 
-        private static int ProcessArguments(string[] args)
-        {
-            return Parser.Default.ParseArguments<Options>(args).MapResult(
-                (Options o) => Run(() => RunTarget(o)),
-                _ => 1);
-        }
+            if (args == null
+                || (args.Length != 0 && args.Length != 1)
+                || !RunTargets.ContainsKey(target))
+            {
+                Help();
 
-        private static void RunTarget(Options o)
-        {
-            if (o.Target.Equals("lint"))
-            {
-                Dotnet($"format --workspace {Solution} --dry-run --check");
+                Environment.ExitCode = 1;
+                return;
             }
-            else if (o.Target.Equals("build"))
+
+            try
             {
-                Dotnet($"build {Solution} -c {o.Configuration} -r {o.Runtime}");
+                RunTargets[target]();
             }
-            else if (o.Target.Equals("publish"))
+            catch (Exception e)
             {
-                Dotnet($"publish src/Chunkyard/Chunkyard.csproj -c {o.Configuration} -r {o.Runtime} /p:PublishSingleFile=true /p:PublishReadyToRun=true");
-            }
-            else
-            {
-                throw new Exception(
-                    $"Unknown target '{o.Target}'");
+                Console.WriteLine(e.Message);
+                Environment.ExitCode = 1;
             }
         }
 
-        private static void Dotnet(string arguments)
+        private static void Clean()
         {
-            Exec("dotnet", arguments, new List<int> { 0 });
+            Directory.Delete(ArtifactsDirectory, true);
+        }
+
+        private static void Lint()
+        {
+            Dotnet(
+                "format",
+                $"--workspace {Solution}",
+                "--dry-run",
+                "--check");
+        }
+
+        private static void Build()
+        {
+            Dotnet(
+                $"build {Solution}",
+                $"-c {Configuration}",
+                $"-r {Runtime}");
+        }
+
+        private static void Test()
+        {
+            Dotnet(
+                $"test {Solution}",
+                $"-c {Configuration}");
+        }
+
+        private static void Publish()
+        {
+            Clean();
+            Lint();
+            Test();
+
+            Dotnet(
+                $"publish src/Chunkyard",
+                $"-c {Configuration}",
+                $"-r {Runtime}",
+                $"-o {ArtifactsDirectory}",
+                "/p:PublishSingleFile=true",
+                "/p:PublishReadyToRun=true");
+        }
+
+        private static void Help()
+        {
+            Console.WriteLine("Usage: <target>");
+            Console.WriteLine("Available targets:");
+
+            foreach (var key in RunTargets.Keys)
+            {
+                Console.WriteLine($"- {key}");
+            }
+        }
+
+        private static void Dotnet(params string[] arguments)
+        {
+            Exec("dotnet", arguments, new[] { 0 });
         }
 
         private static void Exec(
-            string app,
-            string arguments,
-            List<int> validExitCodes)
+            string fileName,
+            string[] arguments,
+            IEnumerable<int> validExitCodes)
         {
-            var startInfo = new ProcessStartInfo(app, arguments)
+            var startInfo = new ProcessStartInfo(
+                fileName,
+                string.Join(' ', arguments))
             {
                 RedirectStandardOutput = true
             };
@@ -70,21 +142,7 @@ namespace Chunkyard.Build
             if (!validExitCodes.Contains(process.ExitCode))
             {
                 throw new Exception(
-                    $"Exit code of {app} was {process.ExitCode}");
-            }
-        }
-
-        private static int Run(Action action)
-        {
-            try
-            {
-                action();
-                return 0;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return 1;
+                    $"Exit code of {fileName} was {process.ExitCode}");
             }
         }
     }

@@ -1,7 +1,4 @@
-# Rust
-**/target
-
-# C Sharp
 .vs
-**/bin
-**/obj
+**/bin/
+**/obj/
+artifacts/
