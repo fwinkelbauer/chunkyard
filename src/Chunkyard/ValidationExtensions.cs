@@ -3,6 +3,9 @@ using System.Diagnostics;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// A set of extension methods to validate parameters.
+    /// </summary>
     [DebuggerStepThrough]
     public static class ValidationExtensions
     {

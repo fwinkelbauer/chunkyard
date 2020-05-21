@@ -2,6 +2,9 @@
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// Contains methods to encrypt and decrypt data.
+    /// </summary>
     public static class AesGcmCrypto
     {
         public const int Iterations = 1000;

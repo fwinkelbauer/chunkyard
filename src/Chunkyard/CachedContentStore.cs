@@ -6,6 +6,11 @@ using Newtonsoft.Json;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// A decorator of <see cref="IContentStore"/> which remembers stored files
+    /// in a separate cache. This cache can be used to skip store operations if
+    /// the files (based on their meta data) have not changed.
+    /// </summary>
     internal class CachedContentStore : IContentStore
     {
         private readonly IContentStore _contentStore;

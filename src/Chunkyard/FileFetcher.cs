@@ -5,6 +5,10 @@ using System.Linq;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// A class to retrieve file names based on a set of directories/fiels and
+    /// exclude patterns.
+    /// </summary>
     internal static class FileFetcher
     {
         private static readonly string HomeDirectory =

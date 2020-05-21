@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// An implementation of <see cref="IRepository"/> using the file system.
+    /// </summary>
     public class FileRepository : IRepository
     {
         private readonly string _contentDirectory;

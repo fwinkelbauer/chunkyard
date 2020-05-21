@@ -1,5 +1,10 @@
 ﻿namespace Chunkyard
 {
+    /// <summary>
+    /// The highest level reference which describes how to retrieve a set of
+    /// data stored in a <see cref="ContentStore"/>. This reference can be used
+    /// to recreate a key from a password.
+    /// </summary>
     public class LogReference
     {
         public LogReference(

@@ -3,6 +3,9 @@ using System.Runtime.Serialization;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// A custom exception type.
+    /// </summary>
     [Serializable]
     public class ChunkyardException : Exception
     {

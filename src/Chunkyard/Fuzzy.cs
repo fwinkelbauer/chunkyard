@@ -2,6 +2,9 @@
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// A fuzzy pattern matcher.
+    /// </summary>
     public class Fuzzy
     {
         private readonly Regex _compiledRegex;

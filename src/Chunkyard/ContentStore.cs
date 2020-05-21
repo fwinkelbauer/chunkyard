@@ -7,6 +7,10 @@ using Newtonsoft.Json;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// An implementation of <see cref="IContentStore"/> which splits and
+    /// encrypts files before storing them in an <see cref="IRepository"/>.
+    /// </summary>
     internal class ContentStore : IContentStore
     {
         private const string DefaultLogName = "master";

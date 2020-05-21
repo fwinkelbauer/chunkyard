@@ -4,6 +4,10 @@ using System.IO;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// Defines a contract to store data and return a reference to retrieve that
+    /// stored data.
+    /// </summary>
     internal interface IContentStore
     {
         public IRepository Repository { get; }

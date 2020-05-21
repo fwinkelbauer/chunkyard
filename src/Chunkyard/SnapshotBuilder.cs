@@ -4,6 +4,10 @@ using System.IO;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// A class used to create snapshots of the file system. These snapshots are
+    /// stored in an <see cref="IContentStore"/>.
+    /// </summary>
     internal class SnapshotBuilder
     {
         private static readonly object Lock = new object();

@@ -5,8 +5,13 @@ using System.Linq;
 
 namespace Chunkyard
 {
-    // A C# port of the Rust crate fastcdc-rc found here:
-    // https://github.com/nlfiedler/fastcdc-rs
+    /// <summary>
+    /// A C# port of the Rust crate fastcdc-rc found here:
+    ///
+    /// https://github.com/nlfiedler/fastcdc-rs
+    ///
+    /// The FastCdc algorithm can be used to split data into chunks.
+    /// </summary>
     public class FastCdc
     {
         public const int MinimumMin = 64;

@@ -2,6 +2,10 @@
 using System.Text;
 namespace Chunkyard
 {
+    /// <summary>
+    /// An implementation of <see cref="IPrompt"/> which prompts the user for a
+    /// password using the console.
+    /// </summary>
     internal class ConsolePrompt : IPrompt
     {
         public string NewPassword()

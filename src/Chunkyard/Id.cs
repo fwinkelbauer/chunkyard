@@ -4,6 +4,11 @@ using System.Text;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// Utility methods which are used to work with content URIs.
+    ///
+    /// Example: sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e
+    /// </summary>
     public static class Id
     {
         public static Uri ComputeContentUri(
@@ -54,7 +59,7 @@ namespace Chunkyard
             string hashAlgorithmName,
             string hash)
         {
-            hashAlgorithmName.EnsureNotNull(nameof(hashAlgorithmName));
+            hashAlgorithmName.EnsureNotNullOrEmpty(nameof(hashAlgorithmName));
 
             return ToContentUri(
                 new HashAlgorithmName(hashAlgorithmName.ToUpper()),
