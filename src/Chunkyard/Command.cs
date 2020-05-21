@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Chunkyard.Options;
-using Serilog;
 
 namespace Chunkyard
 {
@@ -18,8 +17,6 @@ namespace Chunkyard
                 Environment.SpecialFolder.ApplicationData),
             "chunkyard",
             "cache");
-
-        private static readonly ILogger _log = Log.ForContext<Command>();
 
         public static void PreviewFiles(PreviewOptions o)
         {
@@ -35,7 +32,7 @@ namespace Chunkyard
         {
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository, o.Cached);
 
-            _log.Information("Creating new snapshot");
+            Console.WriteLine("Creating new snapshot");
 
             var foundTuples = FileFetcher.Find(o.Files, o.ExcludePatterns)
                 .ToList();
@@ -47,14 +44,12 @@ namespace Chunkyard
                     using var fileStream = File.OpenRead(t.FoundFile);
                     snapshotBuilder.AddContent(fileStream, t.ContentName);
 
-                    _log.Information("Stored: {Content}", t.ContentName);
+                    Console.WriteLine($"Stored: {t.ContentName}");
                 });
 
             var newLogPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
 
-            _log.Information(
-                "Latest snapshot is {LogPosition}",
-                newLogPosition);
+            Console.WriteLine($"Latest snapshot is {newLogPosition}");
         }
 
         public static void CheckSnapshot(CheckOptions o)
@@ -62,7 +57,7 @@ namespace Chunkyard
             var snapshotBuilder = CreateSnapshotBuilder(
                 o.Repository);
 
-            _log.Information("Checking snapshot {LogPosition}", o.LogPosition);
+            Console.WriteLine($"Checking snapshot {o.LogPosition}");
 
             var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
             var filteredContentReferences = FuzzyFilter(
@@ -78,9 +73,7 @@ namespace Chunkyard
                     if (!snapshotBuilder.ContentStore
                         .ContentExists(contentReference))
                     {
-                        _log.Warning(
-                            "Missing: {Content}",
-                            contentReference.Name);
+                        Console.WriteLine($"Missing: {contentReference.Name}");
 
                         error = true;
                     }
@@ -88,17 +81,15 @@ namespace Chunkyard
                         && !snapshotBuilder.ContentStore
                              .ContentValid(contentReference))
                     {
-                        _log.Warning(
-                            "Corrupted: {Content}",
-                            contentReference.Name);
+                        Console.WriteLine(
+                            $"Corrupted: {contentReference.Name}");
 
                         error = true;
                     }
                     else
                     {
-                        _log.Information(
-                            "Validated: {File}",
-                            contentReference.Name);
+                        Console.WriteLine(
+                            $"Validated: {contentReference.Name}");
                     }
                 });
 
@@ -114,7 +105,7 @@ namespace Chunkyard
             var snapshotBuilder = CreateSnapshotBuilder(
                 o.Repository);
 
-            _log.Information("Listing snapshot {LogPosition}", o.LogPosition);
+            Console.WriteLine($"Listing snapshot {o.LogPosition}");
 
             var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
             var filteredContentReferences = FuzzyFilter(
@@ -132,7 +123,7 @@ namespace Chunkyard
             var snapshotBuilder = CreateSnapshotBuilder(
                 o.Repository);
 
-            _log.Information("Restoring snapshot {LogPosition}", o.LogPosition);
+            Console.WriteLine($"Restoring snapshot {o.LogPosition}");
 
             var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
             var mode = o.Overwrite
@@ -165,14 +156,13 @@ namespace Chunkyard
                         snapshotBuilder.ContentStore.
                             RetrieveContent(contentReference, stream);
 
-                        _log.Information(
-                            "Restored: {File}",
-                            file);
+                        Console.WriteLine($"Restored: {file}");
 
                     }
                     catch (Exception e)
                     {
-                        _log.Error(e, "Error: {File}", file);
+                        Console.WriteLine($"Error: {file}");
+                        Console.WriteLine(e);
 
                         error = true;
                     }
@@ -194,10 +184,7 @@ namespace Chunkyard
             {
                 var snapshot = snapshotBuilder.GetSnapshot(logPosition);
 
-                _log.Information(
-                    "{LogPosition}: {Time}",
-                    logPosition,
-                    snapshot.CreationTime);
+                Console.WriteLine($"{logPosition}: {snapshot.CreationTime}");
             }
         }
 
@@ -232,7 +219,7 @@ namespace Chunkyard
                     continue;
                 }
 
-                _log.Information("Unused: {ContentUri}", contentUri);
+                Console.WriteLine($"Unused: {contentUri}");
 
                 if (!o.Preview)
                 {

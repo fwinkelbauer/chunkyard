@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 using Chunkyard.Options;
 using CommandLine;
-using Serilog;
 
 namespace Chunkyard
 {
@@ -11,14 +10,7 @@ namespace Chunkyard
     {
         public static void Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Console()
-                .CreateLogger();
-
             Environment.ExitCode = ProcessArguments(args);
-
-            Log.CloseAndFlush();
         }
 
         private static int ProcessArguments(string[] args)
@@ -50,7 +42,7 @@ namespace Chunkyard
             }
             catch (Exception e)
             {
-                Log.Error(e, "Unexpected error");
+                Console.WriteLine(e);
                 return 1;
             }
         }
