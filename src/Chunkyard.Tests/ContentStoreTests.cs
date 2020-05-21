@@ -7,10 +7,9 @@ namespace Chunkyard.Tests
     public static class ContentStoreTests
     {
         [Fact]
-        public static void StoreContent_And_RetrieveContent_Return_Data()
+        public static void Store_And_RetrieveContent_Return_Data()
         {
-            var repository = new MemoryRepository();
-            var contentStore = CreateContentStore(repository);
+            var contentStore = CreateContentStore();
 
             var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
             var contentName = "some data";
@@ -28,6 +27,35 @@ namespace Chunkyard.Tests
             var actualBytes = outputStream.ToArray();
 
             Assert.Equal(expectedBytes, actualBytes);
+            Assert.Equal(contentName, contentReference.Name);
+            Assert.True(contentStore.ContentExists(contentReference));
+            Assert.True(contentStore.ContentValid(contentReference));
+        }
+
+        [Fact]
+        public static void Store_And_RetrieveContentObject_ReturnObject()
+        {
+            var contentStore = CreateContentStore();
+
+            var expectedText = "some text";
+            var contentName = "some name";
+
+            var contentReference = contentStore.StoreContentObject<string>(
+                expectedText,
+                contentName);
+
+            var actualText = contentStore.RetrieveContentObject<string>(
+                contentReference);
+
+            Assert.Equal(expectedText, actualText);
+            Assert.Equal(contentName, contentReference.Name);
+            Assert.True(contentStore.ContentExists(contentReference));
+            Assert.True(contentStore.ContentValid(contentReference));
+        }
+
+        private static ContentStore CreateContentStore()
+        {
+            return CreateContentStore(new MemoryRepository());
         }
 
         private static ContentStore CreateContentStore(IRepository repository)
