@@ -8,6 +8,7 @@ namespace Chunkyard
     {
         private static readonly object Lock = new object();
 
+        private readonly Dictionary<string, ContentReference> _knownContentReferences;
         private readonly List<ContentReference> _storedContentReferences;
 
         private int? _currentLogPosition;
@@ -20,20 +21,56 @@ namespace Chunkyard
 
             _currentLogPosition = currentLogPosition;
 
+            _knownContentReferences = new Dictionary<string, ContentReference>();
             _storedContentReferences = new List<ContentReference>();
+
+            if (_currentLogPosition == null)
+            {
+                return;
+            }
+
+            var currentSnapshot = GetSnapshot(_currentLogPosition.Value);
+
+            foreach (var contentReference in currentSnapshot.ContentReferences)
+            {
+                _knownContentReferences.Add(
+                    contentReference.Name,
+                    contentReference);
+            }
         }
 
         public IContentStore ContentStore { get; }
 
         public void AddContent(Stream inputStream, string contentName)
         {
-            var contentReference = ContentStore.StoreContent(
-                inputStream,
-                contentName);
+            ContentReference? contentReference = null;
+            ContentReference? previousContentReference = null;
+
+            lock (Lock)
+            {
+                _knownContentReferences.TryGetValue(
+                    contentName,
+                    out previousContentReference);
+            }
+
+            if (previousContentReference == null)
+            {
+                contentReference = ContentStore.StoreContent(
+                    inputStream,
+                    contentName);
+            }
+            else
+            {
+                contentReference = ContentStore.StoreContent(
+                    inputStream,
+                    previousContentReference);
+            }
 
             lock (Lock)
             {
                 _storedContentReferences.Add(contentReference);
+                _knownContentReferences[contentReference.Name] =
+                    contentReference;
             }
         }
 
@@ -42,6 +79,8 @@ namespace Chunkyard
             var contentReference = ContentStore.StoreContent(
                 new Snapshot(creationTime, _storedContentReferences),
                 string.Empty);
+
+            _storedContentReferences.Clear();
 
             _currentLogPosition = ContentStore.AppendToLog(
                 contentReference,
@@ -56,8 +95,7 @@ namespace Chunkyard
             var logReference = ContentStore
                 .RetrieveFromLog(resolveLogPosition);
 
-            return ContentStore.RetrieveContent<Snapshot>(
-                logReference.ContentReference);
+            return GetSnapshot(logReference);
         }
 
         public IEnumerable<Uri> ListUris(int logPosition)
@@ -75,8 +113,7 @@ namespace Chunkyard
                 yield break;
             }
 
-            var snapshot = ContentStore.RetrieveContent<Snapshot>(
-                logReference.ContentReference);
+            var snapshot = GetSnapshot(logReference);
 
             foreach (var contentReference in snapshot.ContentReferences)
             {
@@ -85,6 +122,12 @@ namespace Chunkyard
                     yield return chunk.ContentUri;
                 }
             }
+        }
+
+        private Snapshot GetSnapshot(LogReference logReference)
+        {
+            return ContentStore.RetrieveContent<Snapshot>(
+                logReference.ContentReference);
         }
 
         private int Resolve(int logPosition)

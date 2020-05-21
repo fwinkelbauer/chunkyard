@@ -254,7 +254,6 @@ namespace Chunkyard
             string? password = null;
             byte[]? salt = null;
             int? iterations = null;
-            LogReference? logReference = null;
 
             if (logPosition == null)
             {
@@ -264,7 +263,7 @@ namespace Chunkyard
             }
             else
             {
-                logReference = ContentStore.RetrieveFromLog(
+                var logReference = ContentStore.RetrieveFromLog(
                     repository,
                     logPosition.Value);
 
@@ -273,7 +272,7 @@ namespace Chunkyard
                 iterations = logReference.Iterations;
             }
 
-            var contentStore = new ContentStore(
+            IContentStore contentStore = new ContentStore(
                 repository,
                 new FastCdc(
                     2 * 1024 * 1024,
@@ -284,32 +283,15 @@ namespace Chunkyard
                 salt,
                 iterations.Value);
 
-            if (logReference != null)
-            {
-                var snapshot = contentStore.RetrieveContent<Snapshot>(
-                    logReference.ContentReference);
-
-                // Known files should be encrypted using the existing
-                // parameters, so we register all previous references
-                foreach (var contentReference in snapshot.ContentReferences)
-                {
-                    contentStore.RegisterNonce(
-                        contentReference.Name,
-                        contentReference.Nonce);
-                }
-            }
-
-            IContentStore nestedContentStore = contentStore;
-
             if (cached)
             {
-                nestedContentStore = new CachedContentStore(
+                contentStore = new CachedContentStore(
                     contentStore,
                     CacheDirectoryPath);
             }
 
             return new SnapshotBuilder(
-                nestedContentStore,
+                contentStore,
                 logPosition);
         }
 

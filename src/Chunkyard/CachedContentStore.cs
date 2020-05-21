@@ -70,7 +70,46 @@ namespace Chunkyard
                 contentName);
 
             StoreInCache(
-                contentName,
+                contentReference.Name,
+                new Cache(
+                    contentReference,
+                    fileStream.Length,
+                    File.GetCreationTimeUtc(fileStream.Name),
+                    File.GetLastWriteTimeUtc(fileStream.Name)));
+
+            return contentReference;
+        }
+
+        public ContentReference StoreContent(
+            Stream inputStream,
+            ContentReference previousContentReference)
+        {
+            if (!(inputStream is FileStream fileStream))
+            {
+                return _contentStore.StoreContent(
+                    inputStream,
+                    previousContentReference);
+            }
+
+            var storedCache = RetrieveFromCache(
+                previousContentReference.Name);
+
+            if (storedCache != null
+                && storedCache.Length == fileStream.Length
+                && storedCache.CreationDateUtc.Equals(
+                    File.GetCreationTimeUtc(fileStream.Name))
+                && storedCache.LastWriteDateUtc.Equals(
+                    File.GetLastWriteTimeUtc(fileStream.Name)))
+            {
+                return storedCache.ContentReference;
+            }
+
+            var contentReference = _contentStore.StoreContent(
+                inputStream,
+                previousContentReference);
+
+            StoreInCache(
+                contentReference.Name,
                 new Cache(
                     contentReference,
                     fileStream.Length,
@@ -84,6 +123,16 @@ namespace Chunkyard
             where T : notnull
         {
             return _contentStore.StoreContent<T>(value, contentName);
+        }
+
+        public ContentReference StoreContent<T>(
+            T value,
+            ContentReference previousContentReference)
+            where T : notnull
+        {
+            return _contentStore.StoreContent<T>(
+                value,
+                previousContentReference);
         }
 
         public bool ContentExists(ContentReference contentReference)

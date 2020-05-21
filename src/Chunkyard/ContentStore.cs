@@ -11,15 +11,11 @@ namespace Chunkyard
     {
         private const string DefaultLogName = "master";
 
-        private static readonly object Lock = new object();
-
         private readonly FastCdc _fastCdc;
         private readonly HashAlgorithmName _hashAlgorithmName;
         private readonly byte[] _salt;
         private readonly int _iterations;
         private readonly byte[] _key;
-
-        private readonly Dictionary<string, byte[]> _noncesByFile;
 
         public ContentStore(
             IRepository repository,
@@ -36,8 +32,6 @@ namespace Chunkyard
             _salt = salt;
             _iterations = iterations;
             _key = AesGcmCrypto.PasswordToKey(password, salt, iterations);
-
-            _noncesByFile = new Dictionary<string, byte[]>();
         }
 
         public IRepository Repository { get; }
@@ -74,10 +68,24 @@ namespace Chunkyard
             Stream inputStream,
             string contentName)
         {
-            var nonce = GetNonce(contentName);
+            var nonce = AesGcmCrypto.GenerateNonce();
 
             return new ContentReference(
                 contentName,
+                nonce,
+                WriteChunks(nonce, inputStream));
+        }
+
+        public ContentReference StoreContent(
+            Stream inputStream,
+            ContentReference previousContentReference)
+        {
+            // Known files should be encrypted using the existing
+            // parameters, so we register any previous reference
+            var nonce = previousContentReference.Nonce;
+
+            return new ContentReference(
+                previousContentReference.Name,
                 nonce,
                 WriteChunks(nonce, inputStream));
         }
@@ -88,7 +96,20 @@ namespace Chunkyard
             using var memoryStream = new MemoryStream(ToBytes(value));
 
             return StoreContent(
-                (Stream)memoryStream, contentName);
+                (Stream)memoryStream,
+                contentName);
+        }
+
+        public ContentReference StoreContent<T>(
+            T value,
+            ContentReference previousContentReference)
+            where T : notnull
+        {
+            using var memoryStream = new MemoryStream(ToBytes(value));
+
+            return StoreContent(
+                (Stream)memoryStream,
+                previousContentReference);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -143,25 +164,6 @@ namespace Chunkyard
         public IEnumerable<int> ListLogPositions()
         {
             return Repository.ListLogPositions(DefaultLogName);
-        }
-
-        public void RegisterNonce(string name, byte[] nonce)
-        {
-            _noncesByFile[name] = nonce;
-        }
-
-        private byte[] GetNonce(string name)
-        {
-            lock (Lock)
-            {
-                if (!_noncesByFile.TryGetValue(name, out var nonce))
-                {
-                    nonce = AesGcmCrypto.GenerateNonce();
-                    _noncesByFile[name] = nonce;
-                }
-
-                return nonce;
-            }
         }
 
         public static int? FetchLogPosition(IRepository repository)
