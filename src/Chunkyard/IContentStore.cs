@@ -8,7 +8,7 @@ namespace Chunkyard
     /// Defines a contract to store data and return a reference to retrieve that
     /// stored data.
     /// </summary>
-    internal interface IContentStore
+    public interface IContentStore
     {
         public IRepository Repository { get; }
 
@@ -16,7 +16,7 @@ namespace Chunkyard
             ContentReference contentReference,
             Stream outputStream);
 
-        T RetrieveContent<T>(ContentReference contentReference)
+        T RetrieveContentObject<T>(ContentReference contentReference)
             where T : notnull;
 
         ContentReference StoreContent(Stream inputStream, string contentName);
@@ -25,10 +25,10 @@ namespace Chunkyard
             Stream inputStream,
             ContentReference previousContentReference);
 
-        ContentReference StoreContent<T>(T value, string contentName)
+        ContentReference StoreContentObject<T>(T value, string contentName)
             where T : notnull;
 
-        ContentReference StoreContent<T>(
+        ContentReference StoreContentObject<T>(
             T value,
             ContentReference previousContentReference)
             where T : notnull;

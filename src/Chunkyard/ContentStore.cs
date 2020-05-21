@@ -11,7 +11,7 @@ namespace Chunkyard
     /// An implementation of <see cref="IContentStore"/> which splits and
     /// encrypts files before storing them in an <see cref="IRepository"/>.
     /// </summary>
-    internal class ContentStore : IContentStore
+    public class ContentStore : IContentStore
     {
         private const string DefaultLogName = "master";
 
@@ -44,6 +44,9 @@ namespace Chunkyard
             ContentReference contentReference,
             Stream outputStream)
         {
+            outputStream.EnsureNotNull(nameof(outputStream));
+            contentReference.EnsureNotNull(nameof(contentReference));
+
             foreach (var chunk in contentReference.Chunks)
             {
                 var decryptedData = AesGcmCrypto.Decrypt(
@@ -56,7 +59,7 @@ namespace Chunkyard
             }
         }
 
-        public T RetrieveContent<T>(ContentReference contentReference)
+        public T RetrieveContentObject<T>(ContentReference contentReference)
             where T : notnull
         {
             using var memoryStream = new MemoryStream();
@@ -84,6 +87,10 @@ namespace Chunkyard
             Stream inputStream,
             ContentReference previousContentReference)
         {
+            inputStream.EnsureNotNull(nameof(inputStream));
+            previousContentReference.EnsureNotNull(
+                nameof(previousContentReference));
+
             // Known files should be encrypted using the existing
             // parameters, so we register any previous reference
             var nonce = previousContentReference.Nonce;
@@ -94,17 +101,19 @@ namespace Chunkyard
                 WriteChunks(nonce, inputStream));
         }
 
-        public ContentReference StoreContent<T>(T value, string contentName)
+        public ContentReference StoreContentObject<T>(
+            T value,
+            string contentName)
             where T : notnull
         {
             using var memoryStream = new MemoryStream(ToBytes(value));
 
             return StoreContent(
-                (Stream)memoryStream,
+                memoryStream,
                 contentName);
         }
 
-        public ContentReference StoreContent<T>(
+        public ContentReference StoreContentObject<T>(
             T value,
             ContentReference previousContentReference)
             where T : notnull
@@ -112,12 +121,14 @@ namespace Chunkyard
             using var memoryStream = new MemoryStream(ToBytes(value));
 
             return StoreContent(
-                (Stream)memoryStream,
+                memoryStream,
                 previousContentReference);
         }
 
         public bool ContentExists(ContentReference contentReference)
         {
+            contentReference.EnsureNotNull(nameof(contentReference));
+
             var exists = true;
 
             foreach (var chunk in contentReference.Chunks)
@@ -130,6 +141,8 @@ namespace Chunkyard
 
         public bool ContentValid(ContentReference contentReference)
         {
+            contentReference.EnsureNotNull(nameof(contentReference));
+
             var valid = true;
 
             foreach (var chunk in contentReference.Chunks)
@@ -172,6 +185,8 @@ namespace Chunkyard
 
         public static int? FetchLogPosition(IRepository repository)
         {
+            repository.EnsureNotNull(nameof(repository));
+
             return repository.FetchLogPosition(DefaultLogName);
         }
 
@@ -179,6 +194,8 @@ namespace Chunkyard
             IRepository repository,
             int logPosition)
         {
+            repository.EnsureNotNull(nameof(repository));
+
             return ToObject<LogReference>(
                 repository.RetrieveFromLog(DefaultLogName, logPosition));
         }

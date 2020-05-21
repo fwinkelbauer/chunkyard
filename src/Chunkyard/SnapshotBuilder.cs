@@ -80,7 +80,7 @@ namespace Chunkyard
 
         public int WriteSnapshot(DateTime creationTime)
         {
-            var contentReference = ContentStore.StoreContent(
+            var contentReference = ContentStore.StoreContentObject(
                 new Snapshot(creationTime, _storedContentReferences),
                 string.Empty);
 
@@ -130,7 +130,7 @@ namespace Chunkyard
 
         private Snapshot GetSnapshot(LogReference logReference)
         {
-            return ContentStore.RetrieveContent<Snapshot>(
+            return ContentStore.RetrieveContentObject<Snapshot>(
                 logReference.ContentReference);
         }
 
