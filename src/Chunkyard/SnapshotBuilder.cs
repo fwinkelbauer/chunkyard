@@ -10,8 +10,7 @@ namespace Chunkyard
     /// </summary>
     internal class SnapshotBuilder
     {
-        private static readonly object Lock = new object();
-
+        private readonly object _lock;
         private readonly Dictionary<string, ContentReference> _knownContentReferences;
         private readonly List<ContentReference> _storedContentReferences;
 
@@ -25,6 +24,7 @@ namespace Chunkyard
 
             _currentLogPosition = currentLogPosition;
 
+            _lock = new object();
             _knownContentReferences = new Dictionary<string, ContentReference>();
             _storedContentReferences = new List<ContentReference>();
 
@@ -50,7 +50,7 @@ namespace Chunkyard
             ContentReference? contentReference = null;
             ContentReference? previousContentReference = null;
 
-            lock (Lock)
+            lock (_lock)
             {
                 _knownContentReferences.TryGetValue(
                     contentName,
@@ -70,7 +70,7 @@ namespace Chunkyard
                     previousContentReference);
             }
 
-            lock (Lock)
+            lock (_lock)
             {
                 _storedContentReferences.Add(contentReference);
                 _knownContentReferences[contentReference.Name] =
