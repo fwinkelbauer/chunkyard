@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
 
@@ -33,7 +35,7 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void Store_And_RetrieveContentObject_ReturnObject()
+        public static void Store_And_RetrieveContentObject_Return_Object()
         {
             var contentStore = CreateContentStore();
 
@@ -53,15 +55,75 @@ namespace Chunkyard.Tests
             Assert.True(contentStore.ContentValid(contentReference));
         }
 
-        private static ContentStore CreateContentStore()
+        [Fact]
+        public static void ContentExists_Detects_Missing_Content()
         {
-            return CreateContentStore(new MemoryRepository());
+            var contentStore = CreateContentStore();
+
+            var contentReference = contentStore.StoreContentObject<string>(
+                "some text",
+                "with some name");
+
+            foreach (var uri in contentStore.Repository.ListUris())
+            {
+                contentStore.Repository.RemoveUri(uri);
+            }
+
+            Assert.False(contentStore.ContentExists(contentReference));
         }
 
-        private static ContentStore CreateContentStore(IRepository repository)
+        [Fact]
+        public static void ContentValid_Detects_Corrupted_Content()
+        {
+            var contentStore = CreateContentStore();
+
+            var contentReference = contentStore.StoreContentObject<string>(
+                "some text",
+                "with some name");
+
+            var wrongData = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+
+            foreach (var uri in contentStore.Repository.ListUris().ToArray())
+            {
+                contentStore.Repository.StoreUri(uri, wrongData);
+            }
+
+            Assert.False(contentStore.ContentValid(contentReference));
+        }
+
+        [Fact]
+        public static void Append_And_RetrieveFromLog_Return_Reference()
+        {
+            var contentStore = CreateContentStore();
+            var chunkReference = new ChunkReference(
+                new Uri("sha256://abcdef123456"),
+                new byte[] { 0xFF });
+
+            var contentReference = new ContentReference(
+                "some reference",
+                AesGcmCrypto.GenerateNonce(),
+                new[] { chunkReference });
+
+            Assert.Null(contentStore.FetchLogPosition());
+
+            var firstLogPosition = contentStore.AppendToLog(
+                contentReference,
+                null);
+
+            var secondLogPosition = contentStore.AppendToLog(
+                contentReference,
+                firstLogPosition);
+
+            Assert.Equal(secondLogPosition, contentStore.FetchLogPosition());
+            Assert.Equal(2, contentStore.ListLogPositions().ToArray().Length);
+            Assert.NotNull(contentStore.RetrieveFromLog(firstLogPosition));
+            Assert.NotNull(contentStore.RetrieveFromLog(secondLogPosition));
+        }
+
+        private static ContentStore CreateContentStore()
         {
             return new ContentStore(
-                repository,
+                new MemoryRepository(),
                 new FastCdc(
                     2 * 1024 * 1024,
                     4 * 1024 * 1024,
