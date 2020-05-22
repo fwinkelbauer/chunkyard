@@ -8,7 +8,7 @@ namespace Chunkyard
     /// A class used to create snapshots of the file system. These snapshots are
     /// stored in an <see cref="IContentStore"/>.
     /// </summary>
-    internal class SnapshotBuilder
+    public class SnapshotBuilder
     {
         private readonly object _lock;
         private readonly Dictionary<string, ContentReference> _knownContentReferences;

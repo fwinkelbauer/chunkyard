@@ -7,7 +7,7 @@ namespace Chunkyard
     /// A snapshot contains a list of references which describe the state of
     /// several files at a specific point in time.
     /// </summary>
-    internal class Snapshot
+    public class Snapshot
     {
         public Snapshot(
             DateTime creationTime,
