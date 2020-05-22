@@ -95,11 +95,17 @@ namespace Chunkyard
 
         public Snapshot GetSnapshot(int logPosition)
         {
-            var resolveLogPosition = Resolve(logPosition);
+            var resolvedLogPosition = Resolve(logPosition);
             var logReference = ContentStore
-                .RetrieveFromLog(resolveLogPosition);
+                .RetrieveFromLog(resolvedLogPosition);
 
             return GetSnapshot(logReference);
+        }
+
+        public void RemoveSnapshot(int logPosition)
+        {
+            ContentStore.RemoveFromLog(
+                Resolve(logPosition));
         }
 
         public IEnumerable<Uri> ListUris(int logPosition)

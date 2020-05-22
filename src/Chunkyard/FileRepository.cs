@@ -139,6 +139,12 @@ namespace Chunkyard
                 ToFilePath(logName, logPosition));
         }
 
+        public void RemoveFromLog(string logName, int logPosition)
+        {
+            File.Delete(
+                ToFilePath(logName, logPosition));
+        }
+
         public int? FetchLogPosition(string logName)
         {
             var logPositions = ListLogPositions(logName).ToList();

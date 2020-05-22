@@ -45,6 +45,8 @@ namespace Chunkyard
 
         LogReference RetrieveFromLog(int logPosition);
 
+        void RemoveFromLog(int logPosition);
+
         IEnumerable<int> ListLogPositions();
     }
 }

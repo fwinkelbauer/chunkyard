@@ -178,6 +178,11 @@ namespace Chunkyard
             return RetrieveFromLog(Repository, logPosition);
         }
 
+        public void RemoveFromLog(int logPosition)
+        {
+            Repository.RemoveFromLog(DefaultLogName, logPosition);
+        }
+
         public IEnumerable<int> ListLogPositions()
         {
             return Repository.ListLogPositions(DefaultLogName);

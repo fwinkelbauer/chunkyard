@@ -21,6 +21,7 @@ namespace Chunkyard
                 (CreateOptions o) => Run(() => Command.CreateSnapshot(o)),
                 (CheckOptions o) => Run(() => Command.CheckSnapshot(o)),
                 (ListOptions o) => Run(() => Command.ListSnapshot(o)),
+                (RemoveOptions o) => Run(() => Command.RemoveSnapshot(o)),
                 (LogOptions o) => Run(() => Command.ShowLogPositions(o)),
                 (GarbageCollectOptions o) => Run(() => Command.GarbageCollect(o)),
                 _ => 1);

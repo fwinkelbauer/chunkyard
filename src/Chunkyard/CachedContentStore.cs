@@ -169,6 +169,11 @@ namespace Chunkyard
             return _contentStore.RetrieveFromLog(logPosition);
         }
 
+        public void RemoveFromLog(int logPosition)
+        {
+            _contentStore.RemoveFromLog(logPosition);
+        }
+
         public IEnumerable<int> ListLogPositions()
         {
             return _contentStore.ListLogPositions();

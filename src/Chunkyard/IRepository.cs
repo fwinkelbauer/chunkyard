@@ -27,6 +27,8 @@ namespace Chunkyard
 
         byte[] RetrieveFromLog(string logName, int logPosition);
 
+        void RemoveFromLog(string logName, int logPosition);
+
         int? FetchLogPosition(string logName);
 
         IEnumerable<int> ListLogPositions(string logName);

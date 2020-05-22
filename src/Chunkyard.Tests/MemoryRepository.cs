@@ -84,6 +84,11 @@ namespace Chunkyard.Tests
             return _valuesByLog[logName][logPosition - 1];
         }
 
+        public void RemoveFromLog(string logName, int logPosition)
+        {
+            _valuesByLog[logName].RemoveAt(logPosition);
+        }
+
         public int? FetchLogPosition(string logName)
         {
             if (!_valuesByLog.ContainsKey(logName))

@@ -191,6 +191,14 @@ namespace Chunkyard
             }
         }
 
+        public static void RemoveSnapshot(RemoveOptions o)
+        {
+            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+
+            Console.WriteLine($"Removing snapshot: {o.LogPosition}");
+            snapshotBuilder.RemoveSnapshot(o.LogPosition);
+        }
+
         public static void GarbageCollect(GarbageCollectOptions o)
         {
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
