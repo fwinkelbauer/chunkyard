@@ -22,4 +22,10 @@
     <ProjectReference Include="..\Chunkyard\Chunkyard.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="SekienAkashita.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
