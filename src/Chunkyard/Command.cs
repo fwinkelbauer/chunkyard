@@ -57,12 +57,12 @@ namespace Chunkyard
 
         public static void CheckSnapshot(CheckOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(
-                o.Repository);
+            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+            var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            Console.WriteLine($"Checking snapshot {o.LogPosition}");
+            Console.WriteLine($"Checking snapshot {logPosition}");
 
-            var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
+            var snapshot = snapshotBuilder.GetSnapshot(logPosition);
             var filteredContentReferences = FuzzyFilter(
                 o.IncludeFuzzy,
                 snapshot.ContentReferences);
@@ -105,12 +105,12 @@ namespace Chunkyard
 
         public static void ListSnapshot(ListOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(
-                o.Repository);
+            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+            var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            Console.WriteLine($"Listing snapshot {o.LogPosition}");
+            Console.WriteLine($"Listing snapshot {logPosition}");
 
-            var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
+            var snapshot = snapshotBuilder.GetSnapshot(logPosition);
             var filteredContentReferences = FuzzyFilter(
                 o.IncludeFuzzy,
                 snapshot.ContentReferences);
@@ -123,12 +123,12 @@ namespace Chunkyard
 
         public static void RestoreSnapshot(RestoreOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(
-                o.Repository);
+            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+            var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            Console.WriteLine($"Restoring snapshot {o.LogPosition}");
+            Console.WriteLine($"Restoring snapshot {logPosition}");
 
-            var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
+            var snapshot = snapshotBuilder.GetSnapshot(logPosition);
             var mode = o.Overwrite
                 ? FileMode.OpenOrCreate
                 : FileMode.CreateNew;
@@ -194,9 +194,10 @@ namespace Chunkyard
         public static void RemoveSnapshot(RemoveOptions o)
         {
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+            var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            Console.WriteLine($"Removing snapshot: {o.LogPosition}");
-            snapshotBuilder.RemoveSnapshot(o.LogPosition);
+            Console.WriteLine($"Removing snapshot: {logPosition}");
+            snapshotBuilder.ContentStore.RemoveFromLog(logPosition);
         }
 
         public static void GarbageCollect(GarbageCollectOptions o)

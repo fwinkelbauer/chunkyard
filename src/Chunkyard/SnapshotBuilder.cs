@@ -95,23 +95,13 @@ namespace Chunkyard
 
         public Snapshot GetSnapshot(int logPosition)
         {
-            var resolvedLogPosition = Resolve(logPosition);
-            var logReference = ContentStore
-                .RetrieveFromLog(resolvedLogPosition);
-
-            return GetSnapshot(logReference);
-        }
-
-        public void RemoveSnapshot(int logPosition)
-        {
-            ContentStore.RemoveFromLog(
-                Resolve(logPosition));
+            return GetSnapshot(
+                ContentStore.RetrieveFromLog(logPosition));
         }
 
         public IEnumerable<Uri> ListUris(int logPosition)
         {
-            var logReference = ContentStore
-                .RetrieveFromLog(Resolve(logPosition));
+            var logReference = ContentStore.RetrieveFromLog(logPosition);
 
             foreach (var chunk in logReference.ContentReference.Chunks)
             {
@@ -140,7 +130,7 @@ namespace Chunkyard
                 logReference.ContentReference);
         }
 
-        private int Resolve(int logPosition)
+        public int ResolveLogPosition(int logPosition)
         {
             if (!_currentLogPosition.HasValue)
             {
@@ -150,8 +140,8 @@ namespace Chunkyard
 
             //  0: the first element
             //  1: the second element
-            // -2: the second-last element
             // -1: the last element
+            // -2: the second-last element
             return logPosition >= 0
                 ? logPosition
                 : _currentLogPosition.Value + logPosition + 1;
