@@ -91,8 +91,7 @@ namespace Chunkyard
             previousContentReference.EnsureNotNull(
                 nameof(previousContentReference));
 
-            // Known files should be encrypted using the existing
-            // parameters, so we register any previous reference
+            // Known files should be encrypted using the same nonce
             var nonce = previousContentReference.Nonce;
 
             return new ContentReference(
