@@ -12,6 +12,7 @@ namespace Chunkyard.Build
         private const string ArtifactsDirectory = "artifacts";
         private const string Solution = "src/Chunkyard.sln";
         private const string Configuration = "Release";
+        private const string Version = "0.1.0";
 
         private static readonly string Runtime =
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -27,6 +28,7 @@ namespace Chunkyard.Build
                 { "build", Build },
                 { "test", Test },
                 { "publish", Publish },
+                { "preparerelease", PrepareRelease },
                 { "help", Help }
             };
 
@@ -101,7 +103,15 @@ namespace Chunkyard.Build
                 $"-r {Runtime}",
                 $"-o {ArtifactsDirectory}",
                 "/p:PublishSingleFile=true",
-                "/p:PublishReadyToRun=true");
+                "/p:PublishReadyToRun=true",
+                $"/p:Version={Version}");
+        }
+
+        private static void PrepareRelease()
+        {
+            Git("add -A");
+            Git($"commit -m \"Prepare Chunkyard release v{Version}\"");
+            Git($"tag -m \"v{Version}\"");
         }
 
         private static void Help()
@@ -113,6 +123,11 @@ namespace Chunkyard.Build
             {
                 Console.WriteLine($"- {key}");
             }
+        }
+
+        private static void Git(params string[] arguments)
+        {
+            Exec("git", arguments, new[] { 0 });
         }
 
         private static void Dotnet(params string[] arguments)
