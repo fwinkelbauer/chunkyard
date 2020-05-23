@@ -273,9 +273,9 @@ namespace Chunkyard
             IContentStore contentStore = new ContentStore(
                 repository,
                 new FastCdc(
-                    2 * 1024 * 1024,
                     4 * 1024 * 1024,
-                    8 * 1024 * 1024),
+                    8 * 1024 * 1024,
+                    16 * 1024 * 1024),
                 HashAlgorithmName.SHA256,
                 password,
                 salt,
