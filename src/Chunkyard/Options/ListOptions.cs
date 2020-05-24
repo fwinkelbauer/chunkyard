@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("list", HelpText = "Lists the content of a snapshot")]
+    [Verb("list", HelpText = "List the content of a snapshot")]
     public class ListOptions
     {
         public ListOptions(

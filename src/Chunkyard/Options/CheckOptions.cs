@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("check", HelpText = "Checks if a snapshot is valid")]
+    [Verb("check", HelpText = "Check if a snapshot is valid")]
     public class CheckOptions
     {
         public CheckOptions(
