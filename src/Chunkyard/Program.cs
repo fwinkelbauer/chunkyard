@@ -18,11 +18,11 @@ namespace Chunkyard
             return Parser.Default.ParseArguments(args, LoadOptions()).MapResult(
                 (PreviewOptions o) => Run(() => Command.PreviewFiles(o)),
                 (RestoreOptions o) => Run(() => Command.RestoreSnapshot(o)),
-                (CreateOptions o) => Run(() => Command.CreateSnapshot(o)),
+                (BackupOptions o) => Run(() => Command.CreateSnapshot(o)),
                 (CheckOptions o) => Run(() => Command.CheckSnapshot(o)),
-                (ListOptions o) => Run(() => Command.ListSnapshot(o)),
+                (ShowOptions o) => Run(() => Command.ShowSnapshot(o)),
                 (RemoveOptions o) => Run(() => Command.RemoveSnapshot(o)),
-                (LogOptions o) => Run(() => Command.ShowLogPositions(o)),
+                (LogOptions o) => Run(() => Command.ShowSnapshots(o)),
                 (GarbageCollectOptions o) => Run(() => Command.GarbageCollect(o)),
                 _ => 1);
         }

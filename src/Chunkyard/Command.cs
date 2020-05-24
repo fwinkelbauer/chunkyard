@@ -31,7 +31,7 @@ namespace Chunkyard
             }
         }
 
-        public static void CreateSnapshot(CreateOptions o)
+        public static void CreateSnapshot(BackupOptions o)
         {
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository, o.Cached);
 
@@ -103,7 +103,7 @@ namespace Chunkyard
             }
         }
 
-        public static void ListSnapshot(ListOptions o)
+        public static void ShowSnapshot(ShowOptions o)
         {
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
@@ -178,7 +178,7 @@ namespace Chunkyard
             }
         }
 
-        public static void ShowLogPositions(LogOptions o)
+        public static void ShowSnapshots(LogOptions o)
         {
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
             var logPositions = snapshotBuilder.ContentStore.ListLogPositions();

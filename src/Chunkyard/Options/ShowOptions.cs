@@ -2,10 +2,10 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("list", HelpText = "List the content of a snapshot")]
-    public class ListOptions
+    [Verb("show", HelpText = "Show the content of a snapshot")]
+    public class ShowOptions
     {
-        public ListOptions(
+        public ShowOptions(
             string repository,
             int logPosition,
             string includeFuzzy)

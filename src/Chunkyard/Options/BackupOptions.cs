@@ -3,10 +3,10 @@ using CommandLine;
 
 namespace Chunkyard.Options
 {
-    [Verb("create", HelpText = "Create a new snapshot")]
-    public class CreateOptions
+    [Verb("backup", HelpText = "Create a new snapshot")]
+    public class BackupOptions
     {
-        public CreateOptions(
+        public BackupOptions(
             string repository,
             bool cached,
             IEnumerable<string> files,
