@@ -40,6 +40,8 @@ Type `chunkyard --help` to learn more.
 Example:
 
 ``` shell
+chunkyard preview -f "~/Music" -e "Desktop\.ini" "thumbs\.db"
 chunkyard create -r "../repository" -f "~/Music" -e "Desktop\.ini" "thumbs\.db"
 chunkyard check -r "../repository"
+chunkyard restore -r "../repository" -d . -i "mp3$"
 ```
