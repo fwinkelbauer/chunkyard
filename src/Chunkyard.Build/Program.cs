@@ -4,6 +4,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Chunkyard.Build
 {
@@ -12,7 +13,11 @@ namespace Chunkyard.Build
         private const string ArtifactsDirectory = "artifacts";
         private const string Solution = "src/Chunkyard.sln";
         private const string Configuration = "Release";
-        private const string Version = "0.1.0";
+
+        private static readonly string Version = Regex.Match(
+            File.ReadAllText("CHANGELOG.md"),
+            @"##\s+(\d+\.\d+\.\d+)")
+            .Groups[1].Value;
 
         private static readonly string Runtime =
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
