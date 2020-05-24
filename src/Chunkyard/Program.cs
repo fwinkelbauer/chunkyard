@@ -10,12 +10,9 @@ namespace Chunkyard
     {
         public static void Main(string[] args)
         {
-            Environment.ExitCode = ProcessArguments(args);
-        }
+            var result = Parser.Default.ParseArguments(args, LoadOptions());
 
-        private static int ProcessArguments(string[] args)
-        {
-            return Parser.Default.ParseArguments(args, LoadOptions()).MapResult(
+            Environment.ExitCode = result.MapResult(
                 (PreviewOptions o) => Run(() => Command.PreviewFiles(o)),
                 (RestoreOptions o) => Run(() => Command.RestoreSnapshot(o)),
                 (BackupOptions o) => Run(() => Command.CreateSnapshot(o)),
