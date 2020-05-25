@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## Unreleased
 
+### Changed
+
+- Several command line verbs
+
+### Fixed
+
+- Missing content items when using a cache
+
 ## 0.1.0 - 2020-05-23
 
 ### Added
