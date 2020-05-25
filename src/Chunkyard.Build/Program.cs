@@ -86,7 +86,8 @@ namespace Chunkyard.Build
             Dotnet(
                 $"build {Solution}",
                 $"-c {Configuration}",
-                $"-r {Runtime}");
+                $"-r {Runtime}",
+                "-warnaserror");
         }
 
         private static void Test()
