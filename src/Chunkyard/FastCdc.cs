@@ -391,7 +391,7 @@ namespace Chunkyard
 
         public static int CeilDiv(int x, int y)
         {
-            return (int)((x + y - 1) / y);
+            return (x + y - 1) / y;
         }
 
         public static int Logarithm2(int value)

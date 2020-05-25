@@ -20,5 +20,19 @@ namespace Chunkyard
         public DateTime CreationTime { get; }
 
         public IEnumerable<ContentReference> ContentReferences { get; }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is Snapshot snapshot
+                && CreationTime == snapshot.CreationTime
+                && EqualityComparer<IEnumerable<ContentReference>>.Default.Equals(
+                    ContentReferences,
+                    snapshot.ContentReferences);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(CreationTime, ContentReferences);
+        }
     }
 }

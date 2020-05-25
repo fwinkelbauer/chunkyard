@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard", "Chunkyard\Chun
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard.Tests", "Chunkyard.Tests\Chunkyard.Tests.csproj", "{ECEF842F-8D64-4581-B1AA-F720BF6B72F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chunkyard.Build", "Chunkyard.Build\Chunkyard.Build.csproj", "{3B47DDFE-6553-4710-B0FD-F9E4E9B01AB6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard.Build", "Chunkyard.Build\Chunkyard.Build.csproj", "{3B47DDFE-6553-4710-B0FD-F9E4E9B01AB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

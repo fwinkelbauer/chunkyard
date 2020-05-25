@@ -60,8 +60,10 @@ namespace Chunkyard.Tests
         {
             if (!currentLogPosition.HasValue)
             {
-                _valuesByLog[logName] = new List<byte[]>();
-                _valuesByLog[logName].Add(value);
+                _valuesByLog[logName] = new List<byte[]>
+                {
+                    value
+                };
 
                 return _valuesByLog[logName].Count;
             }

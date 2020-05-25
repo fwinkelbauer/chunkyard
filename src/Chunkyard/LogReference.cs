@@ -1,4 +1,7 @@
-﻿namespace Chunkyard
+﻿using System;
+using System.Collections.Generic;
+
+namespace Chunkyard
 {
     /// <summary>
     /// The highest level reference which describes how to retrieve a set of
@@ -23,5 +26,21 @@
 
         public int Iterations { get; }
 
+        public override bool Equals(object? obj)
+        {
+            return obj is LogReference reference
+                && EqualityComparer<ContentReference>.Default.Equals(
+                    ContentReference,
+                    reference.ContentReference)
+                && EqualityComparer<byte[]>.Default.Equals(
+                    Salt,
+                    reference.Salt)
+                && Iterations == reference.Iterations;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(ContentReference, Salt, Iterations);
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Chunkyard
 {
@@ -24,5 +25,21 @@ namespace Chunkyard
 
         public IEnumerable<ChunkReference> Chunks { get; }
 
+        public override bool Equals(object? obj)
+        {
+            return obj is ContentReference reference
+                && Name == reference.Name
+                && EqualityComparer<byte[]>.Default.Equals(
+                    Nonce,
+                    reference.Nonce)
+                && EqualityComparer<IEnumerable<ChunkReference>>.Default.Equals(
+                    Chunks,
+                    reference.Chunks);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, Nonce, Chunks);
+        }
     }
 }
