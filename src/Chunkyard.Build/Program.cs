@@ -33,7 +33,8 @@ namespace Chunkyard.Build
                 { "build", Build },
                 { "test", Test },
                 { "publish", Publish },
-                { "preparerelease", PrepareRelease },
+                { "commit", Commit },
+                { "fmt", Fmt },
                 { "help", Help }
             };
 
@@ -113,7 +114,14 @@ namespace Chunkyard.Build
                 $"/p:Version={Version}");
         }
 
-        private static void PrepareRelease()
+        private static void Fmt()
+        {
+            Dotnet(
+                "format",
+                $"--workspace {Solution}");
+        }
+
+        private static void Commit()
         {
             Git("add -A");
             Git($"commit -m \"Prepare Chunkyard release v{Version}\"");
