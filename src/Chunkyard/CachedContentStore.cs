@@ -59,13 +59,14 @@ namespace Chunkyard
             }
 
             var storedCache = RetrieveFromCache(contentName);
+            var creationDateUtc = File.GetCreationTimeUtc(fileStream.Name);
+            var lastWriteDateUtc = File.GetLastWriteTimeUtc(fileStream.Name);
 
             if (storedCache != null
                 && storedCache.Length == fileStream.Length
-                && storedCache.CreationDateUtc.Equals(
-                    File.GetCreationTimeUtc(fileStream.Name))
-                && storedCache.LastWriteDateUtc.Equals(
-                    File.GetLastWriteTimeUtc(fileStream.Name)))
+                && storedCache.CreationDateUtc.Equals(creationDateUtc)
+                && storedCache.LastWriteDateUtc.Equals(lastWriteDateUtc)
+                && _contentStore.ContentExists(storedCache.ContentReference))
             {
                 return storedCache.ContentReference;
             }
@@ -79,8 +80,8 @@ namespace Chunkyard
                 new Cache(
                     contentReference,
                     fileStream.Length,
-                    File.GetCreationTimeUtc(fileStream.Name),
-                    File.GetLastWriteTimeUtc(fileStream.Name)));
+                    creationDateUtc,
+                    lastWriteDateUtc));
 
             return contentReference;
         }
@@ -99,12 +100,14 @@ namespace Chunkyard
             var storedCache = RetrieveFromCache(
                 previousContentReference.Name);
 
+            var creationDateUtc = File.GetCreationTimeUtc(fileStream.Name);
+            var lastWriteDateUtc = File.GetLastWriteTimeUtc(fileStream.Name);
+
             if (storedCache != null
                 && storedCache.Length == fileStream.Length
-                && storedCache.CreationDateUtc.Equals(
-                    File.GetCreationTimeUtc(fileStream.Name))
-                && storedCache.LastWriteDateUtc.Equals(
-                    File.GetLastWriteTimeUtc(fileStream.Name)))
+                && storedCache.CreationDateUtc.Equals(creationDateUtc)
+                && storedCache.LastWriteDateUtc.Equals(lastWriteDateUtc)
+                && _contentStore.ContentExists(storedCache.ContentReference))
             {
                 return storedCache.ContentReference;
             }
@@ -118,13 +121,15 @@ namespace Chunkyard
                 new Cache(
                     contentReference,
                     fileStream.Length,
-                    File.GetCreationTimeUtc(fileStream.Name),
-                    File.GetLastWriteTimeUtc(fileStream.Name)));
+                    creationDateUtc,
+                    lastWriteDateUtc));
 
             return contentReference;
         }
 
-        public ContentReference StoreContentObject<T>(T value, string contentName)
+        public ContentReference StoreContentObject<T>(
+            T value,
+            string contentName)
             where T : notnull
         {
             return _contentStore.StoreContentObject<T>(value, contentName);
