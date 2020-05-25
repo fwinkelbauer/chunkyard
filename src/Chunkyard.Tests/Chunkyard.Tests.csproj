@@ -23,9 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="SekienAkashita.jpg">
+    <None Update="SekienAkashita.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
 
 </Project>
