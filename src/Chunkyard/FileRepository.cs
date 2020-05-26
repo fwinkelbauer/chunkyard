@@ -160,18 +160,25 @@ namespace Chunkyard
 
             if (!Directory.Exists(refDirectory))
             {
-                yield break;
+                return new List<int>();
             }
 
             var files = Directory.GetFiles(
                 refDirectory,
                 "*.json");
 
+            var logPositions = new List<int>();
+
             foreach (var file in files)
             {
-                yield return Convert.ToInt32(
-                    Path.GetFileNameWithoutExtension(file));
+                logPositions.Add(
+                    Convert.ToInt32(
+                        Path.GetFileNameWithoutExtension(file)));
             }
+
+            logPositions.Sort();
+
+            return logPositions;
         }
 
         public IEnumerable<string> ListLogNames()
