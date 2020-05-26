@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Chunkyard
 {
@@ -16,7 +17,7 @@ namespace Chunkyard
         {
             Name = name;
             Nonce = nonce;
-            Chunks = new List<ChunkReference>(chunks);
+            Chunks = chunks.ToArray();
         }
 
         public string Name { get; }
@@ -29,12 +30,8 @@ namespace Chunkyard
         {
             return obj is ContentReference reference
                 && Name == reference.Name
-                && EqualityComparer<byte[]>.Default.Equals(
-                    Nonce,
-                    reference.Nonce)
-                && EqualityComparer<IEnumerable<ChunkReference>>.Default.Equals(
-                    Chunks,
-                    reference.Chunks);
+                && Nonce.SequenceEqual(reference.Nonce)
+                && Chunks.SequenceEqual(reference.Chunks);
         }
 
         public override int GetHashCode()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Chunkyard
 {
@@ -29,12 +30,8 @@ namespace Chunkyard
         public override bool Equals(object? obj)
         {
             return obj is LogReference reference
-                && EqualityComparer<ContentReference>.Default.Equals(
-                    ContentReference,
-                    reference.ContentReference)
-                && EqualityComparer<byte[]>.Default.Equals(
-                    Salt,
-                    reference.Salt)
+                && ContentReference.Equals(reference.ContentReference)
+                && Salt.SequenceEqual(reference.Salt)
                 && Iterations == reference.Iterations;
         }
 

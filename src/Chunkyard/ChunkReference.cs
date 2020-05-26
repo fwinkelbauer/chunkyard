@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Chunkyard
 {
@@ -24,12 +25,8 @@ namespace Chunkyard
         public override bool Equals(object? obj)
         {
             return obj is ChunkReference reference
-                && EqualityComparer<Uri>.Default.Equals(
-                    ContentUri,
-                    reference.ContentUri)
-                && EqualityComparer<byte[]>.Default.Equals(
-                    Tag,
-                    reference.Tag);
+                && ContentUri.Equals(reference.ContentUri)
+                && Tag.SequenceEqual(reference.Tag);
         }
 
         public override int GetHashCode()

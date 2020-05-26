@@ -115,9 +115,15 @@ namespace Chunkyard.Tests
                 firstLogPosition);
 
             Assert.Equal(secondLogPosition, contentStore.FetchLogPosition());
-            Assert.Equal(2, contentStore.ListLogPositions().ToArray().Length);
-            Assert.NotNull(contentStore.RetrieveFromLog(firstLogPosition));
-            Assert.NotNull(contentStore.RetrieveFromLog(secondLogPosition));
+            Assert.Equal(2, contentStore.ListLogPositions().Count());
+
+            Assert.Equal(
+                contentReference,
+                contentStore.RetrieveFromLog(firstLogPosition).ContentReference);
+
+            Assert.Equal(
+                contentReference,
+                contentStore.RetrieveFromLog(secondLogPosition).ContentReference);
         }
 
         private static ContentStore CreateContentStore()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Chunkyard
 {
@@ -14,7 +15,7 @@ namespace Chunkyard
             IEnumerable<ContentReference> contentReferences)
         {
             CreationTime = creationTime;
-            ContentReferences = new List<ContentReference>(contentReferences);
+            ContentReferences = contentReferences.ToArray();
         }
 
         public DateTime CreationTime { get; }
@@ -25,9 +26,7 @@ namespace Chunkyard
         {
             return obj is Snapshot snapshot
                 && CreationTime == snapshot.CreationTime
-                && EqualityComparer<IEnumerable<ContentReference>>.Default.Equals(
-                    ContentReferences,
-                    snapshot.ContentReferences);
+                && ContentReferences.SequenceEqual(snapshot.ContentReferences);
         }
 
         public override int GetHashCode()

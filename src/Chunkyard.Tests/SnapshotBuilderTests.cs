@@ -24,7 +24,7 @@ namespace Chunkyard.Tests
             Assert.Single(snapshot.ContentReferences);
             Assert.Equal(
                 2,
-                snapshotBuilder.ListUris(logPosition).ToArray().Length);
+                snapshotBuilder.ListUris(logPosition).Count());
         }
 
         private static SnapshotBuilder CreateSnapshotBuilder()
