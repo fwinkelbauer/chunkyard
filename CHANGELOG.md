@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - The names of a few command line verbs
+- The `create` command to accept chunk size parameters
 
 ### Fixed
 
