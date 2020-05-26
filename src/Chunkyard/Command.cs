@@ -33,7 +33,10 @@ namespace Chunkyard
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(o.Repository, o.Cached);
+            var snapshotBuilder = CreateSnapshotBuilder(
+                o.Repository,
+                o.Cached,
+                new FastCdc(o.Min, o.Avg, o.Max));
 
             Console.WriteLine("Creating new snapshot");
 
@@ -241,9 +244,21 @@ namespace Chunkyard
             }
         }
 
+        private static SnapshotBuilder CreateSnapshotBuilder(string repositoryPath)
+        {
+            return CreateSnapshotBuilder(
+                repositoryPath,
+                false,
+                new FastCdc(
+                    4 * 1024 * 1024,
+                    8 * 1024 * 1024,
+                    16 * 1024 * 1024));
+        }
+
         private static SnapshotBuilder CreateSnapshotBuilder(
             string repositoryPath,
-            bool cached = false)
+            bool cached,
+            FastCdc fastCdc)
         {
             var repository = new FileRepository(repositoryPath);
             var logPosition = ContentStore.FetchLogPosition(repository);
@@ -273,10 +288,7 @@ namespace Chunkyard
 
             IContentStore contentStore = new ContentStore(
                 repository,
-                new FastCdc(
-                    4 * 1024 * 1024,
-                    8 * 1024 * 1024,
-                    16 * 1024 * 1024),
+                fastCdc,
                 HashAlgorithmName.SHA256,
                 password,
                 salt,
