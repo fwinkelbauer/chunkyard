@@ -158,7 +158,7 @@ namespace Chunkyard
 
         public int AppendToLog(
             ContentReference contentReference,
-            int? currentLogPosition)
+            int newLogPosition)
         {
             var logReference = new LogReference(
                 contentReference,
@@ -168,7 +168,7 @@ namespace Chunkyard
             return Repository.AppendToLog(
                 ToBytes(logReference),
                 DefaultLogName,
-                currentLogPosition);
+                newLogPosition);
         }
 
         public LogReference RetrieveFromLog(int logPosition)

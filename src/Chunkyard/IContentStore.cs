@@ -40,7 +40,7 @@ namespace Chunkyard
 
         int AppendToLog(
             ContentReference contentReference,
-            int? currentLogPosition);
+            int newLogPosition);
 
         LogReference RetrieveFromLog(int logPosition);
 

@@ -111,12 +111,8 @@ namespace Chunkyard
         public int AppendToLog(
             byte[] value,
             string logName,
-            int? currentLogPosition)
+            int newLogPosition)
         {
-            var newLogPosition = currentLogPosition.HasValue
-                ? currentLogPosition.Value + 1
-                : 0;
-
             var file = ToFilePath(logName, newLogPosition);
 
             Directory.CreateDirectory(

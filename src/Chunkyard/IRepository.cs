@@ -23,7 +23,7 @@ namespace Chunkyard
 
         void RemoveUri(Uri contentUri);
 
-        int AppendToLog(byte[] value, string logName, int? currentLogPosition);
+        int AppendToLog(byte[] value, string logName, int newLogPosition);
 
         byte[] RetrieveFromLog(string logName, int logPosition);
 

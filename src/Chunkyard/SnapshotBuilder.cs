@@ -86,9 +86,13 @@ namespace Chunkyard
 
             _storedContentReferences.Clear();
 
+            var newLogPosition = _currentLogPosition.HasValue
+                ? _currentLogPosition.Value + 1
+                : 0;
+
             _currentLogPosition = ContentStore.AppendToLog(
                 contentReference,
-                _currentLogPosition);
+                newLogPosition);
 
             return _currentLogPosition.Value;
         }

@@ -162,11 +162,11 @@ namespace Chunkyard
 
         public int AppendToLog(
             ContentReference contentReference,
-            int? currentLogPosition)
+            int newLogPosition)
         {
             return _contentStore.AppendToLog(
                 contentReference,
-                currentLogPosition);
+                newLogPosition);
         }
 
         public LogReference RetrieveFromLog(int logPosition)

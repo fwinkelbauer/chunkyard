@@ -56,9 +56,9 @@ namespace Chunkyard.Tests
         public int AppendToLog(
             byte[] value,
             string logName,
-            int? currentLogPosition)
+            int newLogPosition)
         {
-            if (!currentLogPosition.HasValue)
+            if (!_valuesByLog.ContainsKey(logName))
             {
                 _valuesByLog[logName] = new List<byte[]>
                 {
@@ -68,15 +68,7 @@ namespace Chunkyard.Tests
                 return _valuesByLog[logName].Count;
             }
 
-            var values = _valuesByLog[logName];
-
-            if (currentLogPosition.Value != _valuesByLog[logName].Count)
-            {
-                throw new ChunkyardException(
-                    "Optimistic concurrency exception");
-            }
-
-            values.Add(value);
+            _valuesByLog[logName].Add(value);
 
             return _valuesByLog[logName].Count;
         }

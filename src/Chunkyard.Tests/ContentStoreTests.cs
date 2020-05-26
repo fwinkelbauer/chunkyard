@@ -108,7 +108,7 @@ namespace Chunkyard.Tests
 
             var firstLogPosition = contentStore.AppendToLog(
                 contentReference,
-                null);
+                0);
 
             var secondLogPosition = contentStore.AppendToLog(
                 contentReference,
