@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
@@ -203,18 +205,6 @@ namespace Chunkyard
                 repository.RetrieveFromLog(DefaultLogName, logPosition));
         }
 
-        private static byte[] ToBytes(object o)
-        {
-            return Encoding.UTF8.GetBytes(
-                JsonConvert.SerializeObject(o));
-        }
-
-        private static T ToObject<T>(byte[] value) where T : notnull
-        {
-            return JsonConvert.DeserializeObject<T>(
-                Encoding.UTF8.GetString(value));
-        }
-
         private IEnumerable<ChunkReference> WriteChunks(
             byte[] nonce,
             Stream stream)
@@ -238,6 +228,18 @@ namespace Chunkyard
                     contentUri,
                     tag);
             }
+        }
+
+        private static byte[] ToBytes(object o)
+        {
+            return Encoding.UTF8.GetBytes(
+                JsonConvert.SerializeObject(o));
+        }
+
+        private static T ToObject<T>(byte[] value) where T : notnull
+        {
+            return JsonConvert.DeserializeObject<T>(
+                Encoding.UTF8.GetString(value));
         }
     }
 }

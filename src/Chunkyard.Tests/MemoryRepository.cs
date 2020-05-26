@@ -31,18 +31,6 @@ namespace Chunkyard.Tests
             return _valuesByUri.ContainsKey(contentUri);
         }
 
-        public bool UriValid(Uri contentUri)
-        {
-            var algorithm = Id.AlgorithmFromContentUri(contentUri);
-            var expectedHash = Id.HashFromContentUri(contentUri);
-
-            var actualHash = Id.ComputeHash(
-                algorithm,
-                _valuesByUri[contentUri]);
-
-            return expectedHash.Equals(actualHash);
-        }
-
         public IEnumerable<Uri> ListUris()
         {
             return _valuesByUri.Keys;
@@ -83,18 +71,13 @@ namespace Chunkyard.Tests
             _valuesByLog[logName].RemoveAt(logPosition);
         }
 
-        public int? FetchLogPosition(string logName)
+        public IEnumerable<int> ListLogPositions(string logName)
         {
             if (!_valuesByLog.ContainsKey(logName))
             {
-                return null;
+                yield break;
             }
 
-            return _valuesByLog[logName].Count;
-        }
-
-        public IEnumerable<int> ListLogPositions(string logName)
-        {
             for (int i = 1; i <= _valuesByLog[logName].Count; i++)
             {
                 yield return i;

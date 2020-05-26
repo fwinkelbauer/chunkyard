@@ -1,0 +1,46 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Chunkyard
+{
+    /// <summary>
+    /// A set of extension methods to work with <see cref="IRepository"/>.
+    /// </summary>
+    public static class IRepositoryExtensions
+    {
+        public static bool UriValid(this IRepository repository, Uri contentUri)
+        {
+            repository.EnsureNotNull(nameof(repository));
+
+            if (contentUri == null || !repository.UriExists(contentUri))
+            {
+                return false;
+            }
+
+            var content = repository.RetrieveUri(contentUri);
+            var computedUri = Id.ComputeContentUri(
+                Id.AlgorithmFromContentUri(contentUri),
+                content);
+
+            return contentUri.Equals(computedUri);
+        }
+
+        public static int? FetchLogPosition(
+            this IRepository repository,
+            string logName)
+        {
+            repository.EnsureNotNull(nameof(repository));
+
+            var logPositions = repository.ListLogPositions(logName)
+                .ToList();
+
+            if (logPositions.Count == 0)
+            {
+                return null;
+            }
+
+            return logPositions[logPositions.Count - 1];
+        }
+    }
+}

@@ -17,8 +17,6 @@ namespace Chunkyard
 
         bool UriExists(Uri contentUri);
 
-        bool UriValid(Uri contentUri);
-
         IEnumerable<Uri> ListUris();
 
         void RemoveUri(Uri contentUri);
@@ -28,8 +26,6 @@ namespace Chunkyard
         byte[] RetrieveFromLog(string logName, int logPosition);
 
         void RemoveFromLog(string logName, int logPosition);
-
-        int? FetchLogPosition(string logName);
 
         IEnumerable<int> ListLogPositions(string logName);
 

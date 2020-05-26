@@ -54,21 +54,6 @@ namespace Chunkyard
                 ToFilePath(contentUri));
         }
 
-        public bool UriValid(Uri contentUri)
-        {
-            if (contentUri == null || !UriExists(contentUri))
-            {
-                return false;
-            }
-
-            var content = RetrieveUri(contentUri);
-            var computedUri = Id.ComputeContentUri(
-                Id.AlgorithmFromContentUri(contentUri),
-                content);
-
-            return contentUri.Equals(computedUri);
-        }
-
         public IEnumerable<Uri> ListUris()
         {
             if (!Directory.Exists(_contentDirectory))
@@ -139,18 +124,6 @@ namespace Chunkyard
         {
             File.Delete(
                 ToFilePath(logName, logPosition));
-        }
-
-        public int? FetchLogPosition(string logName)
-        {
-            var logPositions = ListLogPositions(logName).ToList();
-
-            if (logPositions.Count == 0)
-            {
-                return null;
-            }
-
-            return logPositions[logPositions.Count - 1];
         }
 
         public IEnumerable<int> ListLogPositions(string logName)
