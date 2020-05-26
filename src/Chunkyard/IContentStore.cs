@@ -36,16 +36,10 @@ namespace Chunkyard
 
         bool ContentValid(ContentReference contentReference);
 
-        int? FetchLogPosition();
-
         int AppendToLog(
             ContentReference contentReference,
             int newLogPosition);
 
         LogReference RetrieveFromLog(int logPosition);
-
-        void RemoveFromLog(int logPosition);
-
-        IEnumerable<int> ListLogPositions();
     }
 }

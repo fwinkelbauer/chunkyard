@@ -26,13 +26,11 @@ namespace Chunkyard
             return contentUri.Equals(computedUri);
         }
 
-        public static int? FetchLogPosition(
-            this IRepository repository,
-            string logName)
+        public static int? FetchLogPosition(this IRepository repository)
         {
             repository.EnsureNotNull(nameof(repository));
 
-            var logPositions = repository.ListLogPositions(logName)
+            var logPositions = repository.ListLogPositions()
                 .ToList();
 
             if (logPositions.Count == 0)

@@ -21,14 +21,12 @@ namespace Chunkyard
 
         void RemoveUri(Uri contentUri);
 
-        int AppendToLog(byte[] value, string logName, int newLogPosition);
+        int AppendToLog(byte[] value, int newLogPosition);
 
-        byte[] RetrieveFromLog(string logName, int logPosition);
+        byte[] RetrieveFromLog(int logPosition);
 
-        void RemoveFromLog(string logName, int logPosition);
+        void RemoveFromLog(int logPosition);
 
-        IEnumerable<int> ListLogPositions(string logName);
-
-        IEnumerable<string> ListLogNames();
+        IEnumerable<int> ListLogPositions();
     }
 }

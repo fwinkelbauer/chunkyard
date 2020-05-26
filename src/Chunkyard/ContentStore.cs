@@ -14,8 +14,6 @@ namespace Chunkyard
     /// </summary>
     public class ContentStore : IContentStore
     {
-        private const string DefaultLogName = "master";
-
         private readonly FastCdc _fastCdc;
         private readonly HashAlgorithmName _hashAlgorithmName;
         private readonly byte[] _salt;
@@ -153,11 +151,6 @@ namespace Chunkyard
             return valid;
         }
 
-        public int? FetchLogPosition()
-        {
-            return FetchLogPosition(Repository);
-        }
-
         public int AppendToLog(
             ContentReference contentReference,
             int newLogPosition)
@@ -169,30 +162,12 @@ namespace Chunkyard
 
             return Repository.AppendToLog(
                 ToBytes(logReference),
-                DefaultLogName,
                 newLogPosition);
         }
 
         public LogReference RetrieveFromLog(int logPosition)
         {
             return RetrieveFromLog(Repository, logPosition);
-        }
-
-        public void RemoveFromLog(int logPosition)
-        {
-            Repository.RemoveFromLog(DefaultLogName, logPosition);
-        }
-
-        public IEnumerable<int> ListLogPositions()
-        {
-            return Repository.ListLogPositions(DefaultLogName);
-        }
-
-        public static int? FetchLogPosition(IRepository repository)
-        {
-            repository.EnsureNotNull(nameof(repository));
-
-            return repository.FetchLogPosition(DefaultLogName);
         }
 
         public static LogReference RetrieveFromLog(
@@ -202,7 +177,7 @@ namespace Chunkyard
             repository.EnsureNotNull(nameof(repository));
 
             return ToObject<LogReference>(
-                repository.RetrieveFromLog(DefaultLogName, logPosition));
+                repository.RetrieveFromLog(logPosition));
         }
 
         private IEnumerable<ChunkReference> WriteChunks(

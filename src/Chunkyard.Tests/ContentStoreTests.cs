@@ -104,8 +104,6 @@ namespace Chunkyard.Tests
                 AesGcmCrypto.GenerateNonce(),
                 new[] { chunkReference });
 
-            Assert.Null(contentStore.FetchLogPosition());
-
             var firstLogPosition = contentStore.AppendToLog(
                 contentReference,
                 0);
@@ -114,16 +112,27 @@ namespace Chunkyard.Tests
                 contentReference,
                 firstLogPosition);
 
-            Assert.Equal(secondLogPosition, contentStore.FetchLogPosition());
-            Assert.Equal(2, contentStore.ListLogPositions().Count());
+            Assert.Equal(
+                secondLogPosition,
+                contentStore.Repository.FetchLogPosition());
+
+            Assert.Equal(
+                2,
+                contentStore.Repository.ListLogPositions().Count());
+
+            var firstReference = contentStore.RetrieveFromLog(
+                firstLogPosition);
+
+            var secondReference = contentStore.RetrieveFromLog(
+                secondLogPosition);
 
             Assert.Equal(
                 contentReference,
-                contentStore.RetrieveFromLog(firstLogPosition).ContentReference);
+                firstReference.ContentReference);
 
             Assert.Equal(
                 contentReference,
-                contentStore.RetrieveFromLog(secondLogPosition).ContentReference);
+                secondReference.ContentReference);
         }
 
         private static ContentStore CreateContentStore()

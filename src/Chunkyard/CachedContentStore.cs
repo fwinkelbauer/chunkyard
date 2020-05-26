@@ -155,11 +155,6 @@ namespace Chunkyard
             return _contentStore.ContentValid(contentReference);
         }
 
-        public int? FetchLogPosition()
-        {
-            return _contentStore.FetchLogPosition();
-        }
-
         public int AppendToLog(
             ContentReference contentReference,
             int newLogPosition)
@@ -172,16 +167,6 @@ namespace Chunkyard
         public LogReference RetrieveFromLog(int logPosition)
         {
             return _contentStore.RetrieveFromLog(logPosition);
-        }
-
-        public void RemoveFromLog(int logPosition)
-        {
-            _contentStore.RemoveFromLog(logPosition);
-        }
-
-        public IEnumerable<int> ListLogPositions()
-        {
-            return _contentStore.ListLogPositions();
         }
 
         private Cache? RetrieveFromCache(string contentName)

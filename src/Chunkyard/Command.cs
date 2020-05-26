@@ -184,7 +184,8 @@ namespace Chunkyard
         public static void ListSnapshots(ListOptions o)
         {
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
-            var logPositions = snapshotBuilder.ContentStore.ListLogPositions();
+            var logPositions = snapshotBuilder.ContentStore.Repository
+                .ListLogPositions();
 
             foreach (var logPosition in logPositions)
             {
@@ -200,7 +201,8 @@ namespace Chunkyard
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
             Console.WriteLine($"Removing snapshot: {logPosition}");
-            snapshotBuilder.ContentStore.RemoveFromLog(logPosition);
+            snapshotBuilder.ContentStore.Repository
+                .RemoveFromLog(logPosition);
         }
 
         public static void GarbageCollect(GarbageCollectOptions o)
@@ -215,7 +217,8 @@ namespace Chunkyard
                 usedUris[contentUri] = false;
             }
 
-            var logPositions = snapshotBuilder.ContentStore.ListLogPositions();
+            var logPositions = snapshotBuilder.ContentStore.Repository
+                .ListLogPositions();
 
             foreach (var logPosition in logPositions)
             {
@@ -261,7 +264,7 @@ namespace Chunkyard
             FastCdc fastCdc)
         {
             var repository = new FileRepository(repositoryPath);
-            var logPosition = ContentStore.FetchLogPosition(repository);
+            var logPosition = repository.FetchLogPosition();
             var prompt = new EnvironmentPrompt(
                 new ConsolePrompt());
 

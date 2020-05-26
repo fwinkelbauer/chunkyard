@@ -95,10 +95,9 @@ namespace Chunkyard
 
         public int AppendToLog(
             byte[] value,
-            string logName,
             int newLogPosition)
         {
-            var file = ToFilePath(logName, newLogPosition);
+            var file = ToFilePath(newLogPosition);
 
             Directory.CreateDirectory(
                 Path.GetDirectoryName(file));
@@ -114,29 +113,27 @@ namespace Chunkyard
             return newLogPosition;
         }
 
-        public byte[] RetrieveFromLog(string logName, int logPosition)
+        public byte[] RetrieveFromLog(int logPosition)
         {
             return File.ReadAllBytes(
-                ToFilePath(logName, logPosition));
+                ToFilePath(logPosition));
         }
 
-        public void RemoveFromLog(string logName, int logPosition)
+        public void RemoveFromLog(int logPosition)
         {
             File.Delete(
-                ToFilePath(logName, logPosition));
+                ToFilePath(logPosition));
         }
 
-        public IEnumerable<int> ListLogPositions(string logName)
+        public IEnumerable<int> ListLogPositions()
         {
-            var refDirectory = ToDirectoryPath(logName);
-
-            if (!Directory.Exists(refDirectory))
+            if (!Directory.Exists(_refLogDirectory))
             {
                 return new List<int>();
             }
 
             var files = Directory.GetFiles(
-                refDirectory,
+                _refLogDirectory,
                 "*.json");
 
             var logPositions = new List<int>();
@@ -153,12 +150,6 @@ namespace Chunkyard
             return logPositions;
         }
 
-        public IEnumerable<string> ListLogNames()
-        {
-            return Directory.GetDirectories(_refLogDirectory)
-                .Select(d => Path.GetFileName(d));
-        }
-
         private static Uri ToContentUri(string filePath)
         {
             var hashAlgorithmName = Path.GetFileName(
@@ -172,17 +163,10 @@ namespace Chunkyard
                 Path.GetFileNameWithoutExtension(filePath));
         }
 
-        private string ToDirectoryPath(string logName)
+        private string ToFilePath(int logPosition)
         {
             return Path.Combine(
                 _refLogDirectory,
-                logName);
-        }
-
-        private string ToFilePath(string logName, int logPosition)
-        {
-            return Path.Combine(
-                ToDirectoryPath(logName),
                 $"{logPosition}.json");
         }
 

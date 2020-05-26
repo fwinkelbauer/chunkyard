@@ -6,12 +6,12 @@ namespace Chunkyard.Tests
     public class MemoryRepository : IRepository
     {
         private readonly Dictionary<Uri, byte[]> _valuesByUri;
-        private readonly Dictionary<string, List<byte[]>> _valuesByLog;
+        private readonly List<byte[]> _valuesLog;
 
         public MemoryRepository()
         {
             _valuesByUri = new Dictionary<Uri, byte[]>();
-            _valuesByLog = new Dictionary<string, List<byte[]>>();
+            _valuesLog = new List<byte[]>();
         }
 
         public Uri RepositoryUri => new Uri("in://memory");
@@ -41,52 +41,29 @@ namespace Chunkyard.Tests
             _valuesByUri.Remove(contentUri);
         }
 
-        public int AppendToLog(
-            byte[] value,
-            string logName,
-            int newLogPosition)
+        public int AppendToLog(byte[] value, int newLogPosition)
         {
-            if (!_valuesByLog.ContainsKey(logName))
-            {
-                _valuesByLog[logName] = new List<byte[]>
-                {
-                    value
-                };
+            _valuesLog.Add(value);
 
-                return _valuesByLog[logName].Count;
-            }
-
-            _valuesByLog[logName].Add(value);
-
-            return _valuesByLog[logName].Count;
+            return _valuesLog.Count;
         }
 
-        public byte[] RetrieveFromLog(string logName, int logPosition)
+        public byte[] RetrieveFromLog(int logPosition)
         {
-            return _valuesByLog[logName][logPosition - 1];
+            return _valuesLog[logPosition - 1];
         }
 
-        public void RemoveFromLog(string logName, int logPosition)
+        public void RemoveFromLog(int logPosition)
         {
-            _valuesByLog[logName].RemoveAt(logPosition);
+            _valuesLog.RemoveAt(logPosition);
         }
 
-        public IEnumerable<int> ListLogPositions(string logName)
+        public IEnumerable<int> ListLogPositions()
         {
-            if (!_valuesByLog.ContainsKey(logName))
-            {
-                yield break;
-            }
-
-            for (int i = 1; i <= _valuesByLog[logName].Count; i++)
+            for (int i = 1; i <= _valuesLog.Count; i++)
             {
                 yield return i;
             }
-        }
-
-        public IEnumerable<string> ListLogNames()
-        {
-            return _valuesByLog.Keys;
         }
     }
 }
