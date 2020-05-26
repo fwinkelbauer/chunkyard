@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Build.Options
 {
-    [Verb("commit", HelpText = "Creates a release commit")]
+    [Verb("commit", HelpText = "Create a release commit.")]
     public class CommitOptions
     {
     }

@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Build.Options
 {
-    [Verb("clean", HelpText = "Clean all artifacts")]
+    [Verb("clean", HelpText = "Clean all artifacts.")]
     public class CleanOptions
     {
     }

@@ -35,14 +35,6 @@ namespace Chunkyard.Build
             }
         }
 
-        public static void Build()
-        {
-            Build(
-                new DotnetOptions(
-                    DotnetOptions.DefaultConfiguration,
-                    DotnetOptions.DefaultRuntime));
-        }
-
         public static void Build(DotnetOptions o)
         {
             o.EnsureNotNull(nameof(o));
@@ -61,6 +53,17 @@ namespace Chunkyard.Build
             Dotnet(
                 $"test {Solution}",
                 $"-c {o.Configuration}");
+        }
+
+        public static void Default()
+        {
+            var o = new DotnetOptions(
+                DotnetOptions.DefaultConfiguration,
+                DotnetOptions.DefaultRuntime);
+
+            Lint();
+            Build(o);
+            Test(o);
         }
 
         public static void Publish(DotnetOptions o)

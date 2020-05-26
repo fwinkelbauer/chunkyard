@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Build.Options
 {
-    [Verb("lint", HelpText = "Run the linter")]
+    [Verb("lint", HelpText = "Run the linter.")]
     public class LintOptions
     {
     }

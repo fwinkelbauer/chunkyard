@@ -12,7 +12,7 @@ namespace Chunkyard.Build
         {
             if (args != null && args.Length == 0)
             {
-                Environment.ExitCode = Run(Command.Build);
+                Environment.ExitCode = Run(Command.Default);
                 return;
             }
 

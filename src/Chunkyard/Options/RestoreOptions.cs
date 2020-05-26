@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("restore", HelpText = "Restore a snapshot")]
+    [Verb("restore", HelpText = "Restore a snapshot.")]
     public class RestoreOptions
     {
         public RestoreOptions(

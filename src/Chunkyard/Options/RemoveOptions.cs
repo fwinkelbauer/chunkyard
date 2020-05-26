@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("remove", HelpText = "Remove a snapshot")]
+    [Verb("remove", HelpText = "Remove a snapshot.")]
     public class RemoveOptions
     {
         public RemoveOptions(

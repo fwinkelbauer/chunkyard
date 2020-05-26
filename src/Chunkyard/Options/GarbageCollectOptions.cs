@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("gc", HelpText = "Remove unreferenced content")]
+    [Verb("gc", HelpText = "Remove unreferenced content.")]
     public class GarbageCollectOptions
     {
         public GarbageCollectOptions(

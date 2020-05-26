@@ -3,7 +3,7 @@ using CommandLine;
 
 namespace Chunkyard.Options
 {
-    [Verb("preview", HelpText = "Show all files matching the given terms")]
+    [Verb("preview", HelpText = "Show all files matching the given terms.")]
     public class PreviewOptions
     {
         public PreviewOptions(
