@@ -144,7 +144,6 @@ namespace Chunkyard
         public int? FetchLogPosition(string logName)
         {
             var logPositions = ListLogPositions(logName).ToList();
-            logPositions.Sort();
 
             if (logPositions.Count == 0)
             {
