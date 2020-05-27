@@ -10,18 +10,29 @@ namespace Chunkyard
     {
         public static void Main(string[] args)
         {
-            var result = Parser.Default.ParseArguments(args, LoadOptions());
+            try
+            {
+                ProcessArguments(args);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Environment.ExitCode = 1;
+            }
+        }
 
-            Environment.ExitCode = result.MapResult(
-                (PreviewOptions o) => Run(() => Command.PreviewFiles(o)),
-                (RestoreOptions o) => Run(() => Command.RestoreSnapshot(o)),
-                (CreateOptions o) => Run(() => Command.CreateSnapshot(o)),
-                (CheckOptions o) => Run(() => Command.CheckSnapshot(o)),
-                (ShowOptions o) => Run(() => Command.ShowSnapshot(o)),
-                (RemoveOptions o) => Run(() => Command.RemoveSnapshot(o)),
-                (ListOptions o) => Run(() => Command.ListSnapshots(o)),
-                (GarbageCollectOptions o) => Run(() => Command.GarbageCollect(o)),
-                _ => 1);
+        private static void ProcessArguments(string[] args)
+        {
+            Parser.Default.ParseArguments(args, LoadOptions())
+                .WithParsed<PreviewOptions>(o => Command.PreviewFiles(o))
+                .WithParsed<RestoreOptions>(o => Command.RestoreSnapshot(o))
+                .WithParsed<CreateOptions>(o => Command.CreateSnapshot(o))
+                .WithParsed<CheckOptions>(o => Command.CheckSnapshot(o))
+                .WithParsed<ShowOptions>(o => Command.ShowSnapshot(o))
+                .WithParsed<RemoveOptions>(o => Command.RemoveSnapshot(o))
+                .WithParsed<ListOptions>(o => Command.ListSnapshots(o))
+                .WithParsed<GarbageCollectOptions>(o => Command.GarbageCollect(o))
+                .WithNotParsed(_ => Environment.ExitCode = 1);
         }
 
         private static Type[] LoadOptions()
@@ -29,20 +40,6 @@ namespace Chunkyard
             return Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t => t.GetCustomAttribute<VerbAttribute>() != null)
                 .ToArray();
-        }
-
-        private static int Run(Action action)
-        {
-            try
-            {
-                action();
-                return 0;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return 1;
-            }
         }
     }
 }

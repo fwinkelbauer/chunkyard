@@ -10,23 +10,36 @@ namespace Chunkyard.Build
     {
         public static void Main(string[] args)
         {
-            if (args != null && args.Length == 0)
+            args.EnsureNotNull(nameof(args));
+
+            try
             {
-                Environment.ExitCode = Run(Command.Default);
-                return;
+                if (args.Length == 0)
+                {
+                    Command.Default();
+                    return;
+                }
+
+                ProcessArguments(args);
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Environment.ExitCode = 1;
+            }
+        }
 
-            var result = Parser.Default.ParseArguments(args, LoadOptions());
-
-            Environment.ExitCode = result.MapResult(
-                (BuildOptions o) => Run(() => Command.Build(o)),
-                (CleanOptions _) => Run(Command.Clean),
-                (CommitOptions _) => Run(Command.Commit),
-                (FmtOptions _) => Run(Command.Fmt),
-                (LintOptions _) => Run(Command.Lint),
-                (PublishOptions o) => Run(() => Command.Publish(o)),
-                (TestOptions o) => Run(() => Command.Test(o)),
-                _ => 1);
+        private static void ProcessArguments(string[] args)
+        {
+            Parser.Default.ParseArguments(args, LoadOptions())
+                .WithParsed<BuildOptions>(o => Command.Build(o))
+                .WithParsed<CleanOptions>(_ => Command.Clean())
+                .WithParsed<CommitOptions>(_ => Command.Commit())
+                .WithParsed<FmtOptions>(_ => Command.Fmt())
+                .WithParsed<LintOptions>(_ => Command.Lint())
+                .WithParsed<PublishOptions>(o => Command.Publish(o))
+                .WithParsed<TestOptions>(o => Command.Test(o))
+                .WithNotParsed(_ => Environment.ExitCode = 1);
         }
 
         private static Type[] LoadOptions()
@@ -34,20 +47,6 @@ namespace Chunkyard.Build
             return Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t => t.GetCustomAttribute<VerbAttribute>() != null)
                 .ToArray();
-        }
-
-        private static int Run(Action action)
-        {
-            try
-            {
-                action();
-                return 0;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return 1;
-            }
         }
     }
 }
