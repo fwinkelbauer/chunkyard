@@ -31,6 +31,16 @@ namespace Chunkyard
             }
         }
 
+        public static void PushSnapshots(PushOptions o)
+        {
+            PushSnapshots(o.SourceRepository, o.DestinationRepository);
+        }
+
+        public static void PullSnapshots(PullOptions o)
+        {
+            PushSnapshots(o.SourceRepository, o.DestinationRepository);
+        }
+
         public static void CreateSnapshot(CreateOptions o)
         {
             var snapshotBuilder = CreateSnapshotBuilder(
@@ -247,7 +257,84 @@ namespace Chunkyard
             }
         }
 
-        private static SnapshotBuilder CreateSnapshotBuilder(string repositoryPath)
+        private static void PushSnapshots(
+            string sourceRepositoryPath,
+            string destinationRepositoryPath)
+        {
+            var snapshotBuilder = CreateSnapshotBuilder(sourceRepositoryPath);
+            var destinationRepository = new FileRepository(
+                destinationRepositoryPath);
+
+            var sourceLogs = snapshotBuilder.ContentStore.Repository
+                .ListLogPositions()
+                .ToArray();
+
+            var destinationLogs = destinationRepository
+                .ListLogPositions()
+                .ToArray();
+
+            var destinationMax = destinationLogs.Length == 0
+                ? -1
+                : destinationLogs.Max();
+
+            var newLogPositions = sourceLogs
+                .Where(l => l > destinationMax)
+                .ToArray();
+
+            if (newLogPositions.Length == 0)
+            {
+                Console.WriteLine("Nothing to do");
+                return;
+            }
+
+            foreach (var logPosition in newLogPositions)
+            {
+                Console.WriteLine(
+                    $"Ttransmitting snapshot {logPosition}");
+
+                PushSnapshot(
+                    logPosition,
+                    snapshotBuilder,
+                    destinationRepository);
+            }
+        }
+
+        private static void PushSnapshot(
+            int logPosition,
+            SnapshotBuilder snapshotBuilder,
+            IRepository destinationRepository)
+        {
+            var snapshotUris = snapshotBuilder.ListUris(logPosition)
+                .ToList();
+
+            Parallel.ForEach(
+                snapshotUris,
+                u =>
+                {
+                    var contentValue = snapshotBuilder.ContentStore.Repository
+                        .RetrieveUri(u);
+
+
+
+                    if (destinationRepository.UriExists(u))
+                    {
+                        Console.WriteLine($"Exists: {u}");
+                    }
+                    else
+                    {
+                        destinationRepository.StoreUri(u, contentValue);
+                        Console.WriteLine($"Transmitted: {u}");
+                    }
+                });
+
+            var logValue = snapshotBuilder.ContentStore.Repository
+                .RetrieveFromLog(logPosition);
+
+            destinationRepository.AppendToLog(logValue, logPosition);
+        }
+
+        private static SnapshotBuilder CreateSnapshotBuilder(
+            string repositoryPath)
         {
             return CreateSnapshotBuilder(
                 repositoryPath,

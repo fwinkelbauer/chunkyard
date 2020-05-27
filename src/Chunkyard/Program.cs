@@ -32,6 +32,8 @@ namespace Chunkyard
                 .WithParsed<RemoveOptions>(o => Command.RemoveSnapshot(o))
                 .WithParsed<ListOptions>(o => Command.ListSnapshots(o))
                 .WithParsed<GarbageCollectOptions>(o => Command.GarbageCollect(o))
+                .WithParsed<PushOptions>(o => Command.PushSnapshots(o))
+                .WithParsed<PullOptions>(o => Command.PullSnapshots(o))
                 .WithNotParsed(_ => Environment.ExitCode = 1);
         }
 
