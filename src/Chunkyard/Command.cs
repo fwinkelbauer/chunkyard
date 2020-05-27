@@ -51,7 +51,7 @@ namespace Chunkyard
             Console.WriteLine("Creating new snapshot");
 
             var foundTuples = FileFetcher.Find(o.Files, o.ExcludePatterns)
-                .ToList();
+                .ToArray();
 
             Parallel.ForEach(
                 foundTuples,
@@ -305,7 +305,7 @@ namespace Chunkyard
             IRepository destinationRepository)
         {
             var snapshotUris = snapshotBuilder.ListUris(logPosition)
-                .ToList();
+                .ToArray();
 
             Parallel.ForEach(
                 snapshotUris,
@@ -313,8 +313,6 @@ namespace Chunkyard
                 {
                     var contentValue = snapshotBuilder.ContentStore.Repository
                         .RetrieveUri(u);
-
-
 
                     if (destinationRepository.UriExists(u))
                     {

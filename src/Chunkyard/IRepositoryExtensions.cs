@@ -31,14 +31,14 @@ namespace Chunkyard
             repository.EnsureNotNull(nameof(repository));
 
             var logPositions = repository.ListLogPositions()
-                .ToList();
+                .ToArray();
 
-            if (logPositions.Count == 0)
+            if (logPositions.Length == 0)
             {
                 return null;
             }
 
-            return logPositions[logPositions.Count - 1];
+            return logPositions[logPositions.Length - 1];
         }
     }
 }
