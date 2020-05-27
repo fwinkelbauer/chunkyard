@@ -251,41 +251,31 @@ namespace Chunkyard
         public static void GarbageCollect(GarbageCollectOptions o)
         {
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
-            var usedUris = new Dictionary<Uri, bool>();
+            var usedUris = new HashSet<Uri>();
             var allContentUris = snapshotBuilder.ContentStore.Repository
                 .ListUris();
-
-            foreach (var contentUri in allContentUris)
-            {
-                usedUris[contentUri] = false;
-            }
 
             var logPositions = snapshotBuilder.ContentStore.Repository
                 .ListLogPositions();
 
             foreach (var logPosition in logPositions)
             {
-                var contentUris = snapshotBuilder.ListUris(logPosition);
-
-                foreach (var contentUri in contentUris)
-                {
-                    usedUris[contentUri] = true;
-                }
+                usedUris.UnionWith(
+                    snapshotBuilder.ListUris(logPosition));
             }
 
-            foreach (var contentUri in usedUris.Keys)
+            foreach (var contentUri in allContentUris.Except(usedUris))
             {
-                if (usedUris[contentUri])
+                if (o.Preview)
                 {
-                    continue;
+                    Console.WriteLine($"Unused: {contentUri}");
                 }
-
-                Console.WriteLine($"Unused: {contentUri}");
-
-                if (!o.Preview)
+                else
                 {
                     snapshotBuilder.ContentStore.Repository
                         .RemoveUri(contentUri);
+
+                    Console.WriteLine($"Removed: {contentUri}");
                 }
             }
         }
