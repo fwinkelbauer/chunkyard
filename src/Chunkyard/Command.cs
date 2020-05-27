@@ -210,9 +210,35 @@ namespace Chunkyard
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
+            RemoveSnapshot(snapshotBuilder, logPosition);
+        }
+
+        private static void RemoveSnapshot(
+            SnapshotBuilder snapshotBuilder,
+            int logPosition)
+        {
             Console.WriteLine($"Removing snapshot: {logPosition}");
+
             snapshotBuilder.ContentStore.Repository
                 .RemoveFromLog(logPosition);
+        }
+
+        public static void KeepSnapshots(KeepOptions o)
+        {
+            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+            var logPositions = snapshotBuilder.ContentStore.Repository
+                .ListLogPositions();
+
+            var logPositionsToKeep = o.LogPositions
+                .Select(l => snapshotBuilder.ResolveLogPosition(l));
+
+            var logPositionsToDelete = logPositions
+                .Except(logPositionsToKeep);
+
+            foreach (var logPosition in logPositionsToDelete)
+            {
+                RemoveSnapshot(snapshotBuilder, logPosition);
+            }
         }
 
         public static void GarbageCollect(GarbageCollectOptions o)
@@ -293,15 +319,15 @@ namespace Chunkyard
                     $"Ttransmitting snapshot {logPosition}");
 
                 PushSnapshot(
-                    logPosition,
                     snapshotBuilder,
+                    logPosition,
                     destinationRepository);
             }
         }
 
         private static void PushSnapshot(
-            int logPosition,
             SnapshotBuilder snapshotBuilder,
+            int logPosition,
             IRepository destinationRepository)
         {
             var snapshotUris = snapshotBuilder.ListUris(logPosition)

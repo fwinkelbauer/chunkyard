@@ -30,6 +30,7 @@ namespace Chunkyard
                 .WithParsed<CheckOptions>(o => Command.CheckSnapshot(o))
                 .WithParsed<ShowOptions>(o => Command.ShowSnapshot(o))
                 .WithParsed<RemoveOptions>(o => Command.RemoveSnapshot(o))
+                .WithParsed<KeepOptions>(o => Command.KeepSnapshots(o))
                 .WithParsed<ListOptions>(o => Command.ListSnapshots(o))
                 .WithParsed<GarbageCollectOptions>(o => Command.GarbageCollect(o))
                 .WithParsed<PushOptions>(o => Command.PushSnapshots(o))
