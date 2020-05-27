@@ -96,7 +96,7 @@ namespace Chunkyard.Build
         {
             Git("add -A");
             Git($"commit -m \"Prepare Chunkyard release v{Version}\"");
-            Git($"tag -m \"v{Version}\"");
+            Git($"tag \"v{Version}\"");
         }
 
         private static void Dotnet(params string[] arguments)
