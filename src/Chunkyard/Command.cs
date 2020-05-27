@@ -233,7 +233,14 @@ namespace Chunkyard
                 .Select(l => snapshotBuilder.ResolveLogPosition(l));
 
             var logPositionsToDelete = logPositions
-                .Except(logPositionsToKeep);
+                .Except(logPositionsToKeep)
+                .ToArray();
+
+            if (logPositionsToDelete.Length == 0)
+            {
+                Console.WriteLine("Nothing to do");
+                return;
+            }
 
             foreach (var logPosition in logPositionsToDelete)
             {
