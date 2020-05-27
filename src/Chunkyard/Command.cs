@@ -417,22 +417,15 @@ namespace Chunkyard
                 logPosition);
         }
 
-        private static List<ContentReference> FuzzyFilter(
+        private static ContentReference[] FuzzyFilter(
             string fuzzyPattern,
             IEnumerable<ContentReference> contentReferences)
         {
             var fuzzy = new Fuzzy(fuzzyPattern);
-            var matches = new List<ContentReference>();
 
-            foreach (var contentReference in contentReferences)
-            {
-                if (fuzzy.IsMatch(contentReference.Name))
-                {
-                    matches.Add(contentReference);
-                }
-            }
-
-            return matches;
+            return contentReferences
+                .Where(c => fuzzy.IsMatch(c.Name))
+                .ToArray();
         }
     }
 }

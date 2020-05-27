@@ -19,9 +19,10 @@ namespace Chunkyard
             byte[] key,
             byte[] nonce)
         {
+            plaintext.EnsureNotNull(nameof(plaintext));
+
             var tag = new byte[TAG_BYTES];
-            var ciphertext = new byte[
-                plaintext.EnsureNotNull(nameof(plaintext)).Length];
+            var ciphertext = new byte[plaintext.Length];
 
             using var aesGcm = new AesGcm(key);
             aesGcm.Encrypt(nonce, plaintext, ciphertext, tag);
@@ -35,8 +36,9 @@ namespace Chunkyard
             byte[] key,
             byte[] nonce)
         {
-            byte[] plaintext = new byte[
-                ciphertext.EnsureNotNull(nameof(ciphertext)).Length];
+            ciphertext.EnsureNotNull(nameof(ciphertext));
+
+            byte[] plaintext = new byte[ciphertext.Length];
 
             using var aesGcm = new AesGcm(key);
             aesGcm.Decrypt(nonce, ciphertext, tag, plaintext);
@@ -49,8 +51,10 @@ namespace Chunkyard
             byte[] salt,
             int iterations)
         {
+            password.EnsureNotNullOrEmpty(nameof(password));
+
             using var rfc2898 = new Rfc2898DeriveBytes(
-                password.EnsureNotNullOrEmpty(nameof(password)),
+                password,
                 salt,
                 iterations,
                 HashAlgorithmName.SHA256);
