@@ -21,12 +21,11 @@ namespace Chunkyard
             foreach (var file in files)
             {
                 var resolvedFile = ResolvePath(file);
+                var parent = Path.GetDirectoryName(resolvedFile)
+                    ?? resolvedFile;
 
                 foreach (var foundFile in Find(resolvedFile, excludePatterns))
                 {
-                    var parent = Path.GetDirectoryName(resolvedFile)
-                        ?? resolvedFile;
-
                     var contentName = Path.GetRelativePath(parent, foundFile);
 
                     yield return (foundFile, contentName);
