@@ -57,17 +57,11 @@ namespace Chunkyard
                     contentName);
             }
 
-            var storedCache = RetrieveFromCache(contentName);
-            var creationDateUtc = File.GetCreationTimeUtc(fileStream.Name);
-            var lastWriteDateUtc = File.GetLastWriteTimeUtc(fileStream.Name);
+            var storedReference = RetrieveFromCache(fileStream, contentName);
 
-            if (storedCache != null
-                && storedCache.Length == fileStream.Length
-                && storedCache.CreationDateUtc.Equals(creationDateUtc)
-                && storedCache.LastWriteDateUtc.Equals(lastWriteDateUtc)
-                && _contentStore.ContentExists(storedCache.ContentReference))
+            if (storedReference != null)
             {
-                return storedCache.ContentReference;
+                return storedReference;
             }
 
             var contentReference = _contentStore.StoreContent(
@@ -75,12 +69,8 @@ namespace Chunkyard
                 contentName);
 
             StoreInCache(
-                contentReference.Name,
-                new Cache(
-                    contentReference,
-                    fileStream.Length,
-                    creationDateUtc,
-                    lastWriteDateUtc));
+                fileStream,
+                contentReference);
 
             return contentReference;
         }
@@ -96,19 +86,13 @@ namespace Chunkyard
                     previousContentReference);
             }
 
-            var storedCache = RetrieveFromCache(
+            var storedReference = RetrieveFromCache(
+                fileStream,
                 previousContentReference.Name);
 
-            var creationDateUtc = File.GetCreationTimeUtc(fileStream.Name);
-            var lastWriteDateUtc = File.GetLastWriteTimeUtc(fileStream.Name);
-
-            if (storedCache != null
-                && storedCache.Length == fileStream.Length
-                && storedCache.CreationDateUtc.Equals(creationDateUtc)
-                && storedCache.LastWriteDateUtc.Equals(lastWriteDateUtc)
-                && _contentStore.ContentExists(storedCache.ContentReference))
+            if (storedReference != null)
             {
-                return storedCache.ContentReference;
+                return storedReference;
             }
 
             var contentReference = _contentStore.StoreContent(
@@ -116,12 +100,8 @@ namespace Chunkyard
                 previousContentReference);
 
             StoreInCache(
-                contentReference.Name,
-                new Cache(
-                    contentReference,
-                    fileStream.Length,
-                    creationDateUtc,
-                    lastWriteDateUtc));
+                fileStream,
+                contentReference);
 
             return contentReference;
         }
@@ -168,7 +148,9 @@ namespace Chunkyard
             return _contentStore.RetrieveFromLog(logPosition);
         }
 
-        private Cache? RetrieveFromCache(string contentName)
+        private ContentReference? RetrieveFromCache(
+            FileStream fileStream,
+            string contentName)
         {
             var cacheFile = ToCacheFile(contentName);
 
@@ -177,15 +159,38 @@ namespace Chunkyard
                 return null;
             }
 
-            return JsonConvert.DeserializeObject<Cache>(
+            var storedCache = JsonConvert.DeserializeObject<Cache>(
                 File.ReadAllText(cacheFile));
+
+            var creationDateUtc = File.GetCreationTimeUtc(fileStream.Name);
+            var lastWriteDateUtc = File.GetLastWriteTimeUtc(fileStream.Name);
+
+            if (storedCache.Length == fileStream.Length
+                && storedCache.CreationDateUtc.Equals(creationDateUtc)
+                && storedCache.LastWriteDateUtc.Equals(lastWriteDateUtc)
+                && _contentStore.ContentExists(storedCache.ContentReference))
+            {
+                return storedCache.ContentReference;
+            }
+            else
+            {
+                return null;
+            }
         }
 
-        private void StoreInCache(string contentName, Cache cache)
+        private void StoreInCache(
+            FileStream fileStream,
+            ContentReference contentReference)
         {
-            var cacheFile = ToCacheFile(contentName);
+            var cacheFile = ToCacheFile(contentReference.Name);
 
             Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
+
+            var cache = new Cache(
+                contentReference,
+                fileStream.Length,
+                File.GetCreationTimeUtc(fileStream.Name),
+                File.GetLastWriteTimeUtc(fileStream.Name));
 
             File.WriteAllText(
                 cacheFile,
