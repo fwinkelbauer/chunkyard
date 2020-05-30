@@ -14,7 +14,7 @@ namespace Chunkyard
         private const int NONCE_BYTES = 12;
         private const int SALT_BYTES = 12;
 
-        public static (byte[], byte[]) Encrypt(
+        public static (byte[] Ciphertext, byte[] Tag) Encrypt(
             byte[] plaintext,
             byte[] key,
             byte[] nonce)
