@@ -165,9 +165,9 @@ namespace Chunkyard
                         Directory.CreateDirectory(Path.GetDirectoryName(file));
 
                         using var stream = new FileStream(
-                        file,
-                        mode,
-                        FileAccess.Write);
+                            file,
+                            mode,
+                            FileAccess.Write);
 
                         snapshotBuilder.ContentStore.
                             RetrieveContent(contentReference, stream);
