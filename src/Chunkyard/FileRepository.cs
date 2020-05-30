@@ -27,19 +27,20 @@ namespace Chunkyard
         {
             var file = ToFilePath(contentUri);
 
-            if (!File.Exists(file))
+            if (File.Exists(file))
             {
-                Directory.CreateDirectory(
-                    Path.GetDirectoryName(file));
-
-                using var fileStream = new FileStream(
-                    file,
-                    FileMode.CreateNew,
-                    FileAccess.Write);
-
-                fileStream.Write(value);
-                fileStream.Flush(true);
+                return;
             }
+
+            Directory.CreateDirectory(
+                Path.GetDirectoryName(file));
+
+            using var fileStream = new FileStream(
+                file,
+                FileMode.CreateNew,
+                FileAccess.Write);
+
+            fileStream.Write(value);
         }
 
         public byte[] RetrieveUri(Uri contentUri)
@@ -108,7 +109,6 @@ namespace Chunkyard
                 FileAccess.Write);
 
             fileStream.Write(value);
-            fileStream.Flush(true);
 
             return newLogPosition;
         }
