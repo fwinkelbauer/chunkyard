@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## Unreleased
 
+### Removed
+
+- The `--preview` parameter from the `gc` command
+
 ## 0.2.0 - 2020-05-27
 
 ### Added

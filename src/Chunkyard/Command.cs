@@ -58,8 +58,6 @@ namespace Chunkyard
                 return;
             }
 
-            Console.WriteLine("Creating new snapshot");
-
             Parallel.ForEach(
                 foundTuples,
                 t =>
@@ -72,7 +70,7 @@ namespace Chunkyard
 
             var newLogPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
 
-            Console.WriteLine($"Latest snapshot: {newLogPosition}");
+            Console.WriteLine($"Created snapshot: {newLogPosition}");
         }
 
         public static void CheckSnapshot(CheckOptions o)
@@ -290,17 +288,10 @@ namespace Chunkyard
 
             foreach (var contentUri in allContentUris.Except(usedUris))
             {
-                if (o.WhatIf)
-                {
-                    Console.WriteLine($"Would remove: {contentUri}");
-                }
-                else
-                {
-                    snapshotBuilder.ContentStore.Repository
-                        .RemoveUri(contentUri);
+                snapshotBuilder.ContentStore.Repository
+                    .RemoveUri(contentUri);
 
-                    Console.WriteLine($"Removed: {contentUri}");
-                }
+                Console.WriteLine($"Removed: {contentUri}");
             }
         }
 
@@ -337,7 +328,7 @@ namespace Chunkyard
             foreach (var logPosition in newLogPositions)
             {
                 Console.WriteLine(
-                    $"Ttransmitting snapshot: {logPosition}");
+                    $"Transmitting snapshot: {logPosition}");
 
                 PushSnapshot(
                     snapshotBuilder,
