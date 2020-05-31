@@ -48,10 +48,17 @@ namespace Chunkyard
                 o.Cached,
                 new FastCdc(o.Min, o.Avg, o.Max));
 
-            Console.WriteLine("Creating new snapshot");
-
-            var foundTuples = FileFetcher.Find(o.Files, o.ExcludePatterns)
+            var foundTuples = FileFetcher
+                .Find(o.Files, o.ExcludePatterns)
                 .ToArray();
+
+            if (foundTuples.Length == 0)
+            {
+                Console.WriteLine("Nothing to do");
+                return;
+            }
+
+            Console.WriteLine("Creating new snapshot");
 
             Parallel.ForEach(
                 foundTuples,
@@ -195,7 +202,14 @@ namespace Chunkyard
         {
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
             var logPositions = snapshotBuilder.ContentStore.Repository
-                .ListLogPositions();
+                .ListLogPositions()
+                .ToArray();
+
+            if (logPositions.Length == 0)
+            {
+                Console.WriteLine("Nothing to do");
+                return;
+            }
 
             foreach (var logPosition in logPositions)
             {
@@ -262,6 +276,16 @@ namespace Chunkyard
             {
                 usedUris.UnionWith(
                     snapshotBuilder.ListUris(logPosition));
+            }
+
+            var contentUrisToDelete = allContentUris
+                .Except(usedUris)
+                .ToArray();
+
+            if (contentUrisToDelete.Length == 0)
+            {
+                Console.WriteLine("Nothing to do");
+                return;
             }
 
             foreach (var contentUri in allContentUris.Except(usedUris))
