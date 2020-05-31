@@ -407,9 +407,21 @@ namespace Chunkyard
 
             if (cached)
             {
+                // Each repository should have its own cache
+                var shortHash = Id.ComputeHash(
+                    HashAlgorithmName.SHA256,
+                    contentStore.Repository.RepositoryUri.AbsoluteUri)
+                    .Substring(0, 8);
+
+                var cacheDirectory = Path.Combine(
+                    CacheDirectoryPath,
+                    shortHash);
+
+                Console.WriteLine($"Using cache: {cacheDirectory}");
+
                 contentStore = new CachedContentStore(
                     contentStore,
-                    CacheDirectoryPath);
+                    cacheDirectory);
             }
 
             return new SnapshotBuilder(
