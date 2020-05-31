@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## Unreleased
 
+### Changed
+
+- The `keep` command to only operate on the latest N snapshots
+
 ### Removed
 
 - The `--preview` parameter from the `gc` command

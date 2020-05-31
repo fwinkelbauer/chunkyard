@@ -87,6 +87,6 @@ chunkyard create -r "$repo" -f ${directories[*]} --cached
 chunkyard check -r "$repo" --shallow
 
 # Keep the latest four backups
-chunkyard keep -r "$repo" -l -1 -2 -3 -4
+chunkyard keep -r "$repo" -l 4
 chunkyard gc -r "$repo"
 ```

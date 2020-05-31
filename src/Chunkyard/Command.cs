@@ -219,30 +219,28 @@ namespace Chunkyard
 
         public static void RemoveSnapshot(RemoveOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
-            var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
+            var repository = CreateRepository(o.Repository);
 
-            RemoveSnapshot(snapshotBuilder, logPosition);
+            RemoveSnapshot(repository, o.LogPosition);
         }
 
         private static void RemoveSnapshot(
-            SnapshotBuilder snapshotBuilder,
+            IRepository repository,
             int logPosition)
         {
             Console.WriteLine($"Removing snapshot: {logPosition}");
 
-            snapshotBuilder.ContentStore.Repository
-                .RemoveFromLog(logPosition);
+            repository.RemoveFromLog(logPosition);
         }
 
         public static void KeepSnapshots(KeepOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
-            var logPositions = snapshotBuilder.ContentStore.Repository
-                .ListLogPositions();
+            var repository = CreateRepository(o.Repository);
+            var logPositions = repository.ListLogPositions();
 
-            var logPositionsToKeep = o.LogPositions
-                .Select(l => snapshotBuilder.ResolveLogPosition(l));
+            var logPositionsToKeep = logPositions
+                .TakeLast(o.LatestCount)
+                .ToArray();
 
             var logPositionsToDelete = logPositions
                 .Except(logPositionsToKeep)
@@ -256,7 +254,7 @@ namespace Chunkyard
 
             foreach (var logPosition in logPositionsToDelete)
             {
-                RemoveSnapshot(snapshotBuilder, logPosition);
+                RemoveSnapshot(repository, logPosition);
             }
         }
 
@@ -369,6 +367,11 @@ namespace Chunkyard
             destinationRepository.AppendToLog(logValue, logPosition);
         }
 
+        private static IRepository CreateRepository(string repositoryPath)
+        {
+            return new FileRepository(repositoryPath);
+        }
+
         private static SnapshotBuilder CreateSnapshotBuilder(
             string repositoryPath)
         {
@@ -386,7 +389,7 @@ namespace Chunkyard
             bool cached,
             FastCdc fastCdc)
         {
-            var repository = new FileRepository(repositoryPath);
+            var repository = CreateRepository(repositoryPath);
             var logPosition = repository.FetchLogPosition();
             var prompt = new EnvironmentPrompt(
                 new ConsolePrompt());
