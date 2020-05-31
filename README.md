@@ -1,12 +1,25 @@
 # Chunkyard
 
-An experimental backup application (Windows and Linux) for archiving files in a
+Chunkyard is a backup application for Windows and Linux which stores files in a
 content addressable storage with support for dynamic chunking and encryption.
 
 The FastCdc chunking algorithm is a C# port of these libraries:
 
 - [fastcdc-rs](https://github.com/nlfiedler/fastcdc-rs)
 - [fastcdc-py](https://github.com/titusz/fastcdc-py)
+
+## Goals
+
+- Favor simplicity and readability over features
+- Strong encryption (AES Galois/Counter Mode using a 256 bit key)
+- Ability to push/pull from other repositories
+- Verify-able backups
+
+## Not Goals
+
+- Key management
+- Compression
+- File meta data preservation (e.g. creation time, flags, ...)
 
 ## Build
 
@@ -25,13 +38,11 @@ Run any of the below build scripts:
 .\build.bat
 ```
 
-## Concepts
+Create a binary in `./artifacts` by running:
 
-- **Content Reference:** A description of how a file is archived in the
-  underlying storage
-- **Content URI:** The address of an encrypted piece of a file. Example:
-  `sha256://0ec7f158103de762a32f215490298c6bc47578f511955795df7d1a2a07343e3b`
-- **Reference Log:** A structure to store references in an append-only log
+``` shell
+./build.sh publish
+```
 
 ## Usage
 
@@ -40,8 +51,39 @@ Type `chunkyard --help` to learn more.
 Example:
 
 ``` shell
+# See which files chunkyard would backup
 chunkyard preview -f "~/Music" -e "Desktop\.ini" "thumbs\.db"
+
+# Create a backup
 chunkyard create -r "../repository" -f "~/Music" -e "Desktop\.ini" "thumbs\.db"
+
+# Check if the backup is uncorrupted
 chunkyard check -r "../repository"
+
+# Restore parts of the backup
 chunkyard restore -r "../repository" -d . -i "mp3$"
+```
+
+Here's an example of a bash script which can be used in an automated process:
+
+``` shell
+set -euo pipefail
+
+repo=/backup/location
+
+directories=(
+    ~/Music
+    ~/Pictures
+    ~/Videos
+)
+
+export CHUNKYARD_PASSWORD="my secret password"
+
+# Create and check backup
+chunkyard create -r "$repo" -f ${directories[*]} --cached
+chunkyard check -r "$repo" --shallow
+
+# Keep the latest four backups
+chunkyard keep -r "$repo" -l -1 -2 -3 -4
+chunkyard gc -r "$repo"
 ```
