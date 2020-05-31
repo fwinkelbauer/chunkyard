@@ -65,7 +65,7 @@ namespace Chunkyard
 
             var newLogPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
 
-            Console.WriteLine($"Latest snapshot is {newLogPosition}");
+            Console.WriteLine($"Latest snapshot: {newLogPosition}");
         }
 
         public static void CheckSnapshot(CheckOptions o)
@@ -73,7 +73,7 @@ namespace Chunkyard
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            Console.WriteLine($"Checking snapshot {logPosition}");
+            Console.WriteLine($"Checking snapshot: {logPosition}");
 
             var snapshot = snapshotBuilder.GetSnapshot(logPosition);
             var filteredContentReferences = FuzzyFilter(
@@ -121,7 +121,7 @@ namespace Chunkyard
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            Console.WriteLine($"Listing snapshot {logPosition}");
+            Console.WriteLine($"Listing snapshot: {logPosition}");
 
             var snapshot = snapshotBuilder.GetSnapshot(logPosition);
             var filteredContentReferences = FuzzyFilter(
@@ -139,7 +139,7 @@ namespace Chunkyard
             var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            Console.WriteLine($"Restoring snapshot {logPosition}");
+            Console.WriteLine($"Restoring snapshot: {logPosition}");
 
             var snapshot = snapshotBuilder.GetSnapshot(logPosition);
             var mode = o.Overwrite
@@ -313,7 +313,7 @@ namespace Chunkyard
             foreach (var logPosition in newLogPositions)
             {
                 Console.WriteLine(
-                    $"Ttransmitting snapshot {logPosition}");
+                    $"Ttransmitting snapshot: {logPosition}");
 
                 PushSnapshot(
                     snapshotBuilder,
