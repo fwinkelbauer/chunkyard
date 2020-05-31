@@ -31,7 +31,7 @@ namespace Chunkyard.Options
         [Option('l', "log-position", Required = false, HelpText = "The log position", Default = Command.LatestLogPosition)]
         public int LogPosition { get; }
 
-        [Option('o', "overwrite", Required = false, HelpText = "If files should overwritten", Default = false)]
+        [Option('o', "overwrite", Required = false, HelpText = "If files should be overwritten", Default = false)]
         public bool Overwrite { get; }
     }
 }
