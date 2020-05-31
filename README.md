@@ -8,6 +8,9 @@ The FastCdc chunking algorithm is a C# port of these libraries:
 - [fastcdc-rs](https://github.com/nlfiedler/fastcdc-rs)
 - [fastcdc-py](https://github.com/titusz/fastcdc-py)
 
+I built Chunkyard for myself. You might want to consider more sophisticated
+tools. Here's a list of [options](https://github.com/restic/others).
+
 ## Goals
 
 - Favor simplicity and readability over features
