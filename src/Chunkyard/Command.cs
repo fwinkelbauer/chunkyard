@@ -266,9 +266,9 @@ namespace Chunkyard
 
             foreach (var contentUri in allContentUris.Except(usedUris))
             {
-                if (o.Preview)
+                if (o.WhatIf)
                 {
-                    Console.WriteLine($"Unused: {contentUri}");
+                    Console.WriteLine($"Would remove: {contentUri}");
                 }
                 else
                 {

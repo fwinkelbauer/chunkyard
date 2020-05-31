@@ -7,16 +7,16 @@ namespace Chunkyard.Options
     {
         public GarbageCollectOptions(
             string repository,
-            bool preview)
+            bool whatIf)
         {
             Repository = repository;
-            Preview = preview;
+            WhatIf = whatIf;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository")]
         public string Repository { get; }
 
-        [Option('p', "preview", Required = false, HelpText = "Print instead of delete", Default = false)]
-        public bool Preview { get; }
+        [Option("what-if", Required = false, HelpText = "Show what would happen", Default = false)]
+        public bool WhatIf { get; }
     }
 }
