@@ -58,15 +58,16 @@ namespace Chunkyard.Tests
         [Fact]
         public static void ContentExists_Detects_Missing_Content()
         {
-            var contentStore = CreateContentStore();
+            var repository = new MemoryRepository();
+            var contentStore = CreateContentStore(repository);
 
             var contentReference = contentStore.StoreContentObject<string>(
                 "some text",
                 "with some name");
 
-            foreach (var uri in contentStore.Repository.ListUris())
+            foreach (var uri in repository.ListUris())
             {
-                contentStore.Repository.RemoveUri(uri);
+                repository.RemoveUri(uri);
             }
 
             Assert.False(contentStore.ContentExists(contentReference));
@@ -75,7 +76,8 @@ namespace Chunkyard.Tests
         [Fact]
         public static void ContentValid_Detects_Corrupted_Content()
         {
-            var contentStore = CreateContentStore();
+            var repository = new MemoryRepository();
+            var contentStore = CreateContentStore(repository);
 
             var contentReference = contentStore.StoreContentObject<string>(
                 "some text",
@@ -83,9 +85,9 @@ namespace Chunkyard.Tests
 
             var wrongData = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
-            foreach (var uri in contentStore.Repository.ListUris().ToArray())
+            foreach (var uri in repository.ListUris().ToArray())
             {
-                contentStore.Repository.StoreUri(uri, wrongData);
+                repository.StoreUri(uri, wrongData);
             }
 
             Assert.False(contentStore.ContentValid(contentReference));
@@ -94,7 +96,8 @@ namespace Chunkyard.Tests
         [Fact]
         public static void Append_And_RetrieveFromLog_Return_Reference()
         {
-            var contentStore = CreateContentStore();
+            var repository = new MemoryRepository();
+            var contentStore = CreateContentStore(repository);
             var chunkReference = new ChunkReference(
                 new Uri("sha256://abcdef123456"),
                 new byte[] { 0xFF });
@@ -112,13 +115,8 @@ namespace Chunkyard.Tests
                 contentReference,
                 firstLogPosition);
 
-            Assert.Equal(
-                secondLogPosition,
-                contentStore.Repository.FetchLogPosition());
-
-            Assert.Equal(
-                2,
-                contentStore.Repository.ListLogPositions().Count());
+            Assert.Equal(secondLogPosition, repository.FetchLogPosition());
+            Assert.Equal(2, repository.ListLogPositions().Count());
 
             var firstReference = contentStore.RetrieveFromLog(
                 firstLogPosition);
@@ -137,8 +135,13 @@ namespace Chunkyard.Tests
 
         private static ContentStore CreateContentStore()
         {
+            return CreateContentStore(new MemoryRepository());
+        }
+
+        private static ContentStore CreateContentStore(IRepository repository)
+        {
             return new ContentStore(
-                new MemoryRepository(),
+                repository,
                 new FastCdc(
                     2 * 1024 * 1024,
                     4 * 1024 * 1024,

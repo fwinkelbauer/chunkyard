@@ -43,7 +43,7 @@ namespace Chunkyard
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(
+            var (_, _, snapshotBuilder) = Create(
                 o.Repository,
                 o.Cached,
                 new FastCdc(o.Min, o.Avg, o.Max));
@@ -75,7 +75,7 @@ namespace Chunkyard
 
         public static void CheckSnapshot(CheckOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+            var (_, contentStore, snapshotBuilder) = Create(o.Repository);
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
             Console.WriteLine($"Checking snapshot: {logPosition}");
@@ -91,16 +91,14 @@ namespace Chunkyard
                 filteredContentReferences,
                 contentReference =>
                 {
-                    if (!snapshotBuilder.ContentStore
-                        .ContentExists(contentReference))
+                    if (!contentStore.ContentExists(contentReference))
                     {
                         Console.WriteLine($"Missing: {contentReference.Name}");
 
                         error = true;
                     }
                     else if (!o.Shallow
-                        && !snapshotBuilder.ContentStore
-                             .ContentValid(contentReference))
+                        && !contentStore.ContentValid(contentReference))
                     {
                         Console.WriteLine(
                             $"Corrupted: {contentReference.Name}");
@@ -123,7 +121,7 @@ namespace Chunkyard
 
         public static void ShowSnapshot(ShowOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+            var (_, _, snapshotBuilder) = Create(o.Repository);
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
             Console.WriteLine($"Listing snapshot: {logPosition}");
@@ -141,7 +139,7 @@ namespace Chunkyard
 
         public static void RestoreSnapshot(RestoreOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+            var (_, contentStore, snapshotBuilder) = Create(o.Repository);
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
             Console.WriteLine($"Restoring snapshot: {logPosition}");
@@ -174,8 +172,7 @@ namespace Chunkyard
                             mode,
                             FileAccess.Write);
 
-                        snapshotBuilder.ContentStore.
-                            RetrieveContent(contentReference, stream);
+                        contentStore.RetrieveContent(contentReference, stream);
 
                         Console.WriteLine($"Restored: {file}");
 
@@ -198,8 +195,8 @@ namespace Chunkyard
 
         public static void ListSnapshots(ListOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
-            var logPositions = snapshotBuilder.ContentStore.Repository
+            var (repository, _, snapshotBuilder) = Create(o.Repository);
+            var logPositions = repository
                 .ListLogPositions()
                 .ToArray();
 
@@ -219,9 +216,9 @@ namespace Chunkyard
 
         public static void RemoveSnapshot(RemoveOptions o)
         {
-            var repository = CreateRepository(o.Repository);
-
-            RemoveSnapshot(repository, o.LogPosition);
+            RemoveSnapshot(
+                CreateRepository(o.Repository),
+                o.LogPosition);
         }
 
         private static void RemoveSnapshot(
@@ -260,13 +257,10 @@ namespace Chunkyard
 
         public static void GarbageCollect(GarbageCollectOptions o)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(o.Repository);
+            var (repository, _, snapshotBuilder) = Create(o.Repository);
             var usedUris = new HashSet<Uri>();
-            var allContentUris = snapshotBuilder.ContentStore.Repository
-                .ListUris();
-
-            var logPositions = snapshotBuilder.ContentStore.Repository
-                .ListLogPositions();
+            var allContentUris = repository.ListUris();
+            var logPositions = repository.ListLogPositions();
 
             foreach (var logPosition in logPositions)
             {
@@ -286,8 +280,7 @@ namespace Chunkyard
 
             foreach (var contentUri in allContentUris.Except(usedUris))
             {
-                snapshotBuilder.ContentStore.Repository
-                    .RemoveUri(contentUri);
+                repository.RemoveUri(contentUri);
 
                 Console.WriteLine($"Removed: {contentUri}");
             }
@@ -297,11 +290,11 @@ namespace Chunkyard
             string sourceRepositoryPath,
             string destinationRepositoryPath)
         {
-            var snapshotBuilder = CreateSnapshotBuilder(sourceRepositoryPath);
+            var (sourceRepository, _, snapshotBuilder) = Create(sourceRepositoryPath);
             var destinationRepository = new FileRepository(
                 destinationRepositoryPath);
 
-            var sourceLogs = snapshotBuilder.ContentStore.Repository
+            var sourceLogs = sourceRepository
                 .ListLogPositions()
                 .ToArray();
 
@@ -329,6 +322,7 @@ namespace Chunkyard
                     $"Transmitting snapshot: {logPosition}");
 
                 PushSnapshot(
+                    sourceRepository,
                     snapshotBuilder,
                     logPosition,
                     destinationRepository);
@@ -336,19 +330,20 @@ namespace Chunkyard
         }
 
         private static void PushSnapshot(
+            IRepository sourceRepository,
             SnapshotBuilder snapshotBuilder,
             int logPosition,
             IRepository destinationRepository)
         {
-            var snapshotUris = snapshotBuilder.ListUris(logPosition)
+            var snapshotUris = snapshotBuilder
+                .ListUris(logPosition)
                 .ToArray();
 
             Parallel.ForEach(
                 snapshotUris,
                 u =>
                 {
-                    var contentValue = snapshotBuilder.ContentStore.Repository
-                        .RetrieveUri(u);
+                    var contentValue = sourceRepository.RetrieveUri(u);
 
                     if (destinationRepository.UriExists(u))
                     {
@@ -361,8 +356,7 @@ namespace Chunkyard
                     }
                 });
 
-            var logValue = snapshotBuilder.ContentStore.Repository
-                .RetrieveFromLog(logPosition);
+            var logValue = sourceRepository.RetrieveFromLog(logPosition);
 
             destinationRepository.AppendToLog(logValue, logPosition);
         }
@@ -372,10 +366,10 @@ namespace Chunkyard
             return new FileRepository(repositoryPath);
         }
 
-        private static SnapshotBuilder CreateSnapshotBuilder(
+        private static (IRepository Repository, IContentStore ContentStore, SnapshotBuilder SnapshotBuilder) Create(
             string repositoryPath)
         {
-            return CreateSnapshotBuilder(
+            return Create(
                 repositoryPath,
                 false,
                 new FastCdc(
@@ -384,7 +378,7 @@ namespace Chunkyard
                     16 * 1024 * 1024));
         }
 
-        private static SnapshotBuilder CreateSnapshotBuilder(
+        private static (IRepository Repository, IContentStore ContentStore, SnapshotBuilder SnapshotBuilder) Create(
             string repositoryPath,
             bool cached,
             FastCdc fastCdc)
@@ -428,7 +422,7 @@ namespace Chunkyard
                 // Each repository should have its own cache
                 var shortHash = Id.ComputeHash(
                     HashAlgorithmName.SHA256,
-                    contentStore.Repository.RepositoryUri.AbsoluteUri)
+                    repository.RepositoryUri.AbsoluteUri)
                     .Substring(0, 8);
 
                 var cacheDirectory = Path.Combine(
@@ -442,9 +436,11 @@ namespace Chunkyard
                     cacheDirectory);
             }
 
-            return new SnapshotBuilder(
+            var snapshotBuilder = new SnapshotBuilder(
                 contentStore,
                 logPosition);
+
+            return (repository, contentStore, snapshotBuilder);
         }
 
         private static ContentReference[] FuzzyFilter(

@@ -8,8 +8,6 @@ namespace Chunkyard
     /// </summary>
     public interface IContentStore
     {
-        public IRepository Repository { get; }
-
         void RetrieveContent(
             ContentReference contentReference,
             Stream outputStream);

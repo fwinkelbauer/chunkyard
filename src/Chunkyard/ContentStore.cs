@@ -12,6 +12,7 @@ namespace Chunkyard
     /// </summary>
     public class ContentStore : IContentStore
     {
+        private readonly IRepository _repository;
         private readonly FastCdc _fastCdc;
         private readonly HashAlgorithmName _hashAlgorithmName;
         private readonly byte[] _salt;
@@ -26,16 +27,13 @@ namespace Chunkyard
             byte[] salt,
             int iterations)
         {
-            Repository = repository;
-
+            _repository = repository;
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
             _salt = salt;
             _iterations = iterations;
             _key = AesGcmCrypto.PasswordToKey(password, salt, iterations);
         }
-
-        public IRepository Repository { get; }
 
         public void RetrieveContent(
             ContentReference contentReference,
@@ -47,7 +45,7 @@ namespace Chunkyard
             foreach (var chunk in contentReference.Chunks)
             {
                 var decryptedData = AesGcmCrypto.Decrypt(
-                    Repository.RetrieveUri(chunk.ContentUri),
+                    _repository.RetrieveUri(chunk.ContentUri),
                     chunk.Tag,
                     _key,
                     contentReference.Nonce);
@@ -129,7 +127,7 @@ namespace Chunkyard
 
             foreach (var chunk in contentReference.Chunks)
             {
-                exists &= Repository.UriExists(chunk.ContentUri);
+                exists &= _repository.UriExists(chunk.ContentUri);
             }
 
             return exists;
@@ -143,7 +141,7 @@ namespace Chunkyard
 
             foreach (var chunk in contentReference.Chunks)
             {
-                valid &= Repository.UriValid(chunk.ContentUri);
+                valid &= _repository.UriValid(chunk.ContentUri);
             }
 
             return valid;
@@ -158,14 +156,14 @@ namespace Chunkyard
                 _salt,
                 _iterations);
 
-            return Repository.AppendToLog(
+            return _repository.AppendToLog(
                 ToBytes(logReference),
                 newLogPosition);
         }
 
         public LogReference RetrieveFromLog(int logPosition)
         {
-            return RetrieveFromLog(Repository, logPosition);
+            return RetrieveFromLog(_repository, logPosition);
         }
 
         public static LogReference RetrieveFromLog(
@@ -195,7 +193,7 @@ namespace Chunkyard
                     _hashAlgorithmName,
                     encryptedData);
 
-                Repository.StoreUri(contentUri, encryptedData);
+                _repository.StoreUri(contentUri, encryptedData);
 
                 yield return new ChunkReference(
                     contentUri,

@@ -23,8 +23,6 @@ namespace Chunkyard
             _cacheDirectory = cacheDirectory;
         }
 
-        public IRepository Repository => _contentStore.Repository;
-
         public void RetrieveContent(
             ContentReference contentReference,
             Stream outputStream)
