@@ -78,8 +78,6 @@ namespace Chunkyard
             var (_, contentStore, snapshotBuilder) = Create(o.Repository);
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            Console.WriteLine($"Checking snapshot: {logPosition}");
-
             var snapshot = snapshotBuilder.GetSnapshot(logPosition);
             var filteredContentReferences = FuzzyFilter(
                 o.IncludeFuzzy,
@@ -124,8 +122,6 @@ namespace Chunkyard
             var (_, _, snapshotBuilder) = Create(o.Repository);
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            Console.WriteLine($"Listing snapshot: {logPosition}");
-
             var snapshot = snapshotBuilder.GetSnapshot(logPosition);
             var filteredContentReferences = FuzzyFilter(
                 o.IncludeFuzzy,
@@ -141,8 +137,6 @@ namespace Chunkyard
         {
             var (_, contentStore, snapshotBuilder) = Create(o.Repository);
             var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
-
-            Console.WriteLine($"Restoring snapshot: {logPosition}");
 
             var snapshot = snapshotBuilder.GetSnapshot(logPosition);
             var mode = o.Overwrite
@@ -225,9 +219,9 @@ namespace Chunkyard
             IRepository repository,
             int logPosition)
         {
-            Console.WriteLine($"Removing snapshot: {logPosition}");
-
             repository.RemoveFromLog(logPosition);
+
+            Console.WriteLine($"Removed snapshot: {logPosition}");
         }
 
         public static void KeepSnapshots(KeepOptions o)
