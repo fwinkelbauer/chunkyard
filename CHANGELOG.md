@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## Unreleased
 
+## 0.3.0 - 2020-06-02
+
 ### Changed
 
 - The `keep` command to only operate on the latest N snapshots
