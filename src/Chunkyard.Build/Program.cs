@@ -36,7 +36,6 @@ namespace Chunkyard.Build
                 .WithParsed<CleanOptions>(_ => Command.Clean())
                 .WithParsed<CommitOptions>(_ => Command.Commit())
                 .WithParsed<FmtOptions>(_ => Command.Fmt())
-                .WithParsed<LintOptions>(_ => Command.Lint())
                 .WithParsed<PublishOptions>(o => Command.Publish(o))
                 .WithParsed<TestOptions>(o => Command.Test(o))
                 .WithNotParsed(_ => Environment.ExitCode = 1);

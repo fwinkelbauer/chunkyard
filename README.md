@@ -26,12 +26,6 @@ tools. Here's a list of [options](https://github.com/restic/others).
 
 ## Build
 
-Install the dotnet format tool:
-
-``` shell
-dotnet tool install -g dotnet-format
-```
-
 Run any of the below build scripts:
 
 ``` shell
@@ -45,6 +39,13 @@ Create a binary in `./artifacts` by running:
 
 ``` shell
 ./build.sh publish
+```
+
+Install the dotnet format tool to use the `fmt` command:
+
+``` shell
+dotnet tool install -g dotnet-format
+./build.sh fmt
 ```
 
 ## Usage

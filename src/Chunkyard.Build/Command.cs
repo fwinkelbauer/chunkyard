@@ -18,15 +18,6 @@ namespace Chunkyard.Build
             @"##\s+(\d+\.\d+\.\d+)")
             .Groups[1].Value;
 
-        public static void Lint()
-        {
-            Dotnet(
-                "format",
-                $"--workspace {Solution}",
-                "--dry-run",
-                "--check");
-        }
-
         public static void Clean()
         {
             if (Directory.Exists(ArtifactsDirectory))
@@ -61,7 +52,6 @@ namespace Chunkyard.Build
                 DotnetOptions.DefaultConfiguration,
                 DotnetOptions.DefaultRuntime);
 
-            Lint();
             Build(o);
             Test(o);
         }
@@ -71,7 +61,6 @@ namespace Chunkyard.Build
             o.EnsureNotNull(nameof(o));
 
             Clean();
-            Lint();
             Build(o);
             Test(o);
 
