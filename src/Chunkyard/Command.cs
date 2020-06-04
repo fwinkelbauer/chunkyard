@@ -382,9 +382,9 @@ namespace Chunkyard
             var prompt = new EnvironmentPrompt(
                 new ConsolePrompt());
 
-            string? password = null;
-            byte[]? salt = null;
-            int? iterations = null;
+            string? password;
+            byte[]? salt;
+            int? iterations;
 
             if (logPosition == null)
             {

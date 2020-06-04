@@ -324,7 +324,6 @@ namespace Chunkyard
                 var buffer = new byte[_maxSize];
                 var bytesRead = sourceStream.Read(buffer, 0, buffer.Length);
 
-                var chunkStart = bytesProcessed;
                 var chunkSize = Cut(buffer, bytesRead);
                 bytesProcessed += chunkSize;
                 bytesRemaining -= chunkSize;

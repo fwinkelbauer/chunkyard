@@ -37,7 +37,7 @@ namespace Chunkyard
                 return null;
             }
 
-            return logPositions[logPositions.Length - 1];
+            return logPositions[^1];
         }
     }
 }

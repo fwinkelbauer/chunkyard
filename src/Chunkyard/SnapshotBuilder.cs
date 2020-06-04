@@ -46,8 +46,8 @@ namespace Chunkyard
 
         public void AddContent(Stream inputStream, string contentName)
         {
-            ContentReference? contentReference = null;
-            ContentReference? previousContentReference = null;
+            ContentReference? contentReference;
+            ContentReference? previousContentReference;
 
             lock (_lock)
             {

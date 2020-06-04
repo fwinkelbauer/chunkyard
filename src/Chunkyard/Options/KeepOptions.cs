@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using CommandLine;
+﻿using CommandLine;
 
 namespace Chunkyard.Options
 {

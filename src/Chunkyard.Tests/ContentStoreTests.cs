@@ -42,7 +42,7 @@ namespace Chunkyard.Tests
             var expectedText = "some text";
             var contentName = "some name";
 
-            var contentReference = contentStore.StoreContentObject<string>(
+            var contentReference = contentStore.StoreContentObject(
                 expectedText,
                 contentName);
 
@@ -61,7 +61,7 @@ namespace Chunkyard.Tests
             var repository = new MemoryRepository();
             var contentStore = CreateContentStore(repository);
 
-            var contentReference = contentStore.StoreContentObject<string>(
+            var contentReference = contentStore.StoreContentObject(
                 "some text",
                 "with some name");
 
@@ -79,7 +79,7 @@ namespace Chunkyard.Tests
             var repository = new MemoryRepository();
             var contentStore = CreateContentStore(repository);
 
-            var contentReference = contentStore.StoreContentObject<string>(
+            var contentReference = contentStore.StoreContentObject(
                 "some text",
                 "with some name");
 
