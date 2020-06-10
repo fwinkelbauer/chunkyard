@@ -281,9 +281,6 @@ namespace Chunkyard
             0x32E8EA7E
         };
 
-        private readonly int _minSize;
-        private readonly int _avgSize;
-        private readonly int _maxSize;
         private readonly uint _maskS;
         private readonly uint _maskL;
 
@@ -292,25 +289,31 @@ namespace Chunkyard
             int avgSize,
             int maxSize)
         {
-            _minSize = minSize.EnsureBetween(
+            MinSize = minSize.EnsureBetween(
                 MinimumMin,
                 MinimumMax,
                 nameof(minSize));
 
-            _avgSize = avgSize.EnsureBetween(
+            AvgSize = avgSize.EnsureBetween(
                 AverageMin,
                 AverageMax,
                 nameof(avgSize));
 
-            _maxSize = maxSize.EnsureBetween(
+            MaxSize = maxSize.EnsureBetween(
                 MaximumMin,
                 MaximumMax,
                 nameof(maxSize));
 
-            var bits = Logarithm2(_avgSize);
+            var bits = Logarithm2(AvgSize);
             _maskS = Mask(bits + 1);
             _maskL = Mask(bits - 1);
         }
+
+        public int MinSize { get; }
+
+        public int AvgSize { get; }
+
+        public int MaxSize { get; }
 
         public IEnumerable<byte[]> SplitIntoChunks(Stream sourceStream)
         {
@@ -321,7 +324,7 @@ namespace Chunkyard
 
             while (bytesRemaining > 0)
             {
-                var buffer = new byte[_maxSize];
+                var buffer = new byte[MaxSize];
                 var bytesRead = sourceStream.Read(buffer, 0, buffer.Length);
 
                 var chunkSize = Cut(buffer, bytesRead);
@@ -336,14 +339,14 @@ namespace Chunkyard
 
         private int Cut(byte[] buffer, int bytesRead)
         {
-            if (bytesRead <= _minSize)
+            if (bytesRead <= MinSize)
             {
                 return bytesRead;
             }
 
-            var center = CenterSize(_avgSize, _minSize, bytesRead);
+            var center = CenterSize(AvgSize, MinSize, bytesRead);
             uint hash = 0;
-            var offset = _minSize;
+            var offset = MinSize;
 
             while (offset < center)
             {

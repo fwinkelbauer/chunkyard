@@ -43,10 +43,7 @@ namespace Chunkyard
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            var (_, _, snapshotBuilder) = Create(
-                o.Repository,
-                o.Cached,
-                new FastCdc(o.Min, o.Avg, o.Max));
+            var (_, _, snapshotBuilder) = Create(o.Repository, o.Cached);
 
             var foundTuples = FileFetcher
                 .Find(o.Files, o.ExcludePatterns)
@@ -363,24 +360,22 @@ namespace Chunkyard
         private static (IRepository Repository, IContentStore ContentStore, SnapshotBuilder SnapshotBuilder) Create(
             string repositoryPath)
         {
-            return Create(
-                repositoryPath,
-                false,
-                new FastCdc(
-                    4 * 1024 * 1024,
-                    8 * 1024 * 1024,
-                    16 * 1024 * 1024));
+            return Create(repositoryPath, false);
         }
 
         private static (IRepository Repository, IContentStore ContentStore, SnapshotBuilder SnapshotBuilder) Create(
             string repositoryPath,
-            bool cached,
-            FastCdc fastCdc)
+            bool cached)
         {
             var repository = CreateRepository(repositoryPath);
             var logPosition = repository.FetchLogPosition();
             var prompt = new EnvironmentPrompt(
                 new ConsolePrompt());
+
+            var fastCdc = new FastCdc(
+                1 * 1024 * 1024,
+                2 * 1024 * 1024,
+                4 * 1024 * 1024);
 
             string? password;
             byte[]? salt;
