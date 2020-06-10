@@ -50,7 +50,7 @@ namespace Chunkyard
                     _key,
                     contentReference.Nonce);
 
-                outputStream.Write(decryptedData, 0, chunk.Length);
+                outputStream.Write(decryptedData);
             }
         }
 
@@ -184,18 +184,8 @@ namespace Chunkyard
 
             foreach (var chunkedData in chunkedDataItems)
             {
-                using var chunkedStream = new MemoryStream();
-                chunkedStream.Write(chunkedData);
-                var missingLength = _fastCdc.MaxSize - chunkedData.Length;
-
-                if (missingLength > 0)
-                {
-                    chunkedStream.Write(
-                        AesGcmCrypto.GenerateRandomMumber(missingLength));
-                }
-
                 var (encryptedData, tag) = AesGcmCrypto.Encrypt(
-                    chunkedStream.ToArray(),
+                    chunkedData,
                     _key,
                     nonce);
 
@@ -207,7 +197,6 @@ namespace Chunkyard
 
                 yield return new ChunkReference(
                     contentUri,
-                    chunkedData.Length,
                     tag);
             }
         }

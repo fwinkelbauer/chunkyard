@@ -18,6 +18,10 @@ tools. Here's a list of [options](https://github.com/restic/others).
 - Ability to push/pull from other repositories
 - Verify-able backups
 
+**Warning:** Chunkyard is vulnerable to CDC fingerprinting attacks. By observing
+the sizes of chunks in a repository, an attacker might be able to prove that a
+specific file exists in the backup.
+
 ## Not Goals
 
 - Key management

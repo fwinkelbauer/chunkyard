@@ -100,7 +100,6 @@ namespace Chunkyard.Tests
             var contentStore = CreateContentStore(repository);
             var chunkReference = new ChunkReference(
                 new Uri("sha256://abcdef123456"),
-                100,
                 new byte[] { 0xFF });
 
             var contentReference = new ContentReference(

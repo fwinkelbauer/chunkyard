@@ -31,15 +31,5 @@ namespace Chunkyard.Tests
 
             Assert.Equal(expectedText, actualText);
         }
-
-        [Fact]
-        public static void GenerateRandomMumber_Creates_Random_Number()
-        {
-            var length = 5;
-
-            var random = AesGcmCrypto.GenerateRandomMumber(length);
-
-            Assert.Equal(length, random.Length);
-        }
     }
 }

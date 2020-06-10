@@ -10,7 +10,10 @@ namespace Chunkyard.Options
             string repository,
             bool cached,
             IEnumerable<string> files,
-            IEnumerable<string> excludePatterns)
+            IEnumerable<string> excludePatterns,
+            int min,
+            int avg,
+            int max)
         {
             Repository = repository;
             Cached = cached;
@@ -18,6 +21,10 @@ namespace Chunkyard.Options
             ExcludePatterns = excludePatterns == null
                 ? new List<string>()
                 : new List<string>(excludePatterns);
+
+            Min = min;
+            Avg = avg;
+            Max = max;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository")]
@@ -31,5 +38,14 @@ namespace Chunkyard.Options
 
         [Option('e', "exclude", Required = false, HelpText = "The exclude fuzzy patterns")]
         public IEnumerable<string> ExcludePatterns { get; }
+
+        [Option("min", Required = false, HelpText = "The minimum chunk size", Default = 4 * 1024 * 1024)]
+        public int Min { get; }
+
+        [Option("avg", Required = false, HelpText = "The average chunk size", Default = 8 * 1024 * 1024)]
+        public int Avg { get; }
+
+        [Option("max", Required = false, HelpText = "The maximum chunk size", Default = 16 * 1024 * 1024)]
+        public int Max { get; }
     }
 }
