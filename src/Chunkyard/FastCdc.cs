@@ -21,6 +21,10 @@ namespace Chunkyard
         public const int MaximumMin = 1024;
         public const int MaximumMax = 1024 * 1024 * 1024;
 
+        public const int DefaultMin = 4 * 1024 * 1024;
+        public const int DefaultAvg = 8 * 1024 * 1024;
+        public const int DefaultMax = 16 * 1024 * 1024;
+
         private static readonly uint[] Table = new uint[]
         {
             0x5C95C078,

@@ -367,9 +367,9 @@ namespace Chunkyard
                 repositoryPath,
                 false,
                 new FastCdc(
-                    4 * 1024 * 1024,
-                    8 * 1024 * 1024,
-                    16 * 1024 * 1024));
+                    FastCdc.DefaultMin,
+                    FastCdc.DefaultAvg,
+                    FastCdc.DefaultMax));
         }
 
         private static (IRepository Repository, IContentStore ContentStore, SnapshotBuilder SnapshotBuilder) Create(

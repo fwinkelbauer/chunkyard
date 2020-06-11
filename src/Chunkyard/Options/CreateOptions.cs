@@ -39,13 +39,13 @@ namespace Chunkyard.Options
         [Option('e', "exclude", Required = false, HelpText = "The exclude fuzzy patterns")]
         public IEnumerable<string> ExcludePatterns { get; }
 
-        [Option("min", Required = false, HelpText = "The minimum chunk size", Default = 4 * 1024 * 1024)]
+        [Option("min", Required = false, HelpText = "The minimum chunk size", Default = FastCdc.DefaultMin)]
         public int Min { get; }
 
-        [Option("avg", Required = false, HelpText = "The average chunk size", Default = 8 * 1024 * 1024)]
+        [Option("avg", Required = false, HelpText = "The average chunk size", Default = FastCdc.DefaultAvg)]
         public int Avg { get; }
 
-        [Option("max", Required = false, HelpText = "The maximum chunk size", Default = 16 * 1024 * 1024)]
+        [Option("max", Required = false, HelpText = "The maximum chunk size", Default = FastCdc.DefaultMax)]
         public int Max { get; }
     }
 }
