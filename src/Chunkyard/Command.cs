@@ -284,7 +284,9 @@ namespace Chunkyard
             string sourceRepositoryPath,
             string destinationRepositoryPath)
         {
-            var (sourceRepository, _, snapshotBuilder) = Create(sourceRepositoryPath);
+            var (sourceRepository, _, snapshotBuilder) = Create(
+                sourceRepositoryPath);
+
             var destinationRepository = new FileRepository(
                 destinationRepositoryPath);
 
@@ -295,6 +297,23 @@ namespace Chunkyard
             var destinationLogs = destinationRepository
                 .ListLogPositions()
                 .ToArray();
+
+            if (sourceLogs.Length > 0 && destinationLogs.Length > 0)
+            {
+                var sourceRef = ContentStore.RetrieveFromLog(
+                    sourceRepository,
+                    sourceLogs[0]);
+
+                var destinationRef = ContentStore.RetrieveFromLog(
+                    destinationRepository,
+                    destinationLogs[0]);
+
+                if (sourceRef.LogId != destinationRef.LogId)
+                {
+                    throw new ChunkyardException(
+                        "Cannot operate on repositories with different log IDs");
+                }
+            }
 
             var destinationMax = destinationLogs.Length == 0
                 ? -1

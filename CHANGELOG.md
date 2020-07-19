@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## Unreleased
 
+### Added
+
+- A unique ID to every repository log
+
+### Changed
+
+- The behavior of push/pull to abort if the log IDs of the given repositories do not match
+
 ## 0.3.0 - 2020-06-02
 
 ### Changed

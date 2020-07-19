@@ -124,10 +124,12 @@ namespace Chunkyard
         }
 
         public int AppendToLog(
+            Guid logId,
             ContentReference contentReference,
             int newLogPosition)
         {
             return _contentStore.AppendToLog(
+                logId,
                 contentReference,
                 newLogPosition);
         }

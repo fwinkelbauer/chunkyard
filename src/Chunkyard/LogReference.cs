@@ -11,14 +11,18 @@ namespace Chunkyard
     public class LogReference
     {
         public LogReference(
+            Guid logId,
             ContentReference contentReference,
             byte[] salt,
             int iterations)
         {
+            LogId = logId;
             ContentReference = contentReference;
             Salt = salt;
             Iterations = iterations;
         }
+
+        public Guid LogId { get; }
 
         public ContentReference ContentReference { get; }
 
@@ -29,6 +33,7 @@ namespace Chunkyard
         public override bool Equals(object? obj)
         {
             return obj is LogReference reference
+                && LogId.Equals(reference.LogId)
                 && ContentReference.Equals(reference.ContentReference)
                 && Salt.SequenceEqual(reference.Salt)
                 && Iterations == reference.Iterations;
@@ -36,7 +41,7 @@ namespace Chunkyard
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ContentReference, Salt, Iterations);
+            return HashCode.Combine(LogId, ContentReference, Salt, Iterations);
         }
     }
 }

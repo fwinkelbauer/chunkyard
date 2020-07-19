@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -148,10 +149,12 @@ namespace Chunkyard
         }
 
         public int AppendToLog(
+            Guid logId,
             ContentReference contentReference,
             int newLogPosition)
         {
             var logReference = new LogReference(
+                logId,
                 contentReference,
                 _salt,
                 _iterations);

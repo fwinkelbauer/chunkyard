@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Chunkyard
 {
@@ -34,6 +35,7 @@ namespace Chunkyard
         bool ContentValid(ContentReference contentReference);
 
         int AppendToLog(
+            Guid logId,
             ContentReference contentReference,
             int newLogPosition);
 

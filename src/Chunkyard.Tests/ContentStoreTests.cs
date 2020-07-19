@@ -107,11 +107,15 @@ namespace Chunkyard.Tests
                 AesGcmCrypto.GenerateNonce(),
                 new[] { chunkReference });
 
+            var logId = Guid.NewGuid();
+
             var firstLogPosition = contentStore.AppendToLog(
+                logId,
                 contentReference,
                 0);
 
             var secondLogPosition = contentStore.AppendToLog(
+                logId,
                 contentReference,
                 firstLogPosition);
 

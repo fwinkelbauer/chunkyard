@@ -89,7 +89,12 @@ namespace Chunkyard
                 ? _currentLogPosition.Value + 1
                 : 0;
 
+            var logId = _currentLogPosition.HasValue
+                ? _contentStore.RetrieveFromLog(_currentLogPosition.Value).LogId
+                : Guid.NewGuid();
+
             _currentLogPosition = _contentStore.AppendToLog(
+                logId,
                 contentReference,
                 newLogPosition);
 
