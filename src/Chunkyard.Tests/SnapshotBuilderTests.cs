@@ -27,11 +27,45 @@ namespace Chunkyard.Tests
                 snapshotBuilder.ListUris(logPosition).Count());
         }
 
-        private static SnapshotBuilder CreateSnapshotBuilder()
+        [Fact]
+        public static void ListUris_Lists_All_Uris_In_Snapshot()
+        {
+            var snapshotBuilder = CreateSnapshotBuilder();
+
+            var content = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+            using var memoryStream = new MemoryStream(content);
+
+            snapshotBuilder.AddContent(memoryStream, "some content");
+            var logPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
+            var uris = snapshotBuilder.ListUris(logPosition).ToArray();
+
+            Assert.Equal(2, uris.Length);
+        }
+
+        [Fact]
+        public static void ListUris_Lists_Nothing_If_Snapshot_Is_Invalid()
+        {
+            var repository = new MemoryRepository();
+            var snapshotBuilder = CreateSnapshotBuilder(repository);
+
+            var content = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+            using var memoryStream = new MemoryStream(content);
+
+            snapshotBuilder.AddContent(memoryStream, "some content");
+            var logPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
+            var uris = snapshotBuilder.ListUris(logPosition).ToArray();
+
+            repository.RemoveUri(uris[0]);
+
+            Assert.Empty(snapshotBuilder.ListUris(logPosition));
+        }
+
+        private static SnapshotBuilder CreateSnapshotBuilder(
+            IRepository? repository = null)
         {
             return new SnapshotBuilder(
                 new ContentStore(
-                    new MemoryRepository(),
+                    repository ?? new MemoryRepository(),
                     new FastCdc(
                         2 * 1024 * 1024,
                         4 * 1024 * 1024,

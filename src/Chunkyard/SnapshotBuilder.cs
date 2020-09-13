@@ -111,14 +111,14 @@ namespace Chunkyard
         {
             var logReference = _contentStore.RetrieveFromLog(logPosition);
 
-            foreach (var chunk in logReference.ContentReference.Chunks)
-            {
-                yield return chunk.ContentUri;
-            }
-
             if (!_contentStore.ContentExists(logReference.ContentReference))
             {
                 yield break;
+            }
+
+            foreach (var chunk in logReference.ContentReference.Chunks)
+            {
+                yield return chunk.ContentUri;
             }
 
             var snapshot = GetSnapshot(logReference);
