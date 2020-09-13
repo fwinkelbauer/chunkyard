@@ -20,7 +20,7 @@ namespace Chunkyard.Tests
             var logPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
             var snapshot = snapshotBuilder.GetSnapshot(logPosition);
 
-            Assert.Equal(1, logPosition);
+            Assert.Equal(0, logPosition);
             Assert.Single(snapshot.ContentReferences);
             Assert.Equal(
                 2,

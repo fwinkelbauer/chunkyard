@@ -117,7 +117,7 @@ namespace Chunkyard.Tests
             var secondLogPosition = contentStore.AppendToLog(
                 logId,
                 contentReference,
-                firstLogPosition);
+                firstLogPosition + 1);
 
             Assert.Equal(secondLogPosition, repository.FetchLogPosition());
             Assert.Equal(2, repository.ListLogPositions().Count());

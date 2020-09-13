@@ -6,12 +6,12 @@ namespace Chunkyard.Tests
     public class MemoryRepository : IRepository
     {
         private readonly Dictionary<Uri, byte[]> _valuesByUri;
-        private readonly List<byte[]> _valuesLog;
+        private readonly Dictionary<int, byte[]> _valuesByLog;
 
         public MemoryRepository()
         {
             _valuesByUri = new Dictionary<Uri, byte[]>();
-            _valuesLog = new List<byte[]>();
+            _valuesByLog = new Dictionary<int, byte[]>();
         }
 
         public Uri RepositoryUri => new Uri("in://memory");
@@ -43,27 +43,24 @@ namespace Chunkyard.Tests
 
         public int AppendToLog(byte[] value, int newLogPosition)
         {
-            _valuesLog.Add(value);
+            _valuesByLog.Add(newLogPosition, value);
 
-            return _valuesLog.Count;
+            return newLogPosition;
         }
 
         public byte[] RetrieveFromLog(int logPosition)
         {
-            return _valuesLog[logPosition - 1];
+            return _valuesByLog[logPosition];
         }
 
         public void RemoveFromLog(int logPosition)
         {
-            _valuesLog.RemoveAt(logPosition);
+            _valuesByLog.Remove(logPosition);
         }
 
         public IEnumerable<int> ListLogPositions()
         {
-            for (int i = 1; i <= _valuesLog.Count; i++)
-            {
-                yield return i;
-            }
+            return _valuesByLog.Keys;
         }
     }
 }
