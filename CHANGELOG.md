@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## Unreleased
 
+## 1.0.0 - 2020-09-20
+
 ### Added
 
 - A unique ID to every repository log
