@@ -55,7 +55,7 @@ namespace Chunkyard.Tests
             var logPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
             var uris = snapshotBuilder.ListUris(logPosition).ToArray();
 
-            repository.RemoveUri(uris[0]);
+            repository.RemoveValue(uris[0]);
 
             Assert.Empty(snapshotBuilder.ListUris(logPosition));
         }

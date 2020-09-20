@@ -16,17 +16,17 @@ namespace Chunkyard.Tests
 
         public Uri RepositoryUri => new Uri("in://memory");
 
-        public void StoreUri(Uri contentUri, byte[] value)
+        public void StoreValue(Uri contentUri, byte[] value)
         {
             _valuesByUri[contentUri] = value;
         }
 
-        public byte[] RetrieveUri(Uri contentUri)
+        public byte[] RetrieveValue(Uri contentUri)
         {
             return _valuesByUri[contentUri];
         }
 
-        public bool UriExists(Uri contentUri)
+        public bool ValueExists(Uri contentUri)
         {
             return _valuesByUri.ContainsKey(contentUri);
         }
@@ -36,7 +36,7 @@ namespace Chunkyard.Tests
             return _valuesByUri.Keys;
         }
 
-        public void RemoveUri(Uri contentUri)
+        public void RemoveValue(Uri contentUri)
         {
             _valuesByUri.Remove(contentUri);
         }

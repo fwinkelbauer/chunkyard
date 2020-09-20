@@ -67,7 +67,7 @@ namespace Chunkyard.Tests
 
             foreach (var uri in repository.ListUris())
             {
-                repository.RemoveUri(uri);
+                repository.RemoveValue(uri);
             }
 
             Assert.False(contentStore.ContentExists(contentReference));
@@ -87,7 +87,7 @@ namespace Chunkyard.Tests
 
             foreach (var uri in repository.ListUris().ToArray())
             {
-                repository.StoreUri(uri, wrongData);
+                repository.StoreValue(uri, wrongData);
             }
 
             Assert.False(contentStore.ContentValid(contentReference));

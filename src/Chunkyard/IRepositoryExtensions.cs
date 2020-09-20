@@ -12,12 +12,12 @@ namespace Chunkyard
         {
             repository.EnsureNotNull(nameof(repository));
 
-            if (contentUri == null || !repository.UriExists(contentUri))
+            if (contentUri == null || !repository.ValueExists(contentUri))
             {
                 return false;
             }
 
-            var content = repository.RetrieveUri(contentUri);
+            var content = repository.RetrieveValue(contentUri);
             var computedUri = Id.ComputeContentUri(
                 Id.AlgorithmFromContentUri(contentUri),
                 content);

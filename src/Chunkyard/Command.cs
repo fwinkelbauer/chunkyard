@@ -271,7 +271,7 @@ namespace Chunkyard
 
             foreach (var contentUri in allContentUris.Except(usedUris))
             {
-                repository.RemoveUri(contentUri);
+                repository.RemoveValue(contentUri);
 
                 Console.WriteLine($"Removed: {contentUri}");
             }
@@ -353,15 +353,15 @@ namespace Chunkyard
                 snapshotUris,
                 u =>
                 {
-                    var contentValue = sourceRepository.RetrieveUri(u);
+                    var contentValue = sourceRepository.RetrieveValue(u);
 
-                    if (destinationRepository.UriExists(u))
+                    if (destinationRepository.ValueExists(u))
                     {
                         Console.WriteLine($"Exists: {u}");
                     }
                     else
                     {
-                        destinationRepository.StoreUri(u, contentValue);
+                        destinationRepository.StoreValue(u, contentValue);
                         Console.WriteLine($"Transmitted: {u}");
                     }
                 });

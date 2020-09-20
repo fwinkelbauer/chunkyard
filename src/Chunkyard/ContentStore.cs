@@ -44,7 +44,7 @@ namespace Chunkyard
             foreach (var chunk in contentReference.Chunks)
             {
                 var decryptedData = AesGcmCrypto.Decrypt(
-                    _repository.RetrieveUri(chunk.ContentUri),
+                    _repository.RetrieveValue(chunk.ContentUri),
                     chunk.Tag,
                     _key,
                     contentReference.Nonce);
@@ -90,7 +90,7 @@ namespace Chunkyard
 
             foreach (var chunk in contentReference.Chunks)
             {
-                exists &= _repository.UriExists(chunk.ContentUri);
+                exists &= _repository.ValueExists(chunk.ContentUri);
             }
 
             return exists;
@@ -158,7 +158,7 @@ namespace Chunkyard
                     _hashAlgorithmName,
                     encryptedData);
 
-                _repository.StoreUri(contentUri, encryptedData);
+                _repository.StoreValue(contentUri, encryptedData);
 
                 yield return new ChunkReference(
                     contentUri,

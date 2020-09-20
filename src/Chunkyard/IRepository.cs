@@ -11,15 +11,15 @@ namespace Chunkyard
     {
         public Uri RepositoryUri { get; }
 
-        void StoreUri(Uri contentUri, byte[] value);
+        void StoreValue(Uri contentUri, byte[] value);
 
-        byte[] RetrieveUri(Uri contentUri);
+        byte[] RetrieveValue(Uri contentUri);
 
-        bool UriExists(Uri contentUri);
+        bool ValueExists(Uri contentUri);
 
         IEnumerable<Uri> ListUris();
 
-        void RemoveUri(Uri contentUri);
+        void RemoveValue(Uri contentUri);
 
         int AppendToLog(byte[] value, int newLogPosition);
 

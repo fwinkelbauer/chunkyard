@@ -23,7 +23,7 @@ namespace Chunkyard
 
         public Uri RepositoryUri { get; }
 
-        public void StoreUri(Uri contentUri, byte[] value)
+        public void StoreValue(Uri contentUri, byte[] value)
         {
             var file = ToFilePath(contentUri);
 
@@ -43,13 +43,13 @@ namespace Chunkyard
             fileStream.Write(value);
         }
 
-        public byte[] RetrieveUri(Uri contentUri)
+        public byte[] RetrieveValue(Uri contentUri)
         {
             return File.ReadAllBytes(
                 ToFilePath(contentUri));
         }
 
-        public bool UriExists(Uri contentUri)
+        public bool ValueExists(Uri contentUri)
         {
             return File.Exists(
                 ToFilePath(contentUri));
@@ -79,7 +79,7 @@ namespace Chunkyard
             }
         }
 
-        public void RemoveUri(Uri contentUri)
+        public void RemoveValue(Uri contentUri)
         {
             var filePath = ToFilePath(contentUri);
             var directoryPath = Path.GetDirectoryName(filePath);
