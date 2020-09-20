@@ -58,15 +58,13 @@ namespace Chunkyard
                 return;
             }
 
-            Parallel.ForEach(
-                foundTuples,
-                t =>
-                {
-                    using var fileStream = File.OpenRead(t.FoundFile);
-                    snapshotBuilder.AddContent(fileStream, t.ContentName);
+            foreach (var foundTuple in foundTuples)
+            {
+                using var fileStream = File.OpenRead(foundTuple.FoundFile);
+                snapshotBuilder.AddContent(fileStream, foundTuple.ContentName);
 
-                    Console.WriteLine($"Stored: {t.ContentName}");
-                });
+                Console.WriteLine($"Stored: {foundTuple.ContentName}");
+            }
 
             var newLogPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
 
@@ -84,30 +82,26 @@ namespace Chunkyard
 
             var error = false;
 
-            Parallel.ForEach(
-                filteredContentReferences,
-                contentReference =>
+            foreach (var contentReference in filteredContentReferences)
+            {
+                if (!contentStore.ContentExists(contentReference))
                 {
-                    if (!contentStore.ContentExists(contentReference))
-                    {
-                        Console.WriteLine($"Missing: {contentReference.Name}");
+                    Console.WriteLine($"Missing: {contentReference.Name}");
 
-                        error = true;
-                    }
-                    else if (!o.Shallow
-                        && !contentStore.ContentValid(contentReference))
-                    {
-                        Console.WriteLine(
-                            $"Corrupted: {contentReference.Name}");
+                    error = true;
+                }
+                else if (!o.Shallow
+                    && !contentStore.ContentValid(contentReference))
+                {
+                    Console.WriteLine($"Corrupted: {contentReference.Name}");
 
-                        error = true;
-                    }
-                    else
-                    {
-                        Console.WriteLine(
-                            $"Validated: {contentReference.Name}");
-                    }
-                });
+                    error = true;
+                }
+                else
+                {
+                    Console.WriteLine($"Validated: {contentReference.Name}");
+                }
+            }
 
             if (error)
             {
@@ -146,35 +140,33 @@ namespace Chunkyard
 
             var error = false;
 
-            Parallel.ForEach(
-                filteredContentReferences,
-                contentReference =>
+            foreach (var contentReference in filteredContentReferences)
+            {
+                var file = Path.Combine(
+                    o.Directory,
+                    contentReference.Name);
+
+                try
                 {
-                    var file = Path.Combine(
-                        o.Directory,
-                        contentReference.Name);
+                    Directory.CreateDirectory(Path.GetDirectoryName(file));
 
-                    try
-                    {
-                        Directory.CreateDirectory(Path.GetDirectoryName(file));
+                    using var stream = new FileStream(
+                        file,
+                        mode,
+                        FileAccess.Write);
 
-                        using var stream = new FileStream(
-                            file,
-                            mode,
-                            FileAccess.Write);
+                    contentStore.RetrieveContent(contentReference, stream);
 
-                        contentStore.RetrieveContent(contentReference, stream);
+                    Console.WriteLine($"Restored: {file}");
 
-                        Console.WriteLine($"Restored: {file}");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error: {file}{Environment.NewLine}{e}");
 
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine($"Error: {file}{Environment.NewLine}{e}");
-
-                        error = true;
-                    }
-                });
+                    error = true;
+                }
+            }
 
             if (error)
             {
@@ -348,22 +340,20 @@ namespace Chunkyard
                 .ListUris(logPosition)
                 .ToArray();
 
-            Parallel.ForEach(
-                snapshotUris,
-                u =>
-                {
-                    var contentValue = sourceRepository.RetrieveValue(u);
+            foreach (var snapshotUri in snapshotUris)
+            {
+                var contentValue = sourceRepository.RetrieveValue(snapshotUri);
 
-                    if (destinationRepository.ValueExists(u))
-                    {
-                        Console.WriteLine($"Exists: {u}");
-                    }
-                    else
-                    {
-                        destinationRepository.StoreValue(u, contentValue);
-                        Console.WriteLine($"Transmitted: {u}");
-                    }
-                });
+                if (destinationRepository.ValueExists(snapshotUri))
+                {
+                    Console.WriteLine($"Exists: {snapshotUri}");
+                }
+                else
+                {
+                    destinationRepository.StoreValue(snapshotUri, contentValue);
+                    Console.WriteLine($"Transmitted: {snapshotUri}");
+                }
+            }
 
             var logValue = sourceRepository.RetrieveFromLog(logPosition);
 
