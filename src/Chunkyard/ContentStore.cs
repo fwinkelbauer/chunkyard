@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
-using System.Text;
-using Newtonsoft.Json;
 
 namespace Chunkyard
 {
@@ -55,18 +53,6 @@ namespace Chunkyard
             }
         }
 
-        public T RetrieveContentObject<T>(ContentReference contentReference)
-            where T : notnull
-        {
-            using var memoryStream = new MemoryStream();
-
-            RetrieveContent(
-                contentReference,
-                memoryStream);
-
-            return ToObject<T>(memoryStream.ToArray());
-        }
-
         public ContentReference StoreContent(
             Stream inputStream,
             string contentName)
@@ -94,30 +80,6 @@ namespace Chunkyard
                 previousContentReference.Name,
                 nonce,
                 WriteChunks(nonce, inputStream));
-        }
-
-        public ContentReference StoreContentObject<T>(
-            T value,
-            string contentName)
-            where T : notnull
-        {
-            using var memoryStream = new MemoryStream(ToBytes(value));
-
-            return StoreContent(
-                memoryStream,
-                contentName);
-        }
-
-        public ContentReference StoreContentObject<T>(
-            T value,
-            ContentReference previousContentReference)
-            where T : notnull
-        {
-            using var memoryStream = new MemoryStream(ToBytes(value));
-
-            return StoreContent(
-                memoryStream,
-                previousContentReference);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -160,7 +122,7 @@ namespace Chunkyard
                 _iterations);
 
             return _repository.AppendToLog(
-                ToBytes(logReference),
+                DataConvert.ToBytes(logReference),
                 newLogPosition);
         }
 
@@ -175,7 +137,7 @@ namespace Chunkyard
         {
             repository.EnsureNotNull(nameof(repository));
 
-            return ToObject<LogReference>(
+            return DataConvert.ToObject<LogReference>(
                 repository.RetrieveFromLog(logPosition));
         }
 
@@ -202,18 +164,6 @@ namespace Chunkyard
                     contentUri,
                     tag);
             }
-        }
-
-        private static byte[] ToBytes(object o)
-        {
-            return Encoding.UTF8.GetBytes(
-                JsonConvert.SerializeObject(o));
-        }
-
-        private static T ToObject<T>(byte[] value) where T : notnull
-        {
-            return JsonConvert.DeserializeObject<T>(
-                Encoding.UTF8.GetString(value));
         }
     }
 }

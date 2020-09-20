@@ -29,12 +29,6 @@ namespace Chunkyard
             _contentStore.RetrieveContent(contentReference, outputStream);
         }
 
-        public T RetrieveContentObject<T>(ContentReference contentReference)
-            where T : notnull
-        {
-            return _contentStore.RetrieveContentObject<T>(contentReference);
-        }
-
         public ContentReference StoreContent(
             Stream inputStream,
             string contentName)
@@ -93,24 +87,6 @@ namespace Chunkyard
                 contentReference);
 
             return contentReference;
-        }
-
-        public ContentReference StoreContentObject<T>(
-            T value,
-            string contentName)
-            where T : notnull
-        {
-            return _contentStore.StoreContentObject<T>(value, contentName);
-        }
-
-        public ContentReference StoreContentObject<T>(
-            T value,
-            ContentReference previousContentReference)
-            where T : notnull
-        {
-            return _contentStore.StoreContentObject<T>(
-                value,
-                previousContentReference);
         }
 
         public bool ContentExists(ContentReference contentReference)

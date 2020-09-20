@@ -13,22 +13,11 @@ namespace Chunkyard
             ContentReference contentReference,
             Stream outputStream);
 
-        T RetrieveContentObject<T>(ContentReference contentReference)
-            where T : notnull;
-
         ContentReference StoreContent(Stream inputStream, string contentName);
 
         ContentReference StoreContent(
             Stream inputStream,
             ContentReference previousContentReference);
-
-        ContentReference StoreContentObject<T>(T value, string contentName)
-            where T : notnull;
-
-        ContentReference StoreContentObject<T>(
-            T value,
-            ContentReference previousContentReference)
-            where T : notnull;
 
         bool ContentExists(ContentReference contentReference);
 
