@@ -170,8 +170,7 @@ namespace Chunkyard
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine($"Error: {file}");
-                        Console.WriteLine(e);
+                        Console.WriteLine($"Error: {file}{Environment.NewLine}{e}");
 
                         error = true;
                     }
