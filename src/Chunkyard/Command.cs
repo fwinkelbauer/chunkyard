@@ -76,9 +76,8 @@ namespace Chunkyard
         public static void CheckSnapshot(CheckOptions o)
         {
             var (_, contentStore, snapshotBuilder) = Create(o.Repository);
-            var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            var snapshot = snapshotBuilder.GetSnapshot(logPosition);
+            var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
             var filteredContentReferences = FuzzyFilter(
                 o.IncludeFuzzy,
                 snapshot.ContentReferences);
@@ -120,9 +119,8 @@ namespace Chunkyard
         public static void ShowSnapshot(ShowOptions o)
         {
             var (_, _, snapshotBuilder) = Create(o.Repository);
-            var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            var snapshot = snapshotBuilder.GetSnapshot(logPosition);
+            var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
             var filteredContentReferences = FuzzyFilter(
                 o.IncludeFuzzy,
                 snapshot.ContentReferences);
@@ -136,9 +134,8 @@ namespace Chunkyard
         public static void RestoreSnapshot(RestoreOptions o)
         {
             var (_, contentStore, snapshotBuilder) = Create(o.Repository);
-            var logPosition = snapshotBuilder.ResolveLogPosition(o.LogPosition);
 
-            var snapshot = snapshotBuilder.GetSnapshot(logPosition);
+            var snapshot = snapshotBuilder.GetSnapshot(o.LogPosition);
             var mode = o.Overwrite
                 ? FileMode.OpenOrCreate
                 : FileMode.CreateNew;

@@ -104,7 +104,8 @@ namespace Chunkyard
         public Snapshot GetSnapshot(int logPosition)
         {
             return GetSnapshot(
-                _contentStore.RetrieveFromLog(logPosition));
+                _contentStore.RetrieveFromLog(
+                    ResolveLogPosition(logPosition)));
         }
 
         public IEnumerable<Uri> ListUris(int logPosition)
@@ -138,7 +139,7 @@ namespace Chunkyard
                 logReference.ContentReference);
         }
 
-        public int ResolveLogPosition(int logPosition)
+        private int ResolveLogPosition(int logPosition)
         {
             if (!_currentLogPosition.HasValue)
             {
