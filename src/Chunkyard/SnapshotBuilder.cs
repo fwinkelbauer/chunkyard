@@ -45,11 +45,10 @@ namespace Chunkyard
         public void AddContent(Stream inputStream, string contentName)
         {
             ContentReference? contentReference;
-            ContentReference? previousContentReference;
 
             _knownContentReferences.TryGetValue(
                 contentName,
-                out previousContentReference);
+                out var previousContentReference);
 
             if (previousContentReference == null)
             {
