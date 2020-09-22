@@ -44,12 +44,10 @@ namespace Chunkyard.Build
 
         public static void Default()
         {
-            var o = new DotnetOptions(
-                DotnetOptions.DefaultConfiguration,
-                DotnetOptions.DefaultRuntime);
-
-            Build(o);
-            Test(o);
+            Publish(
+                new DotnetOptions(
+                    DotnetOptions.DefaultConfiguration,
+                    DotnetOptions.DefaultRuntime));
         }
 
         public static void Publish(DotnetOptions o)
