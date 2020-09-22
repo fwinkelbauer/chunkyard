@@ -58,17 +58,12 @@ namespace Chunkyard.Tests
         [Fact]
         public static void ContentExists_Detects_Missing_Content()
         {
-            var repository = new MemoryRepository();
-            var contentStore = CreateContentStore(repository);
+            var contentStore = CreateContentStore(
+                new UnstoredMemoryRepository());
 
             var contentReference = contentStore.StoreContentObject(
                 "some text",
                 "with some name");
-
-            foreach (var uri in repository.ListUris())
-            {
-                repository.RemoveValue(uri);
-            }
 
             Assert.False(contentStore.ContentExists(contentReference));
         }
@@ -76,19 +71,12 @@ namespace Chunkyard.Tests
         [Fact]
         public static void ContentValid_Detects_Corrupted_Content()
         {
-            var repository = new MemoryRepository();
-            var contentStore = CreateContentStore(repository);
+            var contentStore = CreateContentStore(
+                new CorruptedMemoryRepository());
 
             var contentReference = contentStore.StoreContentObject(
                 "some text",
                 "with some name");
-
-            var wrongData = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-
-            foreach (var uri in repository.ListUris().ToArray())
-            {
-                repository.StoreValue(uri, wrongData);
-            }
 
             Assert.False(contentStore.ContentValid(contentReference));
         }
@@ -98,16 +86,17 @@ namespace Chunkyard.Tests
         {
             var repository = new MemoryRepository();
             var contentStore = CreateContentStore(repository);
-            var chunkReference = new ChunkReference(
-                new Uri("sha256://abcdef123456"),
-                new byte[] { 0xFF });
 
+            var logId = Guid.NewGuid();
             var contentReference = new ContentReference(
                 "some reference",
                 AesGcmCrypto.GenerateNonce(),
-                new[] { chunkReference });
-
-            var logId = Guid.NewGuid();
+                new[]
+                {
+                    new ChunkReference(
+                        new Uri("sha256://abcdef123456"),
+                        new byte[] { 0xFF })
+                });
 
             var firstLogPosition = contentStore.AppendToLog(
                 logId,
@@ -137,15 +126,11 @@ namespace Chunkyard.Tests
                 secondReference.ContentReference);
         }
 
-        private static ContentStore CreateContentStore()
-        {
-            return CreateContentStore(new MemoryRepository());
-        }
-
-        private static ContentStore CreateContentStore(IRepository repository)
+        private static ContentStore CreateContentStore(
+            IRepository? repository = null)
         {
             return new ContentStore(
-                repository,
+                repository ?? new MemoryRepository(),
                 new FastCdc(
                     2 * 1024 * 1024,
                     4 * 1024 * 1024,
@@ -154,6 +139,23 @@ namespace Chunkyard.Tests
                 "secret password",
                 AesGcmCrypto.GenerateSalt(),
                 5);
+        }
+
+        private class CorruptedMemoryRepository : MemoryRepository
+        {
+            public override void StoreValue(Uri contentUri, byte[] value)
+            {
+                base.StoreValue(
+                    contentUri,
+                    new byte[] { 0xBA, 0xD0 });
+            }
+        }
+
+        private class UnstoredMemoryRepository : MemoryRepository
+        {
+            public override void StoreValue(Uri contentUri, byte[] value)
+            {
+            }
         }
     }
 }
