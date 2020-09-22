@@ -13,18 +13,37 @@ namespace Chunkyard.Tests
         {
             var snapshotBuilder = CreateSnapshotBuilder();
 
-            var content = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-            using var memoryStream = new MemoryStream(content);
+            using var contentStream = CreateContent();
 
-            snapshotBuilder.AddContent(memoryStream, "some content");
+            snapshotBuilder.AddContent(contentStream, "some content");
             var logPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
             var snapshot = snapshotBuilder.GetSnapshot(logPosition);
+            var contentReferences = snapshot.ContentReferences.ToArray();
 
             Assert.Equal(0, logPosition);
-            Assert.Single(snapshot.ContentReferences);
+            Assert.Single(contentReferences);
             Assert.Equal(
-                2,
-                snapshotBuilder.ListUris(logPosition).Count());
+                "some content",
+                contentReferences[0].Name);
+        }
+
+        [Fact]
+        public static void AddContent_Detects_Previous_Content()
+        {
+            var repository = new MemoryRepository();
+            var snapshotBuilder = CreateSnapshotBuilder(repository);
+
+            using var contentStream1 = CreateContent();
+
+            snapshotBuilder.AddContent(contentStream1, "some content");
+            snapshotBuilder.WriteSnapshot(DateTime.Now);
+
+            using var contentStream2 = CreateContent();
+            snapshotBuilder.AddContent(contentStream2, "some content");
+            snapshotBuilder.WriteSnapshot(DateTime.Now);
+
+            // "some content" + snapshot #1 + snapshot #2 = 3 URIs
+            Assert.Equal(3, repository.ListUris().Count());
         }
 
         [Fact]
@@ -32,14 +51,13 @@ namespace Chunkyard.Tests
         {
             var snapshotBuilder = CreateSnapshotBuilder();
 
-            var content = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-            using var memoryStream = new MemoryStream(content);
+            using var contentStream = CreateContent();
 
-            snapshotBuilder.AddContent(memoryStream, "some content");
+            snapshotBuilder.AddContent(contentStream, "some content");
             var logPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
-            var uris = snapshotBuilder.ListUris(logPosition).ToArray();
 
-            Assert.Equal(2, uris.Length);
+            // "some content" + snapshot #1 = 2 URIs
+            Assert.Equal(2, snapshotBuilder.ListUris(logPosition).Count());
         }
 
         [Fact]
@@ -48,10 +66,9 @@ namespace Chunkyard.Tests
             var repository = new MemoryRepository();
             var snapshotBuilder = CreateSnapshotBuilder(repository);
 
-            var content = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-            using var memoryStream = new MemoryStream(content);
+            using var contentStream = CreateContent();
 
-            snapshotBuilder.AddContent(memoryStream, "some content");
+            snapshotBuilder.AddContent(contentStream, "some content");
             var logPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
             var uris = snapshotBuilder.ListUris(logPosition).ToArray();
 
@@ -60,6 +77,23 @@ namespace Chunkyard.Tests
             Assert.Empty(snapshotBuilder.ListUris(logPosition));
         }
 
+        [Fact]
+        public static void GetSnapshot_Accepts_Negative_LogPositions()
+        {
+            var snapshotBuilder = CreateSnapshotBuilder();
+
+            var logPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
+            var expectedSnapshot = snapshotBuilder.GetSnapshot(logPosition);
+            var actualSnapshot = snapshotBuilder.GetSnapshot(-1);
+
+            Assert.Equal(expectedSnapshot, actualSnapshot);
+        }
+
+        private static Stream CreateContent()
+        {
+            return new MemoryStream(
+                new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
+        }
         private static SnapshotBuilder CreateSnapshotBuilder(
             IRepository? repository = null)
         {
