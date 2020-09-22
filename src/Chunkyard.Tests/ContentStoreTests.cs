@@ -84,8 +84,7 @@ namespace Chunkyard.Tests
         [Fact]
         public static void Append_And_RetrieveFromLog_Return_Reference()
         {
-            var repository = new MemoryRepository();
-            var contentStore = CreateContentStore(repository);
+            var contentStore = CreateContentStore();
 
             var logId = Guid.NewGuid();
             var contentReference = new ContentReference(
@@ -107,9 +106,6 @@ namespace Chunkyard.Tests
                 logId,
                 contentReference,
                 firstLogPosition + 1);
-
-            Assert.Equal(secondLogPosition, repository.FetchLogPosition());
-            Assert.Equal(2, repository.ListLogPositions().Count());
 
             var firstReference = contentStore.RetrieveFromLog(
                 firstLogPosition);
