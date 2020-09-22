@@ -10,7 +10,7 @@ namespace Chunkyard
     /// <summary>
     /// Describes every available command line verb of the Chunkyard assembly.
     /// </summary>
-    internal class Command
+    internal class CLI
     {
         public const int LatestLogPosition = -1;
 

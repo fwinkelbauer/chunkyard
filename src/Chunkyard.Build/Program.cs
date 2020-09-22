@@ -26,17 +26,17 @@ namespace Chunkyard.Build
         {
             if (args.Length == 0)
             {
-                Command.Default();
+                CLI.Default();
                 return;
             }
 
             Parser.Default.ParseArguments(args, LoadOptions())
-                .WithParsed<BuildOptions>(o => Command.Build(o))
-                .WithParsed<CleanOptions>(_ => Command.Clean())
-                .WithParsed<CommitOptions>(_ => Command.Commit())
-                .WithParsed<FmtOptions>(_ => Command.Fmt())
-                .WithParsed<PublishOptions>(o => Command.Publish(o))
-                .WithParsed<TestOptions>(o => Command.Test(o))
+                .WithParsed<BuildOptions>(o => CLI.Build(o))
+                .WithParsed<CleanOptions>(_ => CLI.Clean())
+                .WithParsed<CommitOptions>(_ => CLI.Commit())
+                .WithParsed<FmtOptions>(_ => CLI.Fmt())
+                .WithParsed<PublishOptions>(o => CLI.Publish(o))
+                .WithParsed<TestOptions>(o => CLI.Test(o))
                 .WithNotParsed(_ => Environment.ExitCode = 1);
         }
 

@@ -28,7 +28,7 @@ namespace Chunkyard.Options
         [Option('i', "include", Required = false, HelpText = "The include fuzzy pattern")]
         public string IncludeFuzzy { get; }
 
-        [Option('l', "log-position", Required = false, HelpText = "The log position", Default = Command.LatestLogPosition)]
+        [Option('l', "log-position", Required = false, HelpText = "The log position", Default = CLI.LatestLogPosition)]
         public int LogPosition { get; }
 
         [Option('o', "overwrite", Required = false, HelpText = "If files should be overwritten", Default = false)]

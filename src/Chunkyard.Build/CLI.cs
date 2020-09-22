@@ -8,7 +8,7 @@ using Chunkyard.Build.Options;
 
 namespace Chunkyard.Build
 {
-    internal static class Command
+    internal static class CLI
     {
         private const string ArtifactsDirectory = "artifacts";
         private const string Solution = "src/Chunkyard.sln";
