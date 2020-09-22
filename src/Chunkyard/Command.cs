@@ -42,7 +42,7 @@ namespace Chunkyard
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            var (_, _, snapshotBuilder) = Create(
+            var (_, contentStore, snapshotBuilder) = Create(
                 o.Repository,
                 o.Cached,
                 new FastCdc(o.Min, o.Avg, o.Max));
@@ -66,6 +66,18 @@ namespace Chunkyard
             }
 
             var newLogPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
+            var newSnapshot = snapshotBuilder.GetSnapshot(newLogPosition);
+
+            // Perform a shallow check to make sure that our new snapshot is
+            // alright
+            foreach (var contentReference in newSnapshot.ContentReferences)
+            {
+                if (!contentStore.ContentExists(contentReference))
+                {
+                    throw new ChunkyardException(
+                        "Detected errors while creating snapshot");
+                }
+            }
 
             Console.WriteLine($"Created snapshot: {newLogPosition}");
         }
