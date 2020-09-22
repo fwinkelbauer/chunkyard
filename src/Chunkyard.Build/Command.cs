@@ -8,7 +8,7 @@ using Chunkyard.Build.Options;
 
 namespace Chunkyard.Build
 {
-    public static class Command
+    internal static class Command
     {
         private const string ArtifactsDirectory = "artifacts";
         private const string Solution = "src/Chunkyard.sln";
@@ -28,8 +28,6 @@ namespace Chunkyard.Build
 
         public static void Build(DotnetOptions o)
         {
-            o.EnsureNotNull(nameof(o));
-
             Dotnet(
                 $"build {Solution}",
                 $"-c {o.Configuration}",
@@ -39,8 +37,6 @@ namespace Chunkyard.Build
 
         public static void Test(DotnetOptions o)
         {
-            o.EnsureNotNull(nameof(o));
-
             Dotnet(
                 $"test {Solution}",
                 $"-c {o.Configuration}");
@@ -58,8 +54,6 @@ namespace Chunkyard.Build
 
         public static void Publish(DotnetOptions o)
         {
-            o.EnsureNotNull(nameof(o));
-
             Clean();
             Build(o);
             Test(o);

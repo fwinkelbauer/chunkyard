@@ -10,17 +10,10 @@ namespace Chunkyard.Build
     {
         public static void Main(string[] args)
         {
-            args.EnsureNotNull(nameof(args));
-
             try
             {
-                if (args.Length == 0)
-                {
-                    Command.Default();
-                    return;
-                }
-
-                ProcessArguments(args);
+               ProcessArguments(
+                   args ?? throw new ArgumentNullException(nameof(args)));
             }
             catch (Exception e)
             {
@@ -31,6 +24,12 @@ namespace Chunkyard.Build
 
         private static void ProcessArguments(string[] args)
         {
+            if (args.Length == 0)
+            {
+                Command.Default();
+                return;
+            }
+
             Parser.Default.ParseArguments(args, LoadOptions())
                 .WithParsed<BuildOptions>(o => Command.Build(o))
                 .WithParsed<CleanOptions>(_ => Command.Clean())
