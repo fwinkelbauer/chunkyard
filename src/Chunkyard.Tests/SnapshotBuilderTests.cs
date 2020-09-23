@@ -94,6 +94,7 @@ namespace Chunkyard.Tests
             return new MemoryStream(
                 new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
         }
+
         private static SnapshotBuilder CreateSnapshotBuilder(
             IRepository? repository = null)
         {
