@@ -30,8 +30,8 @@ namespace Chunkyard.Tests
         [Fact]
         public static void AddContent_Detects_Previous_Content()
         {
-            var repository = new MemoryRepository();
-            var snapshotBuilder = CreateSnapshotBuilder(repository);
+            var contentStore = new ContentStoreSpy();
+            var snapshotBuilder = CreateSnapshotBuilder(contentStore);
 
             using var contentStream1 = CreateContent();
 
@@ -42,8 +42,7 @@ namespace Chunkyard.Tests
             snapshotBuilder.AddContent(contentStream2, "some content");
             snapshotBuilder.WriteSnapshot(DateTime.Now);
 
-            // "some content" + snapshot #1 + snapshot #2 = 3 URIs
-            Assert.Equal(3, repository.ListUris().Count());
+            Assert.True(contentStore.StorePreviousContentCalled);
         }
 
         [Fact]
@@ -63,16 +62,13 @@ namespace Chunkyard.Tests
         [Fact]
         public static void ListUris_Lists_Nothing_If_Snapshot_Is_Invalid()
         {
-            var repository = new MemoryRepository();
-            var snapshotBuilder = CreateSnapshotBuilder(repository);
+            var snapshotBuilder = CreateSnapshotBuilder(
+                new UnstoredMemoryRepository());
 
             using var contentStream = CreateContent();
 
             snapshotBuilder.AddContent(contentStream, "some content");
             var logPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
-            var uris = snapshotBuilder.ListUris(logPosition).ToArray();
-
-            repository.RemoveValue(uris[0]);
 
             Assert.Empty(snapshotBuilder.ListUris(logPosition));
         }
@@ -96,20 +92,39 @@ namespace Chunkyard.Tests
         }
 
         private static SnapshotBuilder CreateSnapshotBuilder(
+            IContentStore contentStore)
+        {
+            return new SnapshotBuilder(contentStore, null);
+        }
+
+        private static SnapshotBuilder CreateSnapshotBuilder(
             IRepository? repository = null)
         {
-            return new SnapshotBuilder(
-                new ContentStore(
-                    repository ?? new MemoryRepository(),
-                    new FastCdc(
-                        2 * 1024 * 1024,
-                        4 * 1024 * 1024,
-                        8 * 1024 * 1024),
-                    HashAlgorithmName.SHA256,
-                    "secret password",
-                    AesGcmCrypto.GenerateSalt(),
-                    5),
-                null);
+            return CreateSnapshotBuilder(
+                new TestContentStore(repository));
+        }
+
+        private class ContentStoreSpy : TestContentStore
+        {
+            public bool StorePreviousContentCalled { get; private set; }
+
+            public override ContentReference StoreContent(
+                Stream inputStream,
+                ContentReference previousContentReference)
+            {
+                StorePreviousContentCalled = true;
+
+                return base.StoreContent(
+                    inputStream,
+                    previousContentReference);
+            }
+        }
+
+        private class UnstoredMemoryRepository : MemoryRepository
+        {
+            public override void StoreValue(Uri contentUri, byte[] value)
+            {
+            }
         }
     }
 }
