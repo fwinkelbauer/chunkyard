@@ -9,6 +9,8 @@ namespace Chunkyard
     /// </summary>
     public interface IContentStore
     {
+        int? CurrentLogPosition { get; }
+
         void RetrieveContent(
             ContentReference contentReference,
             Stream outputStream);

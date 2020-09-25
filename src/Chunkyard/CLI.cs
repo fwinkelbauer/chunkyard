@@ -394,38 +394,13 @@ namespace Chunkyard
             FastCdc fastCdc)
         {
             var repository = CreateRepository(repositoryPath);
-            var logPosition = repository.FetchLogPosition();
-            var prompt = new EnvironmentPrompt(
-                new ConsolePrompt());
-
-            string? password;
-            byte[]? salt;
-            int? iterations;
-
-            if (logPosition == null)
-            {
-                password = prompt.NewPassword();
-                salt = AesGcmCrypto.GenerateSalt();
-                iterations = AesGcmCrypto.Iterations;
-            }
-            else
-            {
-                var logReference = ContentStore.RetrieveFromLog(
-                    repository,
-                    logPosition.Value);
-
-                password = prompt.ExistingPassword();
-                salt = logReference.Salt;
-                iterations = logReference.Iterations;
-            }
 
             IContentStore contentStore = new ContentStore(
                 repository,
                 fastCdc,
                 HashAlgorithmName.SHA256,
-                password,
-                salt,
-                iterations.Value);
+                new EnvironmentPrompt(
+                    new ConsolePrompt()));
 
             if (cached)
             {
@@ -446,9 +421,7 @@ namespace Chunkyard
                     cacheDirectory);
             }
 
-            var snapshotBuilder = new SnapshotBuilder(
-                contentStore,
-                logPosition);
+            var snapshotBuilder = new SnapshotBuilder(contentStore);
 
             return (repository, contentStore, snapshotBuilder);
         }

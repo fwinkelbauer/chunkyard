@@ -14,25 +14,20 @@ namespace Chunkyard
         private readonly Dictionary<string, ContentReference> _knownContentReferences;
         private readonly List<ContentReference> _storedContentReferences;
 
-        private int? _currentLogPosition;
-
-        public SnapshotBuilder(
-            IContentStore contentStore,
-            int? currentLogPosition)
+        public SnapshotBuilder(IContentStore contentStore)
         {
-            _contentStore = contentStore;
-
-            _currentLogPosition = currentLogPosition;
+            _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
 
             _knownContentReferences = new Dictionary<string, ContentReference>();
             _storedContentReferences = new List<ContentReference>();
 
-            if (_currentLogPosition == null)
+            if (_contentStore.CurrentLogPosition == null)
             {
                 return;
             }
 
-            var currentSnapshot = GetSnapshot(_currentLogPosition.Value);
+            var currentSnapshot = GetSnapshot(
+                _contentStore.CurrentLogPosition.Value);
 
             foreach (var contentReference in currentSnapshot.ContentReferences)
             {
@@ -76,27 +71,27 @@ namespace Chunkyard
 
             _storedContentReferences.Clear();
 
-            var newLogPosition = _currentLogPosition.HasValue
-                ? _currentLogPosition.Value + 1
+            var currentLogPosition = _contentStore.CurrentLogPosition;
+            var newLogPosition = currentLogPosition.HasValue
+                ? currentLogPosition.Value + 1
                 : 0;
 
-            var logId = _currentLogPosition.HasValue
-                ? _contentStore.RetrieveFromLog(_currentLogPosition.Value).LogId
+            var logId = currentLogPosition.HasValue
+                ? _contentStore.RetrieveFromLog(currentLogPosition.Value).LogId
                 : Guid.NewGuid();
 
-            _currentLogPosition = _contentStore.AppendToLog(
+            currentLogPosition = _contentStore.AppendToLog(
                 logId,
                 contentReference,
                 newLogPosition);
 
-            return _currentLogPosition.Value;
+            return currentLogPosition.Value;
         }
 
         public Snapshot GetSnapshot(int logPosition)
         {
             return GetSnapshot(
-                _contentStore.RetrieveFromLog(
-                    ResolveLogPosition(logPosition)));
+                _contentStore.RetrieveFromLog(logPosition));
         }
 
         public IEnumerable<Uri> ListUris(int logPosition)
@@ -128,23 +123,6 @@ namespace Chunkyard
         {
             return _contentStore.RetrieveContentObject<Snapshot>(
                 logReference.ContentReference);
-        }
-
-        private int ResolveLogPosition(int logPosition)
-        {
-            if (!_currentLogPosition.HasValue)
-            {
-                throw new ChunkyardException(
-                    "Cannot load snapshot from an empty repository");
-            }
-
-            //  0: the first element
-            //  1: the second element
-            // -1: the last element
-            // -2: the second-last element
-            return logPosition >= 0
-                ? logPosition
-                : _currentLogPosition.Value + logPosition + 1;
         }
     }
 }

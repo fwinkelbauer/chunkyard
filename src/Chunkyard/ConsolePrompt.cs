@@ -28,7 +28,7 @@ namespace Chunkyard
         }
 
         // https://stackoverflow.com/questions/3404421/password-masking-console-application
-        public static string ReadPassword(string prompt)
+        private static string ReadPassword(string prompt)
         {
             Console.Write(prompt);
 

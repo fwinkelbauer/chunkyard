@@ -120,6 +120,10 @@ namespace Chunkyard.Tests
             Assert.Equal(
                 contentReference,
                 secondReference.ContentReference);
+
+            Assert.Equal(
+                secondLogPosition,
+                contentStore.CurrentLogPosition);
         }
 
         private static ContentStore CreateContentStore(
@@ -132,9 +136,7 @@ namespace Chunkyard.Tests
                     4 * 1024 * 1024,
                     8 * 1024 * 1024),
                 HashAlgorithmName.SHA256,
-                "secret password",
-                AesGcmCrypto.GenerateSalt(),
-                5);
+                new StaticPrompt());
         }
 
         private class CorruptedMemoryRepository : MemoryRepository

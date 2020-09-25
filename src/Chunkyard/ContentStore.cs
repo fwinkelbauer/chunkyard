@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace Chunkyard
@@ -18,20 +19,60 @@ namespace Chunkyard
         private readonly int _iterations;
         private readonly byte[] _key;
 
+        private int? _currentLogPosition;
+
         public ContentStore(
             IRepository repository,
             FastCdc fastCdc,
             HashAlgorithmName hashAlgorithmName,
-            string password,
-            byte[] salt,
-            int iterations)
+            IPrompt prompt)
         {
-            _repository = repository;
+            _repository = repository.EnsureNotNull(nameof(repository));
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
-            _salt = salt;
-            _iterations = iterations;
-            _key = AesGcmCrypto.PasswordToKey(password, salt, iterations);
+
+            CurrentLogPosition = FetchLogPosition(repository);
+            string? password;
+
+            prompt.EnsureNotNull(nameof(prompt));
+
+            if (CurrentLogPosition == null)
+            {
+                password = prompt.NewPassword();
+                _salt = AesGcmCrypto.GenerateSalt();
+                _iterations = AesGcmCrypto.Iterations;
+            }
+            else
+            {
+                var logReference = RetrieveFromLog(
+                    repository,
+                    CurrentLogPosition.Value);
+
+                password = prompt.ExistingPassword();
+                _salt = logReference.Salt;
+                _iterations = logReference.Iterations;
+            }
+
+            _key = AesGcmCrypto.PasswordToKey(password, _salt, _iterations);
+        }
+
+        public int? CurrentLogPosition
+        {
+            get
+            {
+                if (_currentLogPosition.HasValue)
+                {
+                    return _currentLogPosition;
+                }
+
+                _currentLogPosition = FetchLogPosition(_repository);
+
+                return _currentLogPosition;
+            }
+            private set
+            {
+                _currentLogPosition = value;
+            }
         }
 
         public void RetrieveContent(
@@ -121,14 +162,18 @@ namespace Chunkyard
                 _salt,
                 _iterations);
 
-            return _repository.AppendToLog(
+            CurrentLogPosition = _repository.AppendToLog(
                 DataConvert.ToBytes(logReference),
                 newLogPosition);
+
+            return CurrentLogPosition.Value;
         }
 
         public LogReference RetrieveFromLog(int logPosition)
         {
-            return RetrieveFromLog(_repository, logPosition);
+            return RetrieveFromLog(
+                _repository,
+                ResolveLogPosition(logPosition));
         }
 
         public static LogReference RetrieveFromLog(
@@ -164,6 +209,36 @@ namespace Chunkyard
                     contentUri,
                     tag);
             }
+        }
+
+        private static int? FetchLogPosition(IRepository repository)
+        {
+            var logPositions = repository.ListLogPositions()
+                .ToArray();
+
+            if (logPositions.Length == 0)
+            {
+                return null;
+            }
+
+            return logPositions[^1];
+        }
+
+        private int ResolveLogPosition(int logPosition)
+        {
+            if (!CurrentLogPosition.HasValue)
+            {
+                throw new ChunkyardException(
+                    "Cannot load snapshot from an empty repository");
+            }
+
+            //  0: the first element
+            //  1: the second element
+            // -1: the last element
+            // -2: the second-last element
+            return logPosition >= 0
+                ? logPosition
+                : CurrentLogPosition.Value + logPosition + 1;
         }
     }
 }

@@ -17,10 +17,10 @@ namespace Chunkyard.Tests
                     4 * 1024 * 1024,
                     8 * 1024 * 1024),
                 HashAlgorithmName.SHA256,
-                "secret password",
-                AesGcmCrypto.GenerateSalt(),
-                5);
+                new StaticPrompt());
         }
+
+        public int? CurrentLogPosition => _store.CurrentLogPosition;
 
         public virtual void RetrieveContent(
             ContentReference contentReference,

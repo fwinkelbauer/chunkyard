@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace Chunkyard
 {
@@ -23,21 +22,6 @@ namespace Chunkyard
                 content);
 
             return contentUri.Equals(computedUri);
-        }
-
-        public static int? FetchLogPosition(this IRepository repository)
-        {
-            repository.EnsureNotNull(nameof(repository));
-
-            var logPositions = repository.ListLogPositions()
-                .ToArray();
-
-            if (logPositions.Length == 0)
-            {
-                return null;
-            }
-
-            return logPositions[^1];
         }
     }
 }

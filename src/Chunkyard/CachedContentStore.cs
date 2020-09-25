@@ -22,6 +22,8 @@ namespace Chunkyard
             _cacheDirectory = cacheDirectory;
         }
 
+        public int? CurrentLogPosition => _contentStore.CurrentLogPosition;
+
         public void RetrieveContent(
             ContentReference contentReference,
             Stream outputStream)

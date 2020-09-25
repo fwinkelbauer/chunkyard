@@ -31,7 +31,7 @@ namespace Chunkyard.Tests
         public static void AddContent_Detects_Previous_Content()
         {
             var contentStore = new ContentStoreSpy();
-            var snapshotBuilder = CreateSnapshotBuilder(contentStore);
+            var snapshotBuilder = new SnapshotBuilder(contentStore);
 
             using var contentStream1 = CreateContent();
 
@@ -92,15 +92,9 @@ namespace Chunkyard.Tests
         }
 
         private static SnapshotBuilder CreateSnapshotBuilder(
-            IContentStore contentStore)
-        {
-            return new SnapshotBuilder(contentStore, null);
-        }
-
-        private static SnapshotBuilder CreateSnapshotBuilder(
             IRepository? repository = null)
         {
-            return CreateSnapshotBuilder(
+            return new SnapshotBuilder(
                 new TestContentStore(repository));
         }
 
