@@ -95,10 +95,10 @@ namespace Chunkyard.Tests
             IRepository? repository = null)
         {
             return new SnapshotBuilder(
-                new TestContentStore(repository));
+                new MockableContentStore(repository));
         }
 
-        private class ContentStoreSpy : TestContentStore
+        private class ContentStoreSpy : MockableContentStore
         {
             public bool StorePreviousContentCalled { get; private set; }
 

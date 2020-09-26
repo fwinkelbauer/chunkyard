@@ -4,11 +4,11 @@ using System.Security.Cryptography;
 
 namespace Chunkyard.Tests
 {
-    public class TestContentStore : IContentStore
+    public class MockableContentStore : IContentStore
     {
         private readonly IContentStore _store;
 
-        public TestContentStore(IRepository? repository = null)
+        public MockableContentStore(IRepository? repository = null)
         {
             _store = new ContentStore(
                 repository ?? new MemoryRepository(),
