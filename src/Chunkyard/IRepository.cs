@@ -11,7 +11,7 @@ namespace Chunkyard
     {
         public Uri RepositoryUri { get; }
 
-        void StoreValue(Uri contentUri, byte[] value);
+        bool StoreValue(Uri contentUri, byte[] value);
 
         byte[] RetrieveValue(Uri contentUri);
 

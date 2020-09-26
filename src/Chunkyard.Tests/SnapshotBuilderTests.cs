@@ -113,12 +113,5 @@ namespace Chunkyard.Tests
                     previousContentReference);
             }
         }
-
-        private class UnstoredMemoryRepository : MemoryRepository
-        {
-            public override void StoreValue(Uri contentUri, byte[] value)
-            {
-            }
-        }
     }
 }

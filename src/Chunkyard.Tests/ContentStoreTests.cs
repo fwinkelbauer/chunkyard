@@ -141,18 +141,11 @@ namespace Chunkyard.Tests
 
         private class CorruptedMemoryRepository : MemoryRepository
         {
-            public override void StoreValue(Uri contentUri, byte[] value)
+            public override bool StoreValue(Uri contentUri, byte[] value)
             {
-                base.StoreValue(
+                return base.StoreValue(
                     contentUri,
                     new byte[] { 0xBA, 0xD0 });
-            }
-        }
-
-        private class UnstoredMemoryRepository : MemoryRepository
-        {
-            public override void StoreValue(Uri contentUri, byte[] value)
-            {
             }
         }
     }

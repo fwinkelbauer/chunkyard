@@ -23,13 +23,13 @@ namespace Chunkyard
 
         public Uri RepositoryUri { get; }
 
-        public void StoreValue(Uri contentUri, byte[] value)
+        public bool StoreValue(Uri contentUri, byte[] value)
         {
             var file = ToFilePath(contentUri);
 
             if (File.Exists(file))
             {
-                return;
+                return false;
             }
 
             Directory.CreateDirectory(
@@ -41,6 +41,8 @@ namespace Chunkyard
                 FileAccess.Write);
 
             fileStream.Write(value);
+
+            return true;
         }
 
         public byte[] RetrieveValue(Uri contentUri)

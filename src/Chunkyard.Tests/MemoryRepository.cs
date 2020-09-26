@@ -16,9 +16,16 @@ namespace Chunkyard.Tests
 
         public Uri RepositoryUri => new Uri("in://memory");
 
-        public virtual void StoreValue(Uri contentUri, byte[] value)
+        public virtual bool StoreValue(Uri contentUri, byte[] value)
         {
+            if (_valuesByUri.ContainsKey(contentUri))
+            {
+                return false;
+            }
+
             _valuesByUri[contentUri] = value;
+
+            return true;
         }
 
         public byte[] RetrieveValue(Uri contentUri)
