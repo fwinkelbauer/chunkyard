@@ -8,7 +8,7 @@ using Chunkyard.Build.Options;
 
 namespace Chunkyard.Build
 {
-    internal static class CLI
+    internal static class Cli
     {
         private const string ArtifactsDirectory = "artifacts";
         private const string Solution = "src/Chunkyard.sln";
@@ -57,7 +57,7 @@ namespace Chunkyard.Build
             Test(o);
 
             Dotnet(
-                $"publish src/Chunkyard",
+                "publish src/Chunkyard",
                 $"-c {o.Configuration}",
                 $"-r {o.Runtime}",
                 $"-o {ArtifactsDirectory}",
@@ -103,7 +103,7 @@ namespace Chunkyard.Build
             };
 
             using var process = Process.Start(startInfo);
-            string? line = string.Empty;
+            string? line;
 
             while ((line = process.StandardOutput.ReadLine()) != null)
             {

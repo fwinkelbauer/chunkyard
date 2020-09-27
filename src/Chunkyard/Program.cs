@@ -24,17 +24,17 @@ namespace Chunkyard
         private static void ProcessArguments(string[] args)
         {
             Parser.Default.ParseArguments(args, LoadOptions())
-                .WithParsed<PreviewOptions>(o => CLI.PreviewFiles(o))
-                .WithParsed<RestoreOptions>(o => CLI.RestoreSnapshot(o))
-                .WithParsed<CreateOptions>(o => CLI.CreateSnapshot(o))
-                .WithParsed<CheckOptions>(o => CLI.CheckSnapshot(o))
-                .WithParsed<ShowOptions>(o => CLI.ShowSnapshot(o))
-                .WithParsed<RemoveOptions>(o => CLI.RemoveSnapshot(o))
-                .WithParsed<KeepOptions>(o => CLI.KeepSnapshots(o))
-                .WithParsed<ListOptions>(o => CLI.ListSnapshots(o))
-                .WithParsed<GarbageCollectOptions>(o => CLI.GarbageCollect(o))
-                .WithParsed<PushOptions>(o => CLI.PushSnapshots(o))
-                .WithParsed<PullOptions>(o => CLI.PullSnapshots(o))
+                .WithParsed<PreviewOptions>(o => Cli.PreviewFiles(o))
+                .WithParsed<RestoreOptions>(o => Cli.RestoreSnapshot(o))
+                .WithParsed<CreateOptions>(o => Cli.CreateSnapshot(o))
+                .WithParsed<CheckOptions>(o => Cli.CheckSnapshot(o))
+                .WithParsed<ShowOptions>(o => Cli.ShowSnapshot(o))
+                .WithParsed<RemoveOptions>(o => Cli.RemoveSnapshot(o))
+                .WithParsed<KeepOptions>(o => Cli.KeepSnapshots(o))
+                .WithParsed<ListOptions>(o => Cli.ListSnapshots(o))
+                .WithParsed<GarbageCollectOptions>(o => Cli.GarbageCollect(o))
+                .WithParsed<PushOptions>(o => Cli.PushSnapshots(o))
+                .WithParsed<PullOptions>(o => Cli.PullSnapshots(o))
                 .WithNotParsed(_ => Environment.ExitCode = 1);
         }
 

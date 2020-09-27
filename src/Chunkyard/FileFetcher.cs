@@ -18,13 +18,15 @@ namespace Chunkyard
             IEnumerable<string> files,
             IEnumerable<string> excludePatterns)
         {
+            var patterns = excludePatterns.ToArray();
+
             foreach (var file in files)
             {
                 var resolvedFile = ResolvePath(file);
                 var parent = Path.GetDirectoryName(resolvedFile)
                     ?? resolvedFile;
 
-                foreach (var foundFile in Find(resolvedFile, excludePatterns))
+                foreach (var foundFile in Find(resolvedFile, patterns))
                 {
                     var contentName = Path.GetRelativePath(parent, foundFile);
 
@@ -45,12 +47,12 @@ namespace Chunkyard
 
         private static IEnumerable<string> Find(
             string file,
-            IEnumerable<string> excludePatterns)
+            string[] excludePatterns)
         {
             if (Directory.Exists(file))
             {
                 return Filter(
-                    Directory.EnumerateFiles(
+                    Directory.GetFiles(
                         file,
                         "*",
                         SearchOption.AllDirectories),
@@ -69,8 +71,8 @@ namespace Chunkyard
         }
 
         private static List<string> Filter(
-            IEnumerable<string> files,
-            IEnumerable<string> excludePatterns)
+            string[] files,
+            string[] excludePatterns)
         {
             var filteredFiles = files.ToList();
 

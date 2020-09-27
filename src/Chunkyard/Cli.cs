@@ -10,7 +10,7 @@ namespace Chunkyard
     /// <summary>
     /// Describes every available command line verb of the Chunkyard assembly.
     /// </summary>
-    internal class CLI
+    internal static class Cli
     {
         public const int LatestLogPosition = -1;
 
@@ -24,9 +24,9 @@ namespace Chunkyard
         {
             var foundTuples = FileFetcher.Find(o.Files, o.ExcludePatterns);
 
-            foreach ((_, var contentName) in foundTuples)
+            foreach (var foundTuple in foundTuples)
             {
-                Console.WriteLine(contentName);
+                Console.WriteLine(foundTuple.ContentName);
             }
         }
 
@@ -227,7 +227,8 @@ namespace Chunkyard
         public static void KeepSnapshots(KeepOptions o)
         {
             var repository = CreateRepository(o.Repository);
-            var logPositions = repository.ListLogPositions();
+            var logPositions = repository.ListLogPositions()
+                .ToArray();
 
             var logPositionsToKeep = logPositions
                 .TakeLast(o.LatestCount)
@@ -253,7 +254,9 @@ namespace Chunkyard
         {
             var (repository, _, snapshotBuilder) = Create(o.Repository);
             var usedUris = new HashSet<Uri>();
-            var allContentUris = repository.ListUris();
+            var allContentUris = repository.ListUris()
+                .ToArray();
+
             var logPositions = repository.ListLogPositions();
 
             foreach (var logPosition in logPositions)

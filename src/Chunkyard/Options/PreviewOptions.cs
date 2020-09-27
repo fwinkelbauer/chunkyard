@@ -11,9 +11,7 @@ namespace Chunkyard.Options
             IEnumerable<string> excludePatterns)
         {
             Files = new List<string>(files);
-            ExcludePatterns = excludePatterns == null
-                ? new List<string>()
-                : new List<string>(excludePatterns);
+            ExcludePatterns = new List<string>(excludePatterns);
         }
 
         [Option('f', "files", Required = true, HelpText = "The files and directories to include")]

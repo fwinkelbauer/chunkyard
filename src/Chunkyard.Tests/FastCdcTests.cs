@@ -71,13 +71,6 @@ namespace Chunkyard.Tests
             Assert.Equal(expectedValue, FastCdc.Logarithm2(inputValue));
         }
 
-        [Fact]
-        public static void Logarithm2_Test_Assumptions()
-        {
-            Assert.True(FastCdc.Logarithm2(FastCdc.AverageMin) >= 8);
-            Assert.True(FastCdc.Logarithm2(FastCdc.AverageMax) >= 28);
-        }
-
         [Theory]
         [InlineData(10, 5, 2)]
         [InlineData(11, 5, 3)]

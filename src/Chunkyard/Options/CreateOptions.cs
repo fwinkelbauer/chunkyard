@@ -18,9 +18,7 @@ namespace Chunkyard.Options
             Repository = repository;
             Cached = cached;
             Files = new List<string>(files);
-            ExcludePatterns = excludePatterns == null
-                ? new List<string>()
-                : new List<string>(excludePatterns);
+            ExcludePatterns = new List<string>(excludePatterns);
 
             Min = min;
             Avg = avg;

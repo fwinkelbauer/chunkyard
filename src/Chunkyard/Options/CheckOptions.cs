@@ -13,14 +13,14 @@ namespace Chunkyard.Options
         {
             Repository = repository;
             LogPosition = logPosition;
-            IncludeFuzzy = includeFuzzy ?? string.Empty;
+            IncludeFuzzy = includeFuzzy;
             Shallow = shallow;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository")]
         public string Repository { get; }
 
-        [Option('l', "log-position", Required = false, HelpText = "The log position", Default = CLI.LatestLogPosition)]
+        [Option('l', "log-position", Required = false, HelpText = "The log position", Default = Cli.LatestLogPosition)]
         public int LogPosition { get; }
 
         [Option('i', "include", Required = false, HelpText = "The include fuzzy pattern")]

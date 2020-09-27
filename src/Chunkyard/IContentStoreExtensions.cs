@@ -38,21 +38,5 @@ namespace Chunkyard
                 memoryStream,
                 contentName);
         }
-
-        public static StoreResult StoreContentObject<T>(
-            this IContentStore store,
-            T value,
-            ContentReference previousContentReference)
-            where T : notnull
-        {
-            store.EnsureNotNull(nameof(store));
-
-            using var memoryStream = new MemoryStream(
-                DataConvert.ToBytes(value));
-
-            return store.StoreContent(
-                memoryStream,
-                previousContentReference);
-        }
     }
 }

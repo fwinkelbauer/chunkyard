@@ -9,10 +9,10 @@ namespace Chunkyard
     {
         public const int Iterations = 1000;
 
-        private const int TAG_BYTES = 16;
-        private const int KEY_BYTES = 32;
-        private const int NONCE_BYTES = 12;
-        private const int SALT_BYTES = 12;
+        private const int TagBytes = 16;
+        private const int KeyBytes = 32;
+        private const int NonceBytes = 12;
+        private const int SaltBytes = 12;
 
         public static (byte[] Ciphertext, byte[] Tag) Encrypt(
             byte[] plaintext,
@@ -21,7 +21,7 @@ namespace Chunkyard
         {
             plaintext.EnsureNotNull(nameof(plaintext));
 
-            var tag = new byte[TAG_BYTES];
+            var tag = new byte[TagBytes];
             var ciphertext = new byte[plaintext.Length];
 
             using var aesGcm = new AesGcm(key);
@@ -59,17 +59,17 @@ namespace Chunkyard
                 iterations,
                 HashAlgorithmName.SHA256);
 
-            return rfc2898.GetBytes(KEY_BYTES);
+            return rfc2898.GetBytes(KeyBytes);
         }
 
         public static byte[] GenerateSalt()
         {
-            return GenerateRandomMumber(SALT_BYTES);
+            return GenerateRandomMumber(SaltBytes);
         }
 
         public static byte[] GenerateNonce()
         {
-            return GenerateRandomMumber(NONCE_BYTES);
+            return GenerateRandomMumber(NonceBytes);
         }
 
         private static byte[] GenerateRandomMumber(int length)

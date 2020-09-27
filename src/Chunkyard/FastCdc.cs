@@ -14,16 +14,16 @@ namespace Chunkyard
     /// </summary>
     public class FastCdc
     {
-        public const int MinimumMin = 64;
-        public const int MinimumMax = 64 * 1024 * 1024;
-        public const int AverageMin = 256;
-        public const int AverageMax = 256 * 1024 * 1024;
-        public const int MaximumMin = 1024;
-        public const int MaximumMax = 1024 * 1024 * 1024;
-
         public const int DefaultMin = 4 * 1024 * 1024;
         public const int DefaultAvg = 8 * 1024 * 1024;
         public const int DefaultMax = 16 * 1024 * 1024;
+
+        private const int MinimumMin = 64;
+        private const int MinimumMax = 64 * 1024 * 1024;
+        private const int AverageMin = 256;
+        private const int AverageMax = 256 * 1024 * 1024;
+        private const int MaximumMin = 1024;
+        private const int MaximumMax = 1024 * 1024 * 1024;
 
         private static readonly uint[] Table = new uint[]
         {

@@ -69,10 +69,7 @@ namespace Chunkyard
 
                 return _currentLogPosition;
             }
-            private set
-            {
-                _currentLogPosition = value;
-            }
+            private set => _currentLogPosition = value;
         }
 
         public void RetrieveContent(
