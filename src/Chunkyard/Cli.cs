@@ -297,10 +297,10 @@ namespace Chunkyard
             string sourceRepositoryPath,
             string destinationRepositoryPath)
         {
-            var (sourceRepository, _, snapshotBuilder) = Create(
+            var (sourceRepository, sourceContentStore, snapshotBuilder) = Create(
                 sourceRepositoryPath);
 
-            var destinationRepository = new FileRepository(
+            var (destinationRepository, destinationContentStore, _) = Create(
                 destinationRepositoryPath);
 
             var sourceLogs = sourceRepository
@@ -313,12 +313,10 @@ namespace Chunkyard
 
             if (sourceLogs.Length > 0 && destinationLogs.Length > 0)
             {
-                var sourceRef = ContentStore.RetrieveFromLog(
-                    sourceRepository,
+                var sourceRef = sourceContentStore.RetrieveFromLog(
                     sourceLogs[0]);
 
-                var destinationRef = ContentStore.RetrieveFromLog(
-                    destinationRepository,
+                var destinationRef = destinationContentStore.RetrieveFromLog(
                     destinationLogs[0]);
 
                 if (sourceRef.LogId != destinationRef.LogId)
@@ -367,11 +365,11 @@ namespace Chunkyard
 
             foreach (var snapshotUri in snapshotUris)
             {
-                var contentValue = sourceRepository.RetrieveValue(snapshotUri);
-
                 if (!destinationRepository.ValueExists(snapshotUri))
                 {
+                    var contentValue = sourceRepository.RetrieveValue(snapshotUri);
                     destinationRepository.StoreValue(snapshotUri, contentValue);
+
                     Console.WriteLine($"Transmitted: {snapshotUri}");
                 }
             }

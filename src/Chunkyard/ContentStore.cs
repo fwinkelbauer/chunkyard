@@ -181,7 +181,7 @@ namespace Chunkyard
                 ResolveLogPosition(logPosition));
         }
 
-        public static LogReference RetrieveFromLog(
+        private static LogReference RetrieveFromLog(
             IRepository repository,
             int logPosition)
         {

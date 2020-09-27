@@ -9,8 +9,20 @@ namespace Chunkyard
     /// </summary>
     internal class ConsolePrompt : IPrompt
     {
+        private string? _password;
+
+        public ConsolePrompt()
+        {
+            _password = null;
+        }
+
         public string NewPassword()
         {
+            if (_password != null)
+            {
+                return _password;
+            }
+
             var firstPassword = ReadPassword("Enter new password: ");
             var secondPassword = ReadPassword("Re-enter password: ");
 
@@ -19,12 +31,21 @@ namespace Chunkyard
                 throw new ChunkyardException("Passwords do not match");
             }
 
+            _password = firstPassword;
+
             return firstPassword;
         }
 
         public string ExistingPassword()
         {
-            return ReadPassword("Password: ");
+            if (_password != null)
+            {
+                return _password;
+            }
+
+            _password = ReadPassword("Password: ");
+
+            return _password;
         }
 
         // https://stackoverflow.com/questions/3404421/password-masking-console-application
