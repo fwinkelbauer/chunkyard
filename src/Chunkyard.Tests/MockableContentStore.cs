@@ -29,14 +29,14 @@ namespace Chunkyard.Tests
             _store.RetrieveContent(contentReference, outputStream);
         }
 
-        public virtual ContentReference StoreContent(
+        public virtual StoreResult StoreContent(
             Stream inputStream,
             string contentName)
         {
             return _store.StoreContent(inputStream, contentName);
         }
 
-        public virtual ContentReference StoreContent(
+        public virtual StoreResult StoreContent(
             Stream inputStream,
             ContentReference previousContentReference)
         {

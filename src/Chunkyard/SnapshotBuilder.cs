@@ -37,9 +37,9 @@ namespace Chunkyard
             }
         }
 
-        public void AddContent(Stream inputStream, string contentName)
+        public bool AddContent(Stream inputStream, string contentName)
         {
-            ContentReference? contentReference;
+            StoreResult? result;
 
             _knownContentReferences.TryGetValue(
                 contentName,
@@ -47,25 +47,25 @@ namespace Chunkyard
 
             if (previousContentReference == null)
             {
-                contentReference = _contentStore.StoreContent(
-                    inputStream,
-                    contentName);
+                result = _contentStore.StoreContent(inputStream, contentName);
             }
             else
             {
-                contentReference = _contentStore.StoreContent(
+                result = _contentStore.StoreContent(
                     inputStream,
                     previousContentReference);
             }
 
-            _storedContentReferences.Add(contentReference);
-            _knownContentReferences[contentReference.Name] =
-                contentReference;
+            _storedContentReferences.Add(result.ContentReference);
+            _knownContentReferences[result.ContentReference.Name] =
+                result.ContentReference;
+
+            return result.NewContent;
         }
 
         public int WriteSnapshot(DateTime creationTime)
         {
-            var contentReference = _contentStore.StoreContentObject(
+            var result = _contentStore.StoreContentObject(
                 new Snapshot(creationTime, _storedContentReferences),
                 string.Empty);
 
@@ -82,7 +82,7 @@ namespace Chunkyard
 
             currentLogPosition = _contentStore.AppendToLog(
                 logId,
-                contentReference,
+                result.ContentReference,
                 newLogPosition);
 
             return currentLogPosition.Value;

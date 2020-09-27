@@ -94,19 +94,23 @@ namespace Chunkyard
             }
         }
 
-        public ContentReference StoreContent(
+        public StoreResult StoreContent(
             Stream inputStream,
             string contentName)
         {
             var nonce = AesGcmCrypto.GenerateNonce();
 
-            return new ContentReference(
-                contentName,
-                nonce,
-                WriteChunks(nonce, inputStream));
+            var result = WriteChunks(nonce, inputStream);
+
+            return new StoreResult(
+                new ContentReference(
+                    contentName,
+                    nonce,
+                    result.ChunkReferences),
+                result.NewChunks);
         }
 
-        public ContentReference StoreContent(
+        public StoreResult StoreContent(
             Stream inputStream,
             ContentReference previousContentReference)
         {
@@ -117,10 +121,14 @@ namespace Chunkyard
             // Known files should be encrypted using the same nonce
             var nonce = previousContentReference.Nonce;
 
-            return new ContentReference(
-                previousContentReference.Name,
-                nonce,
-                WriteChunks(nonce, inputStream));
+            var result = WriteChunks(nonce, inputStream);
+
+            return new StoreResult(
+                new ContentReference(
+                    previousContentReference.Name,
+                    nonce,
+                    result.ChunkReferences),
+                result.NewChunks);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -186,11 +194,13 @@ namespace Chunkyard
                 repository.RetrieveFromLog(logPosition));
         }
 
-        private IEnumerable<ChunkReference> WriteChunks(
+        private (IEnumerable<ChunkReference> ChunkReferences, bool NewChunks) WriteChunks(
             byte[] nonce,
             Stream stream)
         {
             var chunkedDataItems = _fastCdc.SplitIntoChunks(stream);
+            var newChunks = false;
+            var chunkReferences = new List<ChunkReference>();
 
             foreach (var chunkedData in chunkedDataItems)
             {
@@ -203,12 +213,12 @@ namespace Chunkyard
                     _hashAlgorithmName,
                     encryptedData);
 
-                _repository.StoreValue(contentUri, encryptedData);
+                newChunks |= _repository.StoreValue(contentUri, encryptedData);
 
-                yield return new ChunkReference(
-                    contentUri,
-                    tag);
+                chunkReferences.Add(new ChunkReference(contentUri, tag));
             }
+
+            return (chunkReferences, newChunks);
         }
 
         private static int? FetchLogPosition(IRepository repository)

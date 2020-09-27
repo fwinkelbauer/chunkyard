@@ -31,7 +31,7 @@ namespace Chunkyard
             _contentStore.RetrieveContent(contentReference, outputStream);
         }
 
-        public ContentReference StoreContent(
+        public StoreResult StoreContent(
             Stream inputStream,
             string contentName)
         {
@@ -46,21 +46,21 @@ namespace Chunkyard
 
             if (storedReference != null)
             {
-                return storedReference;
+                return new StoreResult(storedReference, false);
             }
 
-            var contentReference = _contentStore.StoreContent(
+            var result = _contentStore.StoreContent(
                 inputStream,
                 contentName);
 
             StoreInCache(
                 fileStream,
-                contentReference);
+                result.ContentReference);
 
-            return contentReference;
+            return result;
         }
 
-        public ContentReference StoreContent(
+        public StoreResult StoreContent(
             Stream inputStream,
             ContentReference previousContentReference)
         {
@@ -77,18 +77,18 @@ namespace Chunkyard
 
             if (storedReference != null)
             {
-                return storedReference;
+                return new StoreResult(storedReference, false);
             }
 
-            var contentReference = _contentStore.StoreContent(
+            var result = _contentStore.StoreContent(
                 inputStream,
                 previousContentReference);
 
             StoreInCache(
                 fileStream,
-                contentReference);
+                result.ContentReference);
 
-            return contentReference;
+            return result;
         }
 
         public bool ContentExists(ContentReference contentReference)

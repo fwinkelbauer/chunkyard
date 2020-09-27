@@ -17,21 +17,44 @@ namespace Chunkyard.Tests
             var contentName = "some data";
             using var inputStream = new MemoryStream(expectedBytes);
 
-            var contentReference = contentStore.StoreContent(
+            var result = contentStore.StoreContent(
                 inputStream,
                 contentName);
 
             using var outputStream = new MemoryStream();
             contentStore.RetrieveContent(
-                contentReference,
+                result.ContentReference,
                 outputStream);
 
             var actualBytes = outputStream.ToArray();
 
+            Assert.True(result.NewContent);
             Assert.Equal(expectedBytes, actualBytes);
-            Assert.Equal(contentName, contentReference.Name);
-            Assert.True(contentStore.ContentExists(contentReference));
-            Assert.True(contentStore.ContentValid(contentReference));
+            Assert.Equal(contentName, result.ContentReference.Name);
+            Assert.True(contentStore.ContentExists(result.ContentReference));
+            Assert.True(contentStore.ContentValid(result.ContentReference));
+        }
+
+        [Fact]
+        public static void Store_Indicates_NewContent_If_Stored_Twice()
+        {
+            var contentStore = CreateContentStore();
+
+            var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+            var contentName = "some data";
+
+            using var firstStream = new MemoryStream(bytes);
+            var firstResult = contentStore.StoreContent(
+                firstStream,
+                contentName);
+
+            using var secondStream = new MemoryStream(bytes);
+            var secondResult = contentStore.StoreContent(
+                secondStream,
+                firstResult.ContentReference);
+
+            Assert.True(firstResult.NewContent);
+            Assert.False(secondResult.NewContent);
         }
 
         [Fact]
@@ -42,17 +65,17 @@ namespace Chunkyard.Tests
             var expectedText = "some text";
             var contentName = "some name";
 
-            var contentReference = contentStore.StoreContentObject(
+            var result = contentStore.StoreContentObject(
                 expectedText,
                 contentName);
 
             var actualText = contentStore.RetrieveContentObject<string>(
-                contentReference);
+                result.ContentReference);
 
             Assert.Equal(expectedText, actualText);
-            Assert.Equal(contentName, contentReference.Name);
-            Assert.True(contentStore.ContentExists(contentReference));
-            Assert.True(contentStore.ContentValid(contentReference));
+            Assert.Equal(contentName, result.ContentReference.Name);
+            Assert.True(contentStore.ContentExists(result.ContentReference));
+            Assert.True(contentStore.ContentValid(result.ContentReference));
         }
 
         [Fact]
@@ -61,11 +84,11 @@ namespace Chunkyard.Tests
             var contentStore = CreateContentStore(
                 new UnstoredMemoryRepository());
 
-            var contentReference = contentStore.StoreContentObject(
+            var result = contentStore.StoreContentObject(
                 "some text",
                 "with some name");
 
-            Assert.False(contentStore.ContentExists(contentReference));
+            Assert.False(contentStore.ContentExists(result.ContentReference));
         }
 
         [Fact]
@@ -74,11 +97,11 @@ namespace Chunkyard.Tests
             var contentStore = CreateContentStore(
                 new CorruptedMemoryRepository());
 
-            var contentReference = contentStore.StoreContentObject(
+            var result = contentStore.StoreContentObject(
                 "some text",
                 "with some name");
 
-            Assert.False(contentStore.ContentValid(contentReference));
+            Assert.False(contentStore.ContentValid(result.ContentReference));
         }
 
         [Fact]

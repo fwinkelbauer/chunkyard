@@ -23,7 +23,7 @@ namespace Chunkyard
             return DataConvert.ToObject<T>(memoryStream.ToArray());
         }
 
-        public static ContentReference StoreContentObject<T>(
+        public static StoreResult StoreContentObject<T>(
             this IContentStore store,
             T value,
             string contentName)
@@ -39,7 +39,7 @@ namespace Chunkyard
                 contentName);
         }
 
-        public static ContentReference StoreContentObject<T>(
+        public static StoreResult StoreContentObject<T>(
             this IContentStore store,
             T value,
             ContentReference previousContentReference)

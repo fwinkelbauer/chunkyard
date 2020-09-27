@@ -102,7 +102,7 @@ namespace Chunkyard.Tests
         {
             public bool StorePreviousContentCalled { get; private set; }
 
-            public override ContentReference StoreContent(
+            public override StoreResult StoreContent(
                 Stream inputStream,
                 ContentReference previousContentReference)
             {
