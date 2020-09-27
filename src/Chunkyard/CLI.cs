@@ -60,9 +60,14 @@ namespace Chunkyard
             foreach (var foundTuple in foundTuples)
             {
                 using var fileStream = File.OpenRead(foundTuple.FoundFile);
-                snapshotBuilder.AddContent(fileStream, foundTuple.ContentName);
+                var newContent = snapshotBuilder.AddContent(
+                    fileStream,
+                    foundTuple.ContentName);
 
-                Console.WriteLine($"Stored: {foundTuple.ContentName}");
+                if (newContent)
+                {
+                    Console.WriteLine($"Stored: {foundTuple.ContentName}");
+                }
             }
 
             var newLogPosition = snapshotBuilder.WriteSnapshot(DateTime.Now);
@@ -75,7 +80,7 @@ namespace Chunkyard
                 if (!contentStore.ContentExists(contentReference))
                 {
                     throw new ChunkyardException(
-                        "Detected errors while creating snapshot");
+                        $"Missing content {contentReference.Name} after creating snapshot");
                 }
             }
 
@@ -107,10 +112,6 @@ namespace Chunkyard
                     Console.WriteLine($"Corrupted: {contentReference.Name}");
 
                     error = true;
-                }
-                else
-                {
-                    Console.WriteLine($"Validated: {contentReference.Name}");
                 }
             }
 
@@ -271,11 +272,21 @@ namespace Chunkyard
                 return;
             }
 
+            var removed = 0;
+
             foreach (var contentUri in allContentUris.Except(usedUris))
             {
                 repository.RemoveValue(contentUri);
+                removed++;
+            }
 
-                Console.WriteLine($"Removed: {contentUri}");
+            if (removed > 0)
+            {
+                var word = removed == 1
+                    ? "chunk"
+                    : "chunks";
+
+                Console.WriteLine($"Removed {removed} {word}");
             }
         }
 
@@ -355,11 +366,7 @@ namespace Chunkyard
             {
                 var contentValue = sourceRepository.RetrieveValue(snapshotUri);
 
-                if (destinationRepository.ValueExists(snapshotUri))
-                {
-                    Console.WriteLine($"Exists: {snapshotUri}");
-                }
-                else
+                if (!destinationRepository.ValueExists(snapshotUri))
                 {
                     destinationRepository.StoreValue(snapshotUri, contentValue);
                     Console.WriteLine($"Transmitted: {snapshotUri}");

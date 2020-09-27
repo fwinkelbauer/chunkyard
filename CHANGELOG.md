@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - A shallow check after creating a new snapshot using the `create` command
 
+### Changed
+
+- A few commands to be less verbose
+
 ## 1.0.0 - 2020-09-20
 
 ### Added
