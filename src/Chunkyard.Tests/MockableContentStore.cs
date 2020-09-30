@@ -36,13 +36,9 @@ namespace Chunkyard.Tests
             return _store.StoreContent(inputStream, contentName);
         }
 
-        public virtual StoreResult StoreContent(
-            Stream inputStream,
-            ContentReference previousContentReference)
+        public virtual void RegisterContent(ContentReference contentReference)
         {
-            return _store.StoreContent(
-                inputStream,
-                previousContentReference);
+            _store.RegisterContent(contentReference);
         }
 
         public virtual bool ContentExists(ContentReference contentReference)

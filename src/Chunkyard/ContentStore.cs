@@ -18,6 +18,7 @@ namespace Chunkyard
         private readonly byte[] _salt;
         private readonly int _iterations;
         private readonly byte[] _key;
+        private readonly Dictionary<string, ContentReference> _knownContentReferences;
 
         private int? _currentLogPosition;
 
@@ -54,6 +55,8 @@ namespace Chunkyard
             }
 
             _key = AesGcmCrypto.PasswordToKey(password, _salt, _iterations);
+
+            _knownContentReferences = new Dictionary<string, ContentReference>();
         }
 
         public int? CurrentLogPosition
@@ -95,37 +98,33 @@ namespace Chunkyard
             Stream inputStream,
             string contentName)
         {
-            var nonce = AesGcmCrypto.GenerateNonce();
-
-            var result = WriteChunks(nonce, inputStream);
-
-            return new StoreResult(
-                new ContentReference(
-                    contentName,
-                    nonce,
-                    result.ChunkReferences),
-                result.NewChunks);
-        }
-
-        public StoreResult StoreContent(
-            Stream inputStream,
-            ContentReference previousContentReference)
-        {
-            inputStream.EnsureNotNull(nameof(inputStream));
-            previousContentReference.EnsureNotNull(
-                nameof(previousContentReference));
+            _knownContentReferences.TryGetValue(
+                contentName,
+                out var knownContentReference);
 
             // Known files should be encrypted using the same nonce
-            var nonce = previousContentReference.Nonce;
+            var nonce = knownContentReference == null
+                ? AesGcmCrypto.GenerateNonce()
+                : knownContentReference.Nonce;
 
             var result = WriteChunks(nonce, inputStream);
 
-            return new StoreResult(
-                new ContentReference(
-                    previousContentReference.Name,
-                    nonce,
-                    result.ChunkReferences),
-                result.NewChunks);
+            var contentReference = new ContentReference(
+                contentName,
+                nonce,
+                result.ChunkReferences);
+
+            RegisterContent(contentReference);
+
+            return new StoreResult(contentReference, result.NewChunks);
+        }
+
+        public void RegisterContent(ContentReference contentReference)
+        {
+            contentReference.EnsureNotNull(nameof(contentReference));
+
+            _knownContentReferences[contentReference.Name] =
+                contentReference;
         }
 
         public bool ContentExists(ContentReference contentReference)

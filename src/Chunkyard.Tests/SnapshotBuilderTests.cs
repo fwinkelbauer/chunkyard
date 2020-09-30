@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -27,21 +28,20 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void AddContent_Detects_Previous_Content()
+        public static void Constructor_Detects_Previous_Snapshot()
         {
             var contentStore = new ContentStoreSpy();
             var snapshotBuilder = new SnapshotBuilder(contentStore);
 
-            using var contentStream1 = CreateContent();
+            using var contentStream = CreateContent();
 
-            snapshotBuilder.AddContent(contentStream1, "some content");
+            snapshotBuilder.AddContent(contentStream, "some content");
             snapshotBuilder.WriteSnapshot(DateTime.Now);
 
-            using var contentStream2 = CreateContent();
-            snapshotBuilder.AddContent(contentStream2, "some content");
-            snapshotBuilder.WriteSnapshot(DateTime.Now);
+            snapshotBuilder = new SnapshotBuilder(contentStore);
 
-            Assert.True(contentStore.StorePreviousContentCalled);
+            Assert.True(
+                contentStore.RegisteredContentNames.Contains("some content"));
         }
 
         [Fact]
@@ -99,17 +99,18 @@ namespace Chunkyard.Tests
 
         private class ContentStoreSpy : MockableContentStore
         {
-            public bool StorePreviousContentCalled { get; private set; }
-
-            public override StoreResult StoreContent(
-                Stream inputStream,
-                ContentReference previousContentReference)
+            public ContentStoreSpy()
             {
-                StorePreviousContentCalled = true;
+                RegisteredContentNames = new List<string>();
+            }
 
-                return base.StoreContent(
-                    inputStream,
-                    previousContentReference);
+            public IList<string> RegisteredContentNames { get; }
+
+            public override void RegisterContent(ContentReference contentReference)
+            {
+                RegisteredContentNames.Add(contentReference.Name);
+
+                base.RegisterContent(contentReference);
             }
         }
     }

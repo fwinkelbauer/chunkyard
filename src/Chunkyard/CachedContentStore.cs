@@ -60,35 +60,9 @@ namespace Chunkyard
             return result;
         }
 
-        public StoreResult StoreContent(
-            Stream inputStream,
-            ContentReference previousContentReference)
+        public void RegisterContent(ContentReference contentReference)
         {
-            if (!(inputStream is FileStream fileStream))
-            {
-                return _contentStore.StoreContent(
-                    inputStream,
-                    previousContentReference);
-            }
-
-            var storedReference = RetrieveFromCache(
-                fileStream,
-                previousContentReference.Name);
-
-            if (storedReference != null)
-            {
-                return new StoreResult(storedReference, false);
-            }
-
-            var result = _contentStore.StoreContent(
-                inputStream,
-                previousContentReference);
-
-            StoreInCache(
-                fileStream,
-                result.ContentReference);
-
-            return result;
+            _contentStore.RegisterContent(contentReference);
         }
 
         public bool ContentExists(ContentReference contentReference)

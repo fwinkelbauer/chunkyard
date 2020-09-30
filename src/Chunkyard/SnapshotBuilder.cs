@@ -11,14 +11,12 @@ namespace Chunkyard
     public class SnapshotBuilder
     {
         private readonly IContentStore _contentStore;
-        private readonly Dictionary<string, ContentReference> _knownContentReferences;
         private readonly List<ContentReference> _storedContentReferences;
 
         public SnapshotBuilder(IContentStore contentStore)
         {
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
 
-            _knownContentReferences = new Dictionary<string, ContentReference>();
             _storedContentReferences = new List<ContentReference>();
 
             if (_contentStore.CurrentLogPosition == null)
@@ -31,34 +29,15 @@ namespace Chunkyard
 
             foreach (var contentReference in currentSnapshot.ContentReferences)
             {
-                _knownContentReferences.Add(
-                    contentReference.Name,
-                    contentReference);
+                _contentStore.RegisterContent(contentReference);
             }
         }
 
         public bool AddContent(Stream inputStream, string contentName)
         {
-            StoreResult? result;
-
-            _knownContentReferences.TryGetValue(
-                contentName,
-                out var previousContentReference);
-
-            if (previousContentReference == null)
-            {
-                result = _contentStore.StoreContent(inputStream, contentName);
-            }
-            else
-            {
-                result = _contentStore.StoreContent(
-                    inputStream,
-                    previousContentReference);
-            }
+            var result = _contentStore.StoreContent(inputStream, contentName);
 
             _storedContentReferences.Add(result.ContentReference);
-            _knownContentReferences[result.ContentReference.Name] =
-                result.ContentReference;
 
             return result.NewContent;
         }

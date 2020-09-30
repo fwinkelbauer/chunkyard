@@ -50,7 +50,7 @@ namespace Chunkyard.Tests
             using var secondStream = new MemoryStream(bytes);
             var secondResult = contentStore.StoreContent(
                 secondStream,
-                firstResult.ContentReference);
+                contentName);
 
             Assert.True(firstResult.NewContent);
             Assert.False(secondResult.NewContent);
