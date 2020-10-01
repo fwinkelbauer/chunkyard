@@ -94,7 +94,7 @@ namespace Chunkyard
             }
         }
 
-        public StoreResult StoreContent(
+        public (ContentReference ContentReference, bool NewContent) StoreContent(
             Stream inputStream,
             string contentName)
         {
@@ -116,7 +116,7 @@ namespace Chunkyard
 
             RegisterContent(contentReference);
 
-            return new StoreResult(contentReference, result.NewChunks);
+            return (contentReference, result.NewChunks);
         }
 
         public void RegisterContent(ContentReference contentReference)

@@ -14,7 +14,7 @@ namespace Chunkyard
         private static readonly string HomeDirectory =
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        public static IEnumerable<(string AbsolutePath, string RelativePath)> Find(
+        public static IEnumerable<(string AbsolutePath, string PartialPath)> Find(
             IEnumerable<string> files,
             IEnumerable<string> excludePatterns)
         {
@@ -28,11 +28,11 @@ namespace Chunkyard
 
                 foreach (var absolutePath in Find(resolvedPath, patterns))
                 {
-                    var relativePath = Path.GetRelativePath(
+                    var partialPath = Path.GetRelativePath(
                         parentPath,
                         absolutePath);
 
-                    yield return (absolutePath, relativePath);
+                    yield return (absolutePath, partialPath);
                 }
             }
         }

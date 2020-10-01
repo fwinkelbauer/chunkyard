@@ -71,7 +71,7 @@ namespace Chunkyard
 
             foreach (var file in files)
             {
-                Console.WriteLine(file.RelativePath);
+                Console.WriteLine(file.PartialPath);
             }
         }
 
@@ -107,11 +107,11 @@ namespace Chunkyard
                 using var fileStream = File.OpenRead(file.AbsolutePath);
                 var newContent = cli._snapshotBuilder.AddContent(
                     fileStream,
-                    file.RelativePath);
+                    file.PartialPath);
 
                 if (newContent)
                 {
-                    Console.WriteLine($"Stored: {file.RelativePath}");
+                    Console.WriteLine($"Stored: {file.PartialPath}");
                 }
             }
 
