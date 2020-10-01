@@ -12,8 +12,8 @@ namespace Chunkyard.Build
         {
             try
             {
-               ProcessArguments(
-                   args ?? throw new ArgumentNullException(nameof(args)));
+                ProcessArguments(
+                    args ?? throw new ArgumentNullException(nameof(args)));
             }
             catch (Exception e)
             {
