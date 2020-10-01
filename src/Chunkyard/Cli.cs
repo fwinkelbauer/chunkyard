@@ -67,11 +67,11 @@ namespace Chunkyard
 
         public static void PreviewFiles(PreviewOptions o)
         {
-            var foundTuples = FileFetcher.Find(o.Files, o.ExcludePatterns);
+            var files = FileFetcher.Find(o.Files, o.ExcludePatterns);
 
-            foreach (var foundTuple in foundTuples)
+            foreach (var file in files)
             {
-                Console.WriteLine(foundTuple.ContentName);
+                Console.WriteLine(file.RelativePath);
             }
         }
 
@@ -92,26 +92,26 @@ namespace Chunkyard
                 new FastCdc(o.Min, o.Avg, o.Max),
                 o.Cached);
 
-            var foundTuples = FileFetcher
+            var files = FileFetcher
                 .Find(o.Files, o.ExcludePatterns)
                 .ToArray();
 
-            if (foundTuples.Length == 0)
+            if (files.Length == 0)
             {
                 Console.WriteLine("Nothing to do");
                 return;
             }
 
-            foreach (var foundTuple in foundTuples)
+            foreach (var file in files)
             {
-                using var fileStream = File.OpenRead(foundTuple.FoundFile);
+                using var fileStream = File.OpenRead(file.AbsolutePath);
                 var newContent = cli._snapshotBuilder.AddContent(
                     fileStream,
-                    foundTuple.ContentName);
+                    file.RelativePath);
 
                 if (newContent)
                 {
-                    Console.WriteLine($"Stored: {foundTuple.ContentName}");
+                    Console.WriteLine($"Stored: {file.RelativePath}");
                 }
             }
 
