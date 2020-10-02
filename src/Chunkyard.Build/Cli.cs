@@ -20,9 +20,21 @@ namespace Chunkyard.Build
 
         public static void Clean()
         {
-            if (Directory.Exists(ArtifactsDirectory))
+            var dirInfo = new DirectoryInfo(ArtifactsDirectory);
+
+            if (!dirInfo.Exists)
             {
-                Directory.Delete(ArtifactsDirectory, true);
+                return;
+            }
+
+            foreach (var file in dirInfo.GetFiles())
+            {
+                dirInfo.Delete();
+            }
+
+            foreach (var dir in dirInfo.GetDirectories())
+            {
+                dirInfo.Delete(true);
             }
         }
 
