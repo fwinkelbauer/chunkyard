@@ -400,8 +400,7 @@ namespace Chunkyard
 
             foreach (var logPosition in newLogPositions)
             {
-                Console.WriteLine(
-                    $"Transmitting snapshot: {logPosition}");
+                Console.WriteLine($"Transmitting snapshot: {logPosition}");
 
                 sourceCli.PushSnapshot(
                     logPosition,
@@ -423,8 +422,6 @@ namespace Chunkyard
                 {
                     var contentValue = _repository.RetrieveValue(snapshotUri);
                     destinationRepository.StoreValue(snapshotUri, contentValue);
-
-                    Console.WriteLine($"Transmitted: {snapshotUri}");
                 }
             }
 
