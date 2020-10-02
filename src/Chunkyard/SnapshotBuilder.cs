@@ -46,7 +46,7 @@ namespace Chunkyard
         {
             var result = _contentStore.StoreContentObject(
                 new Snapshot(creationTime, _storedContentReferences),
-                string.Empty);
+                ".chunkyard-snapshot");
 
             _storedContentReferences.Clear();
 

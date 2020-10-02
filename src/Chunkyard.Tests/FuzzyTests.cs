@@ -7,7 +7,7 @@ namespace Chunkyard.Tests
         [Fact]
         public static void EmptyPattern_Matches_Everything()
         {
-            var fuzzy = new Fuzzy(string.Empty);
+            var fuzzy = new Fuzzy("");
 
             Assert.True(fuzzy.IsMatch("some text!"));
         }

@@ -76,7 +76,7 @@ namespace Chunkyard
         private static string ToHexString(byte[] hash)
         {
             return BitConverter.ToString(hash)
-                .Replace("-", string.Empty)
+                .Replace("-", "")
                 .ToLower();
         }
     }

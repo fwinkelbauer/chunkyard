@@ -157,8 +157,8 @@ namespace Chunkyard
             var hashAlgorithmName = Path.GetFileName(
                 Path.GetDirectoryName(
                     Path.GetDirectoryName(filePath)
-                    ?? string.Empty))
-                ?? string.Empty;
+                    ?? ""))
+                ?? "";
 
             return Id.ToContentUri(
                 hashAlgorithmName,
