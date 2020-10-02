@@ -29,7 +29,7 @@ namespace Chunkyard.Build
 
             foreach (var file in dirInfo.GetFiles())
             {
-                dirInfo.Delete();
+                file.Delete();
             }
 
             foreach (var dir in dirInfo.GetDirectories())
