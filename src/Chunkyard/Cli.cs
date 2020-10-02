@@ -63,12 +63,16 @@ namespace Chunkyard
 
         public static void PushSnapshots(PushOptions o)
         {
-            PushSnapshots(o.SourceRepository, o.DestinationRepository);
+            PushSnapshots(
+                o.SourceRepository,
+                o.DestinationRepository);
         }
 
         public static void PullSnapshots(PullOptions o)
         {
-            PushSnapshots(o.SourceRepository, o.DestinationRepository);
+            PushSnapshots(
+                o.SourceRepository,
+                o.DestinationRepository);
         }
 
         public static void CreateSnapshot(CreateOptions o)
@@ -399,21 +403,17 @@ namespace Chunkyard
                 Console.WriteLine(
                     $"Transmitting snapshot: {logPosition}");
 
-                PushSnapshot(
-                    sourceCli._repository,
-                    sourceCli._snapshotBuilder,
+                sourceCli.PushSnapshot(
                     logPosition,
                     destinationCli._repository);
             }
         }
 
-        private static void PushSnapshot(
-            IRepository sourceRepository,
-            SnapshotBuilder snapshotBuilder,
+        private void PushSnapshot(
             int logPosition,
             IRepository destinationRepository)
         {
-            var snapshotUris = snapshotBuilder
+            var snapshotUris = _snapshotBuilder
                 .ListUris(logPosition)
                 .ToArray();
 
@@ -421,14 +421,14 @@ namespace Chunkyard
             {
                 if (!destinationRepository.ValueExists(snapshotUri))
                 {
-                    var contentValue = sourceRepository.RetrieveValue(snapshotUri);
+                    var contentValue = _repository.RetrieveValue(snapshotUri);
                     destinationRepository.StoreValue(snapshotUri, contentValue);
 
                     Console.WriteLine($"Transmitted: {snapshotUri}");
                 }
             }
 
-            var logValue = sourceRepository.RetrieveFromLog(logPosition);
+            var logValue = _repository.RetrieveFromLog(logPosition);
 
             destinationRepository.AppendToLog(logValue, logPosition);
         }
