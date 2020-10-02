@@ -316,6 +316,11 @@ namespace Chunkyard
             _maskL = Mask(bits - 1);
         }
 
+        public FastCdc()
+            : this(DefaultMin, DefaultAvg, DefaultMax)
+        {
+        }
+
         public IEnumerable<byte[]> SplitIntoChunks(Stream sourceStream)
         {
             sourceStream.EnsureNotNull(nameof(sourceStream));

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## Unreleased
 
+### Fixed
+
+- The duplicate password prompt when using the `push` and `pull` commands
+
 ## 1.1.0 - 2020-09-30
 
 ### Added

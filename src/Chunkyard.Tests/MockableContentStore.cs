@@ -12,10 +12,7 @@ namespace Chunkyard.Tests
         {
             _store = new ContentStore(
                 repository ?? new MemoryRepository(),
-                new FastCdc(
-                    2 * 1024 * 1024,
-                    4 * 1024 * 1024,
-                    8 * 1024 * 1024),
+                new FastCdc(),
                 HashAlgorithmName.SHA256,
                 new StaticPrompt());
         }

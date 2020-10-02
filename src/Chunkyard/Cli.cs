@@ -20,48 +20,34 @@ namespace Chunkyard
             "chunkyard",
             "cache");
 
+        private static readonly HashAlgorithmName DefaultAlgorithm =
+            HashAlgorithmName.SHA256;
+
         private readonly IRepository _repository;
         private readonly IContentStore _contentStore;
         private readonly SnapshotBuilder _snapshotBuilder;
 
-        private Cli(string repositoryPath, FastCdc fastCdc, bool cached)
+        private Cli(IRepository repository, IContentStore contentStore)
+        {
+            _repository = repository;
+            _contentStore = contentStore;
+            _snapshotBuilder = new SnapshotBuilder(_contentStore);
+        }
+
+        private Cli(string repositoryPath, IPrompt prompt)
         {
             _repository = CreateRepository(repositoryPath);
-
             _contentStore = new ContentStore(
                 _repository,
-                fastCdc,
-                HashAlgorithmName.SHA256,
-                new EnvironmentPrompt(
-                    new ConsolePrompt()));
-
-            if (cached)
-            {
-                // Each repository should have its own cache
-                var shortHash = Id.ComputeHash(
-                    HashAlgorithmName.SHA256,
-                    _repository.RepositoryUri.AbsoluteUri)
-                    .Substring(0, 8);
-
-                var cacheDirectory = Path.Combine(
-                    CacheDirectoryPath,
-                    shortHash);
-
-                Console.WriteLine($"Using cache: {cacheDirectory}");
-
-                _contentStore = new CachedContentStore(
-                    _contentStore,
-                    cacheDirectory);
-            }
+                new FastCdc(),
+                DefaultAlgorithm,
+                prompt);
 
             _snapshotBuilder = new SnapshotBuilder(_contentStore);
         }
 
         private Cli(string repositoryPath)
-            : this(
-                repositoryPath,
-                new FastCdc(FastCdc.DefaultMin, FastCdc.DefaultAvg, FastCdc.DefaultMax),
-                false)
+            : this(repositoryPath, CreatePrompt())
         {
         }
 
@@ -87,10 +73,33 @@ namespace Chunkyard
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            var cli = new Cli(
-                o.Repository,
+            var repository = CreateRepository(o.Repository);
+            IContentStore contentStore = new ContentStore(
+                repository,
                 new FastCdc(o.Min, o.Avg, o.Max),
-                o.Cached);
+                DefaultAlgorithm,
+                CreatePrompt());
+
+            if (o.Cached)
+            {
+                // Each repository should have its own cache
+                var shortHash = Id.ComputeHash(
+                    HashAlgorithmName.SHA256,
+                    repository.RepositoryUri.AbsoluteUri)
+                    .Substring(0, 8);
+
+                var cacheDirectory = Path.Combine(
+                    CacheDirectoryPath,
+                    shortHash);
+
+                Console.WriteLine($"Using cache: {cacheDirectory}");
+
+                contentStore = new CachedContentStore(
+                    contentStore,
+                    cacheDirectory);
+            }
+
+            var cli = new Cli(repository, contentStore);
 
             var files = FileFetcher
                 .Find(o.Files, o.ExcludePatterns)
@@ -120,8 +129,7 @@ namespace Chunkyard
 
             var newSnapshot = cli._snapshotBuilder.GetSnapshot(newLogPosition);
 
-            // Perform a shallow check to make sure that our new snapshot is
-            // alright
+            // Perform a shallow check to make sure that our new snapshot is alright
             foreach (var contentReference in newSnapshot.ContentReferences)
             {
                 if (!cli._contentStore.ContentExists(contentReference))
@@ -344,8 +352,10 @@ namespace Chunkyard
             string sourceRepositoryPath,
             string destinationRepositoryPath)
         {
-            var sourceCli = new Cli(sourceRepositoryPath);
-            var destinationCli = new Cli(destinationRepositoryPath);
+            var prompt = CreatePrompt();
+
+            var sourceCli = new Cli(sourceRepositoryPath, prompt);
+            var destinationCli = new Cli(destinationRepositoryPath, prompt);
 
             var sourceLogs = sourceCli._repository
                 .ListLogPositions()
@@ -426,6 +436,12 @@ namespace Chunkyard
         private static IRepository CreateRepository(string repositoryPath)
         {
             return new FileRepository(repositoryPath);
+        }
+
+        private static IPrompt CreatePrompt()
+        {
+            return new EnvironmentPrompt(
+                new ConsolePrompt());
         }
 
         private static ContentReference[] FuzzyFilter(
