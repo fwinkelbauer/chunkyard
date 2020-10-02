@@ -13,10 +13,10 @@ tools. Here's a list of [options](https://github.com/restic/others).
 
 ## Goals
 
-- Favor simplicity and readability over features
+- Favor simplicity and readability over features and performance
 - Strong encryption (AES Galois/Counter Mode using a 256 bit key)
 - Ability to push/pull from other repositories
-- Verify-able backups
+- Verifiable backups
 
 **Warning:** Chunkyard is vulnerable to CDC fingerprinting attacks. By observing
 the sizes of chunks in a repository, an attacker might be able to prove that a
@@ -30,26 +30,20 @@ specific file exists in the backup.
 
 ## Build
 
-Run any of the below build scripts:
+Run any of the below build scripts to create a binary in `./artifacts`:
 
 ``` shell
-./build.sh
+./make.sh
 
-.\build.ps1
-.\build.bat
-```
-
-Create a binary in `./artifacts` by running:
-
-``` shell
-./build.sh publish
+.\make.ps1
+.\make.bat
 ```
 
 Install the dotnet format tool to use the `fmt` command:
 
 ``` shell
 dotnet tool install -g dotnet-format
-./build.sh fmt
+./make.sh fmt
 ```
 
 ## Usage
@@ -87,9 +81,8 @@ directories=(
 
 export CHUNKYARD_PASSWORD="my secret password"
 
-# Create and check backup
+# Create backup (and also run a shallow check)
 chunkyard create -r "$repo" -f ${directories[*]} --cached
-chunkyard check -r "$repo" --shallow
 
 # Keep the latest four backups
 chunkyard keep -r "$repo" -l 4
