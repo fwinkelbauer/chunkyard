@@ -262,8 +262,10 @@ namespace Chunkyard
             foreach (var logPosition in logPositions)
             {
                 var snapshot = cli._snapshotBuilder.GetSnapshot(logPosition);
+                var isoDate = snapshot.CreationTime.ToString(
+                    "yyyy-MM-dd HH:mm:ss");
 
-                Console.WriteLine($"{logPosition}: {snapshot.CreationTime}");
+                Console.WriteLine($"{logPosition}: {isoDate}");
             }
         }
 
