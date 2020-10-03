@@ -15,7 +15,7 @@ namespace Chunkyard
             ContentReference contentReference,
             Stream outputStream);
 
-        (ContentReference ContentReference, bool NewContent) StoreContent(
+        (ContentReference ContentReference, bool IsNewContent) StoreContent(
             Stream inputStream,
             string contentName);
 

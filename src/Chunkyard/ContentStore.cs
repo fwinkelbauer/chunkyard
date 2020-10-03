@@ -94,7 +94,7 @@ namespace Chunkyard
             }
         }
 
-        public (ContentReference ContentReference, bool NewContent) StoreContent(
+        public (ContentReference ContentReference, bool IsNewContent) StoreContent(
             Stream inputStream,
             string contentName)
         {

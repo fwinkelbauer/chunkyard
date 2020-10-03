@@ -39,7 +39,7 @@ namespace Chunkyard
 
             _storedContentReferences.Add(result.ContentReference);
 
-            return result.NewContent;
+            return result.IsNewContent;
         }
 
         public int WriteSnapshot(DateTime creationTime)

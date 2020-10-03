@@ -31,7 +31,7 @@ namespace Chunkyard
             _contentStore.RetrieveContent(contentReference, outputStream);
         }
 
-        public (ContentReference ContentReference, bool NewContent) StoreContent(
+        public (ContentReference ContentReference, bool IsNewContent) StoreContent(
             Stream inputStream,
             string contentName)
         {

@@ -27,7 +27,7 @@ namespace Chunkyard.Tests
 
             var actualBytes = outputStream.ToArray();
 
-            Assert.True(result.NewContent);
+            Assert.True(result.IsNewContent);
             Assert.Equal(expectedBytes, actualBytes);
             Assert.Equal(contentName, result.ContentReference.Name);
             Assert.True(contentStore.ContentExists(result.ContentReference));
@@ -35,7 +35,7 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void Store_Indicates_NewContent_If_Stored_Twice()
+        public static void Store_Changes_IsNewContent_If_Stored_Twice()
         {
             var contentStore = CreateContentStore();
 
@@ -52,8 +52,8 @@ namespace Chunkyard.Tests
                 secondStream,
                 contentName);
 
-            Assert.True(firstResult.NewContent);
-            Assert.False(secondResult.NewContent);
+            Assert.True(firstResult.IsNewContent);
+            Assert.False(secondResult.IsNewContent);
         }
 
         [Fact]

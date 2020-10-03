@@ -115,17 +115,26 @@ namespace Chunkyard
                 return;
             }
 
+            var isNewSnapshot = false;
+
             foreach (var file in files)
             {
                 using var fileStream = File.OpenRead(file.AbsolutePath);
-                var newContent = cli._snapshotBuilder.AddContent(
+                var isNewContent = cli._snapshotBuilder.AddContent(
                     fileStream,
                     file.PartialPath);
 
-                if (newContent)
+                if (isNewContent)
                 {
+                    isNewSnapshot = true;
                     Console.WriteLine($"Stored: {file.PartialPath}");
                 }
+            }
+
+            if (!isNewSnapshot)
+            {
+                Console.WriteLine("Nothing to do");
+                return;
             }
 
             var newLogPosition = cli._snapshotBuilder.WriteSnapshot(

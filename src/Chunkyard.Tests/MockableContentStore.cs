@@ -26,7 +26,7 @@ namespace Chunkyard.Tests
             _store.RetrieveContent(contentReference, outputStream);
         }
 
-        public virtual (ContentReference ContentReference, bool NewContent) StoreContent(
+        public virtual (ContentReference ContentReference, bool IsNewContent) StoreContent(
             Stream inputStream,
             string contentName)
         {
