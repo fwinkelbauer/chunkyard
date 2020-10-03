@@ -31,6 +31,7 @@ specific file exists in the backup.
 - Key management
 - Compression
 - File meta data preservation (e.g. creation time, flags, ...)
+- Extended features such as branching
 
 ## Build
 
