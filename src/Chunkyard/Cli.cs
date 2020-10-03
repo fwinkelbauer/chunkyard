@@ -111,7 +111,7 @@ namespace Chunkyard
 
             if (files.Length == 0)
             {
-                Console.WriteLine("Nothing to do");
+                Console.WriteLine("Empty file list");
                 return;
             }
 
@@ -133,7 +133,7 @@ namespace Chunkyard
 
             if (!isNewSnapshot)
             {
-                Console.WriteLine("Nothing to do");
+                Console.WriteLine("No new data to store.");
                 return;
             }
 
@@ -264,7 +264,7 @@ namespace Chunkyard
 
             if (logPositions.Length == 0)
             {
-                Console.WriteLine("Nothing to do");
+                Console.WriteLine("Repository is empty");
                 return;
             }
 
@@ -310,7 +310,7 @@ namespace Chunkyard
 
             if (logPositionsToDelete.Length == 0)
             {
-                Console.WriteLine("Nothing to do");
+                Console.WriteLine("There is nothing to delete");
                 return;
             }
 
@@ -341,7 +341,7 @@ namespace Chunkyard
 
             if (contentUrisToDelete.Length == 0)
             {
-                Console.WriteLine("Nothing to do");
+                Console.WriteLine("There is nothing to delete");
                 return;
             }
 
@@ -405,7 +405,7 @@ namespace Chunkyard
 
             if (newLogPositions.Length == 0)
             {
-                Console.WriteLine("Nothing to do");
+                Console.WriteLine("Repository is already up-to-date");
                 return;
             }
 
