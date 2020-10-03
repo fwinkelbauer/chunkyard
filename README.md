@@ -17,6 +17,10 @@ tools. Here's a list of [options](https://github.com/restic/others).
 - Strong encryption (AES Galois/Counter Mode using a 256 bit key)
 - Ability to push/pull from other repositories
 - Verifiable backups
+- Minimal dependencies. Currently the Chunkyard binary utilizes two packages:
+  - `commandlineparser`to create the command line interface
+  - `Newtonsoft.Json` to work with JSON data until I can switch to
+    `System.Text.Json`
 
 **Warning:** Chunkyard is vulnerable to CDC fingerprinting attacks. By observing
 the sizes of chunks in a repository, an attacker might be able to prove that a
