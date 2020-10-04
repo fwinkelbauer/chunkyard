@@ -395,6 +395,21 @@ namespace Chunkyard
                 }
             }
 
+            foreach (var logPosition in sourceLogs.Intersect(destinationLogs))
+            {
+                var sourceRef = sourceCli._contentStore.RetrieveFromLog(
+                    logPosition);
+
+                var destinationRef = destinationCli._contentStore.RetrieveFromLog(
+                    logPosition);
+
+                if (!sourceRef.Equals(destinationRef))
+                {
+                    throw new ChunkyardException(
+                        $"Repositories differ at common snapshot #{logPosition}");
+                }
+            }
+
             var destinationMax = destinationLogs.Length == 0
                 ? -1
                 : destinationLogs.Max();

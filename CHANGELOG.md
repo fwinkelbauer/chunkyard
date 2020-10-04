@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## Unreleased
 
+### Added
+
+- Checks when using the `push` and `pull` commands to ensure that common reflog items (snapshots) do not differ
+
 ### Changed
 
 - The `push` and `pull` commands to be less verbose
