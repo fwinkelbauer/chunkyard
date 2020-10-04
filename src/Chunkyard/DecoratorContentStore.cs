@@ -1,51 +1,46 @@
 ﻿using System;
 using System.IO;
-using System.Security.Cryptography;
 
-namespace Chunkyard.Tests
+namespace Chunkyard
 {
-    public class MockableContentStore : IContentStore
+    public abstract class DecoratorContentStore : IContentStore
     {
-        private readonly IContentStore _store;
-
-        public MockableContentStore(IRepository? repository = null)
+        public DecoratorContentStore(IContentStore store)
         {
-            _store = new ContentStore(
-                repository ?? new MemoryRepository(),
-                new FastCdc(),
-                HashAlgorithmName.SHA256,
-                new StaticPrompt());
+            Store = store;
         }
 
-        public int? CurrentLogPosition => _store.CurrentLogPosition;
+        protected IContentStore Store { get; }
+
+        public virtual int? CurrentLogPosition => Store.CurrentLogPosition;
 
         public virtual void RetrieveContent(
             ContentReference contentReference,
             Stream outputStream)
         {
-            _store.RetrieveContent(contentReference, outputStream);
+            Store.RetrieveContent(contentReference, outputStream);
         }
 
         public virtual (ContentReference ContentReference, bool IsNewContent) StoreContent(
             Stream inputStream,
             string contentName)
         {
-            return _store.StoreContent(inputStream, contentName);
+            return Store.StoreContent(inputStream, contentName);
         }
 
         public virtual void RegisterContent(ContentReference contentReference)
         {
-            _store.RegisterContent(contentReference);
+            Store.RegisterContent(contentReference);
         }
 
         public virtual bool ContentExists(ContentReference contentReference)
         {
-            return _store.ContentExists(contentReference);
+            return Store.ContentExists(contentReference);
         }
 
         public virtual bool ContentValid(ContentReference contentReference)
         {
-            return _store.ContentValid(contentReference);
+            return Store.ContentValid(contentReference);
         }
 
         public virtual int AppendToLog(
@@ -53,7 +48,7 @@ namespace Chunkyard.Tests
             ContentReference contentReference,
             int newLogPosition)
         {
-            return _store.AppendToLog(
+            return Store.AppendToLog(
                 logId,
                 contentReference,
                 newLogPosition);
@@ -61,7 +56,7 @@ namespace Chunkyard.Tests
 
         public virtual LogReference RetrieveFromLog(int logPosition)
         {
-            return _store.RetrieveFromLog(logPosition);
+            return Store.RetrieveFromLog(logPosition);
         }
     }
 }

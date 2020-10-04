@@ -9,35 +9,25 @@ namespace Chunkyard
     /// in a separate cache. This cache can be used to skip store operations if
     /// the files (based on their meta data) have not changed.
     /// </summary>
-    internal class CachedContentStore : IContentStore
+    internal class CachedContentStore : DecoratorContentStore
     {
-        private readonly IContentStore _contentStore;
         private readonly string _cacheDirectory;
 
         public CachedContentStore(
             IContentStore contentStore,
             string cacheDirectory)
+            : base(contentStore)
         {
-            _contentStore = contentStore;
             _cacheDirectory = cacheDirectory;
         }
 
-        public int? CurrentLogPosition => _contentStore.CurrentLogPosition;
-
-        public void RetrieveContent(
-            ContentReference contentReference,
-            Stream outputStream)
-        {
-            _contentStore.RetrieveContent(contentReference, outputStream);
-        }
-
-        public (ContentReference ContentReference, bool IsNewContent) StoreContent(
+        public override (ContentReference ContentReference, bool IsNewContent) StoreContent(
             Stream inputStream,
             string contentName)
         {
             if (!(inputStream is FileStream fileStream))
             {
-                return _contentStore.StoreContent(
+                return Store.StoreContent(
                     inputStream,
                     contentName);
             }
@@ -49,7 +39,7 @@ namespace Chunkyard
                 return (storedReference, false);
             }
 
-            var result = _contentStore.StoreContent(
+            var result = Store.StoreContent(
                 inputStream,
                 contentName);
 
@@ -58,37 +48,6 @@ namespace Chunkyard
                 result.ContentReference);
 
             return result;
-        }
-
-        public void RegisterContent(ContentReference contentReference)
-        {
-            _contentStore.RegisterContent(contentReference);
-        }
-
-        public bool ContentExists(ContentReference contentReference)
-        {
-            return _contentStore.ContentExists(contentReference);
-        }
-
-        public bool ContentValid(ContentReference contentReference)
-        {
-            return _contentStore.ContentValid(contentReference);
-        }
-
-        public int AppendToLog(
-            Guid logId,
-            ContentReference contentReference,
-            int newLogPosition)
-        {
-            return _contentStore.AppendToLog(
-                logId,
-                contentReference,
-                newLogPosition);
-        }
-
-        public LogReference RetrieveFromLog(int logPosition)
-        {
-            return _contentStore.RetrieveFromLog(logPosition);
         }
 
         private ContentReference? RetrieveFromCache(
@@ -111,7 +70,7 @@ namespace Chunkyard
             if (storedCache.Length == fileStream.Length
                 && storedCache.CreationDateUtc.Equals(creationDateUtc)
                 && storedCache.LastWriteDateUtc.Equals(lastWriteDateUtc)
-                && _contentStore.ContentExists(storedCache.ContentReference))
+                && Store.ContentExists(storedCache.ContentReference))
             {
                 return storedCache.ContentReference;
             }

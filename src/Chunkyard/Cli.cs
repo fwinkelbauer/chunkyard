@@ -23,34 +23,6 @@ namespace Chunkyard
         private static readonly HashAlgorithmName DefaultAlgorithm =
             HashAlgorithmName.SHA256;
 
-        private readonly IRepository _repository;
-        private readonly IContentStore _contentStore;
-        private readonly SnapshotBuilder _snapshotBuilder;
-
-        private Cli(IRepository repository, IContentStore contentStore)
-        {
-            _repository = repository;
-            _contentStore = contentStore;
-            _snapshotBuilder = new SnapshotBuilder(_contentStore);
-        }
-
-        private Cli(string repositoryPath, IPrompt prompt)
-        {
-            _repository = CreateRepository(repositoryPath);
-            _contentStore = new ContentStore(
-                _repository,
-                new FastCdc(),
-                DefaultAlgorithm,
-                prompt);
-
-            _snapshotBuilder = new SnapshotBuilder(_contentStore);
-        }
-
-        private Cli(string repositoryPath)
-            : this(repositoryPath, CreatePrompt())
-        {
-        }
-
         public static void PreviewFiles(PreviewOptions o)
         {
             var files = FileFetcher.Find(o.Files, o.ExcludePatterns);
@@ -61,28 +33,25 @@ namespace Chunkyard
             }
         }
 
-        public static void PushSnapshots(PushOptions o)
-        {
-            PushSnapshots(
-                o.SourceRepository,
-                o.DestinationRepository);
-        }
-
-        public static void PullSnapshots(PullOptions o)
-        {
-            PushSnapshots(
-                o.SourceRepository,
-                o.DestinationRepository);
-        }
-
         public static void CreateSnapshot(CreateOptions o)
         {
+            var files = FileFetcher
+                .Find(o.Files, o.ExcludePatterns)
+                .ToArray();
+
+            if (files.Length == 0)
+            {
+                Console.WriteLine("Empty file list");
+                return;
+            }
+
             var repository = CreateRepository(o.Repository);
-            IContentStore contentStore = new ContentStore(
-                repository,
-                new FastCdc(o.Min, o.Avg, o.Max),
-                DefaultAlgorithm,
-                CreatePrompt());
+            IContentStore contentStore = new PrintingContentStore(
+                new ContentStore(
+                    repository,
+                    new FastCdc(o.Min, o.Avg, o.Max),
+                    DefaultAlgorithm,
+                    CreatePrompt()));
 
             if (o.Cached)
             {
@@ -103,103 +72,63 @@ namespace Chunkyard
                     cacheDirectory);
             }
 
-            var cli = new Cli(repository, contentStore);
+            var snapshotStore = new SnapshotStore(
+                repository,
+                contentStore);
 
-            var files = FileFetcher
-                .Find(o.Files, o.ExcludePatterns)
-                .ToArray();
-
-            if (files.Length == 0)
-            {
-                Console.WriteLine("Empty file list");
-                return;
-            }
-
-            var isNewSnapshot = false;
-
-            foreach (var file in files)
-            {
-                using var fileStream = File.OpenRead(file.AbsolutePath);
-                var isNewContent = cli._snapshotBuilder.AddContent(
-                    fileStream,
-                    file.PartialPath);
-
-                if (isNewContent)
+            var logPosition = snapshotStore.AppendSnapshot(
+                files.Select(f =>
                 {
-                    isNewSnapshot = true;
-                    Console.WriteLine($"Stored: {file.PartialPath}");
-                }
-            }
+                    Func<Stream> openRead = () => File.OpenRead(f.AbsolutePath);
+                    return (f.PartialPath, openRead);
+                }),
+                DateTime.Now);
 
-            if (!isNewSnapshot)
+            if (logPosition == null)
             {
                 Console.WriteLine("No new data to store.");
                 return;
             }
 
-            var newLogPosition = cli._snapshotBuilder.WriteSnapshot(
-                DateTime.Now);
+            var snapshotValid = snapshotStore.CheckSnapshotValid(
+                logPosition.Value,
+                "");
 
-            var newSnapshot = cli._snapshotBuilder.GetSnapshot(newLogPosition);
-
-            // Perform a shallow check to make sure that our new snapshot is alright
-            foreach (var contentReference in newSnapshot.ContentReferences)
+            if (!snapshotValid)
             {
-                if (!cli._contentStore.ContentExists(contentReference))
-                {
-                    throw new ChunkyardException(
-                        $"Missing content {contentReference.Name} after creating snapshot");
-                }
+                throw new ChunkyardException(
+                    "Missign content after creating snapshot");
             }
-
-            Console.WriteLine($"Created snapshot: {newLogPosition}");
         }
 
         public static void CheckSnapshot(CheckOptions o)
         {
-            var cli = new Cli(o.Repository);
+            var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            var snapshot = cli._snapshotBuilder.GetSnapshot(o.LogPosition);
-            var filteredContentReferences = FuzzyFilter(
-                o.IncludeFuzzy,
-                snapshot.ContentReferences);
+            var ok = o.Shallow
+                ? snapshotStore.CheckSnapshotExists(
+                    o.LogPosition,
+                    o.IncludeFuzzy)
+                : snapshotStore.CheckSnapshotValid(
+                    o.LogPosition,
+                    o.IncludeFuzzy);
 
-            var error = false;
-
-            foreach (var contentReference in filteredContentReferences)
-            {
-                if (!cli._contentStore.ContentExists(contentReference))
-                {
-                    Console.WriteLine($"Missing: {contentReference.Name}");
-
-                    error = true;
-                }
-                else if (!o.Shallow
-                    && !cli._contentStore.ContentValid(contentReference))
-                {
-                    Console.WriteLine($"Corrupted: {contentReference.Name}");
-
-                    error = true;
-                }
-            }
-
-            if (error)
+            if (!ok)
             {
                 throw new ChunkyardException(
-                    "Detected errors while verifying snapshot");
+                    "Found errors while checking snapshot");
             }
         }
 
         public static void ShowSnapshot(ShowOptions o)
         {
-            var cli = new Cli(o.Repository);
+            var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            var snapshot = cli._snapshotBuilder.GetSnapshot(o.LogPosition);
-            var filteredContentReferences = FuzzyFilter(
-                o.IncludeFuzzy,
-                snapshot.ContentReferences);
+            var contentReferences = snapshotStore.ShowSnapshot(
+                o.LogPosition,
+                o.IncludeFuzzy);
 
-            foreach (var contentReference in filteredContentReferences)
+            foreach (var contentReference in contentReferences)
             {
                 Console.WriteLine(contentReference.Name);
             }
@@ -207,48 +136,27 @@ namespace Chunkyard
 
         public static void RestoreSnapshot(RestoreOptions o)
         {
-            var cli = new Cli(o.Repository);
+            var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            var snapshot = cli._snapshotBuilder.GetSnapshot(o.LogPosition);
-            var mode = o.Overwrite
-                ? FileMode.OpenOrCreate
-                : FileMode.CreateNew;
-
-            var filteredContentReferences = FuzzyFilter(
-                o.IncludeFuzzy,
-                snapshot.ContentReferences);
-
-            var error = false;
-
-            foreach (var contentReference in filteredContentReferences)
+            Func<string, Stream> openWrite = (s) =>
             {
-                var file = Path.Combine(
-                    o.Directory,
-                    contentReference.Name);
+                var mode = o.Overwrite
+                    ? FileMode.OpenOrCreate
+                    : FileMode.CreateNew;
 
-                try
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(file));
+                var file = Path.Combine(o.Directory, s);
 
-                    using var stream = new FileStream(
-                        file,
-                        mode,
-                        FileAccess.Write);
+                Directory.CreateDirectory(Path.GetDirectoryName(file));
 
-                    cli._contentStore.RetrieveContent(contentReference, stream);
+                return new FileStream(file, mode, FileAccess.Write);
+            };
 
-                    Console.WriteLine($"Restored: {file}");
+            var ok = snapshotStore.RestoreSnapshot(
+                o.LogPosition,
+                o.IncludeFuzzy,
+                openWrite);
 
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Error: {file}{Environment.NewLine}{e}");
-
-                    error = true;
-                }
-            }
-
-            if (error)
+            if (!ok)
             {
                 throw new ChunkyardException(
                     "Detected errors while restoring snapshot");
@@ -257,9 +165,9 @@ namespace Chunkyard
 
         public static void ListSnapshots(ListOptions o)
         {
-            var cli = new Cli(o.Repository);
-            var logPositions = cli._repository
-                .ListLogPositions()
+            var snapshotStore = CreateSnapshotStore(o.Repository);
+
+            var logPositions = snapshotStore.ListLogPositions()
                 .ToArray();
 
             if (logPositions.Length == 0)
@@ -270,7 +178,7 @@ namespace Chunkyard
 
             foreach (var logPosition in logPositions)
             {
-                var snapshot = cli._snapshotBuilder.GetSnapshot(logPosition);
+                var snapshot = snapshotStore.GetSnapshot(logPosition);
                 var isoDate = snapshot.CreationTime.ToString(
                     "yyyy-MM-dd HH:mm:ss");
 
@@ -280,87 +188,35 @@ namespace Chunkyard
 
         public static void RemoveSnapshot(RemoveOptions o)
         {
-            RemoveSnapshot(
-                CreateRepository(o.Repository),
-                o.LogPosition);
-        }
+            var repository = CreateRepository(o.Repository);
 
-        private static void RemoveSnapshot(
-            IRepository repository,
-            int logPosition)
-        {
-            repository.RemoveFromLog(logPosition);
-
-            Console.WriteLine($"Removed snapshot: {logPosition}");
+            repository.RemoveFromLog(o.LogPosition);
         }
 
         public static void KeepSnapshots(KeepOptions o)
         {
-            var repository = CreateRepository(o.Repository);
-            var logPositions = repository.ListLogPositions()
-                .ToArray();
-
-            var logPositionsToKeep = logPositions
-                .TakeLast(o.LatestCount)
-                .ToArray();
-
-            var logPositionsToDelete = logPositions
-                .Except(logPositionsToKeep)
-                .ToArray();
-
-            if (logPositionsToDelete.Length == 0)
-            {
-                Console.WriteLine("There is nothing to delete");
-                return;
-            }
-
-            foreach (var logPosition in logPositionsToDelete)
-            {
-                RemoveSnapshot(repository, logPosition);
-            }
+            CreateRepository(o.Repository)
+                .KeepLatestLogPositions(o.LatestCount);
         }
 
         public static void GarbageCollect(GarbageCollectOptions o)
         {
-            var cli = new Cli(o.Repository);
-            var usedUris = new HashSet<Uri>();
-            var allContentUris = cli._repository.ListUris()
-                .ToArray();
+            CreateSnapshotStore(o.Repository)
+                .GarbageCollect();
+        }
 
-            var logPositions = cli._repository.ListLogPositions();
+        public static void PushSnapshots(PushOptions o)
+        {
+            PushSnapshots(
+                o.SourceRepository,
+                o.DestinationRepository);
+        }
 
-            foreach (var logPosition in logPositions)
-            {
-                usedUris.UnionWith(
-                    cli._snapshotBuilder.ListUris(logPosition));
-            }
-
-            var contentUrisToDelete = allContentUris
-                .Except(usedUris)
-                .ToArray();
-
-            if (contentUrisToDelete.Length == 0)
-            {
-                Console.WriteLine("There is nothing to delete");
-                return;
-            }
-
-            var removed = 0;
-
-            foreach (var contentUri in allContentUris.Except(usedUris))
-            {
-                cli._repository.RemoveValue(contentUri);
-                removed++;
-            }
-
-            if (removed > 0)
-            {
-                var word = removed == 1
-                    ? "chunk"
-                    : "chunks";
-
-                Console.WriteLine($"Removed {removed} {word}");
-            }
+        public static void PullSnapshots(PullOptions o)
+        {
+            PushSnapshots(
+                o.SourceRepository,
+                o.DestinationRepository);
         }
 
         private static void PushSnapshots(
@@ -368,97 +224,37 @@ namespace Chunkyard
             string destinationRepositoryPath)
         {
             var prompt = CreatePrompt();
+            var source = CreateSnapshotStore(
+                sourceRepositoryPath,
+                prompt);
 
-            var sourceCli = new Cli(sourceRepositoryPath, prompt);
-            var destinationCli = new Cli(destinationRepositoryPath, prompt);
+            var destination = CreateSnapshotStore(
+                destinationRepositoryPath,
+                prompt);
 
-            var sourceLogs = sourceCli._repository
-                .ListLogPositions()
-                .ToArray();
-
-            var destinationLogs = destinationCli._repository
-                .ListLogPositions()
-                .ToArray();
-
-            if (sourceLogs.Length > 0 && destinationLogs.Length > 0)
-            {
-                var sourceRef = sourceCli._contentStore.RetrieveFromLog(
-                    sourceLogs[0]);
-
-                var destinationRef = destinationCli._contentStore.RetrieveFromLog(
-                    destinationLogs[0]);
-
-                if (sourceRef.LogId != destinationRef.LogId)
-                {
-                    throw new ChunkyardException(
-                        "Cannot operate on repositories with different log IDs");
-                }
-            }
-
-            foreach (var logPosition in sourceLogs.Intersect(destinationLogs))
-            {
-                var sourceRef = sourceCli._contentStore.RetrieveFromLog(
-                    logPosition);
-
-                var destinationRef = destinationCli._contentStore.RetrieveFromLog(
-                    logPosition);
-
-                if (!sourceRef.Equals(destinationRef))
-                {
-                    throw new ChunkyardException(
-                        $"Repositories differ at common snapshot #{logPosition}");
-                }
-            }
-
-            var destinationMax = destinationLogs.Length == 0
-                ? -1
-                : destinationLogs.Max();
-
-            var newLogPositions = sourceLogs
-                .Where(l => l > destinationMax)
-                .ToArray();
-
-            if (newLogPositions.Length == 0)
-            {
-                Console.WriteLine("Repository is already up-to-date");
-                return;
-            }
-
-            foreach (var logPosition in newLogPositions)
-            {
-                Console.WriteLine($"Transmitting snapshot: {logPosition}");
-
-                sourceCli.PushSnapshot(
-                    logPosition,
-                    destinationCli._repository);
-            }
-        }
-
-        private void PushSnapshot(
-            int logPosition,
-            IRepository destinationRepository)
-        {
-            var snapshotUris = _snapshotBuilder
-                .ListUris(logPosition)
-                .ToArray();
-
-            foreach (var snapshotUri in snapshotUris)
-            {
-                if (!destinationRepository.ValueExists(snapshotUri))
-                {
-                    var contentValue = _repository.RetrieveValue(snapshotUri);
-                    destinationRepository.StoreValue(snapshotUri, contentValue);
-                }
-            }
-
-            var logValue = _repository.RetrieveFromLog(logPosition);
-
-            destinationRepository.AppendToLog(logValue, logPosition);
+            source.PushSnapshots(destination);
         }
 
         private static IRepository CreateRepository(string repositoryPath)
         {
-            return new FileRepository(repositoryPath);
+            return new PrintingRepository(
+                new FileRepository(repositoryPath));
+        }
+
+        private static SnapshotStore CreateSnapshotStore(
+            string repositoryPath,
+            IPrompt? prompt = null)
+        {
+            var repository = CreateRepository(repositoryPath);
+
+            return new SnapshotStore(
+                repository,
+                new PrintingContentStore(
+                    new ContentStore(
+                        repository,
+                        new FastCdc(),
+                        DefaultAlgorithm,
+                        prompt ?? CreatePrompt())));
         }
 
         private static IPrompt CreatePrompt()
@@ -467,15 +263,103 @@ namespace Chunkyard
                 new ConsolePrompt());
         }
 
-        private static ContentReference[] FuzzyFilter(
-            string fuzzyPattern,
-            IEnumerable<ContentReference> contentReferences)
+        private class PrintingContentStore : DecoratorContentStore
         {
-            var fuzzy = new Fuzzy(fuzzyPattern);
+            public PrintingContentStore(IContentStore store)
+                : base(store)
+            {
+            }
 
-            return contentReferences
-                .Where(c => fuzzy.IsMatch(c.Name))
-                .ToArray();
+            public override (ContentReference ContentReference, bool IsNewContent) StoreContent(
+                Stream inputStream,
+                string contentName)
+            {
+                var result = base.StoreContent(inputStream, contentName);
+
+                if (result.IsNewContent)
+                {
+                    Console.WriteLine($"Stored: {contentName}");
+                }
+
+                return result;
+            }
+
+            public override bool ContentExists(ContentReference contentReference)
+            {
+                var exists = base.ContentExists(contentReference);
+
+                if (!exists)
+                {
+                    Console.WriteLine($"Missing: {contentReference.Name}");
+                }
+
+                return exists;
+            }
+
+            public override bool ContentValid(ContentReference contentReference)
+            {
+                var valid = base.ContentValid(contentReference);
+
+                if (!valid)
+                {
+                    Console.WriteLine($"Invalid: {contentReference.Name}");
+                }
+
+                return valid;
+            }
+
+            public override void RetrieveContent(
+                ContentReference contentReference,
+                Stream outputStream)
+            {
+                try
+                {
+                    base.RetrieveContent(contentReference, outputStream);
+
+                    if (!contentReference.Name.Equals(SnapshotStore.SnapshotFile))
+                    {
+                        Console.WriteLine($"Restored: {contentReference.Name}");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(
+                        $"Error: {contentReference.Name}{Environment.NewLine}{e}");
+
+                    throw;
+                }
+            }
+        }
+
+        private class PrintingRepository : DecoratorRepository
+        {
+            public PrintingRepository(IRepository repository)
+                : base(repository)
+            {
+            }
+
+            public override int AppendToLog(byte[] value, int newLogPosition)
+            {
+                var logPosition = base.AppendToLog(value, newLogPosition);
+
+                Console.WriteLine($"Created snapshot: {logPosition}");
+
+                return logPosition;
+            }
+
+            public override void RemoveValue(Uri contentUri)
+            {
+                base.RemoveValue(contentUri);
+
+                Console.WriteLine($"Removed: {contentUri}");
+            }
+
+            public override void RemoveFromLog(int logPosition)
+            {
+                base.RemoveFromLog(logPosition);
+
+                Console.WriteLine($"Removed snapshot: {logPosition}");
+            }
         }
     }
 }

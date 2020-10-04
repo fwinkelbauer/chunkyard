@@ -81,7 +81,7 @@ namespace Chunkyard.Tests
         public static void ContentExists_Detects_Missing_Content()
         {
             var contentStore = CreateContentStore(
-                new UnstoredMemoryRepository());
+                new UnstoredRepository());
 
             var result = contentStore.StoreContentObject(
                 "some text",
@@ -94,7 +94,7 @@ namespace Chunkyard.Tests
         public static void ContentValid_Detects_Corrupted_Content()
         {
             var contentStore = CreateContentStore(
-                new CorruptedMemoryRepository());
+                new CorruptedRepository());
 
             var result = contentStore.StoreContentObject(
                 "some text",
@@ -158,8 +158,13 @@ namespace Chunkyard.Tests
                 new StaticPrompt());
         }
 
-        private class CorruptedMemoryRepository : MemoryRepository
+        private class CorruptedRepository : DecoratorRepository
         {
+            public CorruptedRepository()
+                : base (new MemoryRepository())
+            {
+            }
+
             public override bool StoreValue(Uri contentUri, byte[] value)
             {
                 return base.StoreValue(
