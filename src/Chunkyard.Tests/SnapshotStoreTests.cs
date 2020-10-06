@@ -90,10 +90,38 @@ namespace Chunkyard.Tests
             Assert.Equal(expectedSnapshot, actualSnapshot);
         }
 
-        private static Func<Stream> CreateOpenReadContent()
+        [Fact]
+        public static void Can_Create_And_Restore_Snapshot()
+        {
+            var snapshotStore = CreateSnapshotStore();
+            var content = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                new[] { ("some content", CreateOpenReadContent(content)) },
+                DateTime.Now);
+
+            var actualContentName = "";
+            using var writeStream = new MemoryStream();
+            Func<string, Stream> openWrite = (s) =>
+            {
+                actualContentName = s;
+                return writeStream;
+            };
+
+            snapshotStore.RestoreSnapshot(
+                logPosition!.Value,
+                "",
+                openWrite);
+
+            Assert.Equal("some content", actualContentName);
+            Assert.Equal(content, writeStream.ToArray());
+        }
+
+        private static Func<Stream> CreateOpenReadContent(
+            byte[]? content = null)
         {
             return () => new MemoryStream(
-                new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
+                content ?? new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
         }
 
         private static SnapshotStore CreateSnapshotStore(
