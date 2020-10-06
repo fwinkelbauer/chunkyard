@@ -29,7 +29,7 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void Constructor_Detects_Previous_Snapshot()
+        public static void AppendSnapshot_Detects_Previous_Snapshot()
         {
             var repository = new MemoryRepository();
             var contentStore = new SpyContentStore(repository);
@@ -39,7 +39,9 @@ namespace Chunkyard.Tests
                 new[] { ("some content", CreateOpenReadContent()) },
                 DateTime.Now);
 
-            snapshotStore = new SnapshotStore(repository, contentStore);
+            snapshotStore.AppendSnapshot(
+                new[] { ("some content", CreateOpenReadContent()) },
+                DateTime.Now);
 
             Assert.True(
                 contentStore.RegisteredContentNames.Contains("some content"));

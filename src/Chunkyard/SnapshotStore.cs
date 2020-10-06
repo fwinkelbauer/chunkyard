@@ -18,25 +18,14 @@ namespace Chunkyard
         {
             _repository = repository;
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
-
-            if (_contentStore.CurrentLogPosition == null)
-            {
-                return;
-            }
-
-            var currentSnapshot = GetSnapshot(
-                _contentStore.CurrentLogPosition.Value);
-
-            foreach (var contentReference in currentSnapshot.ContentReferences)
-            {
-                _contentStore.RegisterContent(contentReference);
-            }
         }
 
         public int? AppendSnapshot(
             IEnumerable<(string Name, Func<Stream> OpenRead)> contents,
             DateTime creationTime)
         {
+            RegisterPreviousContent();
+
             contents.EnsureNotNull(nameof(contents));
 
             var contentReferences = new List<ContentReference>();
@@ -295,6 +284,22 @@ namespace Chunkyard
         {
             return _contentStore.RetrieveContentObject<Snapshot>(
                 logReference.ContentReference);
+        }
+
+        private void RegisterPreviousContent()
+        {
+            if (_contentStore.CurrentLogPosition == null)
+            {
+                return;
+            }
+
+            var currentSnapshot = GetSnapshot(
+                _contentStore.CurrentLogPosition.Value);
+
+            foreach (var contentReference in currentSnapshot.ContentReferences)
+            {
+                _contentStore.RegisterContent(contentReference);
+            }
         }
 
         private static IEnumerable<ContentReference> FuzzyFilter(
