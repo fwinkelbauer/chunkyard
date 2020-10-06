@@ -175,7 +175,7 @@ namespace Chunkyard
             }
         }
 
-        public void PushSnapshots(
+        public bool PushSnapshots(
             SnapshotStore otherSnapshotStore)
         {
             otherSnapshotStore.EnsureNotNull(nameof(otherSnapshotStore));
@@ -224,7 +224,8 @@ namespace Chunkyard
                 : otherLogs.Max();
 
             var newLogPositions = thisLogs
-                .Where(l => l > otherMax);
+                .Where(l => l > otherMax)
+                .ToArray();
 
             foreach (var logPosition in newLogPositions)
             {
@@ -232,6 +233,8 @@ namespace Chunkyard
                     logPosition,
                     otherSnapshotStore._repository);
             }
+
+            return newLogPositions.Length != 0;
         }
 
         private void PushSnapshot(

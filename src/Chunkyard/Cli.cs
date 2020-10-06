@@ -232,7 +232,12 @@ namespace Chunkyard
                 destinationRepositoryPath,
                 prompt);
 
-            source.PushSnapshots(destination);
+            var pushed = source.PushSnapshots(destination);
+
+            if (!pushed)
+            {
+                Console.WriteLine("No new data to synchronize");
+            }
         }
 
         private static IRepository CreateRepository(string repositoryPath)
@@ -342,7 +347,7 @@ namespace Chunkyard
             {
                 var logPosition = base.AppendToLog(value, newLogPosition);
 
-                Console.WriteLine($"Created snapshot: {logPosition}");
+                Console.WriteLine($"Created: snapshot #{logPosition}");
 
                 return logPosition;
             }
@@ -358,7 +363,7 @@ namespace Chunkyard
             {
                 base.RemoveFromLog(logPosition);
 
-                Console.WriteLine($"Removed snapshot: {logPosition}");
+                Console.WriteLine($"Removed: snapshot #{logPosition}");
             }
         }
     }

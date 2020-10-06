@@ -12,7 +12,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ### Changed
 
-- The `push` and `pull` commands to be less verbose
 - The `list` command to display dates in the "yyyy-MM-dd HH:mm:ss" format
 - The `create` command to only write a snapshot if files changed
 
