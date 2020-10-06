@@ -16,7 +16,7 @@ namespace Chunkyard
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(e.Message);
                 Environment.ExitCode = 1;
             }
         }

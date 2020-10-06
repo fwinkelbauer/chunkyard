@@ -329,7 +329,7 @@ namespace Chunkyard
                 catch (Exception e)
                 {
                     Console.WriteLine(
-                        $"Error: {contentReference.Name}{Environment.NewLine}{e}");
+                        $"Error: {contentReference.Name}{Environment.NewLine}> {e.Message}");
 
                     throw;
                 }
