@@ -18,6 +18,11 @@ namespace Chunkyard.Build
             @"##\s+(\d+\.\d+\.\d+)")
             .Groups[1].Value;
 
+        public static void Default()
+        {
+            Publish(new PublishOptions());
+        }
+
         public static void Clean()
         {
             var dirInfo = new DirectoryInfo(ArtifactsDirectory);
@@ -38,35 +43,19 @@ namespace Chunkyard.Build
             }
         }
 
-        public static void Build(DotnetOptions o)
+        public static void Publish(PublishOptions o)
         {
+            Clean();
+
             Dotnet(
                 $"build {Solution}",
                 $"-c {o.Configuration}",
                 $"-r {o.Runtime}",
                 "-warnaserror");
-        }
 
-        public static void Test(DotnetOptions o)
-        {
             Dotnet(
                 $"test {Solution}",
                 $"-c {o.Configuration}");
-        }
-
-        public static void Default()
-        {
-            Publish(
-                new DotnetOptions(
-                    DotnetOptions.DefaultConfiguration,
-                    DotnetOptions.DefaultRuntime));
-        }
-
-        public static void Publish(DotnetOptions o)
-        {
-            Clean();
-            Build(o);
-            Test(o);
 
             Dotnet(
                 "publish src/Chunkyard",
