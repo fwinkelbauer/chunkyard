@@ -35,7 +35,7 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void Store_Changes_IsNewContent_If_Stored_Twice()
+        public static void Store_Does_Not_Detect_Same_Content()
         {
             var contentStore = CreateContentStore();
 
@@ -53,7 +53,7 @@ namespace Chunkyard.Tests
                 contentName);
 
             Assert.True(firstResult.IsNewContent);
-            Assert.False(secondResult.IsNewContent);
+            Assert.True(secondResult.IsNewContent);
         }
 
         [Fact]

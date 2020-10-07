@@ -114,8 +114,6 @@ namespace Chunkyard
                 nonce,
                 result.ChunkReferences);
 
-            RegisterContent(contentReference);
-
             return (contentReference, result.NewChunks);
         }
 
