@@ -161,7 +161,7 @@ namespace Chunkyard.Tests
         private class CorruptedRepository : DecoratorRepository
         {
             public CorruptedRepository()
-                : base (new MemoryRepository())
+                : base(new MemoryRepository())
             {
             }
 
