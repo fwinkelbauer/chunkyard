@@ -20,7 +20,7 @@ namespace Chunkyard.Build
 
         public static void Default()
         {
-            Publish(new PublishOptions());
+            Build(new BuildOptions());
         }
 
         public static void Clean()
@@ -43,7 +43,7 @@ namespace Chunkyard.Build
             }
         }
 
-        public static void Publish(PublishOptions o)
+        public static void Build(BuildOptions o)
         {
             Clean();
 

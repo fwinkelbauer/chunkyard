@@ -31,7 +31,7 @@ namespace Chunkyard.Build
             }
 
             Parser.Default.ParseArguments(args, LoadOptions())
-                .WithParsed<PublishOptions>(o => Cli.Publish(o))
+                .WithParsed<BuildOptions>(o => Cli.Build(o))
                 .WithParsed<CommitOptions>(_ => Cli.Commit())
                 .WithParsed<FmtOptions>(_ => Cli.Fmt())
                 .WithNotParsed(_ => Environment.ExitCode = 1);

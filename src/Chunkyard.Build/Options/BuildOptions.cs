@@ -4,12 +4,12 @@ using CommandLine;
 namespace Chunkyard.Build.Options
 {
     [Verb("publish", HelpText = "Publish the main project.")]
-    public class PublishOptions
+    public class BuildOptions
     {
         private const string DefaultConfiguration = "Release";
         private const string DefaultRuntime = "";
 
-        public PublishOptions(string configuration, string runtime)
+        public BuildOptions(string configuration, string runtime)
         {
             Configuration = configuration;
 
@@ -25,7 +25,7 @@ namespace Chunkyard.Build.Options
             }
         }
 
-        public PublishOptions()
+        public BuildOptions()
             : this(DefaultConfiguration, DefaultRuntime)
         {
         }
