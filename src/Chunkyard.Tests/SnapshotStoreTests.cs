@@ -29,7 +29,7 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void AppendSnapshot_Detects_Previous_Snapshot()
+        public static void AppendSnapshot_Detects_Previous_Snapshot_To_Deduplicate_Encrypted_Content()
         {
             var repository = new MemoryRepository();
             var contentStore = new SpyContentStore(repository);
