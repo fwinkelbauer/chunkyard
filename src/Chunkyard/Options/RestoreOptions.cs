@@ -22,7 +22,7 @@ namespace Chunkyard.Options
         [Option('r', "repository", Required = true, HelpText = "The repository")]
         public string Repository { get; }
 
-        [Option('d', "directory", Required = true, HelpText = "The directory to restore into")]
+        [Option('d', "directory", Required = false, HelpText = "The directory to restore into", Default = ".")]
         public string Directory { get; }
 
         [Option('i', "include", Required = false, HelpText = "The include fuzzy pattern")]
