@@ -280,7 +280,8 @@ namespace Chunkyard
             {
                 var result = base.StoreContent(inputStream, contentName);
 
-                if (result.IsNewContent)
+                if (result.IsNewContent
+                    && !contentName.Equals(SnapshotStore.SnapshotFile))
                 {
                     Console.WriteLine($"Stored: {contentName}");
                 }
