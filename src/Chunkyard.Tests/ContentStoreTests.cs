@@ -18,7 +18,8 @@ namespace Chunkyard.Tests
 
             var result = contentStore.StoreContent(
                 inputStream,
-                contentName);
+                contentName,
+                AesGcmCrypto.GenerateNonce());
 
             using var outputStream = new MemoryStream();
             contentStore.RetrieveContent(
@@ -35,7 +36,7 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void Store_Does_Not_Detect_Same_Content()
+        public static void Store_Does_Not_Detect_Same_Content_Using_Other_Nonce()
         {
             var contentStore = CreateContentStore();
 
@@ -45,12 +46,14 @@ namespace Chunkyard.Tests
             using var firstStream = new MemoryStream(bytes);
             var firstResult = contentStore.StoreContent(
                 firstStream,
-                contentName);
+                contentName,
+                AesGcmCrypto.GenerateNonce());
 
             using var secondStream = new MemoryStream(bytes);
             var secondResult = contentStore.StoreContent(
                 secondStream,
-                contentName);
+                contentName,
+                AesGcmCrypto.GenerateNonce());
 
             Assert.True(firstResult.IsNewContent);
             Assert.True(secondResult.IsNewContent);
@@ -66,7 +69,8 @@ namespace Chunkyard.Tests
 
             var result = contentStore.StoreContentObject(
                 expectedText,
-                contentName);
+                contentName,
+                AesGcmCrypto.GenerateNonce());
 
             var actualText = contentStore.RetrieveContentObject<string>(
                 result.ContentReference);
@@ -85,7 +89,8 @@ namespace Chunkyard.Tests
 
             var result = contentStore.StoreContentObject(
                 "some text",
-                "with some name");
+                "with some name",
+                AesGcmCrypto.GenerateNonce());
 
             Assert.False(contentStore.ContentExists(result.ContentReference));
         }
@@ -98,7 +103,8 @@ namespace Chunkyard.Tests
 
             var result = contentStore.StoreContentObject(
                 "some text",
-                "with some name");
+                "with some name",
+                AesGcmCrypto.GenerateNonce());
 
             Assert.False(contentStore.ContentValid(result.ContentReference));
         }

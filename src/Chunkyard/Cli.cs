@@ -270,9 +270,10 @@ namespace Chunkyard
 
             public override (ContentReference ContentReference, bool IsNewContent) StoreContent(
                 Stream inputStream,
-                string contentName)
+                string contentName,
+                byte[] nonce)
             {
-                var result = base.StoreContent(inputStream, contentName);
+                var result = base.StoreContent(inputStream, contentName, nonce);
 
                 if (result.IsNewContent
                     && !contentName.Equals(SnapshotStore.SnapshotFile))

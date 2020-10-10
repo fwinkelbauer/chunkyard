@@ -26,7 +26,8 @@ namespace Chunkyard
         public static (ContentReference ContentReference, bool IsNewContent) StoreContentObject<T>(
             this IContentStore store,
             T value,
-            string contentName)
+            string contentName,
+            byte[] nonce)
             where T : notnull
         {
             store.EnsureNotNull(nameof(store));
@@ -36,7 +37,8 @@ namespace Chunkyard
 
             return store.StoreContent(
                 memoryStream,
-                contentName);
+                contentName,
+                nonce);
         }
     }
 }

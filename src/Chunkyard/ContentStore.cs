@@ -18,7 +18,6 @@ namespace Chunkyard
         private readonly byte[] _salt;
         private readonly int _iterations;
         private readonly byte[] _key;
-        private readonly Dictionary<string, ContentReference> _knownContentReferences;
 
         private int? _currentLogPosition;
 
@@ -55,8 +54,6 @@ namespace Chunkyard
             }
 
             _key = AesGcmCrypto.PasswordToKey(password, _salt, _iterations);
-
-            _knownContentReferences = new Dictionary<string, ContentReference>();
         }
 
         public int? CurrentLogPosition
@@ -96,17 +93,9 @@ namespace Chunkyard
 
         public (ContentReference ContentReference, bool IsNewContent) StoreContent(
             Stream inputStream,
-            string contentName)
+            string contentName,
+            byte[] nonce)
         {
-            _knownContentReferences.TryGetValue(
-                contentName,
-                out var knownContentReference);
-
-            // Known files should be encrypted using the same nonce
-            var nonce = knownContentReference == null
-                ? AesGcmCrypto.GenerateNonce()
-                : knownContentReference.Nonce;
-
             var result = WriteChunks(nonce, inputStream);
 
             var contentReference = new ContentReference(
@@ -115,14 +104,6 @@ namespace Chunkyard
                 result.ChunkReferences);
 
             return (contentReference, result.NewChunks);
-        }
-
-        public void RegisterContent(ContentReference contentReference)
-        {
-            contentReference.EnsureNotNull(nameof(contentReference));
-
-            _knownContentReferences[contentReference.Name] =
-                contentReference;
         }
 
         public bool ContentExists(ContentReference contentReference)

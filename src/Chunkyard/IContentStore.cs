@@ -17,9 +17,8 @@ namespace Chunkyard
 
         (ContentReference ContentReference, bool IsNewContent) StoreContent(
             Stream inputStream,
-            string contentName);
-
-        void RegisterContent(ContentReference contentReference);
+            string contentName,
+            byte[] nonce);
 
         bool ContentExists(ContentReference contentReference);
 

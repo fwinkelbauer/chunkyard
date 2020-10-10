@@ -11,6 +11,7 @@ namespace Chunkyard
 
         private readonly IRepository _repository;
         private readonly IContentStore _contentStore;
+        private readonly Dictionary<string, ContentReference> _knownContentReferences;
 
         public SnapshotStore(
             IRepository repository,
@@ -18,6 +19,7 @@ namespace Chunkyard
         {
             _repository = repository;
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
+            _knownContentReferences = new Dictionary<string, ContentReference>();
         }
 
         public int AppendSnapshot(
@@ -35,14 +37,16 @@ namespace Chunkyard
                 using var contentStream = content.OpenRead();
                 var contentResult = _contentStore.StoreContent(
                     contentStream,
-                    content.Name);
+                    content.Name,
+                    GenerateNonce(content.Name));
 
                 contentReferences.Add(contentResult.ContentReference);
             }
 
             var snapshotResult = _contentStore.StoreContentObject(
                 new Snapshot(creationTime, contentReferences),
-                SnapshotFile);
+                SnapshotFile,
+                AesGcmCrypto.GenerateNonce());
 
             var currentLogPosition = _contentStore.CurrentLogPosition;
             var newLogPosition = currentLogPosition.HasValue
@@ -293,8 +297,21 @@ namespace Chunkyard
 
             foreach (var contentReference in currentSnapshot.ContentReferences)
             {
-                _contentStore.RegisterContent(contentReference);
+                _knownContentReferences[contentReference.Name] =
+                    contentReference;
             }
+        }
+
+        private byte[] GenerateNonce(string contentName)
+        {
+            _knownContentReferences.TryGetValue(
+                contentName,
+                out var knownContentReference);
+
+            // Known files should be encrypted using the same nonce
+            return knownContentReference == null
+                ? AesGcmCrypto.GenerateNonce()
+                : knownContentReference.Nonce;
         }
 
         private static IEnumerable<ContentReference> FuzzyFilter(

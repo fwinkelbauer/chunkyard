@@ -31,20 +31,22 @@ namespace Chunkyard.Tests
         [Fact]
         public static void AppendSnapshot_Detects_Previous_Snapshot_To_Deduplicate_Encrypted_Content()
         {
-            var repository = new MemoryRepository();
-            var contentStore = new SpyContentStore(repository);
-            var snapshotStore = new SnapshotStore(repository, contentStore);
+            var snapshotStore = CreateSnapshotStore();
 
-            snapshotStore.AppendSnapshot(
+            var logPosition1 = snapshotStore.AppendSnapshot(
                 new[] { ("some content", CreateOpenReadContent()) },
                 DateTime.Now);
 
-            snapshotStore.AppendSnapshot(
+            var logPosition2 = snapshotStore.AppendSnapshot(
                 new[] { ("some content", CreateOpenReadContent()) },
                 DateTime.Now);
 
-            Assert.True(
-                contentStore.RegisteredContentNames.Contains("some content"));
+            var snapshot1 = snapshotStore.GetSnapshot(logPosition1);
+            var snapshot2 = snapshotStore.GetSnapshot(logPosition2);
+
+            Assert.Equal(
+                snapshot1.ContentReferences,
+                snapshot2.ContentReferences);
         }
 
         [Fact]
@@ -155,30 +157,11 @@ namespace Chunkyard.Tests
 
             return new SnapshotStore(
                 repository,
-                new SpyContentStore(repository));
-        }
-
-        private class SpyContentStore : DecoratorContentStore
-        {
-            public SpyContentStore(IRepository repository)
-                : base(
-                    new ContentStore(
-                        repository,
-                        new FastCdc(),
-                        HashAlgorithmName.SHA256,
-                        new StaticPrompt()))
-            {
-                RegisteredContentNames = new List<string>();
-            }
-
-            public IList<string> RegisteredContentNames { get; }
-
-            public override void RegisterContent(ContentReference contentReference)
-            {
-                RegisteredContentNames.Add(contentReference.Name);
-
-                base.RegisterContent(contentReference);
-            }
+                new ContentStore(
+                    repository,
+                    new FastCdc(),
+                    HashAlgorithmName.SHA256,
+                    new StaticPrompt()));
         }
     }
 }
