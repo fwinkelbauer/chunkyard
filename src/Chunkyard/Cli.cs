@@ -83,14 +83,8 @@ namespace Chunkyard
                 }),
                 DateTime.Now);
 
-            if (logPosition == null)
-            {
-                Console.WriteLine("No new data to store.");
-                return;
-            }
-
             var snapshotValid = snapshotStore.CheckSnapshotValid(
-                logPosition.Value,
+                logPosition,
                 "");
 
             if (!snapshotValid)

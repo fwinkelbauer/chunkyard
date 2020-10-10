@@ -18,7 +18,7 @@ namespace Chunkyard.Tests
                 new[] { ("some content", CreateOpenReadContent()) },
                 DateTime.Now);
 
-            var snapshot = snapshotStore.GetSnapshot(logPosition!.Value);
+            var snapshot = snapshotStore.GetSnapshot(logPosition);
             var contentReferences = snapshot.ContentReferences.ToArray();
 
             Assert.Equal(0, logPosition);
@@ -48,6 +48,35 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
+        public static void AppendSnapshot_Creates_Snapshot_Even_If_Empty()
+        {
+            var snapshotStore = CreateSnapshotStore();
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                Array.Empty<(string, Func<Stream>)>(),
+                DateTime.Now);
+
+            Assert.Equal(0, logPosition);
+        }
+
+        [Fact]
+        public static void AppendSnapshot_Creates_Snapshot_Without_New_Data()
+        {
+            var snapshotStore = CreateSnapshotStore();
+            var contents = new[] { ("some content", CreateOpenReadContent()) };
+
+            snapshotStore.AppendSnapshot(
+                contents,
+                DateTime.Now);
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                contents,
+                DateTime.Now);
+
+            Assert.Equal(1, logPosition);
+        }
+
+        [Fact]
         public static void ListUris_Lists_All_Uris_In_Snapshot()
         {
             var snapshotStore = CreateSnapshotStore();
@@ -57,7 +86,7 @@ namespace Chunkyard.Tests
                 DateTime.Now);
 
             // "some content" + snapshot #1 = 2 URIs
-            Assert.Equal(2, snapshotStore.ListUris(logPosition!.Value).Count());
+            Assert.Equal(2, snapshotStore.ListUris(logPosition).Count());
         }
 
         [Fact]
@@ -70,7 +99,7 @@ namespace Chunkyard.Tests
                 new[] { ("some content", CreateOpenReadContent()) },
                 DateTime.Now);
 
-            Assert.Empty(snapshotStore.ListUris(logPosition!.Value));
+            Assert.Empty(snapshotStore.ListUris(logPosition));
         }
 
         [Fact]
@@ -82,9 +111,7 @@ namespace Chunkyard.Tests
                 new[] { ("some content", CreateOpenReadContent()) },
                 DateTime.Now);
 
-            var expectedSnapshot = snapshotStore.GetSnapshot(
-                logPosition!.Value);
-
+            var expectedSnapshot = snapshotStore.GetSnapshot(logPosition);
             var actualSnapshot = snapshotStore.GetSnapshot(-1);
 
             Assert.Equal(expectedSnapshot, actualSnapshot);
@@ -108,10 +135,7 @@ namespace Chunkyard.Tests
                 return writeStream;
             };
 
-            snapshotStore.RestoreSnapshot(
-                logPosition!.Value,
-                "",
-                openWrite);
+            snapshotStore.RestoreSnapshot(logPosition, "", openWrite);
 
             Assert.Equal("some content", actualContentName);
             Assert.Equal(content, writeStream.ToArray());

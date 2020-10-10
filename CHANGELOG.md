@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## Unreleased
 
+### Changed
+
+- The `create` command to always write a snapshot
+
 ## 1.2.0 - 2020-10-06
 
 ### Added

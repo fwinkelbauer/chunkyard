@@ -20,7 +20,7 @@ namespace Chunkyard
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
         }
 
-        public int? AppendSnapshot(
+        public int AppendSnapshot(
             IEnumerable<(string Name, Func<Stream> OpenRead)> contents,
             DateTime creationTime)
         {
@@ -29,7 +29,6 @@ namespace Chunkyard
             contents.EnsureNotNull(nameof(contents));
 
             var contentReferences = new List<ContentReference>();
-            var isNewContent = false;
 
             foreach (var content in contents)
             {
@@ -39,13 +38,6 @@ namespace Chunkyard
                     content.Name);
 
                 contentReferences.Add(contentResult.ContentReference);
-
-                isNewContent |= contentResult.IsNewContent;
-            }
-
-            if (!isNewContent)
-            {
-                return null;
             }
 
             var snapshotResult = _contentStore.StoreContentObject(
