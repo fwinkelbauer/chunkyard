@@ -171,7 +171,7 @@ namespace Chunkyard
             }
         }
 
-        public bool PushSnapshots(
+        public bool CopySnapshots(
             SnapshotStore otherSnapshotStore)
         {
             otherSnapshotStore.EnsureNotNull(nameof(otherSnapshotStore));
@@ -225,7 +225,7 @@ namespace Chunkyard
 
             foreach (var logPosition in newLogPositions)
             {
-                PushSnapshot(
+                CopySnapshot(
                     logPosition,
                     otherSnapshotStore._repository);
             }
@@ -233,7 +233,7 @@ namespace Chunkyard
             return newLogPositions.Length != 0;
         }
 
-        private void PushSnapshot(
+        private void CopySnapshot(
             int logPosition,
             IRepository otherRepository)
         {

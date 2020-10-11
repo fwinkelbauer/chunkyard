@@ -2,10 +2,10 @@
 
 namespace Chunkyard.Options
 {
-    [Verb("push", HelpText = "Push snapshots to a repository.")]
-    public class PushOptions
+    [Verb("copy", HelpText = "Copy snapshots from one repository to another.")]
+    public class CopyOptions
     {
-        public PushOptions(
+        public CopyOptions(
             string sourceRepository,
             string destinationRepository)
         {

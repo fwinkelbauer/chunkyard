@@ -192,39 +192,23 @@ namespace Chunkyard
                 .GarbageCollect();
         }
 
-        public static void PushSnapshots(PushOptions o)
-        {
-            PushSnapshots(
-                o.SourceRepository,
-                o.DestinationRepository);
-        }
-
-        public static void PullSnapshots(PullOptions o)
-        {
-            PushSnapshots(
-                o.SourceRepository,
-                o.DestinationRepository);
-        }
-
-        private static void PushSnapshots(
-            string sourceRepositoryPath,
-            string destinationRepositoryPath)
+        public static void CopySnapshots(CopyOptions o)
         {
             var prompt = CreatePrompt();
             var source = CreateSnapshotStore(
-                sourceRepositoryPath,
+                o.SourceRepository,
                 prompt);
 
             var destination = CreateSnapshotStore(
-                destinationRepositoryPath,
+                o.DestinationRepository,
                 prompt,
                 ensureRepository: false);
 
-            var pushed = source.PushSnapshots(destination);
+            var copied = source.CopySnapshots(destination);
 
-            if (!pushed)
+            if (!copied)
             {
-                Console.WriteLine("No new data to synchronize");
+                Console.WriteLine("No new snapshots to copy");
             }
         }
 

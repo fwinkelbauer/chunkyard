@@ -33,8 +33,7 @@ namespace Chunkyard
                 .WithParsed<KeepOptions>(o => Cli.KeepSnapshots(o))
                 .WithParsed<ListOptions>(o => Cli.ListSnapshots(o))
                 .WithParsed<GarbageCollectOptions>(o => Cli.GarbageCollect(o))
-                .WithParsed<PushOptions>(o => Cli.PushSnapshots(o))
-                .WithParsed<PullOptions>(o => Cli.PullSnapshots(o))
+                .WithParsed<CopyOptions>(o => Cli.CopySnapshots(o))
                 .WithNotParsed(_ => Environment.ExitCode = 1);
         }
 

@@ -15,7 +15,7 @@ tools. Here's a list of [options](https://github.com/restic/others).
 
 - Favor simplicity and readability over features and performance
 - Strong encryption (AES Galois/Counter Mode using a 256 bit key)
-- Ability to push/pull from other repositories
+- Ability to copy from/to other repositories
 - Verifiable backups
 - Minimal dependencies. Currently the Chunkyard binary utilizes two packages:
   - `commandlineparser`to create the command line interface
