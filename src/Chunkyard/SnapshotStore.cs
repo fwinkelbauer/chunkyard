@@ -5,6 +5,10 @@ using System.Linq;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// A class which uses <see cref="IContentStore"/> and <see
+    /// cref="IRepository"/> to store snapshots of a set of files.
+    /// </summary>
     public class SnapshotStore
     {
         public const string SnapshotFile = ".chunkyard-snapshot";

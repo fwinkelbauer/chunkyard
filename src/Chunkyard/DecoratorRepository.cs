@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// An abstract implementation of <see cref="IRepository"/> which can be
+    /// used to implement decorators.
+    /// </summary>
     public abstract class DecoratorRepository : IRepository
     {
         public DecoratorRepository(IRepository repository)

@@ -3,6 +3,10 @@ using System.IO;
 
 namespace Chunkyard
 {
+    /// <summary>
+    /// An abstract implementation of <see cref="IContentStore"/> which can be
+    /// used to implement decorators.
+    /// </summary>
     public abstract class DecoratorContentStore : IContentStore
     {
         public DecoratorContentStore(IContentStore store)
