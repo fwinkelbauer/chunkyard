@@ -44,7 +44,10 @@ namespace Chunkyard
                 return;
             }
 
-            var repository = CreateRepository(o.Repository);
+            var repository = CreateRepository(
+                o.Repository,
+                ensureRepository: false);
+
             IContentStore contentStore = new PrintingContentStore(
                 new ContentStore(
                     repository,
@@ -160,16 +163,7 @@ namespace Chunkyard
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            var logPositions = snapshotStore.ListLogPositions()
-                .ToArray();
-
-            if (logPositions.Length == 0)
-            {
-                Console.WriteLine("Repository is empty");
-                return;
-            }
-
-            foreach (var logPosition in logPositions)
+            foreach (var logPosition in snapshotStore.ListLogPositions())
             {
                 var snapshot = snapshotStore.GetSnapshot(logPosition);
                 var isoDate = snapshot.CreationTime.ToString(
@@ -223,7 +217,8 @@ namespace Chunkyard
 
             var destination = CreateSnapshotStore(
                 destinationRepositoryPath,
-                prompt);
+                prompt,
+                ensureRepository: false);
 
             var pushed = source.PushSnapshots(destination);
 
@@ -233,17 +228,31 @@ namespace Chunkyard
             }
         }
 
-        private static IRepository CreateRepository(string repositoryPath)
+        private static IRepository CreateRepository(
+            string repositoryPath,
+            bool ensureRepository = true)
         {
-            return new PrintingRepository(
+            var repository = new PrintingRepository(
                 new FileRepository(repositoryPath));
+
+            if (ensureRepository
+                && !repository.ListLogPositions().Any())
+            {
+                throw new ChunkyardException(
+                    "Cannot perform command on an empty repository");
+            }
+
+            return repository;
         }
 
         private static SnapshotStore CreateSnapshotStore(
             string repositoryPath,
-            IPrompt? prompt = null)
+            IPrompt? prompt = null,
+            bool ensureRepository = true)
         {
-            var repository = CreateRepository(repositoryPath);
+            var repository = CreateRepository(
+                repositoryPath,
+                ensureRepository);
 
             return new SnapshotStore(
                 repository,

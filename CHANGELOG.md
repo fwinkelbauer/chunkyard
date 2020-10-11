@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Changed
 
 - The `create` command to always write a snapshot
+- Most commands to require an existing repository
 
 ## 1.2.0 - 2020-10-06
 
