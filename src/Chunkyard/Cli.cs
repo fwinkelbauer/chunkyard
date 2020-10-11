@@ -109,7 +109,11 @@ namespace Chunkyard
                     o.LogPosition,
                     o.IncludeFuzzy);
 
-            if (!ok)
+            if (ok)
+            {
+                Console.WriteLine("Snapshot is valid");
+            }
+            else
             {
                 throw new ChunkyardException(
                     "Found errors while checking snapshot");
