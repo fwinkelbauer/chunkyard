@@ -148,7 +148,17 @@ namespace Chunkyard
 
                 Directory.CreateDirectory(Path.GetDirectoryName(file));
 
-                return new FileStream(file, mode, FileAccess.Write);
+                try
+                {
+                    return new FileStream(file, mode, FileAccess.Write);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(
+                        $"Error: {s}{Environment.NewLine}> {e.Message}");
+
+                    throw;
+                }
             };
 
             var ok = snapshotStore.RestoreSnapshot(
