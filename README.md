@@ -5,11 +5,11 @@ content addressable storage with support for dynamic chunking and encryption.
 
 The FastCdc chunking algorithm is a C# port of these libraries:
 
-- [fastcdc-rs](https://github.com/nlfiedler/fastcdc-rs)
-- [fastcdc-py](https://github.com/titusz/fastcdc-py)
+- [fastcdc-rs][fastcdc-rs]
+- [fastcdc-py][fastcdc-py]
 
 I built Chunkyard for myself. You might want to consider more sophisticated
-tools. Here's a list of [options](https://github.com/restic/others).
+tools. Here's a list of [options][backup-tools].
 
 ## Goals
 
@@ -22,16 +22,13 @@ tools. Here's a list of [options](https://github.com/restic/others).
   - `Newtonsoft.Json` to work with JSON data until I can switch to
     `System.Text.Json`
 
-**Warning:** Chunkyard is vulnerable to CDC fingerprinting attacks. By observing
-the sizes of chunks in a repository, an attacker might be able to prove that a
-specific file exists in the backup.
-
 ## Not Goals
 
 - Key management
 - Compression
 - File meta data preservation (e.g. creation time, flags, ...)
 - Extended features such as branching
+- Obfuscating/Hiding chunk sizes to prevent [CDC fingerprint attacks][borg]
 
 ## Build
 
@@ -93,3 +90,8 @@ chunkyard create -r "$repo" -f ${directories[*]} --cached
 chunkyard keep -r "$repo" -l 4
 chunkyard gc -r "$repo"
 ```
+
+[fastcdc-rs]: https://github.com/nlfiedler/fastcdc-rs
+[fastcdc-py]: https://github.com/titusz/fastcdc-py
+[backup-tools]: https://github.com/restic/others
+[borg]: https://borgbackup.readthedocs.io/en/stable/internals/security.html#fingerprinting
