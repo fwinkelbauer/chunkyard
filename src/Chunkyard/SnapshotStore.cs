@@ -48,7 +48,10 @@ namespace Chunkyard
             }
 
             var snapshotResult = _contentStore.StoreDocument(
-                new Snapshot(creationTime, contentReferences),
+                new Snapshot(
+                    Snapshot.SchemaVersion,
+                    creationTime,
+                    contentReferences),
                 SnapshotFile,
                 AesGcmCrypto.GenerateNonce());
 
