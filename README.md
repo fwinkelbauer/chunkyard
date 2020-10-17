@@ -11,8 +11,14 @@ The FastCdc chunking algorithm is a C# port of these libraries:
 I built Chunkyard for myself. You might want to consider more sophisticated
 tools. Here's a list of [options][backup-tools].
 
+**Note:** A backup operation will fail if the target backup medium runs out of
+space. The repository might contain unreferenced files as the snapshot
+information will only be written after a successful backup operation. These
+unreferenced files can be deleted using the `chunkyard gc` command.
+
 ## Goals
 
+- Cross platform support
 - Favor simplicity and readability over features and performance
 - Strong encryption (AES Galois/Counter Mode using a 256 bit key)
 - Ability to copy from/to other repositories
