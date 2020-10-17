@@ -19,7 +19,8 @@ namespace Chunkyard.Tests
             var result = contentStore.StoreContent(
                 inputStream,
                 contentName,
-                AesGcmCrypto.GenerateNonce());
+                AesGcmCrypto.GenerateNonce(),
+                ContentType.Blob);
 
             using var outputStream = new MemoryStream();
             contentStore.RetrieveContent(
@@ -47,13 +48,15 @@ namespace Chunkyard.Tests
             var firstResult = contentStore.StoreContent(
                 firstStream,
                 contentName,
-                AesGcmCrypto.GenerateNonce());
+                AesGcmCrypto.GenerateNonce(),
+                ContentType.Blob);
 
             using var secondStream = new MemoryStream(bytes);
             var secondResult = contentStore.StoreContent(
                 secondStream,
                 contentName,
-                AesGcmCrypto.GenerateNonce());
+                AesGcmCrypto.GenerateNonce(),
+                ContentType.Blob);
 
             Assert.True(firstResult.IsNewContent);
             Assert.True(secondResult.IsNewContent);
@@ -67,7 +70,7 @@ namespace Chunkyard.Tests
             var expectedText = "some text";
             var contentName = "some name";
 
-            var result = contentStore.StoreContentObject(
+            var result = contentStore.StoreDocument(
                 expectedText,
                 contentName,
                 AesGcmCrypto.GenerateNonce());
@@ -87,7 +90,7 @@ namespace Chunkyard.Tests
             var contentStore = CreateContentStore(
                 new UnstoredRepository());
 
-            var result = contentStore.StoreContentObject(
+            var result = contentStore.StoreDocument(
                 "some text",
                 "with some name",
                 AesGcmCrypto.GenerateNonce());
@@ -101,7 +104,7 @@ namespace Chunkyard.Tests
             var contentStore = CreateContentStore(
                 new CorruptedRepository());
 
-            var result = contentStore.StoreContentObject(
+            var result = contentStore.StoreDocument(
                 "some text",
                 "with some name",
                 AesGcmCrypto.GenerateNonce());
@@ -123,7 +126,8 @@ namespace Chunkyard.Tests
                     new ChunkReference(
                         new Uri("sha256://abcdef123456"),
                         new byte[] { 0xFF })
-                });
+                },
+                ContentType.Blob);
 
             var firstLogPosition = contentStore.AppendToLog(
                 logId,

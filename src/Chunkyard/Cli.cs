@@ -278,12 +278,13 @@ namespace Chunkyard
             public override (ContentReference ContentReference, bool IsNewContent) StoreContent(
                 Stream inputStream,
                 string contentName,
-                byte[] nonce)
+                byte[] nonce,
+                ContentType type)
             {
-                var result = base.StoreContent(inputStream, contentName, nonce);
+                var result = base.StoreContent(inputStream, contentName, nonce, type);
 
                 if (result.IsNewContent
-                    && !contentName.Equals(SnapshotStore.SnapshotFile))
+                    && result.ContentReference.Type == ContentType.Blob)
                 {
                     Console.WriteLine($"Stored: {contentName}");
                 }
@@ -323,7 +324,7 @@ namespace Chunkyard
                 {
                     base.RetrieveContent(contentReference, outputStream);
 
-                    if (!contentReference.Name.Equals(SnapshotStore.SnapshotFile))
+                    if (contentReference.Type == ContentType.Blob)
                     {
                         Console.WriteLine($"Restored: {contentReference.Name}");
                     }

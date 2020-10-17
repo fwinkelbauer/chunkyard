@@ -13,11 +13,13 @@ namespace Chunkyard
         public ContentReference(
             string name,
             byte[] nonce,
-            IEnumerable<ChunkReference> chunks)
+            IEnumerable<ChunkReference> chunks,
+            ContentType type)
         {
             Name = name;
             Nonce = nonce;
             Chunks = chunks.ToArray();
+            Type = type;
         }
 
         public string Name { get; }
@@ -26,17 +28,20 @@ namespace Chunkyard
 
         public IEnumerable<ChunkReference> Chunks { get; }
 
+        public ContentType Type { get; }
+
         public override bool Equals(object? obj)
         {
             return obj is ContentReference reference
                 && Name == reference.Name
                 && Nonce.SequenceEqual(reference.Nonce)
-                && Chunks.SequenceEqual(reference.Chunks);
+                && Chunks.SequenceEqual(reference.Chunks)
+                && Type == reference.Type;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Name, Nonce, Chunks);
+            return HashCode.Combine(Name, Nonce, Chunks, Type);
         }
     }
 }

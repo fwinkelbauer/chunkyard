@@ -94,14 +94,16 @@ namespace Chunkyard
         public (ContentReference ContentReference, bool IsNewContent) StoreContent(
             Stream inputStream,
             string contentName,
-            byte[] nonce)
+            byte[] nonce,
+            ContentType type)
         {
             var result = WriteChunks(nonce, inputStream);
 
             var contentReference = new ContentReference(
                 contentName,
                 nonce,
-                result.ChunkReferences);
+                result.ChunkReferences,
+                type);
 
             return (contentReference, result.NewChunks);
         }

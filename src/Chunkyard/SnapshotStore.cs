@@ -11,7 +11,7 @@ namespace Chunkyard
     /// </summary>
     public class SnapshotStore
     {
-        public const string SnapshotFile = ".chunkyard-snapshot";
+        private const string SnapshotFile = ".chunkyard-snapshot";
 
         private readonly IRepository _repository;
         private readonly IContentStore _contentStore;
@@ -39,7 +39,7 @@ namespace Chunkyard
             foreach (var content in contents)
             {
                 using var contentStream = content.OpenRead();
-                var contentResult = _contentStore.StoreContent(
+                var contentResult = _contentStore.StoreBlob(
                     contentStream,
                     content.Name,
                     GenerateNonce(content.Name));
@@ -47,7 +47,7 @@ namespace Chunkyard
                 contentReferences.Add(contentResult.ContentReference);
             }
 
-            var snapshotResult = _contentStore.StoreContentObject(
+            var snapshotResult = _contentStore.StoreDocument(
                 new Snapshot(creationTime, contentReferences),
                 SnapshotFile,
                 AesGcmCrypto.GenerateNonce());

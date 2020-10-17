@@ -24,14 +24,16 @@ namespace Chunkyard
         public override (ContentReference ContentReference, bool IsNewContent) StoreContent(
             Stream inputStream,
             string contentName,
-            byte[] nonce)
+            byte[] nonce,
+            ContentType type)
         {
             if (!(inputStream is FileStream fileStream))
             {
                 return Store.StoreContent(
                     inputStream,
                     contentName,
-                    nonce);
+                    nonce,
+                    type);
             }
 
             var storedReference = RetrieveFromCache(fileStream, contentName);
@@ -44,7 +46,8 @@ namespace Chunkyard
             var result = Store.StoreContent(
                 inputStream,
                 contentName,
-                nonce);
+                nonce,
+                type);
 
             StoreInCache(
                 fileStream,
