@@ -6,16 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## Unreleased
 
-### Added
-
-- A schema version to every snapshot. Chunkyard will not read a repository if the schema version is not supported
-
 ### Changed
 
 - The `create` command to always write a snapshot
 - Most commands to require an existing repository
 - The commands `push` and `pull` by merging them into a single `copy` command
-- The storage format by introducing a definition of a content type
+- The storage format. Chunkyard will not process a snapshot if the schema version is not supported
 
 ## 1.2.0 - 2020-10-06
 

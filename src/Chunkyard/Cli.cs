@@ -28,7 +28,7 @@ namespace Chunkyard
 
             foreach (var file in files)
             {
-                Console.WriteLine(file.PartialPath);
+                Console.WriteLine(file.ContentName);
             }
         }
 
@@ -82,7 +82,7 @@ namespace Chunkyard
                 files.Select(f =>
                 {
                     Func<Stream> openRead = () => File.OpenRead(f.AbsolutePath);
-                    return (f.PartialPath, openRead);
+                    return (f.ContentName, openRead);
                 }),
                 DateTime.Now);
 

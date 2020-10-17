@@ -14,7 +14,7 @@ namespace Chunkyard
         private static readonly string HomeDirectory =
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        public static IEnumerable<(string AbsolutePath, string PartialPath)> Find(
+        public static IEnumerable<(string AbsolutePath, string ContentName)> Find(
             IEnumerable<string> files,
             IEnumerable<string> excludePatterns)
         {
@@ -32,7 +32,11 @@ namespace Chunkyard
                         parentPath,
                         absolutePath);
 
-                    yield return (absolutePath, partialPath);
+                    // Using a content name with backslashes will not create
+                    // sub-directories when restoring a file on Linux.
+                    yield return (
+                        absolutePath,
+                        partialPath.Replace('\\', '/'));
                 }
             }
         }
