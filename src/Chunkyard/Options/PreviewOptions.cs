@@ -10,8 +10,8 @@ namespace Chunkyard.Options
             IEnumerable<string> files,
             IEnumerable<string> excludePatterns)
         {
-            Files = new List<string>(files);
-            ExcludePatterns = new List<string>(excludePatterns);
+            Files = files;
+            ExcludePatterns = excludePatterns;
         }
 
         [Option('f', "files", Required = true, HelpText = "The files and directories to include")]

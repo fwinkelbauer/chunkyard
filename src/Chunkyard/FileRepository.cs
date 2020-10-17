@@ -131,7 +131,7 @@ namespace Chunkyard
         {
             if (!Directory.Exists(_refLogDirectory))
             {
-                return new List<int>();
+                return Array.Empty<int>();
             }
 
             var files = Directory.GetFiles(
