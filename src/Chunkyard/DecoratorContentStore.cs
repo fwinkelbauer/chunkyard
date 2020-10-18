@@ -25,13 +25,19 @@ namespace Chunkyard
             Store.RetrieveContent(contentReference, outputStream);
         }
 
-        public virtual (ContentReference ContentReference, bool IsNewContent) StoreContent(
+        public virtual ContentReference StoreContent(
             Stream inputStream,
             string contentName,
             byte[] nonce,
-            ContentType type)
+            ContentType type,
+            out bool newContent)
         {
-            return Store.StoreContent(inputStream, contentName, nonce, type);
+            return Store.StoreContent(
+                inputStream,
+                contentName,
+                nonce,
+                type,
+                out newContent);
         }
 
         public virtual bool ContentExists(ContentReference contentReference)

@@ -16,24 +16,25 @@ namespace Chunkyard.Tests
             var contentName = "some data";
             using var inputStream = new MemoryStream(expectedBytes);
 
-            var result = contentStore.StoreContent(
+            var contentReference = contentStore.StoreContent(
                 inputStream,
                 contentName,
                 AesGcmCrypto.GenerateNonce(),
-                ContentType.Blob);
+                ContentType.Blob,
+                out var newContent);
 
             using var outputStream = new MemoryStream();
             contentStore.RetrieveContent(
-                result.ContentReference,
+                contentReference,
                 outputStream);
 
             var actualBytes = outputStream.ToArray();
 
-            Assert.True(result.IsNewContent);
+            Assert.True(newContent);
             Assert.Equal(expectedBytes, actualBytes);
-            Assert.Equal(contentName, result.ContentReference.Name);
-            Assert.True(contentStore.ContentExists(result.ContentReference));
-            Assert.True(contentStore.ContentValid(result.ContentReference));
+            Assert.Equal(contentName, contentReference.Name);
+            Assert.True(contentStore.ContentExists(contentReference));
+            Assert.True(contentStore.ContentValid(contentReference));
         }
 
         [Fact]
@@ -49,17 +50,19 @@ namespace Chunkyard.Tests
                 firstStream,
                 contentName,
                 AesGcmCrypto.GenerateNonce(),
-                ContentType.Blob);
+                ContentType.Blob,
+                out var firstNewContent);
 
             using var secondStream = new MemoryStream(bytes);
             var secondResult = contentStore.StoreContent(
                 secondStream,
                 contentName,
                 AesGcmCrypto.GenerateNonce(),
-                ContentType.Blob);
+                ContentType.Blob,
+                out var secondNewContent);
 
-            Assert.True(firstResult.IsNewContent);
-            Assert.True(secondResult.IsNewContent);
+            Assert.True(firstNewContent);
+            Assert.True(secondNewContent);
         }
 
         [Fact]
@@ -70,18 +73,19 @@ namespace Chunkyard.Tests
             var expectedText = "some text";
             var contentName = "some name";
 
-            var result = contentStore.StoreDocument(
+            var contentReference = contentStore.StoreDocument(
                 expectedText,
                 contentName,
-                AesGcmCrypto.GenerateNonce());
+                AesGcmCrypto.GenerateNonce(),
+                out _);
 
             var actualText = contentStore.RetrieveContentObject<string>(
-                result.ContentReference);
+                contentReference);
 
             Assert.Equal(expectedText, actualText);
-            Assert.Equal(contentName, result.ContentReference.Name);
-            Assert.True(contentStore.ContentExists(result.ContentReference));
-            Assert.True(contentStore.ContentValid(result.ContentReference));
+            Assert.Equal(contentName, contentReference.Name);
+            Assert.True(contentStore.ContentExists(contentReference));
+            Assert.True(contentStore.ContentValid(contentReference));
         }
 
         [Fact]
@@ -90,12 +94,13 @@ namespace Chunkyard.Tests
             var contentStore = CreateContentStore(
                 new UnstoredRepository());
 
-            var result = contentStore.StoreDocument(
+            var contentReference = contentStore.StoreDocument(
                 "some text",
                 "with some name",
-                AesGcmCrypto.GenerateNonce());
+                AesGcmCrypto.GenerateNonce(),
+                out _);
 
-            Assert.False(contentStore.ContentExists(result.ContentReference));
+            Assert.False(contentStore.ContentExists(contentReference));
         }
 
         [Fact]
@@ -104,12 +109,13 @@ namespace Chunkyard.Tests
             var contentStore = CreateContentStore(
                 new CorruptedRepository());
 
-            var result = contentStore.StoreDocument(
+            var contentReference = contentStore.StoreDocument(
                 "some text",
                 "with some name",
-                AesGcmCrypto.GenerateNonce());
+                AesGcmCrypto.GenerateNonce(),
+                out _);
 
-            Assert.False(contentStore.ContentValid(result.ContentReference));
+            Assert.False(contentStore.ContentValid(contentReference));
         }
 
         [Fact]

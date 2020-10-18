@@ -91,21 +91,18 @@ namespace Chunkyard
             }
         }
 
-        public (ContentReference ContentReference, bool IsNewContent) StoreContent(
+        public ContentReference StoreContent(
             Stream inputStream,
             string contentName,
             byte[] nonce,
-            ContentType type)
+            ContentType type,
+            out bool newContent)
         {
-            var result = WriteChunks(nonce, inputStream);
-
-            var contentReference = new ContentReference(
+            return new ContentReference(
                 contentName,
                 nonce,
-                result.ChunkReferences,
+                WriteChunks(nonce, inputStream, out newContent),
                 type);
-
-            return (contentReference, result.NewChunks);
         }
 
         public bool ContentExists(ContentReference contentReference)
@@ -171,12 +168,13 @@ namespace Chunkyard
                 repository.RetrieveFromLog(logPosition));
         }
 
-        private (IEnumerable<ChunkReference> ChunkReferences, bool NewChunks) WriteChunks(
+        private IEnumerable<ChunkReference> WriteChunks(
             byte[] nonce,
-            Stream stream)
+            Stream stream,
+            out bool newChunks)
         {
             var chunkedDataItems = _fastCdc.SplitIntoChunks(stream);
-            var newChunks = false;
+            newChunks = false;
             var chunkReferences = new List<ChunkReference>();
 
             foreach (var chunkedData in chunkedDataItems)
@@ -195,7 +193,7 @@ namespace Chunkyard
                 chunkReferences.Add(new ChunkReference(contentUri, tag));
             }
 
-            return (chunkReferences, newChunks);
+            return chunkReferences;
         }
 
         private static int? FetchLogPosition(IRepository repository)

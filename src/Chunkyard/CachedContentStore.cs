@@ -21,11 +21,12 @@ namespace Chunkyard
             _cacheDirectory = cacheDirectory;
         }
 
-        public override (ContentReference ContentReference, bool IsNewContent) StoreContent(
+        public override ContentReference StoreContent(
             Stream inputStream,
             string contentName,
             byte[] nonce,
-            ContentType type)
+            ContentType type,
+            out bool newContent)
         {
             if (!(inputStream is FileStream fileStream))
             {
@@ -33,27 +34,30 @@ namespace Chunkyard
                     inputStream,
                     contentName,
                     nonce,
-                    type);
+                    type,
+                    out newContent);
             }
 
             var storedReference = RetrieveFromCache(fileStream, contentName);
 
             if (storedReference != null)
             {
-                return (storedReference, false);
+                newContent = false;
+                return storedReference;
             }
 
-            var result = Store.StoreContent(
+            var contentReference = Store.StoreContent(
                 inputStream,
                 contentName,
                 nonce,
-                type);
+                type,
+                out newContent);
 
             StoreInCache(
                 fileStream,
-                result.ContentReference);
+                contentReference);
 
-            return result;
+            return contentReference;
         }
 
         private ContentReference? RetrieveFromCache(

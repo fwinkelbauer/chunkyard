@@ -275,21 +275,27 @@ namespace Chunkyard
             {
             }
 
-            public override (ContentReference ContentReference, bool IsNewContent) StoreContent(
+            public override ContentReference StoreContent(
                 Stream inputStream,
                 string contentName,
                 byte[] nonce,
-                ContentType type)
+                ContentType type,
+                out bool newContent)
             {
-                var result = base.StoreContent(inputStream, contentName, nonce, type);
+                var contentReference = base.StoreContent(
+                    inputStream,
+                    contentName,
+                    nonce,
+                    type,
+                    out newContent);
 
-                if (result.IsNewContent
-                    && result.ContentReference.Type == ContentType.Blob)
+                if (contentReference.Type == ContentType.Blob
+                    && newContent)
                 {
                     Console.WriteLine($"Stored: {contentName}");
                 }
 
-                return result;
+                return contentReference;
             }
 
             public override bool ContentExists(ContentReference contentReference)

@@ -39,21 +39,23 @@ namespace Chunkyard
             foreach (var content in contents)
             {
                 using var contentStream = content.OpenRead();
-                var contentResult = _contentStore.StoreBlob(
+                var contentReference = _contentStore.StoreBlob(
                     contentStream,
                     content.Name,
-                    GenerateNonce(content.Name));
+                    GenerateNonce(content.Name),
+                    out _);
 
-                contentReferences.Add(contentResult.ContentReference);
+                contentReferences.Add(contentReference);
             }
 
-            var snapshotResult = _contentStore.StoreDocument(
+            var snapshotContentReference = _contentStore.StoreDocument(
                 new Snapshot(
                     Snapshot.SchemaVersion,
                     creationTime,
                     contentReferences),
                 SnapshotFile,
-                AesGcmCrypto.GenerateNonce());
+                AesGcmCrypto.GenerateNonce(),
+                out _);
 
             var currentLogPosition = _contentStore.CurrentLogPosition;
             var newLogPosition = currentLogPosition.HasValue
@@ -66,7 +68,7 @@ namespace Chunkyard
 
             currentLogPosition = _contentStore.AppendToLog(
                 logId,
-                snapshotResult.ContentReference,
+                snapshotContentReference,
                 newLogPosition);
 
             return currentLogPosition.Value;

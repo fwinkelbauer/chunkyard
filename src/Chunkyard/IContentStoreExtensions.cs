@@ -23,11 +23,12 @@ namespace Chunkyard
             return DataConvert.ToObject<T>(memoryStream.ToArray());
         }
 
-        public static (ContentReference ContentReference, bool IsNewContent) StoreBlob(
+        public static ContentReference StoreBlob(
             this IContentStore store,
             Stream inputStream,
             string contentName,
-            byte[] nonce)
+            byte[] nonce,
+            out bool newContent)
         {
             store.EnsureNotNull(nameof(store));
 
@@ -35,14 +36,16 @@ namespace Chunkyard
                 inputStream,
                 contentName,
                 nonce,
-                ContentType.Blob);
+                ContentType.Blob,
+                out newContent);
         }
 
-        public static (ContentReference ContentReference, bool IsNewContent) StoreDocument<T>(
+        public static ContentReference StoreDocument<T>(
             this IContentStore store,
             T value,
             string contentName,
-            byte[] nonce)
+            byte[] nonce,
+            out bool newContent)
             where T : notnull
         {
             store.EnsureNotNull(nameof(store));
@@ -54,7 +57,8 @@ namespace Chunkyard
                 memoryStream,
                 contentName,
                 nonce,
-                ContentType.Document);
+                ContentType.Document,
+                out newContent);
         }
     }
 }
