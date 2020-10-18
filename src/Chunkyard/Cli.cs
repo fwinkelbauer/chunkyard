@@ -148,29 +148,13 @@ namespace Chunkyard
 
                 Directory.CreateDirectory(Path.GetDirectoryName(file));
 
-                try
-                {
-                    return new FileStream(file, mode, FileAccess.Write);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(
-                        $"Error: {s}{Environment.NewLine}> {e.Message}");
-
-                    throw;
-                }
+                return new FileStream(file, mode, FileAccess.Write);
             };
 
-            var ok = snapshotStore.RestoreSnapshot(
+            snapshotStore.RestoreSnapshot(
                 o.LogPosition,
                 o.IncludeFuzzy,
                 openWrite);
-
-            if (!ok)
-            {
-                throw new ChunkyardException(
-                    "Detected errors while restoring snapshot");
-            }
         }
 
         public static void ListSnapshots(ListOptions o)
@@ -326,21 +310,11 @@ namespace Chunkyard
                 ContentReference contentReference,
                 Stream outputStream)
             {
-                try
-                {
-                    base.RetrieveContent(contentReference, outputStream);
+                base.RetrieveContent(contentReference, outputStream);
 
-                    if (contentReference.Type == ContentType.Blob)
-                    {
-                        Console.WriteLine($"Restored: {contentReference.Name}");
-                    }
-                }
-                catch (Exception e)
+                if (contentReference.Type == ContentType.Blob)
                 {
-                    Console.WriteLine(
-                        $"Error: {contentReference.Name}{Environment.NewLine}> {e.Message}");
-
-                    throw;
+                    Console.WriteLine($"Restored: {contentReference.Name}");
                 }
             }
         }

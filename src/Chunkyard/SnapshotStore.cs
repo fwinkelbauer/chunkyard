@@ -106,32 +106,22 @@ namespace Chunkyard
             return valid;
         }
 
-        public bool RestoreSnapshot(
+        public void RestoreSnapshot(
             int logPosition,
             string fuzzyPattern,
             Func<string, Stream> openWrite)
         {
             var snapshot = GetSnapshot(logPosition);
-            var ok = true;
             var filteredContentReferences = FuzzyFilter(
                 snapshot.ContentReferences,
                 fuzzyPattern);
 
             foreach (var contentReference in filteredContentReferences)
             {
-                try
-                {
-                    using var stream = openWrite(contentReference.Name);
+                using var stream = openWrite(contentReference.Name);
 
-                    _contentStore.RetrieveContent(contentReference, stream);
-                }
-                catch (Exception)
-                {
-                    ok = false;
-                }
+                _contentStore.RetrieveContent(contentReference, stream);
             }
-
-            return ok;
         }
 
         public Snapshot GetSnapshot(int logPosition)
