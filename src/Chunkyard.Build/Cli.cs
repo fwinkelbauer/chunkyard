@@ -50,7 +50,6 @@ namespace Chunkyard.Build
             Dotnet(
                 $"build {Solution}",
                 $"-c {o.Configuration}",
-                $"-r {o.Runtime}",
                 "-warnaserror");
 
             Dotnet(
