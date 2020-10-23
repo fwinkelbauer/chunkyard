@@ -17,13 +17,9 @@ namespace Chunkyard.Tests
             using var stream = File.OpenRead("SekienAkashita.jpg");
             var chunks = fastCdc.SplitIntoChunks(stream).ToArray();
 
-            Assert.Equal(6, chunks.Length);
-            Assert.Equal(22366, chunks[0].Length);
-            Assert.Equal(8282, chunks[1].Length);
-            Assert.Equal(16303, chunks[2].Length);
-            Assert.Equal(18696, chunks[3].Length);
-            Assert.Equal(32768, chunks[4].Length);
-            Assert.Equal(11051, chunks[5].Length);
+            Assert.Equal(
+                new[] { 22366, 8282, 16303, 18696, 32768, 11051 },
+                chunks.Select(c => c.Length));
         }
 
         [Fact]
@@ -37,10 +33,9 @@ namespace Chunkyard.Tests
             using var stream = File.OpenRead("SekienAkashita.jpg");
             var chunks = fastCdc.SplitIntoChunks(stream).ToArray();
 
-            Assert.Equal(3, chunks.Length);
-            Assert.Equal(32857, chunks[0].Length);
-            Assert.Equal(16408, chunks[1].Length);
-            Assert.Equal(60201, chunks[2].Length);
+            Assert.Equal(
+                new[] { 32857, 16408, 60201 },
+                chunks.Select(c => c.Length));
         }
 
         [Fact]
@@ -54,9 +49,9 @@ namespace Chunkyard.Tests
             using var stream = File.OpenRead("SekienAkashita.jpg");
             var chunks = fastCdc.SplitIntoChunks(stream).ToArray();
 
-            Assert.Equal(2, chunks.Length);
-            Assert.Equal(32857, chunks[0].Length);
-            Assert.Equal(76609, chunks[1].Length);
+            Assert.Equal(
+                new[] { 32857, 76609 },
+                chunks.Select(c => c.Length));
         }
 
         [Theory]
