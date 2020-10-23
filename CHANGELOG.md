@@ -2,7 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog][changelog] and this project adheres to
+[Semantic Versioning][semver].
 
 ## Unreleased
 
@@ -11,13 +12,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 - The `create` command to always write a snapshot
 - Most commands to require an existing repository
 - The commands `push` and `pull` by merging them into a single `copy` command
-- The storage format. Chunkyard will not process a snapshot if the schema version is not supported
+- The storage format. Chunkyard will stop processing a snapshot if the schema
+  version is not supported
 
 ## 1.2.0 - 2020-10-06
 
 ### Added
 
-- Checks when using the `push` and `pull` commands to ensure that common reflog items (snapshots) do not differ
+- Checks when using the `push` and `pull` commands to ensure that common reflog
+  items (snapshots) do not differ
 
 ### Changed
 
@@ -48,7 +51,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ### Changed
 
-- The behavior of push/pull to abort if the log IDs of the given repositories do not match
+- The behavior of push/pull to abort if the log IDs of the given repositories do
+  not match
 
 ## 0.3.0 - 2020-06-02
 
@@ -85,3 +89,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 
 - Initial release
+
+[changelog]: http://keepachangelog.com/en/1.0.0
+[semver]: http://semver.org/spec/v2.0.0.html
