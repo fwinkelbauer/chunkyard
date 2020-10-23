@@ -12,8 +12,7 @@ namespace Chunkyard.Build
         {
             try
             {
-                ProcessArguments(
-                    args ?? throw new ArgumentNullException(nameof(args)));
+                ProcessArguments(args);
             }
             catch (Exception e)
             {
@@ -24,7 +23,7 @@ namespace Chunkyard.Build
 
         private static void ProcessArguments(string[] args)
         {
-            if (args.Length == 0)
+            if (args == null || args.Length == 0)
             {
                 Cli.Default();
                 return;
