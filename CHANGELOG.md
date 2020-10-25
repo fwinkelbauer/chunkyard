@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 2.0.0 - 2020-10-25
+
 ### Changed
 
 - The `create` command to always write a snapshot
