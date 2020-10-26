@@ -73,11 +73,14 @@ namespace Chunkyard.Build
                 $"--workspace {Solution}");
         }
 
-        public static void Commit()
+        public static void Release()
         {
+            var message = $"Prepare Chunkyard release v{Version}";
+            var tag = $"v{Version}";
+
             Git("add -A");
-            Git($"commit -m \"Prepare Chunkyard release v{Version}\"");
-            Git($"tag \"v{Version}\"");
+            Git($"commit -m \"{message}\"");
+            Git($"tag -a \"{tag}\" -m \"{message}\"");
         }
 
         private static void Dotnet(params string[] arguments)
