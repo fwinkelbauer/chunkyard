@@ -280,7 +280,7 @@ namespace Chunkyard
 
         private Snapshot GetSnapshot(LogReference logReference)
         {
-            return _contentStore.RetrieveContentObject<Snapshot>(
+            return _contentStore.RetrieveDocument<Snapshot>(
                 logReference.ContentReference);
         }
 

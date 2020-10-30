@@ -7,7 +7,7 @@ namespace Chunkyard
     /// </summary>
     public static class IContentStoreExtensions
     {
-        public static T RetrieveContentObject<T>(
+        public static T RetrieveDocument<T>(
             this IContentStore store,
             ContentReference contentReference)
             where T : notnull

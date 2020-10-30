@@ -66,7 +66,7 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void Store_And_RetrieveContentObject_Return_Object()
+        public static void Store_And_RetrieveDocument_Return_Object()
         {
             var contentStore = CreateContentStore();
 
@@ -79,7 +79,7 @@ namespace Chunkyard.Tests
                 AesGcmCrypto.GenerateNonce(),
                 out _);
 
-            var actualText = contentStore.RetrieveContentObject<string>(
+            var actualText = contentStore.RetrieveDocument<string>(
                 contentReference);
 
             Assert.Equal(expectedText, actualText);
