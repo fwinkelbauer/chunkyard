@@ -57,7 +57,7 @@ dotnet tool install -g dotnet-format
 ## Publish
 
 - Update `CHANGELOG.md` and add a new version header
-- Run `./make.sh release` to create a git tagged commit containing the latest
+- Run `./make.sh release` to create a tagged commit containing the latest
   version found in `CHANGELOG.md`
 - Run `git push --follow-tags`
 

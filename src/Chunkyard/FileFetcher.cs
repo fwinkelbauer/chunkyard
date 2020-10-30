@@ -6,7 +6,7 @@ using System.Linq;
 namespace Chunkyard
 {
     /// <summary>
-    /// A class to retrieve file names based on a set of directories/fiels and
+    /// A class to retrieve file names based on a set of directories/files and
     /// exclude patterns.
     /// </summary>
     internal static class FileFetcher
