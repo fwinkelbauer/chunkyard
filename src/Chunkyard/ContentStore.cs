@@ -184,11 +184,12 @@ namespace Chunkyard
                     _key,
                     nonce);
 
-                var contentUri = Id.ComputeContentUri(
+                var contentUri = _repository.StoreValue(
                     _hashAlgorithmName,
-                    encryptedData);
+                    encryptedData,
+                    out var newValue);
 
-                newChunks |= _repository.StoreValue(contentUri, encryptedData);
+                newChunks |= newValue;
 
                 chunkReferences.Add(new ChunkReference(contentUri, tag));
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace Chunkyard
 {
@@ -8,6 +9,23 @@ namespace Chunkyard
     /// </summary>
     public static class IRepositoryExtensions
     {
+        public static Uri StoreValue(
+            this IRepository repository,
+            HashAlgorithmName hashAlgorithmName,
+            byte[] value,
+            out bool newValue)
+        {
+            repository.EnsureNotNull(nameof(repository));
+
+            var contentUri = Id.ComputeContentUri(
+                hashAlgorithmName,
+                value);
+
+            newValue = repository.StoreValue(contentUri, value);
+
+            return contentUri;
+        }
+
         public static bool UriValid(this IRepository repository, Uri contentUri)
         {
             repository.EnsureNotNull(nameof(repository));

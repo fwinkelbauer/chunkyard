@@ -1,10 +1,35 @@
 ﻿using System;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Chunkyard.Tests
 {
     public static class IRepositoryExtensionsTests
     {
+        [Fact]
+        public static void StoreValue_Stores_Value_Once()
+        {
+            var repository = new MemoryRepository();
+            var hashAlgorithmName = HashAlgorithmName.SHA256;
+            var content = new byte[] { 0xFF };
+            var expectedContentUri = new Uri("sha256://a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89/");
+
+            var actualContentUri1 = repository.StoreValue(
+                hashAlgorithmName,
+                content,
+                out var newValue1);
+
+            var actualContentUri2 = repository.StoreValue(
+                hashAlgorithmName,
+                content,
+                out var newValue2);
+
+            Assert.Equal(expectedContentUri, actualContentUri1);
+            Assert.Equal(expectedContentUri, actualContentUri2);
+            Assert.True(newValue1);
+            Assert.False(newValue2);
+        }
+
         [Fact]
         public static void UriValid_Returns_False_If_Null()
         {
