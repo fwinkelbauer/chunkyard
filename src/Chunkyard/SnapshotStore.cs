@@ -74,7 +74,7 @@ namespace Chunkyard
             return currentLogPosition.Value;
         }
 
-        public bool CheckSnapshotExists(int logPosition, string fuzzyPattern)
+        public bool CheckSnapshotExists(int logPosition, string fuzzyPattern = "")
         {
             var snapshot = GetSnapshot(logPosition);
             var exists = true;
@@ -90,7 +90,7 @@ namespace Chunkyard
             return exists;
         }
 
-        public bool CheckSnapshotValid(int logPosition, string fuzzyPattern)
+        public bool CheckSnapshotValid(int logPosition, string fuzzyPattern = "")
         {
             var snapshot = GetSnapshot(logPosition);
             var valid = true;

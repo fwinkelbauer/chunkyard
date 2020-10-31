@@ -86,11 +86,9 @@ namespace Chunkyard
                 }),
                 DateTime.Now);
 
-            var snapshotValid = snapshotStore.CheckSnapshotValid(
-                logPosition,
-                "");
+            var snapshotExists = snapshotStore.CheckSnapshotExists(logPosition);
 
-            if (!snapshotValid)
+            if (!snapshotExists)
             {
                 throw new ChunkyardException(
                     "Missign content after creating snapshot");

@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Fixed
+
+- The shallow check after using the `create` command
+
 ## 2.0.0 - 2020-10-25
 
 ### Changed
