@@ -172,11 +172,6 @@ namespace Chunkyard
             }
         }
 
-        public IEnumerable<int> ListLogPositions()
-        {
-            return _repository.ListLogPositions();
-        }
-
         public void GarbageCollect()
         {
             var usedUris = new HashSet<Uri>();

@@ -157,9 +157,10 @@ namespace Chunkyard
 
         public static void ListSnapshots(ListOptions o)
         {
-            var snapshotStore = CreateSnapshotStore(o.Repository);
+            var repository = CreateRepository(o.Repository);
+            var snapshotStore = CreateSnapshotStore(repository);
 
-            foreach (var logPosition in snapshotStore.ListLogPositions())
+            foreach (var logPosition in repository.ListLogPositions())
             {
                 var snapshot = snapshotStore.GetSnapshot(logPosition);
                 var isoDate = snapshot.CreationTime.ToString(
@@ -228,10 +229,15 @@ namespace Chunkyard
             IPrompt? prompt = null,
             bool ensureRepository = true)
         {
-            var repository = CreateRepository(
-                repositoryPath,
-                ensureRepository);
+            return CreateSnapshotStore(
+                CreateRepository(repositoryPath, ensureRepository),
+                prompt);
+        }
 
+        private static SnapshotStore CreateSnapshotStore(
+            IRepository repository,
+            IPrompt? prompt = null)
+        {
             return new SnapshotStore(
                 repository,
                 new PrintingContentStore(
