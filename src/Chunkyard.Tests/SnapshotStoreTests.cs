@@ -87,12 +87,13 @@ namespace Chunkyard.Tests
                 new[] { ("some content", CreateOpenReadContent()) },
                 DateTime.Now);
 
-            // "some content" + snapshot #1 = 2 URIs
+            // - A URI for "some content"
+            // - A URI for the snapshot itself
             Assert.Equal(2, snapshotStore.ListUris(logPosition).Count());
         }
 
         [Fact]
-        public static void ListUris_Lists_Nothing_If_Snapshot_Is_Invalid()
+        public static void ListUris_Throws_If_Snapshot_Is_Invalid()
         {
             var snapshotStore = CreateSnapshotStore(
                 new UnstoredRepository());
@@ -101,7 +102,11 @@ namespace Chunkyard.Tests
                 new[] { ("some content", CreateOpenReadContent()) },
                 DateTime.Now);
 
-            Assert.Empty(snapshotStore.ListUris(logPosition));
+            // xunit does not let my catch a generic Exception type. Instead I
+            // have to check for the KeyNotFoundException which only happens in
+            // a in-memory repository
+            Assert.Throws<KeyNotFoundException>(
+                () => snapshotStore.ListUris(logPosition));
         }
 
         [Fact]

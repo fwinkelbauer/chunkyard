@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Chunkyard
 {
@@ -59,6 +62,14 @@ namespace Chunkyard
                 nonce,
                 ContentType.Document,
                 out newContent);
+        }
+
+        public static IEnumerable<Uri> ListUris(
+            this IContentStore store,
+            ContentReference contentReference)
+        {
+            return contentReference.EnsureNotNull(nameof(contentReference))
+                .Chunks.Select(c => c.ContentUri);
         }
     }
 }

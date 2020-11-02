@@ -154,7 +154,7 @@ namespace Chunkyard
         public Snapshot GetSnapshot(int logPosition)
         {
             return GetSnapshot(
-                _contentStore.RetrieveFromLog(logPosition));
+                _contentStore.RetrieveFromLog(logPosition).ContentReference);
         }
 
         public IEnumerable<ContentReference> ShowSnapshot(
@@ -279,33 +279,26 @@ namespace Chunkyard
 
         public IEnumerable<Uri> ListUris(int logPosition)
         {
-            var logReference = _contentStore.RetrieveFromLog(logPosition);
+            var uris = new List<Uri>();
+            var snapshotReference = _contentStore.RetrieveFromLog(logPosition)
+                .ContentReference;
 
-            if (!_contentStore.ContentExists(logReference.ContentReference))
-            {
-                yield break;
-            }
+            uris.AddRange(_contentStore.ListUris(snapshotReference));
 
-            foreach (var chunk in logReference.ContentReference.Chunks)
-            {
-                yield return chunk.ContentUri;
-            }
-
-            var snapshot = GetSnapshot(logReference);
+            var snapshot = GetSnapshot(snapshotReference);
 
             foreach (var contentReference in snapshot.ContentReferences)
             {
-                foreach (var chunk in contentReference.Chunks)
-                {
-                    yield return chunk.ContentUri;
-                }
+                uris.AddRange(_contentStore.ListUris(contentReference));
             }
+
+            return uris;
         }
 
-        private Snapshot GetSnapshot(LogReference logReference)
+        private Snapshot GetSnapshot(ContentReference contentReference)
         {
             return _contentStore.RetrieveDocument<Snapshot>(
-                logReference.ContentReference);
+                contentReference);
         }
 
         private void RegisterPreviousContent()
