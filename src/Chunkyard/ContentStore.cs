@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Chunkyard
 {
@@ -31,7 +32,6 @@ namespace Chunkyard
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
 
-            CurrentLogPosition = FetchLogPosition(repository);
             string? password;
 
             prompt.EnsureNotNull(nameof(prompt));
@@ -174,25 +174,33 @@ namespace Chunkyard
             out bool newChunks)
         {
             var chunkedDataItems = _fastCdc.SplitIntoChunks(stream);
-            newChunks = false;
+
+            var newValues = false;
             var chunkReferences = new List<ChunkReference>();
 
-            foreach (var chunkedData in chunkedDataItems)
-            {
-                var (encryptedData, tag) = AesGcmCrypto.Encrypt(
-                    chunkedData,
-                    _key,
-                    nonce);
+            Parallel.ForEach(
+                chunkedDataItems,
+                chunkedData =>
+                {
+                    var (encryptedData, tag) = AesGcmCrypto.Encrypt(
+                        chunkedData,
+                        _key,
+                        nonce);
 
-                var contentUri = _repository.StoreValue(
-                    _hashAlgorithmName,
-                    encryptedData,
-                    out var newValue);
+                    var contentUri = _repository.StoreValue(
+                        _hashAlgorithmName,
+                        encryptedData,
+                        out var newValue);
 
-                newChunks |= newValue;
+                    lock (chunkReferences)
+                    {
+                        newValues |= newValue;
 
-                chunkReferences.Add(new ChunkReference(contentUri, tag));
-            }
+                        chunkReferences.Add(new ChunkReference(contentUri, tag));
+                    }
+                });
+
+            newChunks = newValues;
 
             return chunkReferences;
         }

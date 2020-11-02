@@ -5,7 +5,9 @@ namespace Chunkyard
 {
     /// <summary>
     /// Defines a basic contract to store and retrieve bytes. Stored data can be
-    /// referenced using an URI.
+    /// referenced using an URI. Any implementation of this interface must be
+    /// able to handle calls in a multithreaded environment (e.g. parallel calls
+    /// to StoreValue).
     /// </summary>
     public interface IRepository
     {

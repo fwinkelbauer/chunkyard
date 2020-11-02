@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Chunkyard
 {
@@ -36,17 +37,22 @@ namespace Chunkyard
 
             var contentReferences = new List<ContentReference>();
 
-            foreach (var content in contents)
-            {
-                using var contentStream = content.OpenRead();
-                var contentReference = _contentStore.StoreBlob(
-                    contentStream,
-                    content.Name,
-                    GenerateNonce(content.Name),
-                    out _);
+            Parallel.ForEach(
+                contents,
+                content =>
+                {
+                    using var contentStream = content.OpenRead();
+                    var contentReference = _contentStore.StoreBlob(
+                        contentStream,
+                        content.Name,
+                        GenerateNonce(content.Name),
+                        out _);
 
-                contentReferences.Add(contentReference);
-            }
+                    lock (contentReferences)
+                    {
+                        contentReferences.Add(contentReference);
+                    }
+                });
 
             var snapshotContentReference = _contentStore.StoreDocument(
                 new Snapshot(
@@ -74,34 +80,53 @@ namespace Chunkyard
             return currentLogPosition.Value;
         }
 
-        public bool CheckSnapshotExists(int logPosition, string fuzzyPattern = "")
+        public bool CheckSnapshotExists(
+            int logPosition,
+            string fuzzyPattern = "")
         {
             var snapshot = GetSnapshot(logPosition);
-            var exists = true;
             var filteredContentReferences = FuzzyFilter(
                 snapshot.ContentReferences,
                 fuzzyPattern);
 
+            // Checking if a content exists seems like a fast operation
+            // (compared to checking if a piece of content is valid), so let's
+            // use a simple loop for now.
             foreach (var contentReference in filteredContentReferences)
             {
-                exists &= _contentStore.ContentExists(contentReference);
+                if (!_contentStore.ContentExists(contentReference))
+                {
+                    return false;
+                }
             }
 
-            return exists;
+            return true;
         }
 
-        public bool CheckSnapshotValid(int logPosition, string fuzzyPattern = "")
+        public bool CheckSnapshotValid(
+            int logPosition,
+            string fuzzyPattern = "")
         {
             var snapshot = GetSnapshot(logPosition);
-            var valid = true;
             var filteredContentReferences = FuzzyFilter(
                 snapshot.ContentReferences,
                 fuzzyPattern);
 
-            foreach (var contentReference in filteredContentReferences)
-            {
-                valid &= _contentStore.ContentValid(contentReference);
-            }
+            var lockObject = new object();
+            var valid = true;
+
+            Parallel.ForEach(
+                filteredContentReferences,
+                contentReference =>
+                {
+                    if (!_contentStore.ContentValid(contentReference))
+                    {
+                        lock (lockObject)
+                        {
+                            valid = false;
+                        }
+                    }
+                });
 
             return valid;
         }
@@ -116,12 +141,14 @@ namespace Chunkyard
                 snapshot.ContentReferences,
                 fuzzyPattern);
 
-            foreach (var contentReference in filteredContentReferences)
-            {
-                using var stream = openWrite(contentReference.Name);
+            Parallel.ForEach(
+                filteredContentReferences,
+                contentReference =>
+                {
+                    using var stream = openWrite(contentReference.Name);
 
-                _contentStore.RetrieveContent(contentReference, stream);
-            }
+                    _contentStore.RetrieveContent(contentReference, stream);
+                });
         }
 
         public Snapshot GetSnapshot(int logPosition)
@@ -164,10 +191,12 @@ namespace Chunkyard
                     ListUris(logPosition));
             }
 
-            foreach (var contentUri in allContentUris.Except(usedUris))
-            {
-                _repository.RemoveValue(contentUri);
-            }
+            Parallel.ForEach(
+                allContentUris.Except(usedUris),
+                contentUri =>
+                {
+                    _repository.RemoveValue(contentUri);
+                });
         }
 
         public bool CopySnapshots(
@@ -236,21 +265,21 @@ namespace Chunkyard
             int logPosition,
             IRepository otherRepository)
         {
-            var snapshotUris = ListUris(logPosition)
-                .ToArray();
+            var urisToCopy = ListUris(logPosition).Except(
+                otherRepository.ListUris());
 
-            foreach (var snapshotUri in snapshotUris)
-            {
-                if (!otherRepository.ValueExists(snapshotUri))
+            Parallel.ForEach(
+                urisToCopy,
+                contentUri =>
                 {
-                    var contentValue = _repository.RetrieveValue(snapshotUri);
-                    otherRepository.StoreValue(snapshotUri, contentValue);
-                }
-            }
+                    otherRepository.StoreValue(
+                        contentUri,
+                        _repository.RetrieveValue(contentUri));
+                });
 
-            var logValue = _repository.RetrieveFromLog(logPosition);
-
-            otherRepository.AppendToLog(logValue, logPosition);
+            otherRepository.AppendToLog(
+                _repository.RetrieveFromLog(logPosition),
+                logPosition);
         }
 
         public IEnumerable<Uri> ListUris(int logPosition)
