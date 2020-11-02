@@ -28,8 +28,8 @@ namespace Chunkyard
 
         int AppendToLog(
             Guid logId,
-            ContentReference contentReference,
-            int newLogPosition);
+            int newLogPosition,
+            ContentReference contentReference);
 
         LogReference RetrieveFromLog(int logPosition);
     }

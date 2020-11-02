@@ -135,8 +135,8 @@ namespace Chunkyard
 
         public int AppendToLog(
             Guid logId,
-            ContentReference contentReference,
-            int newLogPosition)
+            int newLogPosition,
+            ContentReference contentReference)
         {
             var logReference = new LogReference(
                 logId,

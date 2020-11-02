@@ -137,13 +137,13 @@ namespace Chunkyard.Tests
 
             var firstLogPosition = contentStore.AppendToLog(
                 logId,
-                contentReference,
-                0);
+                0,
+                contentReference);
 
             var secondLogPosition = contentStore.AppendToLog(
                 logId,
-                contentReference,
-                firstLogPosition + 1);
+                firstLogPosition + 1,
+                contentReference);
 
             var firstReference = contentStore.RetrieveFromLog(
                 firstLogPosition);

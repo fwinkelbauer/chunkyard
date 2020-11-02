@@ -74,8 +74,8 @@ namespace Chunkyard
 
             currentLogPosition = _contentStore.AppendToLog(
                 logId,
-                snapshotContentReference,
-                newLogPosition);
+                newLogPosition,
+                snapshotContentReference);
 
             return currentLogPosition.Value;
         }
