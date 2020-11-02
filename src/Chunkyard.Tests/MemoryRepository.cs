@@ -65,7 +65,7 @@ namespace Chunkyard.Tests
             }
         }
 
-        public int AppendToLog(byte[] value, int newLogPosition)
+        public int AppendToLog(int newLogPosition, byte[] value)
         {
             lock (_lock)
             {

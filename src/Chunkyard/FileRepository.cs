@@ -96,9 +96,7 @@ namespace Chunkyard
             Directory.Delete(directoryPath);
         }
 
-        public int AppendToLog(
-            byte[] value,
-            int newLogPosition)
+        public int AppendToLog(int newLogPosition, byte[] value)
         {
             var file = ToFilePath(newLogPosition);
 

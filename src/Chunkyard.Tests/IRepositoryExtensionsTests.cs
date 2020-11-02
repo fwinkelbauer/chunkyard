@@ -77,10 +77,10 @@ namespace Chunkyard.Tests
             var repository = new MemoryRepository();
             var content = new byte[] { 0xFF };
 
-            repository.AppendToLog(content, 0);
-            repository.AppendToLog(content, 1);
-            repository.AppendToLog(content, 2);
-            repository.AppendToLog(content, 3);
+            repository.AppendToLog(0, content);
+            repository.AppendToLog(1, content);
+            repository.AppendToLog(2, content);
+            repository.AppendToLog(3, content);
 
             repository.KeepLatestLogPositions(2);
 
@@ -95,8 +95,8 @@ namespace Chunkyard.Tests
             var repository = new MemoryRepository();
             var content = new byte[] { 0xFF };
 
-            repository.AppendToLog(content, 0);
-            repository.AppendToLog(content, 1);
+            repository.AppendToLog(0, content);
+            repository.AppendToLog(1, content);
 
             repository.KeepLatestLogPositions(2);
 
@@ -111,8 +111,8 @@ namespace Chunkyard.Tests
             var repository = new MemoryRepository();
             var content = new byte[] { 0xFF };
 
-            repository.AppendToLog(content, 0);
-            repository.AppendToLog(content, 1);
+            repository.AppendToLog(0, content);
+            repository.AppendToLog(1, content);
 
             repository.KeepLatestLogPositions(3);
 
@@ -127,8 +127,8 @@ namespace Chunkyard.Tests
             var repository = new MemoryRepository();
             var content = new byte[] { 0xFF };
 
-            repository.AppendToLog(content, 0);
-            repository.AppendToLog(content, 1);
+            repository.AppendToLog(0, content);
+            repository.AppendToLog(1, content);
 
             repository.KeepLatestLogPositions(0);
 

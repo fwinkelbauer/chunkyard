@@ -278,8 +278,8 @@ namespace Chunkyard
                 });
 
             otherRepository.AppendToLog(
-                _repository.RetrieveFromLog(logPosition),
-                logPosition);
+                logPosition,
+                _repository.RetrieveFromLog(logPosition));
         }
 
         public IEnumerable<Uri> ListUris(int logPosition)

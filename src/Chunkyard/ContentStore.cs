@@ -145,8 +145,8 @@ namespace Chunkyard
                 _iterations);
 
             CurrentLogPosition = _repository.AppendToLog(
-                DataConvert.ToBytes(logReference),
-                newLogPosition);
+                newLogPosition,
+                DataConvert.ToBytes(logReference));
 
             return CurrentLogPosition.Value;
         }

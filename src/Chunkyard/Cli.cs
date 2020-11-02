@@ -324,9 +324,9 @@ namespace Chunkyard
             {
             }
 
-            public override int AppendToLog(byte[] value, int newLogPosition)
+            public override int AppendToLog(int newLogPosition, byte[] value)
             {
-                var logPosition = base.AppendToLog(value, newLogPosition);
+                var logPosition = base.AppendToLog(newLogPosition, value);
 
                 Console.WriteLine($"Created: snapshot #{logPosition}");
 

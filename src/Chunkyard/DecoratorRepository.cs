@@ -43,9 +43,9 @@ namespace Chunkyard
             Repository.RemoveValue(contentUri);
         }
 
-        public virtual int AppendToLog(byte[] value, int newLogPosition)
+        public virtual int AppendToLog(int newLogPosition, byte[] value)
         {
-            return Repository.AppendToLog(value, newLogPosition);
+            return Repository.AppendToLog(newLogPosition, value);
         }
 
         public virtual byte[] RetrieveFromLog(int logPosition)
