@@ -199,7 +199,7 @@ namespace Chunkyard
                 });
         }
 
-        public bool CopySnapshots(
+        public IEnumerable<int> CopySnapshots(
             SnapshotStore otherSnapshotStore)
         {
             otherSnapshotStore.EnsureNotNull(nameof(otherSnapshotStore));
@@ -258,7 +258,7 @@ namespace Chunkyard
                     otherSnapshotStore._repository);
             }
 
-            return newLogPositions.Length != 0;
+            return newLogPositions;
         }
 
         private void CopySnapshot(

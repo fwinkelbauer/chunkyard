@@ -200,9 +200,7 @@ namespace Chunkyard
                 prompt,
                 ensureRepository: false);
 
-            var copied = source.CopySnapshots(destination);
-
-            if (!copied)
+            if (!source.CopySnapshots(destination).Any())
             {
                 Console.WriteLine("No new snapshots to copy");
             }
