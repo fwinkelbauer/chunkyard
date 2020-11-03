@@ -109,28 +109,30 @@ namespace Chunkyard
         {
             contentReference.EnsureNotNull(nameof(contentReference));
 
-            var exists = true;
-
             foreach (var chunk in contentReference.Chunks)
             {
-                exists &= _repository.ValueExists(chunk.ContentUri);
+                if (!_repository.ValueExists(chunk.ContentUri))
+                {
+                    return false;
+                }
             }
 
-            return exists;
+            return true;
         }
 
         public bool ContentValid(ContentReference contentReference)
         {
             contentReference.EnsureNotNull(nameof(contentReference));
 
-            var valid = true;
-
             foreach (var chunk in contentReference.Chunks)
             {
-                valid &= _repository.UriValid(chunk.ContentUri);
+                if (!_repository.UriValid(chunk.ContentUri))
+                {
+                    return false;
+                }
             }
 
-            return valid;
+            return true;
         }
 
         public int AppendToLog(
@@ -174,33 +176,24 @@ namespace Chunkyard
             out bool newChunks)
         {
             var chunkedDataItems = _fastCdc.SplitIntoChunks(stream);
-
-            var newValues = false;
             var chunkReferences = new List<ChunkReference>();
+            newChunks = false;
 
-            Parallel.ForEach(
-                chunkedDataItems,
-                chunkedData =>
-                {
-                    var (encryptedData, tag) = AesGcmCrypto.Encrypt(
-                        chunkedData,
-                        _key,
-                        nonce);
+            foreach (var chunkedData in chunkedDataItems)
+            {
+                var (encryptedData, tag) = AesGcmCrypto.Encrypt(
+                    chunkedData,
+                    _key,
+                    nonce);
 
-                    var contentUri = _repository.StoreValue(
-                        _hashAlgorithmName,
-                        encryptedData,
-                        out var newValue);
+                var contentUri = _repository.StoreValue(
+                    _hashAlgorithmName,
+                    encryptedData,
+                    out var newValue);
 
-                    lock (chunkReferences)
-                    {
-                        newValues |= newValue;
-
-                        chunkReferences.Add(new ChunkReference(contentUri, tag));
-                    }
-                });
-
-            newChunks = newValues;
+                newChunks |= newValue;
+                chunkReferences.Add(new ChunkReference(contentUri, tag));
+            }
 
             return chunkReferences;
         }

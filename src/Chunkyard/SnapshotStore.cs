@@ -37,22 +37,17 @@ namespace Chunkyard
 
             var contentReferences = new List<ContentReference>();
 
-            Parallel.ForEach(
-                contents,
-                content =>
-                {
-                    using var contentStream = content.OpenRead();
-                    var contentReference = _contentStore.StoreBlob(
-                        contentStream,
-                        content.Name,
-                        GenerateNonce(content.Name),
-                        out _);
+            foreach (var content in contents)
+            {
+                using var contentStream = content.OpenRead();
+                var contentReference = _contentStore.StoreBlob(
+                    contentStream,
+                    content.Name,
+                    GenerateNonce(content.Name),
+                    out _);
 
-                    lock (contentReferences)
-                    {
-                        contentReferences.Add(contentReference);
-                    }
-                });
+                contentReferences.Add(contentReference);
+            }
 
             var snapshotContentReference = _contentStore.StoreDocument(
                 new Snapshot(
@@ -89,9 +84,6 @@ namespace Chunkyard
                 snapshot.ContentReferences,
                 fuzzyPattern);
 
-            // Checking if a content exists seems like a fast operation
-            // (compared to checking if a piece of content is valid), so let's
-            // use a simple loop for now.
             foreach (var contentReference in filteredContentReferences)
             {
                 if (!_contentStore.ContentExists(contentReference))
@@ -112,23 +104,15 @@ namespace Chunkyard
                 snapshot.ContentReferences,
                 fuzzyPattern);
 
-            var lockObject = new object();
-            var valid = true;
-
-            Parallel.ForEach(
-                filteredContentReferences,
-                contentReference =>
+            foreach (var contentReference in filteredContentReferences)
+            {
+                if (!_contentStore.ContentValid(contentReference))
                 {
-                    if (!_contentStore.ContentValid(contentReference))
-                    {
-                        lock (lockObject)
-                        {
-                            valid = false;
-                        }
-                    }
-                });
+                    return false;
+                }
+            }
 
-            return valid;
+            return true;
         }
 
         public void RestoreSnapshot(
@@ -141,14 +125,12 @@ namespace Chunkyard
                 snapshot.ContentReferences,
                 fuzzyPattern);
 
-            Parallel.ForEach(
-                filteredContentReferences,
-                contentReference =>
-                {
-                    using var stream = openWrite(contentReference.Name);
+            foreach (var contentReference in filteredContentReferences)
+            {
+                using var stream = openWrite(contentReference.Name);
 
-                    _contentStore.RetrieveContent(contentReference, stream);
-                });
+                _contentStore.RetrieveContent(contentReference, stream);
+            }
         }
 
         public Snapshot GetSnapshot(int logPosition)
@@ -186,12 +168,10 @@ namespace Chunkyard
                     ListUris(logPosition));
             }
 
-            Parallel.ForEach(
-                allContentUris.Except(usedUris),
-                contentUri =>
-                {
-                    _repository.RemoveValue(contentUri);
-                });
+            foreach (var contentUri in allContentUris.Except(usedUris))
+            {
+                _repository.RemoveValue(contentUri);
+            }
         }
 
         public IEnumerable<int> CopySnapshots(
@@ -263,14 +243,12 @@ namespace Chunkyard
             var urisToCopy = ListUris(logPosition).Except(
                 otherRepository.ListUris());
 
-            Parallel.ForEach(
-                urisToCopy,
-                contentUri =>
-                {
-                    otherRepository.StoreValue(
-                        contentUri,
-                        _repository.RetrieveValue(contentUri));
-                });
+            foreach (var contentUri in urisToCopy)
+            {
+                otherRepository.StoreValue(
+                    contentUri,
+                    _repository.RetrieveValue(contentUri));
+            }
 
             otherRepository.AppendToLog(
                 logPosition,
