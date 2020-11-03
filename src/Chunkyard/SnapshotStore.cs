@@ -226,33 +226,42 @@ namespace Chunkyard
                 .Where(l => l > otherMax)
                 .ToArray();
 
+            var otherUris = otherSnapshotStore._repository.ListUris().ToList();
+
             foreach (var logPosition in newLogPositions)
             {
-                CopySnapshot(
-                    logPosition,
-                    otherSnapshotStore._repository);
+                otherUris.AddRange(
+                    CopySnapshotUris(
+                        logPosition,
+                        otherSnapshotStore._repository,
+                        otherUris));
             }
 
             return newLogPositions;
         }
 
-        private void CopySnapshot(
+        private IEnumerable<Uri> CopySnapshotUris(
             int logPosition,
-            IRepository otherRepository)
+            IRepository otherRepository,
+            IEnumerable<Uri> otherUris)
         {
-            var urisToCopy = ListUris(logPosition).Except(
-                otherRepository.ListUris());
+            var urisToCopy = ListUris(logPosition).Except(otherUris);
+            var copiedUris = new List<Uri>();
 
             foreach (var contentUri in urisToCopy)
             {
                 otherRepository.StoreValue(
                     contentUri,
                     _repository.RetrieveValue(contentUri));
+
+                copiedUris.Add(contentUri);
             }
 
             otherRepository.AppendToLog(
                 logPosition,
                 _repository.RetrieveFromLog(logPosition));
+
+            return copiedUris;
         }
 
         public IEnumerable<Uri> ListUris(int logPosition)
