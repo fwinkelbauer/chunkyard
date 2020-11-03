@@ -16,11 +16,10 @@ namespace Chunkyard.Tests
             var contentName = "some data";
             using var inputStream = new MemoryStream(expectedBytes);
 
-            var contentReference = contentStore.StoreContent(
+            var contentReference = contentStore.StoreBlob(
                 inputStream,
                 contentName,
                 AesGcmCrypto.GenerateNonce(),
-                ContentType.Blob,
                 out var newContent);
 
             using var outputStream = new MemoryStream();
@@ -38,6 +37,33 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
+        public static void Store_Detects_Same_Content()
+        {
+            var contentStore = CreateContentStore();
+
+            var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+            var contentName = "some data";
+            var nonce = AesGcmCrypto.GenerateNonce();
+
+            using var firstStream = new MemoryStream(bytes);
+            var firstResult = contentStore.StoreBlob(
+                firstStream,
+                contentName,
+                nonce,
+                out var firstNewContent);
+
+            using var secondStream = new MemoryStream(bytes);
+            var secondResult = contentStore.StoreBlob(
+                secondStream,
+                contentName,
+                nonce,
+                out var secondNewContent);
+
+            Assert.True(firstNewContent);
+            Assert.False(secondNewContent);
+        }
+
+        [Fact]
         public static void Store_Does_Not_Detect_Same_Content_Using_Other_Nonce()
         {
             var contentStore = CreateContentStore();
@@ -46,19 +72,17 @@ namespace Chunkyard.Tests
             var contentName = "some data";
 
             using var firstStream = new MemoryStream(bytes);
-            var firstResult = contentStore.StoreContent(
+            var firstResult = contentStore.StoreBlob(
                 firstStream,
                 contentName,
                 AesGcmCrypto.GenerateNonce(),
-                ContentType.Blob,
                 out var firstNewContent);
 
             using var secondStream = new MemoryStream(bytes);
-            var secondResult = contentStore.StoreContent(
+            var secondResult = contentStore.StoreBlob(
                 secondStream,
                 contentName,
                 AesGcmCrypto.GenerateNonce(),
-                ContentType.Blob,
                 out var secondNewContent);
 
             Assert.True(firstNewContent);
