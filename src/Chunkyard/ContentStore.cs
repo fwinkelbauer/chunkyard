@@ -108,31 +108,27 @@ namespace Chunkyard
         public bool ContentExists(ContentReference contentReference)
         {
             contentReference.EnsureNotNull(nameof(contentReference));
+            var exists = true;
 
             foreach (var chunk in contentReference.Chunks)
             {
-                if (!_repository.ValueExists(chunk.ContentUri))
-                {
-                    return false;
-                }
+                exists &= _repository.ValueExists(chunk.ContentUri);
             }
 
-            return true;
+            return exists;
         }
 
         public bool ContentValid(ContentReference contentReference)
         {
             contentReference.EnsureNotNull(nameof(contentReference));
+            var valid = true;
 
             foreach (var chunk in contentReference.Chunks)
             {
-                if (!_repository.UriValid(chunk.ContentUri))
-                {
-                    return false;
-                }
+                valid &= _repository.UriValid(chunk.ContentUri);
             }
 
-            return true;
+            return valid;
         }
 
         public int AppendToLog(

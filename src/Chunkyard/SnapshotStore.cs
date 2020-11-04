@@ -84,15 +84,14 @@ namespace Chunkyard
                 snapshot.ContentReferences,
                 fuzzyPattern);
 
+            var exists = true;
+
             foreach (var contentReference in filteredContentReferences)
             {
-                if (!_contentStore.ContentExists(contentReference))
-                {
-                    return false;
-                }
+                exists &= _contentStore.ContentExists(contentReference);
             }
 
-            return true;
+            return exists;
         }
 
         public bool CheckSnapshotValid(
@@ -104,15 +103,14 @@ namespace Chunkyard
                 snapshot.ContentReferences,
                 fuzzyPattern);
 
+            var valid = true;
+
             foreach (var contentReference in filteredContentReferences)
             {
-                if (!_contentStore.ContentValid(contentReference))
-                {
-                    return false;
-                }
+                valid &= _contentStore.ContentValid(contentReference);
             }
 
-            return true;
+            return valid;
         }
 
         public void RestoreSnapshot(
