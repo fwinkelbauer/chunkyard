@@ -1,5 +1,5 @@
 ((nil .
-      ((compile-command . "dotnet build src")))
+      ((compile-command . "dotnet test src")))
  (markdown-mode .
                 ((eval . (flyspell-mode))
                  (eval . (flyspell-buffer)))))
