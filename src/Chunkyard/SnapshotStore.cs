@@ -216,7 +216,8 @@ namespace Chunkyard
             var newLogPositions = thisLogs
                 .Where(l => l > otherMax);
 
-            var otherUris = otherSnapshotStore._repository.ListUris().ToList();
+            var otherUris = otherSnapshotStore._repository.ListUris()
+                .ToList();
 
             foreach (var logPosition in newLogPositions)
             {
