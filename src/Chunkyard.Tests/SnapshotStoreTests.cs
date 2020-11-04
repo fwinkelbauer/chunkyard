@@ -19,13 +19,12 @@ namespace Chunkyard.Tests
                 DateTime.Now);
 
             var snapshot = snapshotStore.GetSnapshot(logPosition);
-            var contentReferences = snapshot.ContentReferences.ToArray();
+            var contentReferences = snapshot.ContentReferences;
 
             Assert.Equal(0, logPosition);
-            Assert.Single(contentReferences);
             Assert.Equal(
-                "some content",
-                contentReferences[0].Name);
+                new[] { "some content" },
+                contentReferences.Select(c => c.Name));
         }
 
         [Fact]
@@ -102,7 +101,7 @@ namespace Chunkyard.Tests
                 new[] { ("some content", CreateOpenReadContent()) },
                 DateTime.Now);
 
-            // xunit does not let my catch a generic Exception type. Instead I
+            // xunit does not let me catch a generic Exception type. Instead I
             // have to check for the KeyNotFoundException which only happens in
             // a in-memory repository
             Assert.Throws<KeyNotFoundException>(
@@ -118,14 +117,26 @@ namespace Chunkyard.Tests
                 new[] { ("some content", CreateOpenReadContent()) },
                 DateTime.Now);
 
-            var expectedSnapshot = snapshotStore.GetSnapshot(logPosition);
-            var actualSnapshot = snapshotStore.GetSnapshot(-1);
-
-            Assert.Equal(expectedSnapshot, actualSnapshot);
+            Assert.Equal(
+                snapshotStore.GetSnapshot(logPosition),
+                snapshotStore.GetSnapshot(-1));
         }
 
         [Fact]
-        public static void Can_Create_And_Restore_Snapshot()
+        public static void CheckSnapshot_Detects_No_Errors()
+        {
+            var snapshotStore = CreateSnapshotStore();
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                new[] { ("some content", CreateOpenReadContent()) },
+                DateTime.Now);
+
+            Assert.True(snapshotStore.CheckSnapshotExists(logPosition));
+            Assert.True(snapshotStore.CheckSnapshotValid(logPosition));
+        }
+
+        [Fact]
+        public static void Restore_Writes_Content_To_Streams()
         {
             var snapshotStore = CreateSnapshotStore();
             var content = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
@@ -146,6 +157,54 @@ namespace Chunkyard.Tests
 
             Assert.Equal("some content", actualContentName);
             Assert.Equal(content, writeStream.ToArray());
+        }
+
+        [Fact]
+        public static void ShowSnapshot_Lists_Content()
+        {
+            var snapshotStore = CreateSnapshotStore();
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                new[] { ("some content", CreateOpenReadContent()) },
+                DateTime.Now);
+
+            Assert.Equal(
+                new[] { "some content" },
+                snapshotStore.ShowSnapshot(logPosition).Select(c => c.Name));
+        }
+
+        [Fact]
+        public static void GarbageCollect_Keeps_Used_uris()
+        {
+            var repository = new MemoryRepository();
+            var snapshotStore = CreateSnapshotStore(
+                repository);
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                new[] { ("some content", CreateOpenReadContent()) },
+                DateTime.Now);
+
+            snapshotStore.GarbageCollect();
+
+            Assert.True(snapshotStore.CheckSnapshotValid(logPosition));
+        }
+
+        [Fact]
+        public static void GarbageCollect_Removes_Unused_Uris()
+        {
+            var repository = new MemoryRepository();
+            var snapshotStore = CreateSnapshotStore(
+                repository);
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                new[] { ("some content", CreateOpenReadContent()) },
+                DateTime.Now);
+
+            repository.RemoveFromLog(logPosition);
+
+            snapshotStore.GarbageCollect();
+
+            Assert.Empty(repository.ListUris());
         }
 
         private static Func<Stream> CreateOpenReadContent(

@@ -194,20 +194,5 @@ namespace Chunkyard.Tests
                 HashAlgorithmName.SHA256,
                 new StaticPrompt());
         }
-
-        private class CorruptedRepository : DecoratorRepository
-        {
-            public CorruptedRepository()
-                : base(new MemoryRepository())
-            {
-            }
-
-            public override bool StoreValue(Uri contentUri, byte[] value)
-            {
-                return base.StoreValue(
-                    contentUri,
-                    new byte[] { 0xBA, 0xD0 });
-            }
-        }
     }
 }

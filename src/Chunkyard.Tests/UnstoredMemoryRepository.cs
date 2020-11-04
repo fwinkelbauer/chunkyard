@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Tests
 {
-    public class UnstoredRepository : DecoratorRepository
+    internal class UnstoredRepository : DecoratorRepository
     {
         public UnstoredRepository()
             : base(new MemoryRepository())

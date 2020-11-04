@@ -134,7 +134,7 @@ namespace Chunkyard
 
         public IEnumerable<ContentReference> ShowSnapshot(
             int logPosition,
-            string fuzzyPattern)
+            string fuzzyPattern = "")
         {
             var snapshot = GetSnapshot(logPosition);
             var filteredContentReferences = FuzzyFilter(
