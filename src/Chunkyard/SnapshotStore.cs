@@ -150,9 +150,7 @@ namespace Chunkyard
         public void GarbageCollect()
         {
             var usedUris = new HashSet<Uri>();
-            var allContentUris = _repository.ListUris()
-                .ToArray();
-
+            var allContentUris = _repository.ListUris();
             var logPositions = _repository.ListLogPositions();
 
             foreach (var logPosition in logPositions)
@@ -216,8 +214,7 @@ namespace Chunkyard
                 : otherLogs.Max();
 
             var newLogPositions = thisLogs
-                .Where(l => l > otherMax)
-                .ToArray();
+                .Where(l => l > otherMax);
 
             var otherUris = otherSnapshotStore._repository.ListUris().ToList();
 
@@ -228,9 +225,9 @@ namespace Chunkyard
                         logPosition,
                         otherSnapshotStore._repository,
                         otherUris));
-            }
 
-            return newLogPositions;
+                yield return logPosition;
+            }
         }
 
         private IEnumerable<Uri> CopySnapshotUris(

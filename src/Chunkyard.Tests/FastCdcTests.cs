@@ -15,7 +15,7 @@ namespace Chunkyard.Tests
                 32 * 1024);
 
             using var stream = File.OpenRead("SekienAkashita.jpg");
-            var chunks = fastCdc.SplitIntoChunks(stream).ToArray();
+            var chunks = fastCdc.SplitIntoChunks(stream);
 
             Assert.Equal(
                 new[] { 22366, 8282, 16303, 18696, 32768, 11051 },
@@ -31,7 +31,7 @@ namespace Chunkyard.Tests
                 64 * 1024);
 
             using var stream = File.OpenRead("SekienAkashita.jpg");
-            var chunks = fastCdc.SplitIntoChunks(stream).ToArray();
+            var chunks = fastCdc.SplitIntoChunks(stream);
 
             Assert.Equal(
                 new[] { 32857, 16408, 60201 },
@@ -47,7 +47,7 @@ namespace Chunkyard.Tests
                 128 * 1024);
 
             using var stream = File.OpenRead("SekienAkashita.jpg");
-            var chunks = fastCdc.SplitIntoChunks(stream).ToArray();
+            var chunks = fastCdc.SplitIntoChunks(stream);
 
             Assert.Equal(
                 new[] { 32857, 76609 },
