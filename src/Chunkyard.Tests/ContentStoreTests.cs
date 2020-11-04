@@ -147,7 +147,6 @@ namespace Chunkyard.Tests
         {
             var contentStore = CreateContentStore();
 
-            var logId = Guid.NewGuid();
             var contentReference = new ContentReference(
                 "some reference",
                 AesGcmCrypto.GenerateNonce(),
@@ -160,12 +159,10 @@ namespace Chunkyard.Tests
                 ContentType.Blob);
 
             var firstLogPosition = contentStore.AppendToLog(
-                logId,
                 0,
                 contentReference);
 
             var secondLogPosition = contentStore.AppendToLog(
-                logId,
                 firstLogPosition + 1,
                 contentReference);
 

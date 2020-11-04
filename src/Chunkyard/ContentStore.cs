@@ -19,6 +19,7 @@ namespace Chunkyard
         private readonly byte[] _salt;
         private readonly int _iterations;
         private readonly byte[] _key;
+        private readonly Guid _logId;
 
         private int? _currentLogPosition;
 
@@ -41,6 +42,7 @@ namespace Chunkyard
                 password = prompt.NewPassword();
                 _salt = AesGcmCrypto.GenerateSalt();
                 _iterations = AesGcmCrypto.Iterations;
+                _logId = Guid.NewGuid();
             }
             else
             {
@@ -51,6 +53,7 @@ namespace Chunkyard
                 password = prompt.ExistingPassword();
                 _salt = logReference.Salt;
                 _iterations = logReference.Iterations;
+                _logId = logReference.LogId;
             }
 
             _key = AesGcmCrypto.PasswordToKey(password, _salt, _iterations);
@@ -132,12 +135,11 @@ namespace Chunkyard
         }
 
         public int AppendToLog(
-            Guid logId,
             int newLogPosition,
             ContentReference contentReference)
         {
             var logReference = new LogReference(
-                logId,
+                _logId,
                 contentReference,
                 _salt,
                 _iterations);

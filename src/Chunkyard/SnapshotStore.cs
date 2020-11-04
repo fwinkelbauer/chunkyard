@@ -63,12 +63,7 @@ namespace Chunkyard
                 ? currentLogPosition.Value + 1
                 : 0;
 
-            var logId = currentLogPosition.HasValue
-                ? _contentStore.RetrieveFromLog(currentLogPosition.Value).LogId
-                : Guid.NewGuid();
-
             currentLogPosition = _contentStore.AppendToLog(
-                logId,
                 newLogPosition,
                 snapshotContentReference);
 

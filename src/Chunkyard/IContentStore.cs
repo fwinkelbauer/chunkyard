@@ -27,7 +27,6 @@ namespace Chunkyard
         bool ContentValid(ContentReference contentReference);
 
         int AppendToLog(
-            Guid logId,
             int newLogPosition,
             ContentReference contentReference);
 

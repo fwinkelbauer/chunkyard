@@ -51,12 +51,10 @@ namespace Chunkyard
         }
 
         public virtual int AppendToLog(
-            Guid logId,
             int newLogPosition,
             ContentReference contentReference)
         {
             return Store.AppendToLog(
-                logId,
                 newLogPosition,
                 contentReference);
         }
