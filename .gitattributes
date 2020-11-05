@@ -1,2 +1,2 @@
-*.cpp   diff=cpp
+*.cs    diff=csharp
 *.md    diff=markdown
