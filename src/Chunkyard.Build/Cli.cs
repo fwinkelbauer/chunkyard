@@ -18,11 +18,6 @@ namespace Chunkyard.Build
             @"##\s+(\d+\.\d+\.\d+)")
             .Groups[1].Value;
 
-        public static void Default()
-        {
-            Build(new BuildOptions());
-        }
-
         public static void Clean()
         {
             var dirInfo = new DirectoryInfo(ArtifactsDirectory);
@@ -54,6 +49,7 @@ namespace Chunkyard.Build
 
             Dotnet(
                 $"test {Solution}",
+                "--no-build",
                 $"-c {o.Configuration}");
 
             Dotnet(

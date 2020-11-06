@@ -23,12 +23,6 @@ namespace Chunkyard.Build
 
         private static void ProcessArguments(string[] args)
         {
-            if (args == null || args.Length == 0)
-            {
-                Cli.Default();
-                return;
-            }
-
             Parser.Default.ParseArguments(args, LoadOptions())
                 .WithParsed<BuildOptions>(o => Cli.Build(o))
                 .WithParsed<ReleaseOptions>(_ => Cli.Release())

@@ -1,5 +1,5 @@
 ((nil .
-      ((compile-command . "dotnet test src")))
+      ((compile-command . "csake build")))
  (markdown-mode .
                 ((eval . (flyspell-mode))
                  (eval . (flyspell-buffer)))))
