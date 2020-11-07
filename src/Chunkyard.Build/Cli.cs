@@ -38,10 +38,8 @@ namespace Chunkyard.Build
             }
         }
 
-        public static void Build(BuildOptions o)
+        public static void Build(DotnetOptions o)
         {
-            Clean();
-
             Dotnet(
                 $"build {Solution}",
                 $"-c {o.Configuration}",
@@ -51,6 +49,13 @@ namespace Chunkyard.Build
                 $"test {Solution}",
                 "--no-build",
                 $"-c {o.Configuration}");
+        }
+
+        public static void Publish(DotnetOptions o)
+        {
+            Clean();
+
+            Build(o);
 
             Dotnet(
                 "publish src/Chunkyard",

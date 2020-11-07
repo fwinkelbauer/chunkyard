@@ -1,53 +1,13 @@
-﻿using System;
-﻿using System.Runtime.InteropServices;
-using CommandLine;
+﻿using CommandLine;
 
 namespace Chunkyard.Build.Options
 {
     [Verb("build", HelpText = "Build the main project.")]
-    public class BuildOptions
+    public class BuildOptions : DotnetOptions
     {
-        private const string DefaultConfiguration = "Release";
-
-        public BuildOptions(string configuration, string runtime = "")
+        public BuildOptions(string configuration, string runtime)
+            : base(configuration, runtime)
         {
-            Configuration = configuration;
-
-            Runtime = string.IsNullOrEmpty(runtime)
-                ? FetchRuntimeIdentifier()
-                : runtime;
-        }
-
-        public BuildOptions()
-            : this(DefaultConfiguration)
-        {
-        }
-
-        [Option('c', "configuration", Required = false, HelpText = "The build configuration", Default = DefaultConfiguration)]
-        public string Configuration { get; }
-
-        [Option('r', "runtime", Required = false, HelpText = "The build runtime")]
-        public string Runtime { get; }
-
-        private static string FetchRuntimeIdentifier()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return "win-x64";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return "linux-x64";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                return "osx-x64";
-            }
-            else
-            {
-                throw new InvalidOperationException(
-                    "Could not infer runtime identifier");
-            }
         }
     }
 }
