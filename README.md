@@ -38,28 +38,22 @@ unreferenced files can be deleted using the `chunkyard gc` command.
 
 ## Build
 
-Run any of the below build scripts to create a binary in `./artifacts`:
-
-``` shell
-./make.sh
-
-.\make.ps1
-.\make.bat
-```
+Run `./csake build` to build the solution.
 
 Install the dotnet format tool to use the `fmt` command:
 
 ``` shell
 dotnet tool install -g dotnet-format
-./make.sh fmt
+./csake fmt
 ```
 
 ## Publish
 
 - Update `CHANGELOG.md` and add a new version header
-- Run `./make.sh release` to create a tagged commit containing the latest
+- Run `./csake release` to create a tagged commit containing the latest
   version found in `CHANGELOG.md`
 - Run `git push --follow-tags`
+- Run `./csake publish` to create a binary in the `./artifacts` directory
 
 ## Usage
 
