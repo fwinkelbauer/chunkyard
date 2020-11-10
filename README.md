@@ -23,10 +23,8 @@ unreferenced files can be deleted using the `chunkyard gc` command.
 - Strong encryption (AES Galois/Counter Mode using a 256 bit key)
 - Ability to copy from/to other repositories
 - Verifiable backups
-- Minimal dependencies. Currently the Chunkyard binary utilizes two packages:
-  - `commandlineparser`to create the command line interface
-  - `Newtonsoft.Json` to work with JSON data until I can switch to
-    `System.Text.Json`
+- Minimal dependencies. The Chunkyard binary only utilizes the
+  `commandlineparser` package to create its command line interface
 
 ## Not Goals
 

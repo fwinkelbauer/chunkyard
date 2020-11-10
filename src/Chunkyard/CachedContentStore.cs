@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Newtonsoft.Json;
 
 namespace Chunkyard
 {
@@ -71,8 +70,8 @@ namespace Chunkyard
                 return null;
             }
 
-            var storedCache = JsonConvert.DeserializeObject<Cache>(
-                File.ReadAllText(cacheFile));
+            var storedCache = DataConvert.ToObject<Cache>(
+                File.ReadAllBytes(cacheFile));
 
             var creationDateUtc = File.GetCreationTimeUtc(fileStream.Name);
             var lastWriteDateUtc = File.GetLastWriteTimeUtc(fileStream.Name);
@@ -104,9 +103,9 @@ namespace Chunkyard
                 File.GetCreationTimeUtc(fileStream.Name),
                 File.GetLastWriteTimeUtc(fileStream.Name));
 
-            File.WriteAllText(
+            File.WriteAllBytes(
                 cacheFile,
-                JsonConvert.SerializeObject(cache));
+                DataConvert.ToBytes(cache));
         }
 
         private string ToCacheFile(string contentName)
