@@ -113,6 +113,8 @@ namespace Chunkyard
             string fuzzyPattern,
             Func<string, Stream> openWrite)
         {
+            openWrite.EnsureNotNull(nameof(openWrite));
+
             var snapshot = GetSnapshot(logPosition);
             var filteredContentReferences = FuzzyFilter(
                 snapshot.ContentReferences,

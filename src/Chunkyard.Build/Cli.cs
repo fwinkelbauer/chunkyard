@@ -107,6 +107,13 @@ namespace Chunkyard.Build
             };
 
             using var process = Process.Start(startInfo);
+
+            if (process == null)
+            {
+                throw new InvalidOperationException(
+                    $"Could not start process '{fileName}'");
+            }
+
             string? line;
 
             while ((line = process.StandardOutput.ReadLine()) != null)
