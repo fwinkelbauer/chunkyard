@@ -55,6 +55,10 @@ namespace Chunkyard.Build
         {
             Clean();
 
+            Dotnet(
+                $"format {Solution}",
+                "--check");
+
             Build(o);
 
             Dotnet(
@@ -69,9 +73,7 @@ namespace Chunkyard.Build
 
         public static void Fmt()
         {
-            Dotnet(
-                "format",
-                $"--workspace {Solution}");
+            Dotnet($"format {Solution}");
         }
 
         public static void Release()

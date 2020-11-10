@@ -1,5 +1,5 @@
 ﻿using System;
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using CommandLine;
 
 namespace Chunkyard.Build.Options
