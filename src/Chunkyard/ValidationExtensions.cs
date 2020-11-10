@@ -15,7 +15,7 @@ namespace Chunkyard
         }
 
         public static string EnsureNotNullOrEmpty(
-            this string value,
+            this string? value,
             string paramName)
         {
             if (string.IsNullOrEmpty(value))

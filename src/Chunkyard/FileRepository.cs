@@ -32,8 +32,7 @@ namespace Chunkyard
                 return false;
             }
 
-            Directory.CreateDirectory(
-                Path.GetDirectoryName(file));
+            DirectoryUtil.CreateParent(file);
 
             using var fileStream = new FileStream(
                 file,
@@ -88,7 +87,8 @@ namespace Chunkyard
 
             File.Delete(filePath);
 
-            if (Directory.EnumerateFileSystemEntries(directoryPath).Any())
+            if (string.IsNullOrEmpty(directoryPath)
+                || Directory.EnumerateFileSystemEntries(directoryPath).Any())
             {
                 return;
             }
@@ -100,8 +100,7 @@ namespace Chunkyard
         {
             var file = ToFilePath(newLogPosition);
 
-            Directory.CreateDirectory(
-                Path.GetDirectoryName(file));
+            DirectoryUtil.CreateParent(file);
 
             using var fileStream = new FileStream(
                 file,
@@ -175,7 +174,7 @@ namespace Chunkyard
             var hash = Id.HashFromContentUri(contentUri);
             var directory = Path.Combine(
                 _contentDirectory,
-                Id.AlgorithmFromContentUri(contentUri).Name.ToLower(),
+                Id.AlgorithmFromContentUri(contentUri).Name!.ToLower(),
                 hash.Substring(0, 2));
 
             return Path.Combine(

@@ -96,7 +96,7 @@ namespace Chunkyard
         {
             var cacheFile = ToCacheFile(contentReference.Name);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
+            DirectoryUtil.CreateParent(cacheFile);
 
             var cache = new Cache(
                 contentReference,

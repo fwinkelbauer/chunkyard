@@ -144,7 +144,7 @@ namespace Chunkyard
 
                 var file = Path.Combine(o.Directory, s);
 
-                Directory.CreateDirectory(Path.GetDirectoryName(file));
+                DirectoryUtil.CreateParent(file);
 
                 return new FileStream(file, mode, FileAccess.Write);
             };

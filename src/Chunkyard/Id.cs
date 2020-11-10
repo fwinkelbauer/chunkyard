@@ -24,9 +24,9 @@ namespace Chunkyard
             HashAlgorithmName hashAlgorithmName,
             byte[] data)
         {
-            using var algorithm = HashAlgorithm.Create(hashAlgorithmName.Name);
+            using var algorithm = HashAlgorithm.Create(hashAlgorithmName.Name!);
 
-            return ToHexString(algorithm.ComputeHash(data));
+            return ToHexString(algorithm!.ComputeHash(data));
         }
 
         public static string ComputeHash(
@@ -70,7 +70,7 @@ namespace Chunkyard
             HashAlgorithmName hashAlgorithmName,
             string hash)
         {
-            return new Uri($"{hashAlgorithmName.Name.ToLower()}://{hash}");
+            return new Uri($"{hashAlgorithmName.Name!.ToLower()}://{hash}");
         }
 
         private static string ToHexString(byte[] hash)
