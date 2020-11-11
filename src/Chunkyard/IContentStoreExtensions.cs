@@ -64,12 +64,15 @@ namespace Chunkyard
                 out newContent);
         }
 
-        public static IEnumerable<Uri> ListUris(
+        public static Uri[] ListUris(
             this IContentStore store,
             ContentReference contentReference)
         {
-            return contentReference.EnsureNotNull(nameof(contentReference))
-                .Chunks.Select(c => c.ContentUri);
+            contentReference.EnsureNotNull(nameof(contentReference));
+
+            return contentReference.Chunks
+                .Select(c => c.ContentUri)
+                .ToArray();
         }
     }
 }
