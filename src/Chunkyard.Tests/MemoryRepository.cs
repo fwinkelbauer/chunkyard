@@ -10,14 +10,19 @@ namespace Chunkyard.Tests
         private readonly Dictionary<Uri, byte[]> _valuesByUri;
         private readonly Dictionary<int, byte[]> _valuesByLog;
 
-        public MemoryRepository()
+        public MemoryRepository(Guid? repositoryId = null)
         {
             _lock = new object();
             _valuesByUri = new Dictionary<Uri, byte[]>();
             _valuesByLog = new Dictionary<int, byte[]>();
+
+            RepositoryUri = new Uri("in://memory");
+            RepositoryId = repositoryId ?? Guid.NewGuid();
         }
 
-        public Uri RepositoryUri => new Uri("in://memory");
+        public Uri RepositoryUri { get; }
+
+        public Guid RepositoryId { get; }
 
         public bool StoreValue(Uri contentUri, byte[] value)
         {
@@ -54,7 +59,9 @@ namespace Chunkyard.Tests
         {
             lock (_lock)
             {
-                return _valuesByUri.Keys.ToArray();
+                return _valuesByUri.Keys
+                    .OrderByDescending(uri => uri.AbsoluteUri)
+                    .ToArray();
             }
         }
 

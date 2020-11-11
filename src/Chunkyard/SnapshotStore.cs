@@ -160,27 +160,28 @@ namespace Chunkyard
         }
 
         public int[] CopySnapshots(
-            SnapshotStore otherSnapshotStore)
+            IRepository otherRepository)
         {
-            otherSnapshotStore.EnsureNotNull(nameof(otherSnapshotStore));
+            otherRepository.EnsureNotNull(nameof(otherRepository));
+
+            if (!_repository.RepositoryId.Equals(otherRepository.RepositoryId))
+            {
+                throw new ChunkyardException(
+                    "Cannot operate on repositories with different IDs");
+            }
 
             var thisLogs = _repository.ListLogPositions();
-
-            var otherContentStore = otherSnapshotStore._contentStore;
-            var otherLogs = otherSnapshotStore._repository.ListLogPositions();
+            var otherLogs = otherRepository.ListLogPositions();
 
             foreach (var logPosition in thisLogs.Intersect(otherLogs))
             {
-                var thisLogReference = _contentStore.RetrieveFromLog(
-                    logPosition);
+                var bytes = _repository.RetrieveFromLog(logPosition);
+                var otherBytes = otherRepository.RetrieveFromLog(logPosition);
 
-                var otherLogReference = otherContentStore.RetrieveFromLog(
-                    logPosition);
-
-                if (!thisLogReference.Equals(otherLogReference))
+                if (!bytes.Equals(otherBytes))
                 {
                     throw new ChunkyardException(
-                        $"Repositories differ at common snapshot #{logPosition}");
+                        $"Repositories differ at position #{logPosition}");
                 }
             }
 
@@ -192,7 +193,7 @@ namespace Chunkyard
                 .Where(l => l > otherMax)
                 .ToArray();
 
-            var otherUris = otherSnapshotStore._repository.ListUris()
+            var otherUris = otherRepository.ListUris()
                 .ToList();
 
             foreach (var logPosition in newLogPositions)
@@ -200,7 +201,7 @@ namespace Chunkyard
                 otherUris.AddRange(
                     CopySnapshotUris(
                         logPosition,
-                        otherSnapshotStore._repository,
+                        otherRepository,
                         otherUris));
             }
 

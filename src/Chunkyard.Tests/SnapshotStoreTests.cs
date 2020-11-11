@@ -238,6 +238,35 @@ namespace Chunkyard.Tests
             Assert.Empty(repository.ListUris());
         }
 
+        [Fact]
+        public static void CopySnapshots_Throws_If_RepositoryIds_Dont_Match()
+        {
+            var snapshotStore = CreateSnapshotStore();
+            var otherRepository = new MemoryRepository();
+
+            Assert.Throws<ChunkyardException>(
+                () => snapshotStore.CopySnapshots(otherRepository));
+        }
+
+        [Fact]
+        public static void CopySnapshots_Copies_Missing_Data()
+        {
+            var repository = new MemoryRepository();
+            var snapshotStore = CreateSnapshotStore(repository);
+            var otherRepository = new MemoryRepository(
+                repository.RepositoryId);
+
+            snapshotStore.AppendSnapshot(
+                new[] { ("some content", CreateOpenReadContent()) },
+                DateTime.Now);
+
+            snapshotStore.CopySnapshots(otherRepository);
+
+            Assert.Equal(
+                repository.ListUris(),
+                otherRepository.ListUris());
+        }
+
         private static Func<Stream> CreateOpenReadContent(
             byte[]? content = null)
         {

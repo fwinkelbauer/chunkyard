@@ -8,7 +8,9 @@ namespace Chunkyard
     /// </summary>
     public interface IRepository
     {
-        public Uri RepositoryUri { get; }
+        Uri RepositoryUri { get; }
+
+        Guid RepositoryId { get; }
 
         bool StoreValue(Uri contentUri, byte[] value);
 

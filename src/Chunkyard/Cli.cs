@@ -188,17 +188,12 @@ namespace Chunkyard
 
         public static void CopySnapshots(CopyOptions o)
         {
-            var prompt = CreatePrompt();
-            var source = CreateSnapshotStore(
-                o.SourceRepository,
-                prompt);
-
-            var destination = CreateSnapshotStore(
+            var sourceStore = CreateSnapshotStore(o.SourceRepository);
+            var destinationRepository = CreateRepository(
                 o.DestinationRepository,
-                prompt,
                 ensureRepository: false);
 
-            if (!source.CopySnapshots(destination).Any())
+            if (!sourceStore.CopySnapshots(destinationRepository).Any())
             {
                 Console.WriteLine("No new snapshots to copy");
             }
