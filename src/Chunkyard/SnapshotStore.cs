@@ -15,16 +15,14 @@ namespace Chunkyard
     {
         private const string SnapshotFile = ".chunkyard-snapshot";
 
-        private readonly IRepository _repository;
         private readonly IContentStore _contentStore;
+        private readonly IRepository _repository;
         private readonly Dictionary<string, ContentReference> _knownContentReferences;
 
-        public SnapshotStore(
-            IRepository repository,
-            IContentStore contentStore)
+        public SnapshotStore(IContentStore contentStore)
         {
-            _repository = repository;
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
+            _repository = contentStore.Repository;
             _knownContentReferences = new Dictionary<string, ContentReference>();
         }
 

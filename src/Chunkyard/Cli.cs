@@ -73,9 +73,7 @@ namespace Chunkyard
                     cacheDirectory);
             }
 
-            var snapshotStore = new SnapshotStore(
-                repository,
-                contentStore);
+            var snapshotStore = new SnapshotStore(contentStore);
 
             var logPosition = snapshotStore.AppendSnapshot(
                 files.Select(f =>
@@ -238,7 +236,6 @@ namespace Chunkyard
             IPrompt? prompt = null)
         {
             return new SnapshotStore(
-                repository,
                 new PrintingContentStore(
                     new ContentStore(
                         repository,

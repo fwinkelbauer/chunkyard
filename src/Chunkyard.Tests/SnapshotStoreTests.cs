@@ -248,12 +248,9 @@ namespace Chunkyard.Tests
         private static SnapshotStore CreateSnapshotStore(
             IRepository? repository = null)
         {
-            repository = repository ?? new MemoryRepository();
-
             return new SnapshotStore(
-                repository,
                 new ContentStore(
-                    repository,
+                    repository ?? new MemoryRepository(),
                     new FastCdc(),
                     HashAlgorithmName.SHA256,
                     new StaticPrompt()));
