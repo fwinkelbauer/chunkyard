@@ -50,7 +50,6 @@ namespace Chunkyard
 
             var snapshotContentReference = _contentStore.StoreDocument(
                 new Snapshot(
-                    Snapshot.SchemaVersion,
                     creationTime,
                     contentReferences.ToImmutable()),
                 SnapshotFile,
