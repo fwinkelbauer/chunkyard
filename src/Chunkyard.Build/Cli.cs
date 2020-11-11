@@ -70,9 +70,9 @@ namespace Chunkyard.Build
                 $"-c {o.Configuration}",
                 $"-r {o.Runtime}",
                 $"-o {ArtifactsDirectory}",
-                "/p:PublishSingleFile=true",
-                "/p:PublishReadyToRun=true",
-                $"/p:Version={Version}");
+                $"-p:Version={Version}",
+                "-p:PublishSingleFile=true",
+                "-p:PublishReadyToRun=true");
         }
 
         public static void Fmt()
