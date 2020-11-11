@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
 namespace Chunkyard
 {
@@ -9,7 +8,7 @@ namespace Chunkyard
     /// </summary>
     public abstract class DecoratorContentStore : IContentStore
     {
-        public DecoratorContentStore(IContentStore store)
+        protected DecoratorContentStore(IContentStore store)
         {
             Store = store;
         }

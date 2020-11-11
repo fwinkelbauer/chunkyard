@@ -9,7 +9,7 @@ namespace Chunkyard
     /// </summary>
     public abstract class DecoratorRepository : IRepository
     {
-        public DecoratorRepository(IRepository repository)
+        protected DecoratorRepository(IRepository repository)
         {
             Repository = repository;
         }

@@ -381,7 +381,7 @@ namespace Chunkyard
             return bytesRead;
         }
 
-        public static int CenterSize(int average, int minimum, int sourceSize)
+        private static int CenterSize(int average, int minimum, int sourceSize)
         {
             var offset = minimum + CeilDiv(minimum, 2);
 
@@ -397,17 +397,17 @@ namespace Chunkyard
                 : size;
         }
 
-        public static int CeilDiv(int x, int y)
+        private static int CeilDiv(int x, int y)
         {
             return (x + y - 1) / y;
         }
 
-        public static int Logarithm2(int value)
+        private static int Logarithm2(int value)
         {
             return (int)Math.Round(Math.Log(value, 2));
         }
 
-        public static uint Mask(int bits)
+        private static uint Mask(int bits)
         {
             bits.EnsureBetween(1, 31, nameof(bits));
 

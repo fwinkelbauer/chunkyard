@@ -131,7 +131,7 @@ namespace Chunkyard.Build
 
             if (!validExitCodes.Contains(process.ExitCode))
             {
-                throw new Exception(
+                throw new ExecuteException(
                     $"Exit code of {fileName} was {process.ExitCode}");
             }
         }

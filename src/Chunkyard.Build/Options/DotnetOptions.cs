@@ -8,7 +8,7 @@ namespace Chunkyard.Build.Options
     {
         private const string DefaultConfiguration = "Release";
 
-        public DotnetOptions(string configuration, string runtime)
+        protected DotnetOptions(string configuration, string runtime)
         {
             Configuration = configuration;
 

@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Build.Options
 {
-    [Verb("build", HelpText = "Build the main project.")]
+    [Verb("build", HelpText = "Build the solution.")]
     public class BuildOptions : DotnetOptions
     {
         public BuildOptions(string configuration, string runtime)

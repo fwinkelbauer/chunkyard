@@ -24,6 +24,7 @@ namespace Chunkyard.Build
         private static void ProcessArguments(string[] args)
         {
             Parser.Default.ParseArguments(args, LoadOptions())
+                .WithParsed<CleanOptions>(o => Cli.Clean(o))
                 .WithParsed<BuildOptions>(o => Cli.Build(o))
                 .WithParsed<PublishOptions>(o => Cli.Publish(o))
                 .WithParsed<ReleaseOptions>(_ => Cli.Release())

@@ -40,10 +40,10 @@ namespace Chunkyard
 
         private static bool TryGetPassword(out string password)
         {
-            password = Environment.GetEnvironmentVariable(PasswordVariable)
-                ?? "";
+            var env = Environment.GetEnvironmentVariable(PasswordVariable);
+            password = env ?? "";
 
-            return !string.IsNullOrEmpty(password);
+            return !string.IsNullOrEmpty(env);
         }
     }
 }
