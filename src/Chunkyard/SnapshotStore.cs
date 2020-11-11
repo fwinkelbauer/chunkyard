@@ -133,19 +133,13 @@ namespace Chunkyard
                 _contentStore.RetrieveFromLog(logPosition).ContentReference);
         }
 
-        public IEnumerable<ContentReference> ShowSnapshot(
+        public ContentReference[] ShowSnapshot(
             int logPosition,
             string fuzzyPattern = "")
         {
-            var snapshot = GetSnapshot(logPosition);
-            var filteredContentReferences = FuzzyFilter(
-                snapshot.ContentReferences,
+            return FuzzyFilter(
+                GetSnapshot(logPosition).ContentReferences,
                 fuzzyPattern);
-
-            foreach (var contentReference in filteredContentReferences)
-            {
-                yield return contentReference;
-            }
         }
 
         public void GarbageCollect()
@@ -166,7 +160,7 @@ namespace Chunkyard
             }
         }
 
-        public IEnumerable<int> CopySnapshots(
+        public int[] CopySnapshots(
             SnapshotStore otherSnapshotStore)
         {
             otherSnapshotStore.EnsureNotNull(nameof(otherSnapshotStore));
@@ -211,7 +205,8 @@ namespace Chunkyard
                 : otherLogs.Max();
 
             var newLogPositions = thisLogs
-                .Where(l => l > otherMax);
+                .Where(l => l > otherMax)
+                .ToArray();
 
             var otherUris = otherSnapshotStore._repository.ListUris()
                 .ToList();
@@ -223,9 +218,9 @@ namespace Chunkyard
                         logPosition,
                         otherSnapshotStore._repository,
                         otherUris));
-
-                yield return logPosition;
             }
+
+            return newLogPositions;
         }
 
         private IEnumerable<Uri> CopySnapshotUris(
@@ -252,7 +247,7 @@ namespace Chunkyard
             return copiedUris;
         }
 
-        public IEnumerable<Uri> ListUris(int logPosition)
+        public Uri[] ListUris(int logPosition)
         {
             var uris = new List<Uri>();
             var snapshotReference = _contentStore.RetrieveFromLog(logPosition)
@@ -267,7 +262,7 @@ namespace Chunkyard
                 uris.AddRange(_contentStore.ListUris(contentReference));
             }
 
-            return uris;
+            return uris.ToArray();
         }
 
         private Snapshot GetSnapshot(ContentReference contentReference)
@@ -314,13 +309,14 @@ namespace Chunkyard
                 : knownContentReference.Nonce;
         }
 
-        private static IEnumerable<ContentReference> FuzzyFilter(
+        private static ContentReference[] FuzzyFilter(
             IEnumerable<ContentReference> contentReferences,
             string fuzzyPattern)
         {
             var fuzzy = new Fuzzy(fuzzyPattern);
 
-            return contentReferences.Where(c => fuzzy.IsMatch(c.Name));
+            return contentReferences.Where(c => fuzzy.IsMatch(c.Name))
+                .ToArray();
         }
     }
 }

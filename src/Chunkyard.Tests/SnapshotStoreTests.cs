@@ -88,7 +88,7 @@ namespace Chunkyard.Tests
 
             // - A URI for "some content"
             // - A URI for the snapshot itself
-            Assert.Equal(2, snapshotStore.ListUris(logPosition).Count());
+            Assert.Equal(2, snapshotStore.ListUris(logPosition).Length);
         }
 
         [Fact]
