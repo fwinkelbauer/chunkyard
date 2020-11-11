@@ -49,9 +49,7 @@ namespace Chunkyard
         {
             repository.EnsureNotNull(nameof(repository));
 
-            var logPositions = repository.ListLogPositions()
-                .ToArray();
-
+            var logPositions = repository.ListLogPositions();
             var logPositionsToKeep = logPositions
                 .TakeLast(count)
                 .ToArray();

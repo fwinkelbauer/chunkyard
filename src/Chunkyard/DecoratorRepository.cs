@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Chunkyard
 {
@@ -33,7 +32,7 @@ namespace Chunkyard
             return Repository.ValueExists(contentUri);
         }
 
-        public virtual IEnumerable<Uri> ListUris()
+        public virtual Uri[] ListUris()
         {
             return Repository.ListUris();
         }
@@ -58,7 +57,7 @@ namespace Chunkyard
             Repository.RemoveFromLog(logPosition);
         }
 
-        public virtual IEnumerable<int> ListLogPositions()
+        public virtual int[] ListLogPositions()
         {
             return Repository.ListLogPositions();
         }

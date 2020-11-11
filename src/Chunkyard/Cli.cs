@@ -34,8 +34,7 @@ namespace Chunkyard
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            var files = FileFetcher
-                .Find(o.Files, o.ExcludePatterns)
+            var files = FileFetcher.Find(o.Files, o.ExcludePatterns)
                 .ToArray();
 
             if (files.Length == 0)

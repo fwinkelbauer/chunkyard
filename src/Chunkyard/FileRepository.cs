@@ -56,28 +56,9 @@ namespace Chunkyard
                 ToFilePath(contentUri));
         }
 
-        public IEnumerable<Uri> ListUris()
+        public Uri[] ListUris()
         {
-            if (!Directory.Exists(_contentDirectory))
-            {
-                yield break;
-            }
-
-            var hashDirectories = Directory.GetDirectories(
-                _contentDirectory);
-
-            foreach (var hashDirectory in hashDirectories)
-            {
-                var contentFiles = Directory.EnumerateFiles(
-                    hashDirectory,
-                    "*",
-                    SearchOption.AllDirectories);
-
-                foreach (var contentFile in contentFiles)
-                {
-                    yield return ToContentUri(contentFile);
-                }
-            }
+            return EnumerateUris().ToArray();
         }
 
         public void RemoveValue(Uri contentUri)
@@ -124,7 +105,7 @@ namespace Chunkyard
                 ToFilePath(logPosition));
         }
 
-        public IEnumerable<int> ListLogPositions()
+        public int[] ListLogPositions()
         {
             if (!Directory.Exists(_refLogDirectory))
             {
@@ -146,7 +127,31 @@ namespace Chunkyard
 
             logPositions.Sort();
 
-            return logPositions;
+            return logPositions.ToArray();
+        }
+
+        private IEnumerable<Uri> EnumerateUris()
+        {
+            if (!Directory.Exists(_contentDirectory))
+            {
+                yield break;
+            }
+
+            var hashDirectories = Directory.GetDirectories(
+                _contentDirectory);
+
+            foreach (var hashDirectory in hashDirectories)
+            {
+                var contentFiles = Directory.EnumerateFiles(
+                    hashDirectory,
+                    "*",
+                    SearchOption.AllDirectories);
+
+                foreach (var contentFile in contentFiles)
+                {
+                    yield return ToContentUri(contentFile);
+                }
+            }
         }
 
         private static Uri ToContentUri(string filePath)

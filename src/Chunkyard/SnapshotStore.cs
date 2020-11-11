@@ -173,14 +173,10 @@ namespace Chunkyard
         {
             otherSnapshotStore.EnsureNotNull(nameof(otherSnapshotStore));
 
-            var thisLogs = _repository
-                .ListLogPositions()
-                .ToArray();
+            var thisLogs = _repository.ListLogPositions();
 
             var otherContentStore = otherSnapshotStore._contentStore;
-            var otherLogs = otherSnapshotStore._repository
-                .ListLogPositions()
-                .ToArray();
+            var otherLogs = otherSnapshotStore._repository.ListLogPositions();
 
             if (thisLogs.Length > 0 && otherLogs.Length > 0)
             {

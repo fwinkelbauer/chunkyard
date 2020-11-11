@@ -198,8 +198,7 @@ namespace Chunkyard
 
         private static int? FetchLogPosition(IRepository repository)
         {
-            var logPositions = repository.ListLogPositions()
-                .ToArray();
+            var logPositions = repository.ListLogPositions();
 
             if (logPositions.Length == 0)
             {

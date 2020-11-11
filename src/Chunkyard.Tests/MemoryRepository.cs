@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Chunkyard.Tests
 {
@@ -49,11 +50,11 @@ namespace Chunkyard.Tests
             }
         }
 
-        public IEnumerable<Uri> ListUris()
+        public Uri[] ListUris()
         {
             lock (_lock)
             {
-                return _valuesByUri.Keys;
+                return _valuesByUri.Keys.ToArray();
             }
         }
 
@@ -91,11 +92,11 @@ namespace Chunkyard.Tests
             }
         }
 
-        public IEnumerable<int> ListLogPositions()
+        public int[] ListLogPositions()
         {
             lock (_lock)
             {
-                return _valuesByLog.Keys;
+                return _valuesByLog.Keys.ToArray();
             }
         }
     }
