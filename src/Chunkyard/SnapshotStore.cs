@@ -169,21 +169,6 @@ namespace Chunkyard
             var otherContentStore = otherSnapshotStore._contentStore;
             var otherLogs = otherSnapshotStore._repository.ListLogPositions();
 
-            if (thisLogs.Length > 0 && otherLogs.Length > 0)
-            {
-                var thisLogReference = _contentStore.RetrieveFromLog(
-                    thisLogs[0]);
-
-                var otherLogReference = otherContentStore.RetrieveFromLog(
-                    otherLogs[0]);
-
-                if (thisLogReference.LogId != otherLogReference.LogId)
-                {
-                    throw new ChunkyardException(
-                        "Cannot operate on repositories with different log IDs");
-                }
-            }
-
             foreach (var logPosition in thisLogs.Intersect(otherLogs))
             {
                 var thisLogReference = _contentStore.RetrieveFromLog(

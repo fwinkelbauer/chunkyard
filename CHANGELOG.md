@@ -10,7 +10,9 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 ### Changed
 
 - To target framework to .NET 5 and reduced the binary file size
-- The storage format by removing the schema information from a snapshot
+- The storage format by
+  - removing the schema information from a snapshot
+  - removing the ID from a log reference
 
 ### Fixed
 
