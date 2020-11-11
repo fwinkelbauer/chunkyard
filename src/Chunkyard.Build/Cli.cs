@@ -18,8 +18,12 @@ namespace Chunkyard.Build
             @"##\s+(\d+\.\d+\.\d+)")
             .Groups[1].Value;
 
-        public static void Clean()
+        public static void Clean(DotnetOptions o)
         {
+            Dotnet(
+                $"clean {Solution}",
+                $"-c {o.Configuration}");
+
             var dirInfo = new DirectoryInfo(ArtifactsDirectory);
 
             if (!dirInfo.Exists)
@@ -32,9 +36,9 @@ namespace Chunkyard.Build
                 file.Delete();
             }
 
-            foreach (var dir in dirInfo.GetDirectories())
+            foreach (var subDirInfo in dirInfo.GetDirectories())
             {
-                dirInfo.Delete(true);
+                subDirInfo.Delete(true);
             }
         }
 
@@ -53,7 +57,7 @@ namespace Chunkyard.Build
 
         public static void Publish(DotnetOptions o)
         {
-            Clean();
+            Clean(o);
 
             Dotnet(
                 $"format {Solution}",
