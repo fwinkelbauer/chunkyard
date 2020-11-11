@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- To target framework to .NET 5 and reduced the binary file size
+
 ### Fixed
 
 - The shallow check after using the `create` command

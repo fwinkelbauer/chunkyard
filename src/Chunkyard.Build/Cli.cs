@@ -72,7 +72,7 @@ namespace Chunkyard.Build
                 $"-o {ArtifactsDirectory}",
                 $"-p:Version={Version}",
                 "-p:PublishSingleFile=true",
-                "-p:PublishReadyToRun=true");
+                "-p:PublishTrimmed=true");
         }
 
         public static void Fmt()
