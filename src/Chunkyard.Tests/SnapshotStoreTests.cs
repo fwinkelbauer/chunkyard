@@ -101,10 +101,7 @@ namespace Chunkyard.Tests
                 new[] { ("some content", CreateOpenReadContent()) },
                 DateTime.Now);
 
-            // xunit does not let me catch a generic Exception type. Instead I
-            // have to check for the KeyNotFoundException which only happens in
-            // a in-memory repository
-            Assert.Throws<KeyNotFoundException>(
+            Assert.Throws<ChunkyardException>(
                 () => snapshotStore.ListUris(logPosition));
         }
 
@@ -123,7 +120,7 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void CheckSnapshot_Detects_No_Errors()
+        public static void CheckSnapshot_Detects_Ok()
         {
             var snapshotStore = CreateSnapshotStore();
 
@@ -133,6 +130,40 @@ namespace Chunkyard.Tests
 
             Assert.True(snapshotStore.CheckSnapshotExists(logPosition));
             Assert.True(snapshotStore.CheckSnapshotValid(logPosition));
+        }
+
+        [Fact]
+        public static void CheckSnapshot_Fails_If_Snapshot_Missing()
+        {
+            var snapshotStore = CreateSnapshotStore(
+                new UnstoredRepository());
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                new[] { ("some content", CreateOpenReadContent()) },
+                DateTime.Now);
+
+            Assert.Throws<ChunkyardException>(
+                () => snapshotStore.CheckSnapshotExists(logPosition));
+
+            Assert.Throws<ChunkyardException>(
+                () => snapshotStore.CheckSnapshotValid(logPosition));
+        }
+
+        [Fact]
+        public static void CheckSnapshot_Fails_If_Snapshot_Invalid()
+        {
+            var snapshotStore = CreateSnapshotStore(
+                new CorruptedRepository());
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                new[] { ("some content", CreateOpenReadContent()) },
+                DateTime.Now);
+
+            Assert.Throws<ChunkyardException>(
+                () => snapshotStore.CheckSnapshotExists(logPosition));
+
+            Assert.Throws<ChunkyardException>(
+                () => snapshotStore.CheckSnapshotValid(logPosition));
         }
 
         [Fact]

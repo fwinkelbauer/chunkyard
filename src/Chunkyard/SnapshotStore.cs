@@ -274,8 +274,17 @@ namespace Chunkyard
 
         private Snapshot GetSnapshot(ContentReference contentReference)
         {
-            return _contentStore.RetrieveDocument<Snapshot>(
-                contentReference);
+            try
+            {
+                return _contentStore.RetrieveDocument<Snapshot>(
+                    contentReference);
+            }
+            catch (Exception e)
+            {
+                throw new ChunkyardException(
+                    "Could not retrieve snapshot",
+                    e);
+            }
         }
 
         private void RegisterPreviousContent()
