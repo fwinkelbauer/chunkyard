@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace Chunkyard
 
             contents.EnsureNotNull(nameof(contents));
 
-            var contentReferences = new List<ContentReference>();
+            var contentReferences = ImmutableArray.CreateBuilder<ContentReference>();
 
             foreach (var content in contents)
             {
@@ -53,7 +54,7 @@ namespace Chunkyard
                 new Snapshot(
                     Snapshot.SchemaVersion,
                     creationTime,
-                    contentReferences),
+                    contentReferences.ToImmutable()),
                 SnapshotFile,
                 AesGcmCrypto.GenerateNonce(),
                 out _);

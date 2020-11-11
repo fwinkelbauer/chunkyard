@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.IO;
 using System.Security.Cryptography;
 using Xunit;
@@ -150,12 +151,10 @@ namespace Chunkyard.Tests
             var contentReference = new ContentReference(
                 "some reference",
                 AesGcmCrypto.GenerateNonce(),
-                new[]
-                {
+                ImmutableArray.Create(
                     new ChunkReference(
                         new Uri("sha256://abcdef123456"),
-                        new byte[] { 0xFF })
-                },
+                        new byte[] { 0xFF })),
                 ContentType.Blob);
 
             var firstLogPosition = contentStore.AppendToLog(

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Chunkyard
@@ -15,11 +15,11 @@ namespace Chunkyard
         public Snapshot(
             int version,
             DateTime creationTime,
-            IEnumerable<ContentReference> contentReferences)
+            IImmutableList<ContentReference> contentReferences)
         {
             Version = version;
             CreationTime = creationTime;
-            ContentReferences = contentReferences.ToArray();
+            ContentReferences = contentReferences;
 
             if (Version != SchemaVersion)
             {
@@ -32,7 +32,7 @@ namespace Chunkyard
 
         public DateTime CreationTime { get; }
 
-        public IEnumerable<ContentReference> ContentReferences { get; }
+        public IImmutableList<ContentReference> ContentReferences { get; }
 
         public override bool Equals(object? obj)
         {

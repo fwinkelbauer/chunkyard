@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Chunkyard
@@ -13,12 +13,12 @@ namespace Chunkyard
         public ContentReference(
             string name,
             byte[] nonce,
-            IEnumerable<ChunkReference> chunks,
+            IImmutableList<ChunkReference> chunks,
             ContentType type)
         {
             Name = name;
             Nonce = nonce;
-            Chunks = chunks.ToArray();
+            Chunks = chunks;
             Type = type;
         }
 
@@ -26,7 +26,7 @@ namespace Chunkyard
 
         public byte[] Nonce { get; }
 
-        public IEnumerable<ChunkReference> Chunks { get; }
+        public IImmutableList<ChunkReference> Chunks { get; }
 
         public ContentType Type { get; }
 

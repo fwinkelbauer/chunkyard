@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -168,13 +168,13 @@ namespace Chunkyard
                 repository.RetrieveFromLog(logPosition));
         }
 
-        private IEnumerable<ChunkReference> WriteChunks(
+        private IImmutableList<ChunkReference> WriteChunks(
             byte[] nonce,
             Stream stream,
             out bool newChunks)
         {
             var chunkedDataItems = _fastCdc.SplitIntoChunks(stream);
-            var chunkReferences = new List<ChunkReference>();
+            var chunkReferences = ImmutableArray.CreateBuilder<ChunkReference>();
             newChunks = false;
 
             foreach (var chunkedData in chunkedDataItems)
@@ -193,7 +193,7 @@ namespace Chunkyard
                 chunkReferences.Add(new ChunkReference(contentUri, tag));
             }
 
-            return chunkReferences;
+            return chunkReferences.ToImmutable();
         }
 
         private static int? FetchLogPosition(IRepository repository)
