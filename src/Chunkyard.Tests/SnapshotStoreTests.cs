@@ -133,7 +133,7 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void CheckSnapshot_Fails_If_Snapshot_Missing()
+        public static void CheckSnapshot_Throws_If_Snapshot_Missing()
         {
             var snapshotStore = CreateSnapshotStore(
                 new UnstoredRepository());
@@ -150,7 +150,7 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void CheckSnapshot_Fails_If_Snapshot_Invalid()
+        public static void CheckSnapshot_Throws_If_Snapshot_Invalid()
         {
             var snapshotStore = CreateSnapshotStore(
                 new CorruptedRepository());

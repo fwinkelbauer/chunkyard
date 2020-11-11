@@ -126,6 +126,7 @@ namespace Chunkyard.Tests
                 out _);
 
             Assert.False(contentStore.ContentExists(contentReference));
+            Assert.False(contentStore.ContentValid(contentReference));
         }
 
         [Fact]
@@ -140,6 +141,7 @@ namespace Chunkyard.Tests
                 AesGcmCrypto.GenerateNonce(),
                 out _);
 
+            Assert.True(contentStore.ContentExists(contentReference));
             Assert.False(contentStore.ContentValid(contentReference));
         }
 
