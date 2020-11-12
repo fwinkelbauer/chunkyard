@@ -29,8 +29,9 @@ namespace Chunkyard
         public static bool UriValid(this IRepository repository, Uri contentUri)
         {
             repository.EnsureNotNull(nameof(repository));
+            contentUri.EnsureNotNull(nameof(contentUri));
 
-            if (contentUri == null || !repository.ValueExists(contentUri))
+            if (!repository.ValueExists(contentUri))
             {
                 return false;
             }
@@ -50,9 +51,7 @@ namespace Chunkyard
             repository.EnsureNotNull(nameof(repository));
 
             var logPositions = repository.ListLogPositions();
-            var logPositionsToKeep = logPositions
-                .TakeLast(count)
-                .ToArray();
+            var logPositionsToKeep = logPositions.TakeLast(count);
 
             var logPositionsToDelete = logPositions
                 .Except(logPositionsToKeep);

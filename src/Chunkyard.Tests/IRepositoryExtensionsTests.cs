@@ -31,14 +31,6 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void UriValid_Returns_False_If_Null()
-        {
-            var repository = new MemoryRepository();
-
-            Assert.False(repository.UriValid(null!));
-        }
-
-        [Fact]
         public static void UriValid_Returns_False_If_Not_Exists()
         {
             var repository = new MemoryRepository();
