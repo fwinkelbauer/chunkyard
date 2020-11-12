@@ -173,9 +173,8 @@ namespace Chunkyard
 
         public static void RemoveSnapshot(RemoveOptions o)
         {
-            var repository = CreateRepository(o.Repository);
-
-            repository.RemoveFromLog(o.LogPosition);
+            CreateRepository(o.Repository)
+                .RemoveFromLog(o.LogPosition);
         }
 
         public static void KeepSnapshots(KeepOptions o)
