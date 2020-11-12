@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -78,34 +77,6 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void ListUris_Lists_All_Uris_In_Snapshot()
-        {
-            var snapshotStore = CreateSnapshotStore();
-
-            var logPosition = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
-                DateTime.Now);
-
-            // - A URI for "some content"
-            // - A URI for the snapshot itself
-            Assert.Equal(2, snapshotStore.ListUris(logPosition).Length);
-        }
-
-        [Fact]
-        public static void ListUris_Throws_If_Snapshot_Is_Invalid()
-        {
-            var snapshotStore = CreateSnapshotStore(
-                new UnstoredRepository());
-
-            var logPosition = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
-                DateTime.Now);
-
-            Assert.Throws<ChunkyardException>(
-                () => snapshotStore.ListUris(logPosition));
-        }
-
-        [Fact]
         public static void GetSnapshot_Accepts_Negative_LogPositions()
         {
             var snapshotStore = CreateSnapshotStore();
@@ -178,11 +149,12 @@ namespace Chunkyard.Tests
 
             var actualContentName = "";
             using var writeStream = new MemoryStream();
-            Func<string, Stream> openWrite = (s) =>
+
+            Stream openWrite(string s)
             {
                 actualContentName = s;
                 return writeStream;
-            };
+            }
 
             snapshotStore.RestoreSnapshot(logPosition, "", openWrite);
 

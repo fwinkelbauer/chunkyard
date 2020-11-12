@@ -78,8 +78,12 @@ namespace Chunkyard
             var logPosition = snapshotStore.AppendSnapshot(
                 files.Select(f =>
                 {
-                    Func<Stream> openRead = () => File.OpenRead(f.AbsolutePath);
-                    return (f.ContentName, openRead);
+                    Stream openRead()
+                    {
+                        return File.OpenRead(f.AbsolutePath);
+                    }
+
+                    return (f.ContentName, (Func<Stream>)openRead);
                 }),
                 DateTime.Now);
 
@@ -133,7 +137,7 @@ namespace Chunkyard
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            Func<string, Stream> openWrite = (s) =>
+            Stream openWrite(string s)
             {
                 var mode = o.Overwrite
                     ? FileMode.OpenOrCreate
@@ -144,7 +148,7 @@ namespace Chunkyard
                 DirectoryUtil.CreateParent(file);
 
                 return new FileStream(file, mode, FileAccess.Write);
-            };
+            }
 
             snapshotStore.RestoreSnapshot(
                 o.LogPosition,

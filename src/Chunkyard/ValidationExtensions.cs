@@ -18,12 +18,9 @@ namespace Chunkyard
             this string? value,
             string paramName)
         {
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new ArgumentNullException(paramName);
-            }
-
-            return value;
+            return string.IsNullOrEmpty(value)
+                ? throw new ArgumentNullException(paramName)
+                : value;
         }
 
         public static int EnsureBetween(
@@ -32,14 +29,11 @@ namespace Chunkyard
             int max,
             string paramName)
         {
-            if (value < min || value > max)
-            {
-                throw new ArgumentOutOfRangeException(
+            return value < min || value > max
+                ? throw new ArgumentOutOfRangeException(
                     paramName,
-                    $"Value must be between {min} and {max}");
-            }
-
-            return value;
+                    $"Value must be between {min} and {max}")
+                : value;
         }
     }
 }

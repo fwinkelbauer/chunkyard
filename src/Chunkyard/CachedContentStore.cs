@@ -27,7 +27,7 @@ namespace Chunkyard
             ContentType type,
             out bool newContent)
         {
-            if (!(inputStream is FileStream fileStream))
+            if (inputStream is not FileStream fileStream)
             {
                 return Store.StoreContent(
                     inputStream,
@@ -76,17 +76,12 @@ namespace Chunkyard
             var creationDateUtc = File.GetCreationTimeUtc(fileStream.Name);
             var lastWriteDateUtc = File.GetLastWriteTimeUtc(fileStream.Name);
 
-            if (storedCache.Length == fileStream.Length
+            return storedCache.Length == fileStream.Length
                 && storedCache.CreationDateUtc.Equals(creationDateUtc)
                 && storedCache.LastWriteDateUtc.Equals(lastWriteDateUtc)
-                && Store.ContentExists(storedCache.ContentReference))
-            {
-                return storedCache.ContentReference;
-            }
-            else
-            {
-                return null;
-            }
+                && Store.ContentExists(storedCache.ContentReference)
+                ? storedCache.ContentReference
+                : null;
         }
 
         private void StoreInCache(

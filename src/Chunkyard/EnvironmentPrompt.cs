@@ -20,22 +20,16 @@ namespace Chunkyard
 
         public string NewPassword()
         {
-            if (TryGetPassword(out var password))
-            {
-                return password;
-            }
-
-            return _prompt.NewPassword();
+            return TryGetPassword(out var password)
+                ? password
+                : _prompt.NewPassword();
         }
 
         public string ExistingPassword()
         {
-            if (TryGetPassword(out var password))
-            {
-                return password;
-            }
-
-            return _prompt.ExistingPassword();
+            return TryGetPassword(out var password)
+                ? password
+                : _prompt.ExistingPassword();
         }
 
         private static bool TryGetPassword(out string password)

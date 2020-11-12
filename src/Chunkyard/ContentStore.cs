@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 
 namespace Chunkyard
 {
@@ -197,12 +194,9 @@ namespace Chunkyard
         {
             var logPositions = repository.ListLogPositions();
 
-            if (logPositions.Length == 0)
-            {
-                return null;
-            }
-
-            return logPositions[^1];
+            return logPositions.Length == 0
+                ? null
+                : logPositions[^1];
         }
 
         private int ResolveLogPosition(int logPosition)

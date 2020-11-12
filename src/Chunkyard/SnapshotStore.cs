@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Chunkyard
 {
@@ -232,19 +231,21 @@ namespace Chunkyard
             return copiedUris;
         }
 
-        public Uri[] ListUris(int logPosition)
+        private Uri[] ListUris(int logPosition)
         {
             var uris = new List<Uri>();
             var snapshotReference = _contentStore.RetrieveFromLog(logPosition)
                 .ContentReference;
 
-            uris.AddRange(_contentStore.ListUris(snapshotReference));
+            uris.AddRange(
+                snapshotReference.Chunks.Select(c => c.ContentUri));
 
             var snapshot = GetSnapshot(snapshotReference);
 
             foreach (var contentReference in snapshot.ContentReferences)
             {
-                uris.AddRange(_contentStore.ListUris(contentReference));
+                uris.AddRange(
+                    contentReference.Chunks.Select(c => c.ContentUri));
             }
 
             return uris.ToArray();
