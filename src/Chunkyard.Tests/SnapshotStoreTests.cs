@@ -221,6 +221,26 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
+        public static void CopySnapshots_Throws_If_Snapshots_Dont_Match()
+        {
+            var repository1 = new MemoryRepository();
+            var snapshotStore1 = CreateSnapshotStore(repository1);
+            var repository2 = new MemoryRepository(repository1.RepositoryId);
+            var snapshotStore2 = CreateSnapshotStore(repository2);
+
+            snapshotStore1.AppendSnapshot(
+                new[] { ("some content", CreateOpenReadContent()) },
+                DateTime.Now);
+
+            snapshotStore2.AppendSnapshot(
+                new[] { ("some other content", CreateOpenReadContent()) },
+                DateTime.Now);
+
+            Assert.Throws<ChunkyardException>(
+                () => snapshotStore1.CopySnapshots(repository2));
+        }
+
+        [Fact]
         public static void CopySnapshots_Copies_Missing_Data()
         {
             var repository = new MemoryRepository();
