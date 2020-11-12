@@ -47,12 +47,9 @@ namespace Chunkyard
                 o.Repository,
                 ensureRepository: false);
 
-            IContentStore contentStore = new PrintingContentStore(
-                new ContentStore(
-                    repository,
-                    new FastCdc(o.Min, o.Avg, o.Max),
-                    DefaultAlgorithm,
-                    CreatePrompt()));
+            var contentStore = CreateContentStore(
+                repository,
+                new FastCdc(o.Min, o.Avg, o.Max));
 
             if (o.Cached)
             {
@@ -202,6 +199,35 @@ namespace Chunkyard
             }
         }
 
+        private static SnapshotStore CreateSnapshotStore(
+            string repositoryPath,
+            bool ensureRepository = true)
+        {
+            return CreateSnapshotStore(
+                CreateRepository(repositoryPath, ensureRepository));
+        }
+
+        private static SnapshotStore CreateSnapshotStore(
+            IRepository repository,
+            FastCdc? fastCdc = null)
+        {
+            return new SnapshotStore(
+                CreateContentStore(repository, fastCdc));
+        }
+
+        private static IContentStore CreateContentStore(
+            IRepository repository,
+            FastCdc? fastCdc = null)
+        {
+            return new PrintingContentStore(
+                new ContentStore(
+                    repository,
+                    fastCdc ?? new FastCdc(),
+                    DefaultAlgorithm,
+                    new EnvironmentPrompt(
+                        new ConsolePrompt())));
+        }
+
         private static IRepository CreateRepository(
             string repositoryPath,
             bool ensureRepository = true)
@@ -217,35 +243,6 @@ namespace Chunkyard
             }
 
             return repository;
-        }
-
-        private static SnapshotStore CreateSnapshotStore(
-            string repositoryPath,
-            IPrompt? prompt = null,
-            bool ensureRepository = true)
-        {
-            return CreateSnapshotStore(
-                CreateRepository(repositoryPath, ensureRepository),
-                prompt);
-        }
-
-        private static SnapshotStore CreateSnapshotStore(
-            IRepository repository,
-            IPrompt? prompt = null)
-        {
-            return new SnapshotStore(
-                new PrintingContentStore(
-                    new ContentStore(
-                        repository,
-                        new FastCdc(),
-                        DefaultAlgorithm,
-                        prompt ?? CreatePrompt())));
-        }
-
-        private static IPrompt CreatePrompt()
-        {
-            return new EnvironmentPrompt(
-                new ConsolePrompt());
         }
 
         private class PrintingContentStore : DecoratorContentStore
