@@ -16,8 +16,6 @@ namespace Chunkyard
         private readonly int _iterations;
         private readonly byte[] _key;
 
-        private int? _currentLogPosition;
-
         public ContentStore(
             IRepository repository,
             FastCdc fastCdc,
@@ -31,6 +29,11 @@ namespace Chunkyard
             string? password;
 
             prompt.EnsureNotNull(nameof(prompt));
+
+            var logPositions = repository.ListLogPositions();
+            CurrentLogPosition = logPositions.Length == 0
+                ? null
+                : logPositions[^1];
 
             if (CurrentLogPosition == null)
             {
@@ -54,21 +57,7 @@ namespace Chunkyard
 
         public IRepository Repository { get; }
 
-        public int? CurrentLogPosition
-        {
-            get
-            {
-                if (_currentLogPosition.HasValue)
-                {
-                    return _currentLogPosition;
-                }
-
-                _currentLogPosition = FetchLogPosition(Repository);
-
-                return _currentLogPosition;
-            }
-            private set => _currentLogPosition = value;
-        }
+        public int? CurrentLogPosition { get; private set; }
 
         public void RetrieveContent(
             ContentReference contentReference,
@@ -188,15 +177,6 @@ namespace Chunkyard
             }
 
             return chunkReferences.ToImmutable();
-        }
-
-        private static int? FetchLogPosition(IRepository repository)
-        {
-            var logPositions = repository.ListLogPositions();
-
-            return logPositions.Length == 0
-                ? null
-                : logPositions[^1];
         }
 
         private int ResolveLogPosition(int logPosition)
