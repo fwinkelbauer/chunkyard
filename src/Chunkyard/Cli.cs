@@ -28,14 +28,14 @@ namespace Chunkyard
 
             foreach (var file in files)
             {
-                Console.WriteLine(file.ContentName);
+                Console.WriteLine(file);
             }
         }
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            var files = FileFetcher.Find(o.Files, o.ExcludePatterns)
-                .ToArray();
+            var files = FileFetcher.Find(o.Files, o.ExcludePatterns);
+            var parent = FileFetcher.FindCommonParent(files);
 
             if (files.Length == 0)
             {
@@ -72,16 +72,17 @@ namespace Chunkyard
 
             var snapshotStore = new SnapshotStore(contentStore);
 
-            var logPosition = snapshotStore.AppendSnapshot(
-                files.Select(f =>
-                {
-                    Stream openRead()
-                    {
-                        return File.OpenRead(f.AbsolutePath);
-                    }
+            var contentNames = FileFetcher.ToContentNames(parent, files);
 
-                    return (f.ContentName, (Func<Stream>)openRead);
-                }),
+            Stream openRead(string subPath)
+            {
+                return File.OpenRead(
+                    Path.Combine(parent, subPath));
+            }
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                contentNames,
+                openRead,
                 DateTime.Now);
 
             var snapshotExists = snapshotStore.CheckSnapshotExists(logPosition);
@@ -275,7 +276,8 @@ namespace Chunkyard
                 return contentReference;
             }
 
-            public override bool ContentExists(ContentReference contentReference)
+            public override bool ContentExists(
+                ContentReference contentReference)
             {
                 var exists = base.ContentExists(contentReference);
 

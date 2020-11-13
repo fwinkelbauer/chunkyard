@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -14,7 +15,8 @@ namespace Chunkyard.Tests
             var snapshotStore = CreateSnapshotStore();
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                new[] { "some content" },
+                OpenStream(),
                 DateTime.Now);
 
             var snapshot = snapshotStore.GetSnapshot(logPosition);
@@ -32,11 +34,13 @@ namespace Chunkyard.Tests
             var snapshotStore = CreateSnapshotStore();
 
             var logPosition1 = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                new[] { "some content" },
+                OpenStream(),
                 DateTime.Now);
 
             var logPosition2 = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                new[] { "some content" },
+                OpenStream(),
                 DateTime.Now);
 
             var snapshot1 = snapshotStore.GetSnapshot(logPosition1);
@@ -53,7 +57,8 @@ namespace Chunkyard.Tests
             var snapshotStore = CreateSnapshotStore();
 
             var logPosition = snapshotStore.AppendSnapshot(
-                Array.Empty<(string, Func<Stream>)>(),
+                Array.Empty<string>(),
+                OpenStream(),
                 DateTime.Now);
 
             Assert.Equal(0, logPosition);
@@ -63,14 +68,16 @@ namespace Chunkyard.Tests
         public static void AppendSnapshot_Creates_Snapshot_Without_New_Data()
         {
             var snapshotStore = CreateSnapshotStore();
-            var contents = new[] { ("some content", CreateOpenReadContent()) };
+            var contents = new[] { "some content" };
 
             snapshotStore.AppendSnapshot(
                 contents,
+                OpenStream(),
                 DateTime.Now);
 
             var logPosition = snapshotStore.AppendSnapshot(
                 contents,
+                OpenStream(),
                 DateTime.Now);
 
             Assert.Equal(1, logPosition);
@@ -82,7 +89,8 @@ namespace Chunkyard.Tests
             var snapshotStore = CreateSnapshotStore();
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                new[] { "some content" },
+                OpenStream(),
                 DateTime.Now);
 
             Assert.Equal(
@@ -96,7 +104,8 @@ namespace Chunkyard.Tests
             var snapshotStore = CreateSnapshotStore();
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                new[] { "some content" },
+                OpenStream(),
                 DateTime.Now);
 
             Assert.True(snapshotStore.CheckSnapshotExists(logPosition));
@@ -110,7 +119,8 @@ namespace Chunkyard.Tests
                 new UnstoredRepository());
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                new[] { "some content" },
+                OpenStream(),
                 DateTime.Now);
 
             Assert.Throws<ChunkyardException>(
@@ -127,7 +137,8 @@ namespace Chunkyard.Tests
                 new CorruptedRepository());
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                new[] { "some content" },
+                OpenStream(),
                 DateTime.Now);
 
             Assert.Throws<ChunkyardException>(
@@ -141,10 +152,15 @@ namespace Chunkyard.Tests
         public static void Restore_Writes_Content_To_Streams()
         {
             var snapshotStore = CreateSnapshotStore();
-            var content = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+            var content = new byte[] { 0x11, 0x22, 0x33, 0x44 };
+            var bytesPerContent = new Dictionary<string, byte[]>
+            {
+                { "some content", content }
+            };
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent(content)) },
+                new[] { "some content" },
+                OpenStream(bytesPerContent),
                 DateTime.Now);
 
             var actualContentName = "";
@@ -166,13 +182,15 @@ namespace Chunkyard.Tests
         public static void ShowSnapshot_Lists_Content()
         {
             var snapshotStore = CreateSnapshotStore();
+            var contents = new[] { "some content" };
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                contents,
+                OpenStream(),
                 DateTime.Now);
 
             Assert.Equal(
-                new[] { "some content" },
+                contents,
                 snapshotStore.ShowSnapshot(logPosition).Select(c => c.Name));
         }
 
@@ -184,7 +202,8 @@ namespace Chunkyard.Tests
                 repository);
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                new[] { "some content" },
+                OpenStream(),
                 DateTime.Now);
 
             snapshotStore.GarbageCollect();
@@ -200,7 +219,8 @@ namespace Chunkyard.Tests
                 repository);
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                new[] { "some content" },
+                OpenStream(),
                 DateTime.Now);
 
             repository.RemoveFromLog(logPosition);
@@ -229,11 +249,13 @@ namespace Chunkyard.Tests
             var snapshotStore2 = CreateSnapshotStore(repository2);
 
             snapshotStore1.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                new[] { "some content" },
+                OpenStream(),
                 DateTime.Now);
 
             snapshotStore2.AppendSnapshot(
-                new[] { ("some other content", CreateOpenReadContent()) },
+                new[] { "some other content" },
+                OpenStream(),
                 DateTime.Now);
 
             Assert.Throws<ChunkyardException>(
@@ -249,7 +271,8 @@ namespace Chunkyard.Tests
                 repository.RepositoryId);
 
             snapshotStore.AppendSnapshot(
-                new[] { ("some content", CreateOpenReadContent()) },
+                new[] { "some content" },
+                OpenStream(),
                 DateTime.Now);
 
             snapshotStore.CopySnapshots(otherRepository);
@@ -259,11 +282,13 @@ namespace Chunkyard.Tests
                 otherRepository.ListUris());
         }
 
-        private static Func<Stream> CreateOpenReadContent(
-            byte[]? content = null)
+        private static Func<string, Stream> OpenStream(
+            Dictionary<string, byte[]>? bytesPerContent = null)
         {
-            return () => new MemoryStream(
-                content ?? new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
+            return (s) => new MemoryStream(
+                bytesPerContent == null
+                    ? new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }
+                    : bytesPerContent[s]);
         }
 
         private static SnapshotStore CreateSnapshotStore(

@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 - The storage format by
   - removing the schema information from a snapshot
   - removing the ID from a log reference
+  - modifying all content names around a common parent path
 
 ### Fixed
 

@@ -14,29 +14,25 @@ namespace Chunkyard
         private static readonly string HomeDirectory =
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        public static IEnumerable<(string AbsolutePath, string ContentName)> Find(
+        public static string[] Find(
             IEnumerable<string> files,
             IEnumerable<string> excludePatterns)
         {
-            var patterns = excludePatterns.ToArray();
+            return FindEnumerate(
+                files,
+                excludePatterns.ToArray())
+                .ToArray();
+        }
 
+        private static IEnumerable<string> FindEnumerate(
+            IEnumerable<string> files,
+            string[] excludePatterns)
+        {
             foreach (var file in files)
             {
-                var resolvedPath = ResolvePath(file);
-                var parentPath = Path.GetDirectoryName(resolvedPath)
-                    ?? resolvedPath;
-
-                foreach (var absolutePath in Find(resolvedPath, patterns))
+                foreach (var path in Find(ResolvePath(file), excludePatterns))
                 {
-                    var partialPath = Path.GetRelativePath(
-                        parentPath,
-                        absolutePath);
-
-                    // Using a content name with backslashes will not create
-                    // sub-directories when restoring a file on Linux.
-                    yield return (
-                        absolutePath,
-                        partialPath.Replace('\\', '/'));
+                    yield return path;
                 }
             }
         }
@@ -96,6 +92,58 @@ namespace Chunkyard
             }
 
             return filteredFiles;
+        }
+
+        public static IEnumerable<string> ToContentNames(
+            string parent,
+            IEnumerable<string> files)
+        {
+            foreach (var file in files)
+            {
+                var contentName = string.IsNullOrEmpty(parent)
+                    ? file
+                    : file.Replace(parent, "");
+
+                // Using a content name with backslashes will not create
+                // sub-directories when restoring a file on Linux.
+                //
+                // Also we don't want to include any ":" so that cont name can
+                // be turned into valid paths.
+                yield return contentName
+                    .Replace('\\', '/')
+                    .Replace(":", "");
+            }
+        }
+
+        // https://stackoverflow.com/questions/24866683/find-common-parent-path-in-list-of-files-and-directories
+        public static string FindCommonParent(IList<string> files)
+        {
+            files.EnsureNotNull(nameof(files));
+
+            if (files.Count == 0)
+            {
+                throw new ArgumentException(
+                    "Cannot operate on empty list",
+                    nameof(files));
+            }
+
+            var k = files[0].Length;
+
+            for (int i = 1; i < files.Count; i++)
+            {
+                k = Math.Min(k, files[i].Length);
+
+                for (int j = 0; j < k; j++)
+                {
+                    if (files[i][j] != files[0][j])
+                    {
+                        k = j;
+                        break;
+                    }
+                }
+            }
+
+            return files[0].Substring(0, k);
         }
     }
 }

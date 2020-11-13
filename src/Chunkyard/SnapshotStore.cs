@@ -26,22 +26,24 @@ namespace Chunkyard
         }
 
         public int AppendSnapshot(
-            IEnumerable<(string Name, Func<Stream> OpenRead)> contents,
+            IEnumerable<string> contentNames,
+            Func<string, Stream> openRead,
             DateTime creationTime)
         {
             RegisterPreviousContent();
 
-            contents.EnsureNotNull(nameof(contents));
+            contentNames.EnsureNotNull(nameof(contentNames));
+            openRead.EnsureNotNull(nameof(openRead));
 
             var contentReferences = ImmutableArray.CreateBuilder<ContentReference>();
 
-            foreach (var content in contents)
+            foreach (var contentName in contentNames)
             {
-                using var contentStream = content.OpenRead();
+                using var contentStream = openRead(contentName);
                 var contentReference = _contentStore.StoreBlob(
                     contentStream,
-                    content.Name,
-                    GenerateNonce(content.Name),
+                    contentName,
+                    GenerateNonce(contentName),
                     out _);
 
                 contentReferences.Add(contentReference);
