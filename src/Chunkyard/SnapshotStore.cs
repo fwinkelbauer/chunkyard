@@ -160,8 +160,7 @@ namespace Chunkyard
             }
         }
 
-        public int[] CopySnapshots(
-            IRepository otherRepository)
+        public int[] CopySnapshots(IRepository otherRepository)
         {
             otherRepository.EnsureNotNull(nameof(otherRepository));
 
