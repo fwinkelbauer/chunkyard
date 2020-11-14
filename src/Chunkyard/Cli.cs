@@ -234,7 +234,8 @@ namespace Chunkyard
             bool ensureRepository = true)
         {
             var repository = new PrintingRepository(
-                new FileRepository(repositoryPath));
+                new SqliteRepository(
+                    Path.Combine(repositoryPath, ".chunkyard.sqlite")));
 
             if (ensureRepository
                 && !repository.ListLogPositions().Any())

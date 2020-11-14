@@ -9,6 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Sql\*.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Sql\*.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.35" />
+    <PackageReference Include="dbup-sqlite" Version="4.4.0" />
     <PackageReference Include="commandlineparser" Version="2.7.82" />
   </ItemGroup>
 
