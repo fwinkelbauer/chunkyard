@@ -102,7 +102,7 @@ namespace Chunkyard
             {
                 var contentName = string.IsNullOrEmpty(parent)
                     ? file
-                    : file.Replace(parent, "");
+                    : Path.GetRelativePath(parent, file);
 
                 // Using a content name with backslashes will not create
                 // sub-directories when restoring a file on Linux.
@@ -115,35 +115,32 @@ namespace Chunkyard
             }
         }
 
-        // https://stackoverflow.com/questions/24866683/find-common-parent-path-in-list-of-files-and-directories
+        // https://rosettacode.org/wiki/Find_common_directory_path#C.23
         public static string FindCommonParent(IList<string> files)
         {
-            files.EnsureNotNull(nameof(files));
+            var parent = "";
+            var separatedPaths = files
+                .First(str => str.Length == files.Max(st2 => st2.Length))
+                .Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries)
+                .ToArray();
 
-            if (files.Count == 0)
+            foreach (var pathSegment in separatedPaths)
             {
-                throw new ArgumentException(
-                    "Cannot operate on empty list",
-                    nameof(files));
-            }
-
-            var k = files[0].Length;
-
-            for (int i = 1; i < files.Count; i++)
-            {
-                k = Math.Min(k, files[i].Length);
-
-                for (int j = 0; j < k; j++)
+                if (parent.Length == 0 && files.All(str => str.StartsWith(pathSegment)))
                 {
-                    if (files[i][j] != files[0][j])
-                    {
-                        k = j;
-                        break;
-                    }
+                    parent = pathSegment;
+                }
+                else if (files.All(str => str.StartsWith(parent + Path.DirectorySeparatorChar + pathSegment)))
+                {
+                    parent += Path.DirectorySeparatorChar + pathSegment;
+                }
+                else
+                {
+                    break;
                 }
             }
 
-            return files[0].Substring(0, k);
+            return parent;
         }
     }
 }
