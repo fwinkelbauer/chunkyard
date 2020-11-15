@@ -57,16 +57,13 @@ namespace Chunkyard
                 AesGcmCrypto.GenerateNonce(),
                 out _);
 
-            var currentLogPosition = _contentStore.CurrentLogPosition;
-            var newLogPosition = currentLogPosition.HasValue
-                ? currentLogPosition.Value + 1
+            var newLogPosition = _contentStore.CurrentLogPosition.HasValue
+                ? _contentStore.CurrentLogPosition.Value + 1
                 : 0;
 
-            currentLogPosition = _contentStore.AppendToLog(
+            return _contentStore.AppendToLog(
                 newLogPosition,
                 snapshotContentReference);
-
-            return currentLogPosition.Value;
         }
 
         public bool CheckSnapshotExists(
