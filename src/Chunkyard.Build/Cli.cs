@@ -12,11 +12,9 @@ namespace Chunkyard.Build
     {
         private const string ArtifactsDirectory = "artifacts";
         private const string Solution = "src/Chunkyard.sln";
+        private const string Changelog = "CHANGELOG.md";
 
-        private static readonly string Version = Regex.Match(
-            File.ReadAllText("CHANGELOG.md"),
-            @"##\s+(\d+\.\d+\.\d+)")
-            .Groups[1].Value;
+        private static readonly string Version = FetchVersion();
 
         public static void Clean(DotnetOptions o)
         {
@@ -134,6 +132,17 @@ namespace Chunkyard.Build
                 throw new ExecuteException(
                     $"Exit code of {fileName} was {process.ExitCode}");
             }
+        }
+
+        private static string FetchVersion()
+        {
+            var match = Regex.Match(
+                File.ReadAllText(Changelog),
+                @"##\s+(\d+\.\d+\.\d+)");
+
+            return match.Groups.Count > 1
+                ? match.Groups[1].Value
+                : "0.0.0";
         }
     }
 }
