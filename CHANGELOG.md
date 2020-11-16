@@ -7,13 +7,17 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+
+## 3.0.0 - 2020-11-16
+
 ### Changed
 
-- To target framework to .NET 5 and reduced the binary file size
+- The target framework to .NET 5 and reduced the binary file size
 - The storage format by
   - removing the schema information from a snapshot
   - removing the ID from a log reference
   - modifying all content names around a common parent path
+  - adding a unique identifier to a repository
 
 ### Fixed
 
