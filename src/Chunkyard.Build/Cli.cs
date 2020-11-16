@@ -103,7 +103,7 @@ namespace Chunkyard.Build
         private static void Exec(
             string fileName,
             string[] arguments,
-            IEnumerable<int> validExitCodes)
+            int[] validExitCodes)
         {
             var startInfo = new ProcessStartInfo(
                 fileName,
@@ -116,7 +116,7 @@ namespace Chunkyard.Build
 
             if (process == null)
             {
-                throw new InvalidOperationException(
+                throw new ExecuteException(
                     $"Could not start process '{fileName}'");
             }
 

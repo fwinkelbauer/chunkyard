@@ -23,20 +23,17 @@ namespace Chunkyard.Build
 
         private static void ProcessArguments(string[] args)
         {
-            Parser.Default.ParseArguments(args, LoadOptions())
+            var optionTypes = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.GetCustomAttribute<VerbAttribute>() != null)
+                .ToArray();
+
+            Parser.Default.ParseArguments(args, optionTypes)
                 .WithParsed<CleanOptions>(o => Cli.Clean(o))
                 .WithParsed<BuildOptions>(o => Cli.Build(o))
                 .WithParsed<PublishOptions>(o => Cli.Publish(o))
                 .WithParsed<ReleaseOptions>(_ => Cli.Release())
                 .WithParsed<FmtOptions>(_ => Cli.Fmt())
                 .WithNotParsed(_ => Environment.ExitCode = 1);
-        }
-
-        private static Type[] LoadOptions()
-        {
-            return Assembly.GetExecutingAssembly().GetTypes()
-                .Where(t => t.GetCustomAttribute<VerbAttribute>() != null)
-                .ToArray();
         }
     }
 }

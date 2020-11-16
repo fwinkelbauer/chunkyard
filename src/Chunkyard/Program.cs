@@ -23,7 +23,11 @@ namespace Chunkyard
 
         private static void ProcessArguments(string[] args)
         {
-            Parser.Default.ParseArguments(args, LoadOptions())
+            var optionTypes = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.GetCustomAttribute<VerbAttribute>() != null)
+                .ToArray();
+
+            Parser.Default.ParseArguments(args, optionTypes)
                 .WithParsed<PreviewOptions>(o => Cli.PreviewFiles(o))
                 .WithParsed<RestoreOptions>(o => Cli.RestoreSnapshot(o))
                 .WithParsed<CreateOptions>(o => Cli.CreateSnapshot(o))
@@ -35,13 +39,6 @@ namespace Chunkyard
                 .WithParsed<GarbageCollectOptions>(o => Cli.GarbageCollect(o))
                 .WithParsed<CopyOptions>(o => Cli.CopySnapshots(o))
                 .WithNotParsed(_ => Environment.ExitCode = 1);
-        }
-
-        private static Type[] LoadOptions()
-        {
-            return Assembly.GetExecutingAssembly().GetTypes()
-                .Where(t => t.GetCustomAttribute<VerbAttribute>() != null)
-                .ToArray();
         }
     }
 }
