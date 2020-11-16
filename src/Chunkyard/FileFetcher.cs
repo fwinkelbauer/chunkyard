@@ -21,6 +21,7 @@ namespace Chunkyard
             return FindEnumerate(
                 files,
                 excludePatterns.ToArray())
+                .Distinct()
                 .ToArray();
         }
 
