@@ -87,6 +87,11 @@ namespace Chunkyard.Build
                 Dotnet(
                     $"format {Solution}",
                     "--check");
+
+                Dotnet(
+                    $"outdated {Solution}",
+                    "--fail-on-updates",
+                    "--exclude xunit.runner.visualstudio");
             });
         }
 
@@ -95,6 +100,17 @@ namespace Chunkyard.Build
             Once(nameof(Fmt), () =>
             {
                 Dotnet($"format {Solution}");
+            });
+        }
+
+        public static void Upgrade()
+        {
+            Once(nameof(Upgrade), () =>
+            {
+                Dotnet(
+                    $"outdated {Solution}",
+                    "--upgrade",
+                    "--exclude xunit.runner.visualstudio");
             });
         }
 

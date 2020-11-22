@@ -36,14 +36,14 @@ unreferenced files can be deleted using the `chunkyard gc` command.
 
 ## Build
 
-Run `./csake build` to build the solution.
-
-Install the dotnet format tool to use the `fmt` command:
+Install these dotnet global tools:
 
 ``` shell
 dotnet tool install -g dotnet-format
-./csake fmt
+dotnet tool install -g dotnet-outdated-tool
 ```
+
+Run `./csake build` to build the solution.
 
 ## Publish
 

@@ -34,6 +34,7 @@ namespace Chunkyard.Build
                 .WithParsed<ReleaseOptions>(_ => Cli.Release())
                 .WithParsed<LintOptions>(_ => Cli.Lint())
                 .WithParsed<FmtOptions>(_ => Cli.Fmt())
+                .WithParsed<UpgradeOptions>(_ => Cli.Upgrade())
                 .WithNotParsed(_ => Environment.ExitCode = 1);
         }
     }
