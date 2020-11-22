@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,77 +15,100 @@ namespace Chunkyard.Build
         private const string Changelog = "CHANGELOG.md";
 
         private static readonly string Version = FetchVersion();
+        private static readonly List<string> Executed = new List<string>();
 
         public static void Clean(DotnetOptions o)
         {
-            Dotnet(
-                $"clean {Solution}",
-                $"-c {o.Configuration}");
-
-            var dirInfo = new DirectoryInfo(ArtifactsDirectory);
-
-            if (!dirInfo.Exists)
+            Once(nameof(Clean), () =>
             {
-                return;
-            }
+                Dotnet(
+                    $"clean {Solution}",
+                    $"-c {o.Configuration}");
 
-            foreach (var file in dirInfo.GetFiles())
-            {
-                file.Delete();
-            }
+                var dirInfo = new DirectoryInfo(ArtifactsDirectory);
 
-            foreach (var subDirInfo in dirInfo.GetDirectories())
-            {
-                subDirInfo.Delete(true);
-            }
+                if (!dirInfo.Exists)
+                {
+                    return;
+                }
+
+                foreach (var file in dirInfo.GetFiles())
+                {
+                    file.Delete();
+                }
+
+                foreach (var subDirInfo in dirInfo.GetDirectories())
+                {
+                    subDirInfo.Delete(true);
+
+                }
+            });
         }
 
         public static void Build(DotnetOptions o)
         {
-            Dotnet(
-                $"build {Solution}",
-                $"-c {o.Configuration}",
-                "-warnaserror");
+            Once(nameof(Build), () =>
+            {
+                Dotnet(
+                    $"build {Solution}",
+                    $"-c {o.Configuration}",
+                    "-warnaserror");
 
-            Dotnet(
-                $"test {Solution}",
-                "--no-build",
-                $"-c {o.Configuration}");
+                Dotnet(
+                    $"test {Solution}",
+                    "--no-build",
+                    $"-c {o.Configuration}");
+            });
         }
 
         public static void Publish(DotnetOptions o)
         {
+            Lint();
             Clean(o);
-
-            Dotnet(
-                $"format {Solution}",
-                "--check");
-
             Build(o);
 
-            Dotnet(
-                "publish src/Chunkyard",
-                $"-c {o.Configuration}",
-                $"-r {o.Runtime}",
-                $"-o {ArtifactsDirectory}",
-                $"-p:Version={Version}",
-                "-p:PublishSingleFile=true",
-                "-p:PublishTrimmed=true");
+            Once(nameof(Publish), () =>
+            {
+                Dotnet(
+                    "publish src/Chunkyard",
+                    $"-c {o.Configuration}",
+                    $"-r {o.Runtime}",
+                    $"-o {ArtifactsDirectory}",
+                    $"-p:Version={Version}",
+                    "-p:PublishSingleFile=true",
+                    "-p:PublishTrimmed=true");
+            });
+        }
+
+        public static void Lint()
+        {
+            Once(nameof(Lint), () =>
+            {
+                Dotnet(
+                    $"format {Solution}",
+                    "--check");
+            });
         }
 
         public static void Fmt()
         {
-            Dotnet($"format {Solution}");
+            Once(nameof(Fmt), () =>
+            {
+                Dotnet($"format {Solution}");
+            });
         }
 
         public static void Release()
         {
-            var message = $"Prepare Chunkyard release v{Version}";
-            var tag = $"v{Version}";
+            Once(nameof(Release), () =>
+            {
+                var message = $"Prepare Chunkyard release v{Version}";
+                var tag = $"v{Version}";
 
-            Git("add -A");
-            Git($"commit -m \"{message}\"");
-            Git($"tag -a \"{tag}\" -m \"{message}\"");
+                Git("add -A");
+                Git($"commit -m \"{message}\"");
+                Git($"tag -a \"{tag}\" -m \"{message}\"");
+            });
         }
 
         private static void Dotnet(params string[] arguments)
@@ -142,6 +166,18 @@ namespace Chunkyard.Build
             return match.Groups.Count > 1
                 ? match.Groups[1].Value
                 : "0.0.0";
+        }
+
+        private static void Once(string name, Action action)
+        {
+            if (Executed.Contains(name))
+            {
+                return;
+            }
+
+            action();
+
+            Executed.Add(name);
         }
     }
 }
