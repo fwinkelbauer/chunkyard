@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The storage format by removing the unique repository identifier
 
 ## 3.0.0 - 2020-11-16
 

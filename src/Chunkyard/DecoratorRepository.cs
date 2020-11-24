@@ -15,8 +15,6 @@ namespace Chunkyard
 
         public virtual Uri RepositoryUri => Repository.RepositoryUri;
 
-        public Guid RepositoryId => Repository.RepositoryId;
-
         protected IRepository Repository { get; }
 
         public virtual bool StoreValue(Uri contentUri, byte[] value)

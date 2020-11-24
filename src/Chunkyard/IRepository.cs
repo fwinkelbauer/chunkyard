@@ -10,8 +10,6 @@ namespace Chunkyard
     {
         Uri RepositoryUri { get; }
 
-        Guid RepositoryId { get; }
-
         bool StoreValue(Uri contentUri, byte[] value);
 
         byte[] RetrieveValue(Uri contentUri);

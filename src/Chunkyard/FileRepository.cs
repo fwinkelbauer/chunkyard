@@ -19,13 +19,9 @@ namespace Chunkyard
             _refLogDirectory = Path.Combine(directory, "reflog");
 
             RepositoryUri = new Uri(Path.GetFullPath(directory));
-            RepositoryId = LoadRepositoryId(
-                Path.Combine(directory, "guid"));
         }
 
         public Uri RepositoryUri { get; }
-
-        public Guid RepositoryId { get; }
 
         public bool StoreValue(Uri contentUri, byte[] value)
         {
@@ -189,23 +185,6 @@ namespace Chunkyard
             return Path.Combine(
                 directory,
                 hash);
-        }
-
-        private static Guid LoadRepositoryId(string filePath)
-        {
-            DirectoryUtil.CreateParent(filePath);
-
-            if (File.Exists(filePath))
-            {
-                return Guid.Parse(
-                    File.ReadAllText(filePath));
-            }
-
-            var repositoryId = Guid.NewGuid();
-
-            File.WriteAllText(filePath, repositoryId.ToString());
-
-            return repositoryId;
         }
     }
 }

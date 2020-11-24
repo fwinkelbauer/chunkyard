@@ -161,16 +161,19 @@ namespace Chunkyard
         {
             otherRepository.EnsureNotNull(nameof(otherRepository));
 
-            if (!_repository.RepositoryId.Equals(otherRepository.RepositoryId))
-            {
-                throw new ChunkyardException(
-                    "Cannot operate on repositories with different IDs");
-            }
-
             var thisLogs = _repository.ListLogPositions();
             var otherLogs = otherRepository.ListLogPositions();
+            var intersection = thisLogs.Intersect(otherLogs)
+                .ToArray();
 
-            foreach (var logPosition in thisLogs.Intersect(otherLogs))
+            if (intersection.Length == 0
+                && otherLogs.Length > 0)
+            {
+                throw new ChunkyardException(
+                    "Cannot operate on repositories without overlapping log positions");
+            }
+
+            foreach (var logPosition in intersection)
             {
                 var bytes = _repository.RetrieveFromLog(logPosition);
                 var otherBytes = otherRepository.RetrieveFromLog(logPosition);

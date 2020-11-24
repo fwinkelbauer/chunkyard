@@ -231,21 +231,39 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void CopySnapshots_Throws_If_RepositoryIds_Dont_Match()
+        public static void CopySnapshots_Throws_If_No_Overlap()
         {
-            var snapshotStore = CreateSnapshotStore();
-            var otherRepository = new MemoryRepository();
+            var repository1 = new MemoryRepository();
+            var snapshotStore1 = CreateSnapshotStore(repository1);
+            var repository2 = new MemoryRepository();
+            var snapshotStore2 = CreateSnapshotStore(repository2);
+
+            var firstLogPosition = snapshotStore1.AppendSnapshot(
+                new[] { "some content" },
+                OpenStream(),
+                DateTime.Now);
+
+            snapshotStore1.AppendSnapshot(
+                new[] { "some content" },
+                OpenStream(),
+                DateTime.Now);
+
+            repository1.RemoveFromLog(firstLogPosition);
+
+            snapshotStore2.AppendSnapshot(
+                new[] { "some other content" },
+                OpenStream(),
+                DateTime.Now);
 
             Assert.Throws<ChunkyardException>(
-                () => snapshotStore.CopySnapshots(otherRepository));
+                () => snapshotStore1.CopySnapshots(repository2));
         }
 
         [Fact]
         public static void CopySnapshots_Throws_If_Snapshots_Dont_Match()
         {
-            var repository1 = new MemoryRepository();
-            var snapshotStore1 = CreateSnapshotStore(repository1);
-            var repository2 = new MemoryRepository(repository1.RepositoryId);
+            var snapshotStore1 = CreateSnapshotStore();
+            var repository2 = new MemoryRepository();
             var snapshotStore2 = CreateSnapshotStore(repository2);
 
             snapshotStore1.AppendSnapshot(
@@ -267,8 +285,7 @@ namespace Chunkyard.Tests
         {
             var repository = new MemoryRepository();
             var snapshotStore = CreateSnapshotStore(repository);
-            var otherRepository = new MemoryRepository(
-                repository.RepositoryId);
+            var otherRepository = new MemoryRepository();
 
             snapshotStore.AppendSnapshot(
                 new[] { "some content" },
