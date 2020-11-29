@@ -9,7 +9,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ### Changed
 
-- The storage format by removing the unique repository identifier
+- The storage format by
+  - removing the unique repository identifier
+  - adding cryptographic details to every piece of content to enable disaster
+    recovery
 - The `copy` command to only work if both repositories contain at least one
   overlapping snapshot
 

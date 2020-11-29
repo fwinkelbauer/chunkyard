@@ -8,10 +8,10 @@ namespace Chunkyard
     public static class AesGcmCrypto
     {
         public const int Iterations = 1000;
+        public const int NonceBytes = 12;
+        public const int TagBytes = 16;
 
-        private const int TagBytes = 16;
         private const int KeyBytes = 32;
-        private const int NonceBytes = 12;
         private const int SaltBytes = 12;
 
         public static (byte[] Ciphertext, byte[] Tag) Encrypt(

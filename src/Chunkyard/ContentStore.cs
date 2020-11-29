@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace Chunkyard
@@ -68,8 +69,15 @@ namespace Chunkyard
 
             foreach (var chunk in contentReference.Chunks)
             {
+                // Strip away the cryptographic details which we added when
+                // storing the value
+                var value = Repository.RetrieveValue(chunk.ContentUri)
+                    .Skip(AesGcmCrypto.NonceBytes)
+                    .SkipLast(AesGcmCrypto.TagBytes)
+                    .ToArray();
+
                 var decryptedData = AesGcmCrypto.Decrypt(
-                    Repository.RetrieveValue(chunk.ContentUri),
+                    value,
                     chunk.Tag,
                     _key,
                     contentReference.Nonce);
@@ -167,9 +175,17 @@ namespace Chunkyard
                     _key,
                     nonce);
 
+                // We add all cryptographic details needed to decrypt a piece of
+                // content so that we can recover it even if a snapshot gets
+                // corrupted.
+                var value = nonce
+                    .Concat(encryptedData)
+                    .Concat(tag)
+                    .ToArray();
+
                 var contentUri = Repository.StoreValue(
                     _hashAlgorithmName,
-                    encryptedData,
+                    value,
                     out var newValue);
 
                 newChunks |= newValue;
