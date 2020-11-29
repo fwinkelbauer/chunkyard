@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 ### Changed
 
 - The storage format by removing the unique repository identifier
+- The `copy` command to only work if both repositories contain at least one
+  overlapping snapshot
 
 ## 3.0.0 - 2020-11-16
 
