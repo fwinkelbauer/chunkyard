@@ -25,7 +25,7 @@ namespace Chunkyard
             string contentName,
             byte[] nonce,
             ContentType type,
-            out bool newContent)
+            out bool isNewContent)
         {
             if (inputStream is not FileStream fileStream)
             {
@@ -34,14 +34,14 @@ namespace Chunkyard
                     contentName,
                     nonce,
                     type,
-                    out newContent);
+                    out isNewContent);
             }
 
             var storedReference = RetrieveFromCache(fileStream, contentName);
 
             if (storedReference != null)
             {
-                newContent = false;
+                isNewContent = false;
                 return storedReference;
             }
 
@@ -50,7 +50,7 @@ namespace Chunkyard
                 contentName,
                 nonce,
                 type,
-                out newContent);
+                out isNewContent);
 
             StoreInCache(
                 fileStream,

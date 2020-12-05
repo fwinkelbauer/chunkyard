@@ -264,17 +264,17 @@ namespace Chunkyard
                 string contentName,
                 byte[] nonce,
                 ContentType type,
-                out bool newContent)
+                out bool isNewContent)
             {
                 var contentReference = base.StoreContent(
                     inputStream,
                     contentName,
                     nonce,
                     type,
-                    out newContent);
+                    out isNewContent);
 
                 if (contentReference.Type == ContentType.Blob
-                    && newContent)
+                    && isNewContent)
                 {
                     Console.WriteLine($"Stored content: {contentName}");
                 }

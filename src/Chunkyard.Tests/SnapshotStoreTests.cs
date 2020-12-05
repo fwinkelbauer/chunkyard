@@ -233,70 +233,74 @@ namespace Chunkyard.Tests
         [Fact]
         public static void CopySnapshots_Throws_If_No_Overlap()
         {
-            var repository1 = new MemoryRepository();
-            var snapshotStore1 = CreateSnapshotStore(repository1);
-            var repository2 = new MemoryRepository();
-            var snapshotStore2 = CreateSnapshotStore(repository2);
+            var sourceRepository = new MemoryRepository();
+            var sourceSnapshotStore = CreateSnapshotStore(sourceRepository);
 
-            var firstLogPosition = snapshotStore1.AppendSnapshot(
+            var destinationRepository = new MemoryRepository();
+            var destinationSnapshotStore = CreateSnapshotStore(
+                destinationRepository);
+
+            var firstLogPosition = sourceSnapshotStore.AppendSnapshot(
                 new[] { "some content" },
                 OpenStream(),
                 DateTime.Now);
 
-            snapshotStore1.AppendSnapshot(
+            sourceSnapshotStore.AppendSnapshot(
                 new[] { "some content" },
                 OpenStream(),
                 DateTime.Now);
 
-            repository1.RemoveFromLog(firstLogPosition);
+            sourceRepository.RemoveFromLog(firstLogPosition);
 
-            snapshotStore2.AppendSnapshot(
+            destinationSnapshotStore.AppendSnapshot(
                 new[] { "some other content" },
                 OpenStream(),
                 DateTime.Now);
 
             Assert.Throws<ChunkyardException>(
-                () => snapshotStore1.CopySnapshots(repository2));
+                () => sourceSnapshotStore.CopySnapshots(destinationRepository));
         }
 
         [Fact]
         public static void CopySnapshots_Throws_If_Snapshots_Dont_Match()
         {
-            var snapshotStore1 = CreateSnapshotStore();
-            var repository2 = new MemoryRepository();
-            var snapshotStore2 = CreateSnapshotStore(repository2);
+            var sourceSnapshotStore = CreateSnapshotStore();
 
-            snapshotStore1.AppendSnapshot(
+            var destinationRepository = new MemoryRepository();
+            var destinationSnapshotStore = CreateSnapshotStore(
+                destinationRepository);
+
+            sourceSnapshotStore.AppendSnapshot(
                 new[] { "some content" },
                 OpenStream(),
                 DateTime.Now);
 
-            snapshotStore2.AppendSnapshot(
+            destinationSnapshotStore.AppendSnapshot(
                 new[] { "some other content" },
                 OpenStream(),
                 DateTime.Now);
 
             Assert.Throws<ChunkyardException>(
-                () => snapshotStore1.CopySnapshots(repository2));
+                () => sourceSnapshotStore.CopySnapshots(destinationRepository));
         }
 
         [Fact]
         public static void CopySnapshots_Copies_Missing_Data()
         {
-            var repository = new MemoryRepository();
-            var snapshotStore = CreateSnapshotStore(repository);
-            var otherRepository = new MemoryRepository();
+            var sourceRepository = new MemoryRepository();
+            var sourceSnapshotStore = CreateSnapshotStore(sourceRepository);
+            var destinationRepository = new MemoryRepository();
 
-            snapshotStore.AppendSnapshot(
+            sourceSnapshotStore.AppendSnapshot(
                 new[] { "some content" },
                 OpenStream(),
                 DateTime.Now);
 
-            snapshotStore.CopySnapshots(otherRepository);
+            sourceSnapshotStore.CopySnapshots(destinationRepository);
 
             Assert.Equal(
-                repository.ListUris(),
-                otherRepository.ListUris());
+                sourceRepository.ListUris(),
+                destinationRepository.ListUris());
         }
 
         private static Func<string, Stream> OpenStream(

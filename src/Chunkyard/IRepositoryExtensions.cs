@@ -13,7 +13,7 @@ namespace Chunkyard
             this IRepository repository,
             HashAlgorithmName hashAlgorithmName,
             byte[] value,
-            out bool newValue)
+            out bool isNewValue)
         {
             repository.EnsureNotNull(nameof(repository));
 
@@ -21,7 +21,7 @@ namespace Chunkyard
                 hashAlgorithmName,
                 value);
 
-            newValue = repository.StoreValue(contentUri, value);
+            isNewValue = repository.StoreValue(contentUri, value);
 
             return contentUri;
         }

@@ -21,7 +21,7 @@ namespace Chunkyard
             string contentName,
             byte[] nonce,
             ContentType type,
-            out bool newContent);
+            out bool isNewContent);
 
         bool ContentExists(ContentReference contentReference);
 

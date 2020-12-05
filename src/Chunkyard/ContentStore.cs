@@ -91,12 +91,12 @@ namespace Chunkyard
             string contentName,
             byte[] nonce,
             ContentType type,
-            out bool newContent)
+            out bool isNewContent)
         {
             return new ContentReference(
                 contentName,
                 nonce,
-                WriteChunks(nonce, inputStream, out newContent),
+                WriteChunks(nonce, inputStream, out isNewContent),
                 type);
         }
 
@@ -162,11 +162,11 @@ namespace Chunkyard
         private IImmutableList<ChunkReference> WriteChunks(
             byte[] nonce,
             Stream stream,
-            out bool newChunks)
+            out bool hasNewChunks)
         {
             var chunkedDataItems = _fastCdc.SplitIntoChunks(stream);
             var chunkReferences = ImmutableArray.CreateBuilder<ChunkReference>();
-            newChunks = false;
+            hasNewChunks = false;
 
             foreach (var chunkedData in chunkedDataItems)
             {
@@ -186,9 +186,9 @@ namespace Chunkyard
                 var contentUri = Repository.StoreValue(
                     _hashAlgorithmName,
                     value,
-                    out var newValue);
+                    out var isNewValue);
 
-                newChunks |= newValue;
+                hasNewChunks |= isNewValue;
                 chunkReferences.Add(new ChunkReference(contentUri, tag));
             }
 

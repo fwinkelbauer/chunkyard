@@ -17,17 +17,17 @@ namespace Chunkyard.Tests
             var actualContentUri1 = repository.StoreValue(
                 hashAlgorithmName,
                 content,
-                out var newValue1);
+                out var isNewValue1);
 
             var actualContentUri2 = repository.StoreValue(
                 hashAlgorithmName,
                 content,
-                out var newValue2);
+                out var isNewValue2);
 
             Assert.Equal(expectedContentUri, actualContentUri1);
             Assert.Equal(expectedContentUri, actualContentUri2);
-            Assert.True(newValue1);
-            Assert.False(newValue2);
+            Assert.True(isNewValue1);
+            Assert.False(isNewValue2);
         }
 
         [Fact]

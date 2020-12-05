@@ -31,14 +31,14 @@ namespace Chunkyard
             string contentName,
             byte[] nonce,
             ContentType type,
-            out bool newContent)
+            out bool isNewContent)
         {
             return Store.StoreContent(
                 inputStream,
                 contentName,
                 nonce,
                 type,
-                out newContent);
+                out isNewContent);
         }
 
         public virtual bool ContentExists(ContentReference contentReference)

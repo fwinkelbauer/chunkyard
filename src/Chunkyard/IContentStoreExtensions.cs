@@ -28,7 +28,7 @@ namespace Chunkyard
             Stream inputStream,
             string contentName,
             byte[] nonce,
-            out bool newContent)
+            out bool isNewContent)
         {
             store.EnsureNotNull(nameof(store));
 
@@ -37,7 +37,7 @@ namespace Chunkyard
                 contentName,
                 nonce,
                 ContentType.Blob,
-                out newContent);
+                out isNewContent);
         }
 
         public static ContentReference StoreDocument<T>(
@@ -45,7 +45,7 @@ namespace Chunkyard
             T value,
             string contentName,
             byte[] nonce,
-            out bool newContent)
+            out bool isNewContent)
             where T : notnull
         {
             store.EnsureNotNull(nameof(store));
@@ -58,7 +58,7 @@ namespace Chunkyard
                 contentName,
                 nonce,
                 ContentType.Document,
-                out newContent);
+                out isNewContent);
         }
     }
 }

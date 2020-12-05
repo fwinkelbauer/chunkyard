@@ -14,14 +14,15 @@ namespace Chunkyard.Tests
             var contentStore = CreateContentStore();
 
             var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-            var contentName = "some data";
             using var inputStream = new MemoryStream(expectedBytes);
+
+            var contentName = "some data";
 
             var contentReference = contentStore.StoreBlob(
                 inputStream,
                 contentName,
                 AesGcmCrypto.GenerateNonce(),
-                out var newContent);
+                out var isNewContent);
 
             using var outputStream = new MemoryStream();
             contentStore.RetrieveContent(
@@ -30,7 +31,7 @@ namespace Chunkyard.Tests
 
             var actualBytes = outputStream.ToArray();
 
-            Assert.True(newContent);
+            Assert.True(isNewContent);
             Assert.Equal(expectedBytes, actualBytes);
             Assert.Equal(contentName, contentReference.Name);
             Assert.True(contentStore.ContentExists(contentReference));
@@ -43,25 +44,26 @@ namespace Chunkyard.Tests
             var contentStore = CreateContentStore();
 
             var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+            using var inputStream1 = new MemoryStream(bytes);
+            using var inputStream2 = new MemoryStream(bytes);
+
             var contentName = "some data";
             var nonce = AesGcmCrypto.GenerateNonce();
 
-            using var firstStream = new MemoryStream(bytes);
-            var firstResult = contentStore.StoreBlob(
-                firstStream,
+            contentStore.StoreBlob(
+                inputStream1,
                 contentName,
                 nonce,
-                out var firstNewContent);
+                out var isNewContent1);
 
-            using var secondStream = new MemoryStream(bytes);
-            var secondResult = contentStore.StoreBlob(
-                secondStream,
+            contentStore.StoreBlob(
+                inputStream2,
                 contentName,
                 nonce,
-                out var secondNewContent);
+                out var isNewContent2);
 
-            Assert.True(firstNewContent);
-            Assert.False(secondNewContent);
+            Assert.True(isNewContent1);
+            Assert.False(isNewContent2);
         }
 
         [Fact]
@@ -70,24 +72,25 @@ namespace Chunkyard.Tests
             var contentStore = CreateContentStore();
 
             var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+            using var inputStream1 = new MemoryStream(bytes);
+            using var inputStream2 = new MemoryStream(bytes);
+
             var contentName = "some data";
 
-            using var firstStream = new MemoryStream(bytes);
-            var firstResult = contentStore.StoreBlob(
-                firstStream,
+            contentStore.StoreBlob(
+                inputStream1,
                 contentName,
                 AesGcmCrypto.GenerateNonce(),
-                out var firstNewContent);
+                out var isNewContent1);
 
-            using var secondStream = new MemoryStream(bytes);
-            var secondResult = contentStore.StoreBlob(
-                secondStream,
+            contentStore.StoreBlob(
+                inputStream2,
                 contentName,
                 AesGcmCrypto.GenerateNonce(),
-                out var secondNewContent);
+                out var isNewContent2);
 
-            Assert.True(firstNewContent);
-            Assert.True(secondNewContent);
+            Assert.True(isNewContent1);
+            Assert.True(isNewContent2);
         }
 
         [Fact]
