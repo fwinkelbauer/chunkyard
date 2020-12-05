@@ -13,10 +13,10 @@ namespace Chunkyard.Options
             LatestCount = latestCount;
         }
 
-        [Option('r', "repository", Required = true, HelpText = "The repository")]
+        [Option('r', "repository", Required = true, HelpText = "The repository path")]
         public string Repository { get; }
 
-        [Option('l', "latest", Required = true, HelpText = "The count of latest log positions to keep")]
+        [Option("latest", Required = true, HelpText = "The count of the latest snapshots to keep")]
         public int LatestCount { get; }
     }
 }

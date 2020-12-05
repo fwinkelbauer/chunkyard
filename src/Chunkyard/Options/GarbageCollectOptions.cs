@@ -10,7 +10,7 @@ namespace Chunkyard.Options
             Repository = repository;
         }
 
-        [Option('r', "repository", Required = true, HelpText = "The repository")]
+        [Option('r', "repository", Required = true, HelpText = "The repository path")]
         public string Repository { get; }
     }
 }

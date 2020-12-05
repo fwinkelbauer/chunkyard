@@ -17,7 +17,7 @@ namespace Chunkyard.Options
         [Option('f', "files", Required = true, HelpText = "The files and directories to include")]
         public IEnumerable<string> Files { get; }
 
-        [Option('e', "exclude", Required = false, HelpText = "The exclude fuzzy patterns")]
+        [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude")]
         public IEnumerable<string> ExcludePatterns { get; }
     }
 }

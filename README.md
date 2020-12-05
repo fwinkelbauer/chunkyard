@@ -55,11 +55,18 @@ Run `./csake build` to build the solution.
 
 ## Usage
 
-Type `chunkyard --help` to learn more.
+Type `chunkyard --help` to see a list of all available commands. You can add
+`--help` to any command to get more information on its usage.
 
 Example:
 
 ``` shell
+# List all available commands
+chunkyard --help
+
+# Learn more about the preview command
+chunkyard preview --help
+
 # See which files chunkyard would backup
 chunkyard preview -f "~/Music" -e "Desktop\.ini" "thumbs\.db"
 
@@ -92,7 +99,7 @@ export CHUNKYARD_PASSWORD="my secret password"
 chunkyard create -r "$repo" -f ${directories[*]} --cached
 
 # Keep the latest four backups
-chunkyard keep -r "$repo" -l 4
+chunkyard keep -r "$repo" --latest 4
 chunkyard gc -r "$repo"
 ```
 

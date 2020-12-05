@@ -13,10 +13,10 @@ namespace Chunkyard.Options
             LogPosition = logPosition;
         }
 
-        [Option('r', "repository", Required = true, HelpText = "The repository")]
+        [Option('r', "repository", Required = true, HelpText = "The repository path")]
         public string Repository { get; }
 
-        [Option('l', "log-position", Required = true, HelpText = "The log position")]
+        [Option('s', "snapshot", Required = true, HelpText = "The snapshot ID")]
         public int LogPosition { get; }
     }
 }

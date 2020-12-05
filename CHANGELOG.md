@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The name of the argument `log-position` to `snapshot` for all CLI verbs
+
 ## 4.0.0 - 2020-11-29
 
 ### Changed

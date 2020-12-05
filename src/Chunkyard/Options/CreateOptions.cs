@@ -8,34 +8,33 @@ namespace Chunkyard.Options
     {
         public CreateOptions(
             string repository,
-            bool cached,
             IEnumerable<string> files,
             IEnumerable<string> excludePatterns,
+            bool cached,
             int min,
             int avg,
             int max)
         {
             Repository = repository;
-            Cached = cached;
             Files = files;
             ExcludePatterns = excludePatterns;
-
+            Cached = cached;
             Min = min;
             Avg = avg;
             Max = max;
         }
 
-        [Option('r', "repository", Required = true, HelpText = "The repository")]
+        [Option('r', "repository", Required = true, HelpText = "The repository path")]
         public string Repository { get; }
-
-        [Option('c', "cached", Required = false, HelpText = "Use a file cache to improve performance", Default = false)]
-        public bool Cached { get; }
 
         [Option('f', "files", Required = true, HelpText = "The files and directories to include")]
         public IEnumerable<string> Files { get; }
 
-        [Option('e', "exclude", Required = false, HelpText = "The exclude fuzzy patterns")]
+        [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude")]
         public IEnumerable<string> ExcludePatterns { get; }
+
+        [Option("cached", Required = false, HelpText = "Use a file cache to improve performance", Default = false)]
+        public bool Cached { get; }
 
         [Option("min", Required = false, HelpText = "The minimum chunk size", Default = FastCdc.DefaultMin)]
         public int Min { get; }

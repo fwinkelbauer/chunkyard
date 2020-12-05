@@ -17,16 +17,16 @@ namespace Chunkyard.Options
             Shallow = shallow;
         }
 
-        [Option('r', "repository", Required = true, HelpText = "The repository")]
+        [Option('r', "repository", Required = true, HelpText = "The repository path")]
         public string Repository { get; }
 
-        [Option('l', "log-position", Required = false, HelpText = "The log position", Default = Cli.LatestLogPosition)]
+        [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = Cli.LatestLogPosition)]
         public int LogPosition { get; }
 
-        [Option('i', "include", Required = false, HelpText = "The include fuzzy pattern")]
+        [Option('i', "include", Required = false, HelpText = "The fuzzy pattern for files to include")]
         public string IncludeFuzzy { get; }
 
-        [Option('s', "shallow", Required = false, HelpText = "Do not verify chunk hashes", Default = false)]
+        [Option("shallow", Required = false, HelpText = "Check if chunks exist without further validation", Default = false)]
         public bool Shallow { get; }
     }
 }
