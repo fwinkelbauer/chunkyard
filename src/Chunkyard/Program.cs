@@ -26,6 +26,8 @@ namespace Chunkyard
 
         private static void WriteError(string message)
         {
+            Environment.ExitCode = 1;
+
             try
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -35,8 +37,6 @@ namespace Chunkyard
             {
                 Console.ResetColor();
             }
-
-            Environment.ExitCode = 1;
         }
 
         private static void ProcessArguments(string[] args)

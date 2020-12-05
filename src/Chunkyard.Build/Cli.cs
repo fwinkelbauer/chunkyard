@@ -40,7 +40,6 @@ namespace Chunkyard.Build
                 foreach (var subDirInfo in dirInfo.GetDirectories())
                 {
                     subDirInfo.Delete(true);
-
                 }
             });
         }
