@@ -16,9 +16,23 @@ namespace Chunkyard.Build
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error: {e.Message}");
-                Environment.ExitCode = 1;
+                WriteError($"Error: {e.Message}");
             }
+        }
+
+        private static void WriteError(string message)
+        {
+            try
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(message);
+            }
+            finally
+            {
+                Console.ResetColor();
+            }
+
+            Environment.ExitCode = 1;
         }
 
         private static void ProcessArguments(string[] args)

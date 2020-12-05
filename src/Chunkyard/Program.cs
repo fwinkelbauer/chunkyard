@@ -14,11 +14,29 @@ namespace Chunkyard
             {
                 ProcessArguments(args);
             }
+            catch (ChunkyardException e)
+            {
+                WriteError($"Error: {e.Message}");
+            }
             catch (Exception e)
             {
-                Console.WriteLine($"Error: {e.Message}");
-                Environment.ExitCode = 1;
+                WriteError(e.ToString());
             }
+        }
+
+        private static void WriteError(string message)
+        {
+            try
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(message);
+            }
+            finally
+            {
+                Console.ResetColor();
+            }
+
+            Environment.ExitCode = 1;
         }
 
         private static void ProcessArguments(string[] args)

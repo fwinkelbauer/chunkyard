@@ -26,6 +26,12 @@ namespace Chunkyard
         {
             var files = FileFetcher.Find(o.Files, o.ExcludePatterns);
 
+            if (files.Length == 0)
+            {
+                Console.WriteLine("Empty file list. Nothing to do!");
+                return;
+            }
+
             foreach (var file in files)
             {
                 Console.WriteLine(file);
@@ -39,7 +45,7 @@ namespace Chunkyard
 
             if (files.Length == 0)
             {
-                Console.WriteLine("Empty file list");
+                Console.WriteLine("Empty file list. Nothing to do!");
                 return;
             }
 
@@ -165,7 +171,7 @@ namespace Chunkyard
                 var isoDate = snapshot.CreationTime.ToString(
                     "yyyy-MM-dd HH:mm:ss");
 
-                Console.WriteLine($"{logPosition}: {isoDate}");
+                Console.WriteLine($"Snapshot #{logPosition}: {isoDate}");
             }
         }
 
@@ -270,7 +276,7 @@ namespace Chunkyard
                 if (contentReference.Type == ContentType.Blob
                     && newContent)
                 {
-                    Console.WriteLine($"Stored: {contentName}");
+                    Console.WriteLine($"Stored content: {contentName}");
                 }
 
                 return contentReference;
@@ -283,7 +289,7 @@ namespace Chunkyard
 
                 if (!exists)
                 {
-                    Console.WriteLine($"Missing: {contentReference.Name}");
+                    Console.WriteLine($"Missing content: {contentReference.Name}");
                 }
 
                 return exists;
@@ -295,7 +301,7 @@ namespace Chunkyard
 
                 if (!valid)
                 {
-                    Console.WriteLine($"Invalid: {contentReference.Name}");
+                    Console.WriteLine($"Invalid content: {contentReference.Name}");
                 }
 
                 return valid;
@@ -309,7 +315,7 @@ namespace Chunkyard
 
                 if (contentReference.Type == ContentType.Blob)
                 {
-                    Console.WriteLine($"Restored: {contentReference.Name}");
+                    Console.WriteLine($"Restored content: {contentReference.Name}");
                 }
             }
         }
@@ -325,7 +331,7 @@ namespace Chunkyard
             {
                 var logPosition = base.AppendToLog(newLogPosition, value);
 
-                Console.WriteLine($"Created: snapshot #{logPosition}");
+                Console.WriteLine($"Created snapshot: #{logPosition}");
 
                 return logPosition;
             }
@@ -334,14 +340,14 @@ namespace Chunkyard
             {
                 base.RemoveValue(contentUri);
 
-                Console.WriteLine($"Removed: {contentUri}");
+                Console.WriteLine($"Removed snapshot: {contentUri}");
             }
 
             public override void RemoveFromLog(int logPosition)
             {
                 base.RemoveFromLog(logPosition);
 
-                Console.WriteLine($"Removed: snapshot #{logPosition}");
+                Console.WriteLine($"Removed snapshot: #{logPosition}");
             }
         }
     }
