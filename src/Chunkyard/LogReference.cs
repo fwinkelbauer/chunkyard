@@ -28,10 +28,10 @@ namespace Chunkyard
 
         public override bool Equals(object? obj)
         {
-            return obj is LogReference reference
-                && ContentReference.Equals(reference.ContentReference)
-                && Salt.SequenceEqual(reference.Salt)
-                && Iterations == reference.Iterations;
+            return obj is LogReference other
+                && ContentReference.Equals(other.ContentReference)
+                && Salt.SequenceEqual(other.Salt)
+                && Iterations == other.Iterations;
         }
 
         public override int GetHashCode()

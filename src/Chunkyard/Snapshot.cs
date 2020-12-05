@@ -24,9 +24,9 @@ namespace Chunkyard
 
         public override bool Equals(object? obj)
         {
-            return obj is Snapshot snapshot
-                && CreationTime == snapshot.CreationTime
-                && ContentReferences.SequenceEqual(snapshot.ContentReferences);
+            return obj is Snapshot other
+                && CreationTime == other.CreationTime
+                && ContentReferences.SequenceEqual(other.ContentReferences);
         }
 
         public override int GetHashCode()

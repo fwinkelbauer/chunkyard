@@ -23,9 +23,9 @@ namespace Chunkyard
 
         public override bool Equals(object? obj)
         {
-            return obj is ChunkReference reference
-                && ContentUri.Equals(reference.ContentUri)
-                && Tag.SequenceEqual(reference.Tag);
+            return obj is ChunkReference other
+                && ContentUri.Equals(other.ContentUri)
+                && Tag.SequenceEqual(other.Tag);
         }
 
         public override int GetHashCode()

@@ -32,11 +32,11 @@ namespace Chunkyard
 
         public override bool Equals(object? obj)
         {
-            return obj is ContentReference reference
-                && Name == reference.Name
-                && Nonce.SequenceEqual(reference.Nonce)
-                && Chunks.SequenceEqual(reference.Chunks)
-                && Type == reference.Type;
+            return obj is ContentReference other
+                && Name == other.Name
+                && Nonce.SequenceEqual(other.Nonce)
+                && Chunks.SequenceEqual(other.Chunks)
+                && Type == other.Type;
         }
 
         public override int GetHashCode()
