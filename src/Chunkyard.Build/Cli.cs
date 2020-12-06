@@ -62,7 +62,6 @@ namespace Chunkyard.Build
 
         public static void Publish(DotnetOptions o)
         {
-            Lint();
             Clean(o);
             Build(o);
 
@@ -76,21 +75,6 @@ namespace Chunkyard.Build
                     $"-p:Version={Version}",
                     "-p:PublishSingleFile=true",
                     "-p:PublishTrimmed=true");
-            });
-        }
-
-        public static void Lint()
-        {
-            Once(nameof(Lint), () =>
-            {
-                Dotnet(
-                    $"format {Solution}",
-                    "--check");
-
-                Dotnet(
-                    $"outdated {Solution}",
-                    "--fail-on-updates",
-                    "--exclude xunit.runner.visualstudio");
             });
         }
 
