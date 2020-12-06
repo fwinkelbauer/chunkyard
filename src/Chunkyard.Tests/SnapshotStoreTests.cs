@@ -116,7 +116,7 @@ namespace Chunkyard.Tests
         public static void CheckSnapshot_Throws_If_Snapshot_Missing()
         {
             var snapshotStore = CreateSnapshotStore(
-                new UnstoredRepository());
+                new UnstoredContentStore());
 
             var logPosition = snapshotStore.AppendSnapshot(
                 new[] { "some content" },
@@ -134,7 +134,7 @@ namespace Chunkyard.Tests
         public static void CheckSnapshot_Throws_If_Snapshot_Invalid()
         {
             var snapshotStore = CreateSnapshotStore(
-                new CorruptedRepository());
+                new CorruptedContentStore());
 
             var logPosition = snapshotStore.AppendSnapshot(
                 new[] { "some content" },
@@ -146,6 +146,40 @@ namespace Chunkyard.Tests
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotValid(logPosition));
+        }
+
+        [Fact]
+        public static void CheckSnapshot_Detects_Missing_Content()
+        {
+            var contentNames = new[] { "some content" };
+            var snapshotStore = CreateSnapshotStore(
+                new UnstoredContentStore(
+                    contentToNotStore: contentNames));
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                contentNames,
+                OpenStream(),
+                DateTime.Now);
+
+            Assert.False(snapshotStore.CheckSnapshotExists(logPosition));
+            Assert.False(snapshotStore.CheckSnapshotValid(logPosition));
+        }
+
+        [Fact]
+        public static void CheckSnapshot_Detects_Invalid_Content()
+        {
+            var contentNames = new[] { "some content" };
+            var snapshotStore = CreateSnapshotStore(
+                new CorruptedContentStore(
+                    contentToCorrupt: contentNames));
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                contentNames,
+                OpenStream(),
+                DateTime.Now);
+
+            Assert.True(snapshotStore.CheckSnapshotExists(logPosition));
+            Assert.False(snapshotStore.CheckSnapshotValid(logPosition));
         }
 
         [Fact]
@@ -313,14 +347,112 @@ namespace Chunkyard.Tests
         }
 
         private static SnapshotStore CreateSnapshotStore(
-            IRepository? repository = null)
+            IContentStore? contentStore = null)
         {
             return new SnapshotStore(
-                new ContentStore(
-                    repository ?? new MemoryRepository(),
-                    new FastCdc(),
-                    HashAlgorithmName.SHA256,
-                    new StaticPrompt()));
+                contentStore ?? CreateContentStore());
+        }
+
+        private static SnapshotStore CreateSnapshotStore(
+            IRepository repository)
+        {
+            return new SnapshotStore(
+                CreateContentStore(repository));
+        }
+
+        private static IContentStore CreateContentStore(
+            IRepository? repository = null)
+        {
+            return new ContentStore(
+                repository ?? new MemoryRepository(),
+                new FastCdc(),
+                HashAlgorithmName.SHA256,
+                new StaticPrompt());
+        }
+
+        internal class UnstoredContentStore : DecoratorContentStore
+        {
+            private readonly List<string>? _contentToNotStore;
+
+            public UnstoredContentStore(
+                IEnumerable<string>? contentToNotStore = null)
+                : base(CreateContentStore())
+            {
+                _contentToNotStore = contentToNotStore?.ToList();
+            }
+
+            public override ContentReference StoreContent(
+                Stream inputStream,
+                string contentName,
+                byte[] nonce,
+                ContentType type,
+                out bool isNewContent)
+            {
+                var contentReference = Store.StoreContent(
+                    inputStream,
+                    contentName,
+                    nonce,
+                    type,
+                    out isNewContent);
+
+                if (_contentToNotStore == null
+                    || _contentToNotStore.Contains(contentReference.Name))
+                {
+                    var uris = contentReference.Chunks
+                        .Select(c => c.ContentUri);
+
+                    foreach (var uri in uris)
+                    {
+                        Repository.RemoveValue(uri);
+                    }
+                }
+
+                return contentReference;
+            }
+        }
+
+        internal class CorruptedContentStore : DecoratorContentStore
+        {
+            private readonly List<string>? _contentToCorrupt;
+
+            public CorruptedContentStore(
+                IEnumerable<string>? contentToCorrupt = null)
+                : base(CreateContentStore())
+            {
+                _contentToCorrupt = contentToCorrupt?.ToList();
+            }
+
+            public override ContentReference StoreContent(
+                Stream inputStream,
+                string contentName,
+                byte[] nonce,
+                ContentType type,
+                out bool isNewContent)
+            {
+                var contentReference = Store.StoreContent(
+                    inputStream,
+                    contentName,
+                    nonce,
+                    type,
+                    out isNewContent);
+
+                if (_contentToCorrupt == null
+                    || _contentToCorrupt.Contains(contentName))
+                {
+                    var uris = contentReference.Chunks
+                        .Select(c => c.ContentUri);
+
+                    foreach (var uri in uris)
+                    {
+                        Repository.RemoveValue(uri);
+                        Repository.StoreValue(
+                            uri,
+                            new byte[] { 0xFF, 0xBA, 0xDD, 0xFF });
+                    }
+                }
+
+                return contentReference;
+            }
         }
     }
 }

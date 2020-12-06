@@ -198,5 +198,35 @@ namespace Chunkyard.Tests
                 HashAlgorithmName.SHA256,
                 new StaticPrompt());
         }
+
+        internal class UnstoredRepository : DecoratorRepository
+        {
+            public UnstoredRepository()
+                : base(new MemoryRepository())
+            {
+            }
+
+            public override bool StoreValue(Uri contentUri, byte[] value)
+            {
+                // Let's simulate data loss by not storing any data
+                return true;
+            }
+        }
+
+        internal class CorruptedRepository : DecoratorRepository
+        {
+            public CorruptedRepository()
+                : base(new MemoryRepository())
+            {
+            }
+
+            public override bool StoreValue(Uri contentUri, byte[] value)
+            {
+                // Let's simulate data corruption by storing different data
+                return Repository.StoreValue(
+                    contentUri,
+                    new byte[] { 0xFF, 0xBA, 0xDD, 0xFF });
+            }
+        }
     }
 }
