@@ -229,7 +229,7 @@ namespace Chunkyard.Tests
         }
 
         [Fact]
-        public static void GarbageCollect_Keeps_Used_uris()
+        public static void GarbageCollect_Keeps_Used_Uris()
         {
             var repository = new MemoryRepository();
             var snapshotStore = CreateSnapshotStore(
