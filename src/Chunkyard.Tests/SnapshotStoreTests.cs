@@ -335,6 +335,10 @@ namespace Chunkyard.Tests
             Assert.Equal(
                 sourceRepository.ListUris(),
                 destinationRepository.ListUris());
+
+            Assert.Equal(
+                sourceRepository.ListLogPositions(),
+                destinationRepository.ListLogPositions());
         }
 
         private static Func<string, Stream> OpenStream(
