@@ -35,24 +35,23 @@ namespace Chunkyard
             contentNames.EnsureNotNull(nameof(contentNames));
             openRead.EnsureNotNull(nameof(openRead));
 
-            var contentReferences = ImmutableArray.CreateBuilder<ContentReference>();
+            var contentReferences = contentNames
+                .Select(contentName =>
+                {
+                    using var contentStream = openRead(contentName);
 
-            foreach (var contentName in contentNames)
-            {
-                using var contentStream = openRead(contentName);
-                var contentReference = _contentStore.StoreBlob(
-                    contentStream,
-                    contentName,
-                    GenerateNonce(contentName),
-                    out _);
-
-                contentReferences.Add(contentReference);
-            }
+                    return _contentStore.StoreBlob(
+                        contentStream,
+                        contentName,
+                        GenerateNonce(contentName),
+                        out _);
+                })
+                .ToImmutableArray();
 
             var snapshotContentReference = _contentStore.StoreDocument(
                 new Snapshot(
                     creationTime,
-                    contentReferences.ToImmutable()),
+                    contentReferences),
                 SnapshotFile,
                 AesGcmCrypto.GenerateNonce(),
                 out _);
@@ -75,14 +74,9 @@ namespace Chunkyard
                 snapshot.ContentReferences,
                 fuzzyPattern);
 
-            var exists = true;
-
-            foreach (var contentReference in filteredContentReferences)
-            {
-                exists &= _contentStore.ContentExists(contentReference);
-            }
-
-            return exists;
+            return filteredContentReferences
+                .Select(cr => _contentStore.ContentExists(cr))
+                .Aggregate(true, (total, next) => total &= next);
         }
 
         public bool CheckSnapshotValid(
@@ -94,14 +88,9 @@ namespace Chunkyard
                 snapshot.ContentReferences,
                 fuzzyPattern);
 
-            var valid = true;
-
-            foreach (var contentReference in filteredContentReferences)
-            {
-                valid &= _contentStore.ContentValid(contentReference);
-            }
-
-            return valid;
+            return filteredContentReferences
+                .Select(cr => _contentStore.ContentValid(cr))
+                .Aggregate(true, (total, next) => total &= next);
         }
 
         public void RestoreSnapshot(

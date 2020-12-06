@@ -116,18 +116,14 @@ namespace Chunkyard
                 _refLogDirectory,
                 "*.json");
 
-            var logPositions = new List<int>();
+            var logPositions = files
+                .Select(file => Convert.ToInt32(
+                    Path.GetFileNameWithoutExtension(file)))
+                .ToArray();
 
-            foreach (var file in files)
-            {
-                logPositions.Add(
-                    Convert.ToInt32(
-                        Path.GetFileNameWithoutExtension(file)));
-            }
+            Array.Sort(logPositions);
 
-            logPositions.Sort();
-
-            return logPositions.ToArray();
+            return logPositions;
         }
 
         private IEnumerable<Uri> EnumerateUris()
