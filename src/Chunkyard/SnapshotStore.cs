@@ -130,15 +130,8 @@ namespace Chunkyard
 
         public void GarbageCollect()
         {
-            var usedUris = new HashSet<Uri>();
             var allContentUris = _repository.ListUris();
-            var logPositions = _repository.ListLogPositions();
-
-            foreach (var logPosition in logPositions)
-            {
-                usedUris.UnionWith(
-                    ListUris(logPosition));
-            }
+            var usedUris = ListUris();
 
             foreach (var contentUri in allContentUris.Except(usedUris))
             {
@@ -219,6 +212,15 @@ namespace Chunkyard
                 _repository.RetrieveFromLog(logPosition));
 
             return copiedUris;
+        }
+
+        private Uri[] ListUris()
+        {
+            return _repository.ListLogPositions()
+                .Select(position => ListUris(position))
+                .SelectMany(position => position)
+                .Distinct()
+                .ToArray();
         }
 
         private Uri[] ListUris(int logPosition)
