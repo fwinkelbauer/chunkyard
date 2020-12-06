@@ -171,52 +171,39 @@ namespace Chunkyard
                 ? -1
                 : otherLogs.Max();
 
-            var newLogPositions = thisLogs
+            var logPositionsToCopy = thisLogs
                 .Where(l => l > otherMax)
                 .ToArray();
 
-            var otherUris = otherRepository.ListUris()
-                .ToList();
-
-            foreach (var logPosition in newLogPositions)
-            {
-                otherUris.AddRange(
-                    CopySnapshotUris(
-                        logPosition,
-                        otherRepository,
-                        otherUris));
-            }
-
-            return newLogPositions;
-        }
-
-        private IEnumerable<Uri> CopySnapshotUris(
-            int logPosition,
-            IRepository otherRepository,
-            IEnumerable<Uri> otherUris)
-        {
-            var urisToCopy = ListUris(logPosition).Except(otherUris);
-            var copiedUris = new List<Uri>();
+            var urisToCopy = ListUris(logPositionsToCopy)
+                .Except(otherRepository.ListUris());
 
             foreach (var contentUri in urisToCopy)
             {
                 otherRepository.StoreValue(
                     contentUri,
                     _repository.RetrieveValue(contentUri));
-
-                copiedUris.Add(contentUri);
             }
 
-            otherRepository.AppendToLog(
-                logPosition,
-                _repository.RetrieveFromLog(logPosition));
+            foreach (var logPosition in logPositionsToCopy)
+            {
+                otherRepository.AppendToLog(
+                    logPosition,
+                    _repository.RetrieveFromLog(logPosition));
+            }
 
-            return copiedUris;
+            return logPositionsToCopy;
         }
 
         private Uri[] ListUris()
         {
-            return _repository.ListLogPositions()
+            return ListUris(
+                _repository.ListLogPositions());
+        }
+
+        private Uri[] ListUris(IEnumerable<int> logPositions)
+        {
+            return logPositions
                 .Select(position => ListUris(position))
                 .SelectMany(position => position)
                 .Distinct()
