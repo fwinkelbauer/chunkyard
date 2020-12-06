@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Chunkyard.Build.Options;
 
@@ -17,98 +18,80 @@ namespace Chunkyard.Build
         private static readonly string Version = FetchVersion();
         private static readonly List<string> Executed = new List<string>();
 
-        public static void Clean(DotnetOptions o)
+        public static void Clean(DotnetOptions o) => Once(() =>
         {
-            Once(nameof(Clean), () =>
+            Dotnet(
+                $"clean {Solution}",
+                $"-c {o.Configuration}");
+
+            var dirInfo = new DirectoryInfo(ArtifactsDirectory);
+
+            if (!dirInfo.Exists)
             {
-                Dotnet(
-                    $"clean {Solution}",
-                    $"-c {o.Configuration}");
+                return;
+            }
 
-                var dirInfo = new DirectoryInfo(ArtifactsDirectory);
+            foreach (var file in dirInfo.GetFiles())
+            {
+                file.Delete();
+            }
 
-                if (!dirInfo.Exists)
-                {
-                    return;
-                }
+            foreach (var subDirInfo in dirInfo.GetDirectories())
+            {
+                subDirInfo.Delete(true);
+            }
+        });
 
-                foreach (var file in dirInfo.GetFiles())
-                {
-                    file.Delete();
-                }
-
-                foreach (var subDirInfo in dirInfo.GetDirectories())
-                {
-                    subDirInfo.Delete(true);
-                }
-            });
-        }
-
-        public static void Build(DotnetOptions o)
+        public static void Build(DotnetOptions o) => Once(() =>
         {
-            Once(nameof(Build), () =>
-            {
-                Dotnet(
-                    $"build {Solution}",
-                    $"-c {o.Configuration}",
-                    "-warnaserror");
+            Dotnet(
+                $"build {Solution}",
+                $"-c {o.Configuration}",
+                "-warnaserror");
 
-                Dotnet(
-                    $"test {Solution}",
-                    "--no-build",
-                    $"-c {o.Configuration}");
-            });
-        }
+            Dotnet(
+                $"test {Solution}",
+                "--no-build",
+                $"-c {o.Configuration}");
+        });
 
-        public static void Publish(DotnetOptions o)
+        public static void Publish(DotnetOptions o) => Once(() =>
         {
             Clean(o);
             Build(o);
 
-            Once(nameof(Publish), () =>
-            {
-                Dotnet(
-                    "publish src/Chunkyard",
-                    $"-c {o.Configuration}",
-                    $"-r {o.Runtime}",
-                    $"-o {ArtifactsDirectory}",
-                    $"-p:Version={Version}",
-                    "-p:PublishSingleFile=true",
-                    "-p:PublishTrimmed=true");
-            });
-        }
+            Dotnet(
+                "publish src/Chunkyard",
+                $"-c {o.Configuration}",
+                $"-r {o.Runtime}",
+                $"-o {ArtifactsDirectory}",
+                $"-p:Version={Version}",
+                "-p:PublishSingleFile=true",
+                "-p:PublishTrimmed=true");
+        });
 
-        public static void Fmt()
+        public static void Fmt() => Once(() =>
         {
-            Once(nameof(Fmt), () =>
-            {
-                Dotnet($"format {Solution}");
-            });
-        }
+            Dotnet($"format {Solution}");
+        });
 
-        public static void Upgrade()
+        public static void Upgrade() => Once(() =>
         {
-            Once(nameof(Upgrade), () =>
-            {
-                Dotnet(
-                    $"outdated {Solution}",
-                    "--upgrade",
-                    "--exclude xunit.runner.visualstudio");
-            });
-        }
+            Dotnet(
+                $"outdated {Solution}",
+                "--upgrade",
+                "--exclude xunit.runner.visualstudio");
+        });
 
-        public static void Release()
+        public static void Release() => Once(() =>
         {
-            Once(nameof(Release), () =>
-            {
-                var message = $"Prepare Chunkyard release v{Version}";
-                var tag = $"v{Version}";
+            var message = $"Prepare Chunkyard release v{Version}";
+            var tag = $"v{Version}";
 
-                Git("add -A");
-                Git($"commit -m \"{message}\"");
-                Git($"tag -a \"{tag}\" -m \"{message}\"");
-            });
-        }
+            Git("add -A");
+            Git($"commit -m \"{message}\"");
+            Git($"tag -a \"{tag}\" -m \"{message}\"");
+        });
 
         private static void Dotnet(params string[] arguments)
         {
@@ -167,16 +150,18 @@ namespace Chunkyard.Build
                 : "0.0.0";
         }
 
-        private static void Once(string name, Action action)
+        private static void Once(
+            Action action,
+            [CallerMemberName] string memberName = "")
         {
-            if (Executed.Contains(name))
+            if (Executed.Contains(memberName))
             {
                 return;
             }
 
             action();
 
-            Executed.Add(name);
+            Executed.Add(memberName);
         }
     }
 }
