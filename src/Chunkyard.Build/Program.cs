@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using Chunkyard.Build.Options;
+using Chunkyard.Build.Cli;
 using CommandLine;
 
 namespace Chunkyard.Build
@@ -42,12 +42,12 @@ namespace Chunkyard.Build
                 .ToArray();
 
             Parser.Default.ParseArguments(args, optionTypes)
-                .WithParsed<CleanOptions>(o => Cli.Clean(o))
-                .WithParsed<BuildOptions>(o => Cli.Build(o))
-                .WithParsed<PublishOptions>(o => Cli.Publish(o))
-                .WithParsed<ReleaseOptions>(_ => Cli.Release())
-                .WithParsed<FmtOptions>(_ => Cli.Fmt())
-                .WithParsed<UpgradeOptions>(_ => Cli.Upgrade())
+                .WithParsed<CleanOptions>(o => Commands.Clean(o))
+                .WithParsed<BuildOptions>(o => Commands.Build(o))
+                .WithParsed<PublishOptions>(o => Commands.Publish(o))
+                .WithParsed<ReleaseOptions>(_ => Commands.Release())
+                .WithParsed<FmtOptions>(_ => Commands.Fmt())
+                .WithParsed<UpgradeOptions>(_ => Commands.Upgrade())
                 .WithNotParsed(_ => Environment.ExitCode = 1);
         }
     }

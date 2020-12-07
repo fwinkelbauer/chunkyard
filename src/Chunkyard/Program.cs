@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using Chunkyard.Options;
+using Chunkyard.Cli;
+using Chunkyard.Core;
 using CommandLine;
 
 namespace Chunkyard
@@ -46,16 +47,16 @@ namespace Chunkyard
                 .ToArray();
 
             Parser.Default.ParseArguments(args, optionTypes)
-                .WithParsed<PreviewOptions>(o => Cli.PreviewFiles(o))
-                .WithParsed<RestoreOptions>(o => Cli.RestoreSnapshot(o))
-                .WithParsed<CreateOptions>(o => Cli.CreateSnapshot(o))
-                .WithParsed<CheckOptions>(o => Cli.CheckSnapshot(o))
-                .WithParsed<ShowOptions>(o => Cli.ShowSnapshot(o))
-                .WithParsed<RemoveOptions>(o => Cli.RemoveSnapshot(o))
-                .WithParsed<KeepOptions>(o => Cli.KeepSnapshots(o))
-                .WithParsed<ListOptions>(o => Cli.ListSnapshots(o))
-                .WithParsed<GarbageCollectOptions>(o => Cli.GarbageCollect(o))
-                .WithParsed<CopyOptions>(o => Cli.CopySnapshots(o))
+                .WithParsed<PreviewOptions>(o => Commands.PreviewFiles(o))
+                .WithParsed<RestoreOptions>(o => Commands.RestoreSnapshot(o))
+                .WithParsed<CreateOptions>(o => Commands.CreateSnapshot(o))
+                .WithParsed<CheckOptions>(o => Commands.CheckSnapshot(o))
+                .WithParsed<ShowOptions>(o => Commands.ShowSnapshot(o))
+                .WithParsed<RemoveOptions>(o => Commands.RemoveSnapshot(o))
+                .WithParsed<KeepOptions>(o => Commands.KeepSnapshots(o))
+                .WithParsed<ListOptions>(o => Commands.ListSnapshots(o))
+                .WithParsed<GarbageCollectOptions>(o => Commands.GarbageCollect(o))
+                .WithParsed<CopyOptions>(o => Commands.CopySnapshots(o))
                 .WithNotParsed(_ => Environment.ExitCode = 1);
         }
     }

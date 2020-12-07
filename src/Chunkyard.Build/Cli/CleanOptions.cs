@@ -1,0 +1,13 @@
+﻿using CommandLine;
+
+namespace Chunkyard.Build.Cli
+{
+    [Verb("clean", HelpText = "Clean the solution.")]
+    public class CleanOptions : DotnetOptions
+    {
+        public CleanOptions(string configuration, string runtime)
+            : base(configuration, runtime)
+        {
+        }
+    }
+}
