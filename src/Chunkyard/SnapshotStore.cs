@@ -115,8 +115,21 @@ namespace Chunkyard
 
         public Snapshot GetSnapshot(int logPosition)
         {
-            return GetSnapshot(
-                _contentStore.RetrieveFromLog(logPosition).ContentReference);
+            ContentReference? contentReference;
+
+            try
+            {
+                contentReference = _contentStore.RetrieveFromLog(logPosition)
+                    .ContentReference;
+            }
+            catch (Exception e)
+            {
+                throw new ChunkyardException(
+                    $"Snapshot #{logPosition} does not exist",
+                    e);
+            }
+
+            return GetSnapshot(contentReference);
         }
 
         public ContentReference[] ShowSnapshot(
