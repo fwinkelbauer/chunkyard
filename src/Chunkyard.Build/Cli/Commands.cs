@@ -30,9 +30,9 @@ namespace Chunkyard.Build.Cli
                 return;
             }
 
-            foreach (var file in dirInfo.GetFiles())
+            foreach (var fileInfo in dirInfo.GetFiles())
             {
-                file.Delete();
+                fileInfo.Delete();
             }
 
             foreach (var subDirInfo in dirInfo.GetDirectories())
