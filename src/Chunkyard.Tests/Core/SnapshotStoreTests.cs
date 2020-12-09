@@ -383,12 +383,15 @@ namespace Chunkyard.Tests.Core
         private static SnapshotStore CreateSnapshotStore(
             IRepository? repository = null)
         {
+            repository = repository ?? new MemoryRepository();
+
             return new SnapshotStore(
                 new ContentStore(
-                    repository ?? new MemoryRepository(),
+                    repository,
                     new FastCdc(),
                     HashAlgorithmName.SHA256,
-                    new StaticPrompt()));
+                    new StaticPrompt()),
+                repository);
         }
     }
 }

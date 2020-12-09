@@ -11,6 +11,7 @@ namespace Chunkyard.Core
     /// </summary>
     public class ContentStore : IContentStore
     {
+        private readonly IRepository _repository;
         private readonly FastCdc _fastCdc;
         private readonly HashAlgorithmName _hashAlgorithmName;
         private readonly byte[] _salt;
@@ -23,7 +24,7 @@ namespace Chunkyard.Core
             HashAlgorithmName hashAlgorithmName,
             IPrompt prompt)
         {
-            Repository = repository.EnsureNotNull(nameof(repository));
+            _repository = repository.EnsureNotNull(nameof(repository));
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
 
@@ -56,8 +57,6 @@ namespace Chunkyard.Core
             _key = AesGcmCrypto.PasswordToKey(password, _salt, _iterations);
         }
 
-        public IRepository Repository { get; }
-
         public int? CurrentLogPosition { get; private set; }
 
         public void RetrieveContent(
@@ -71,7 +70,7 @@ namespace Chunkyard.Core
             {
                 // Strip away the cryptographic details which we added when
                 // storing the value
-                var value = Repository.RetrieveValue(chunk.ContentUri)
+                var value = _repository.RetrieveValue(chunk.ContentUri)
                     .Skip(AesGcmCrypto.NonceBytes)
                     .SkipLast(AesGcmCrypto.TagBytes)
                     .ToArray();
@@ -105,7 +104,7 @@ namespace Chunkyard.Core
             contentReference.EnsureNotNull(nameof(contentReference));
 
             return contentReference.Chunks
-                .Select(chunk => Repository.ValueExists(chunk.ContentUri))
+                .Select(chunk => _repository.ValueExists(chunk.ContentUri))
                 .Aggregate(true, (total, next) => total &= next);
         }
 
@@ -114,7 +113,7 @@ namespace Chunkyard.Core
             contentReference.EnsureNotNull(nameof(contentReference));
 
             return contentReference.Chunks
-                .Select(chunk => Repository.UriValid(chunk.ContentUri))
+                .Select(chunk => _repository.UriValid(chunk.ContentUri))
                 .Aggregate(true, (total, next) => total &= next);
         }
 
@@ -127,7 +126,7 @@ namespace Chunkyard.Core
                 _salt,
                 _iterations);
 
-            CurrentLogPosition = Repository.AppendToLog(
+            CurrentLogPosition = _repository.AppendToLog(
                 newLogPosition,
                 DataConvert.ToBytes(logReference));
 
@@ -137,7 +136,7 @@ namespace Chunkyard.Core
         public LogReference RetrieveFromLog(int logPosition)
         {
             return RetrieveFromLog(
-                Repository,
+                _repository,
                 ResolveLogPosition(logPosition));
         }
 
@@ -175,7 +174,7 @@ namespace Chunkyard.Core
                     .Concat(tag)
                     .ToArray();
 
-                var contentUri = Repository.StoreValue(
+                var contentUri = _repository.StoreValue(
                     _hashAlgorithmName,
                     value,
                     out var isNewValue);

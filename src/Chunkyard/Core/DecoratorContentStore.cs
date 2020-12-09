@@ -15,8 +15,6 @@ namespace Chunkyard.Core
 
         protected IContentStore Store { get; }
 
-        public IRepository Repository => Store.Repository;
-
         public virtual int? CurrentLogPosition => Store.CurrentLogPosition;
 
         public virtual void RetrieveContent(

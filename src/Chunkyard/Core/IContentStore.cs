@@ -8,8 +8,6 @@ namespace Chunkyard.Core
     /// </summary>
     public interface IContentStore
     {
-        IRepository Repository { get; }
-
         int? CurrentLogPosition { get; }
 
         void RetrieveContent(

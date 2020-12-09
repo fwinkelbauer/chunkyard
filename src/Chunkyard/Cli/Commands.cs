@@ -77,7 +77,7 @@ namespace Chunkyard.Cli
                     cacheDirectory);
             }
 
-            var snapshotStore = new SnapshotStore(contentStore);
+            var snapshotStore = new SnapshotStore(contentStore, repository);
 
             var contentNames = FileFetcher.ToContentNames(parent, files);
 
@@ -220,7 +220,8 @@ namespace Chunkyard.Cli
             FastCdc? fastCdc = null)
         {
             return new SnapshotStore(
-                CreateContentStore(repository, fastCdc));
+                CreateContentStore(repository, fastCdc),
+                repository);
         }
 
         private static IContentStore CreateContentStore(

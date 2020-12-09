@@ -121,7 +121,8 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ContentExists_Detects_Missing_Content()
         {
-            var contentStore = CreateContentStore();
+            var repository = new MemoryRepository();
+            var contentStore = CreateContentStore(repository);
 
             var contentReference = contentStore.StoreDocument(
                 "some text",
@@ -129,9 +130,9 @@ namespace Chunkyard.Tests.Core
                 AesGcmCrypto.GenerateNonce(),
                 out _);
 
-            foreach (var uri in contentStore.Repository.ListUris())
+            foreach (var uri in repository.ListUris())
             {
-                contentStore.Repository.RemoveValue(uri);
+                repository.RemoveValue(uri);
             }
 
             Assert.False(contentStore.ContentExists(contentReference));
@@ -141,7 +142,8 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ContentValid_Detects_Corrupted_Content()
         {
-            var contentStore = CreateContentStore();
+            var repository = new MemoryRepository();
+            var contentStore = CreateContentStore(repository);
 
             var contentReference = contentStore.StoreDocument(
                 "some text",
@@ -149,10 +151,10 @@ namespace Chunkyard.Tests.Core
                 AesGcmCrypto.GenerateNonce(),
                 out _);
 
-            foreach (var uri in contentStore.Repository.ListUris())
+            foreach (var uri in repository.ListUris())
             {
-                contentStore.Repository.RemoveValue(uri);
-                contentStore.Repository.StoreValue(
+                repository.RemoveValue(uri);
+                repository.StoreValue(
                     uri,
                     new byte[] { 0xFF, 0xBA, 0xDD, 0xFF  });
             }
@@ -202,10 +204,11 @@ namespace Chunkyard.Tests.Core
                 contentStore.CurrentLogPosition);
         }
 
-        private static ContentStore CreateContentStore()
+        private static ContentStore CreateContentStore(
+            IRepository? repository = null)
         {
             return new ContentStore(
-                new MemoryRepository(),
+                repository ?? new MemoryRepository(),
                 new FastCdc(),
                 HashAlgorithmName.SHA256,
                 new StaticPrompt());

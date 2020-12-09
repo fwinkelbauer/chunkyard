@@ -18,10 +18,12 @@ namespace Chunkyard.Core
         private readonly IRepository _repository;
         private readonly Dictionary<string, ContentReference> _knownContentReferences;
 
-        public SnapshotStore(IContentStore contentStore)
+        public SnapshotStore(
+            IContentStore contentStore,
+            IRepository repository)
         {
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
-            _repository = contentStore.Repository;
+            _repository = repository.EnsureNotNull(nameof(repository));
             _knownContentReferences = new Dictionary<string, ContentReference>();
         }
 
