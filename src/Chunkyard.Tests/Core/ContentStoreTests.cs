@@ -121,14 +121,18 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ContentExists_Detects_Missing_Content()
         {
-            var contentStore = CreateContentStore(
-                new UnstoredRepository());
+            var contentStore = CreateContentStore();
 
             var contentReference = contentStore.StoreDocument(
                 "some text",
                 "with some name",
                 AesGcmCrypto.GenerateNonce(),
                 out _);
+
+            foreach (var chunk in contentReference.Chunks)
+            {
+                contentStore.Repository.RemoveValue(chunk.ContentUri);
+            }
 
             Assert.False(contentStore.ContentExists(contentReference));
             Assert.False(contentStore.ContentValid(contentReference));
@@ -137,14 +141,21 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ContentValid_Detects_Corrupted_Content()
         {
-            var contentStore = CreateContentStore(
-                new CorruptedRepository());
+            var contentStore = CreateContentStore();
 
             var contentReference = contentStore.StoreDocument(
                 "some text",
                 "with some name",
                 AesGcmCrypto.GenerateNonce(),
                 out _);
+
+            foreach (var chunk in contentReference.Chunks)
+            {
+                contentStore.Repository.RemoveValue(chunk.ContentUri);
+                contentStore.Repository.StoreValue(
+                    chunk.ContentUri,
+                    new byte[] { 0xFF, 0xBA, 0xDD, 0xFF  });
+            }
 
             Assert.True(contentStore.ContentExists(contentReference));
             Assert.False(contentStore.ContentValid(contentReference));
@@ -191,44 +202,13 @@ namespace Chunkyard.Tests.Core
                 contentStore.CurrentLogPosition);
         }
 
-        private static ContentStore CreateContentStore(
-            IRepository? repository = null)
+        private static ContentStore CreateContentStore()
         {
             return new ContentStore(
-                repository ?? new MemoryRepository(),
+                new MemoryRepository(),
                 new FastCdc(),
                 HashAlgorithmName.SHA256,
                 new StaticPrompt());
-        }
-
-        internal class UnstoredRepository : DecoratorRepository
-        {
-            public UnstoredRepository()
-                : base(new MemoryRepository())
-            {
-            }
-
-            public override bool StoreValue(Uri contentUri, byte[] value)
-            {
-                // Let's simulate data loss by not storing any data
-                return true;
-            }
-        }
-
-        internal class CorruptedRepository : DecoratorRepository
-        {
-            public CorruptedRepository()
-                : base(new MemoryRepository())
-            {
-            }
-
-            public override bool StoreValue(Uri contentUri, byte[] value)
-            {
-                // Let's simulate data corruption by storing different data
-                return Repository.StoreValue(
-                    contentUri,
-                    new byte[] { 0xFF, 0xBA, 0xDD, 0xFF });
-            }
         }
     }
 }

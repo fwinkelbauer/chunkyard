@@ -117,13 +117,18 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void CheckSnapshot_Throws_If_Snapshot_Missing()
         {
-            var snapshotStore = CreateSnapshotStore(
-                new UnstoredContentStore());
+            var repository = new MemoryRepository();
+            var snapshotStore = CreateSnapshotStore(repository);
 
             var logPosition = snapshotStore.AppendSnapshot(
                 new[] { "some content" },
                 OpenStream(),
                 DateTime.Now);
+
+            foreach (var uri in repository.ListUris())
+            {
+                repository.RemoveValue(uri);
+            }
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotExists(logPosition));
@@ -135,13 +140,21 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void CheckSnapshot_Throws_If_Snapshot_Invalid()
         {
-            var snapshotStore = CreateSnapshotStore(
-                new CorruptedContentStore());
+            var repository = new MemoryRepository();
+            var snapshotStore = CreateSnapshotStore(repository);
 
             var logPosition = snapshotStore.AppendSnapshot(
                 new[] { "some content" },
                 OpenStream(),
                 DateTime.Now);
+
+            foreach (var uri in repository.ListUris())
+            {
+                repository.RemoveValue(uri);
+                repository.StoreValue(
+                    uri,
+                    new byte[] { 0xFF, 0xBA, 0xDD, 0xFF });
+            }
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotExists(logPosition));
@@ -153,15 +166,24 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void CheckSnapshot_Detects_Missing_Content()
         {
-            var contentNames = new[] { "some content" };
-            var snapshotStore = CreateSnapshotStore(
-                new UnstoredContentStore(
-                    contentToNotStore: contentNames));
+            var repository = new MemoryRepository();
+            var snapshotStore = CreateSnapshotStore(repository);
 
             var logPosition = snapshotStore.AppendSnapshot(
-                contentNames,
+                new[] { "some content" },
                 OpenStream(),
                 DateTime.Now);
+
+            var snapshot = snapshotStore.GetSnapshot(logPosition);
+            var urisToRemove = snapshot.ContentReferences
+                .Select(contentReference => contentReference.Chunks)
+                .SelectMany(chunk => chunk)
+                .Select(chunk => chunk.ContentUri);
+
+            foreach (var uri in urisToRemove)
+            {
+                repository.RemoveValue(uri);
+            }
 
             Assert.False(snapshotStore.CheckSnapshotExists(logPosition));
             Assert.False(snapshotStore.CheckSnapshotValid(logPosition));
@@ -170,15 +192,27 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void CheckSnapshot_Detects_Invalid_Content()
         {
-            var contentNames = new[] { "some content" };
-            var snapshotStore = CreateSnapshotStore(
-                new CorruptedContentStore(
-                    contentToCorrupt: contentNames));
+            var repository = new MemoryRepository();
+            var snapshotStore = CreateSnapshotStore(repository);
 
             var logPosition = snapshotStore.AppendSnapshot(
-                contentNames,
+                new[] { "some content" },
                 OpenStream(),
                 DateTime.Now);
+
+            var snapshot = snapshotStore.GetSnapshot(logPosition);
+            var urisToRemove = snapshot.ContentReferences
+                .Select(contentReference => contentReference.Chunks)
+                .SelectMany(chunk => chunk)
+                .Select(chunk => chunk.ContentUri);
+
+            foreach (var uri in urisToRemove)
+            {
+                repository.RemoveValue(uri);
+                repository.StoreValue(
+                    uri,
+                    new byte[] { 0xFF, 0xBA, 0xDD, 0xFF});
+            }
 
             Assert.True(snapshotStore.CheckSnapshotExists(logPosition));
             Assert.False(snapshotStore.CheckSnapshotValid(logPosition));
@@ -233,9 +267,7 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void GarbageCollect_Keeps_Used_Uris()
         {
-            var repository = new MemoryRepository();
-            var snapshotStore = CreateSnapshotStore(
-                repository);
+            var snapshotStore = CreateSnapshotStore();
 
             var logPosition = snapshotStore.AppendSnapshot(
                 new[] { "some content" },
@@ -353,112 +385,14 @@ namespace Chunkyard.Tests.Core
         }
 
         private static SnapshotStore CreateSnapshotStore(
-            IContentStore? contentStore = null)
-        {
-            return new SnapshotStore(
-                contentStore ?? CreateContentStore());
-        }
-
-        private static SnapshotStore CreateSnapshotStore(
-            IRepository repository)
-        {
-            return new SnapshotStore(
-                CreateContentStore(repository));
-        }
-
-        private static IContentStore CreateContentStore(
             IRepository? repository = null)
         {
-            return new ContentStore(
-                repository ?? new MemoryRepository(),
-                new FastCdc(),
-                HashAlgorithmName.SHA256,
-                new StaticPrompt());
-        }
-
-        internal class UnstoredContentStore : DecoratorContentStore
-        {
-            private readonly List<string>? _contentToNotStore;
-
-            public UnstoredContentStore(
-                IEnumerable<string>? contentToNotStore = null)
-                : base(CreateContentStore())
-            {
-                _contentToNotStore = contentToNotStore?.ToList();
-            }
-
-            public override ContentReference StoreContent(
-                Stream inputStream,
-                string contentName,
-                byte[] nonce,
-                ContentType type,
-                out bool isNewContent)
-            {
-                var contentReference = Store.StoreContent(
-                    inputStream,
-                    contentName,
-                    nonce,
-                    type,
-                    out isNewContent);
-
-                if (_contentToNotStore == null
-                    || _contentToNotStore.Contains(contentReference.Name))
-                {
-                    var uris = contentReference.Chunks
-                        .Select(c => c.ContentUri);
-
-                    foreach (var uri in uris)
-                    {
-                        Repository.RemoveValue(uri);
-                    }
-                }
-
-                return contentReference;
-            }
-        }
-
-        internal class CorruptedContentStore : DecoratorContentStore
-        {
-            private readonly List<string>? _contentToCorrupt;
-
-            public CorruptedContentStore(
-                IEnumerable<string>? contentToCorrupt = null)
-                : base(CreateContentStore())
-            {
-                _contentToCorrupt = contentToCorrupt?.ToList();
-            }
-
-            public override ContentReference StoreContent(
-                Stream inputStream,
-                string contentName,
-                byte[] nonce,
-                ContentType type,
-                out bool isNewContent)
-            {
-                var contentReference = Store.StoreContent(
-                    inputStream,
-                    contentName,
-                    nonce,
-                    type,
-                    out isNewContent);
-
-                if (_contentToCorrupt == null
-                    || _contentToCorrupt.Contains(contentName))
-                {
-                    var uris = contentReference.Chunks
-                        .Select(c => c.ContentUri);
-
-                    foreach (var uri in uris)
-                    {
-                        Repository.RemoveValue(uri);
-                        Repository.StoreValue(
-                            uri,
-                            new byte[] { 0xFF, 0xBA, 0xDD, 0xFF });
-                    }
-                }
-
-                return contentReference;
-            }
+            return new SnapshotStore(
+                new ContentStore(
+                    repository ?? new MemoryRepository(),
+                    new FastCdc(),
+                    HashAlgorithmName.SHA256,
+                    new StaticPrompt()));
         }
     }
 }
