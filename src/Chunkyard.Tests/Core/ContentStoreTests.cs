@@ -130,10 +130,8 @@ namespace Chunkyard.Tests.Core
                 AesGcmCrypto.GenerateNonce(),
                 out _);
 
-            foreach (var uri in repository.ListUris())
-            {
-                repository.RemoveValue(uri);
-            }
+            repository.RemoveUris(
+                repository.ListUris());
 
             Assert.False(contentStore.ContentExists(contentReference));
             Assert.False(contentStore.ContentValid(contentReference));
@@ -151,13 +149,8 @@ namespace Chunkyard.Tests.Core
                 AesGcmCrypto.GenerateNonce(),
                 out _);
 
-            foreach (var uri in repository.ListUris())
-            {
-                repository.RemoveValue(uri);
-                repository.StoreValue(
-                    uri,
-                    new byte[] { 0xFF, 0xBA, 0xDD, 0xFF  });
-            }
+            repository.CorruptUris(
+                repository.ListUris());
 
             Assert.True(contentStore.ContentExists(contentReference));
             Assert.False(contentStore.ContentValid(contentReference));

@@ -125,10 +125,8 @@ namespace Chunkyard.Tests.Core
                 OpenStream(),
                 DateTime.Now);
 
-            foreach (var uri in repository.ListUris())
-            {
-                repository.RemoveValue(uri);
-            }
+            repository.RemoveUris(
+                repository.ListUris());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotExists(logPosition));
@@ -148,13 +146,8 @@ namespace Chunkyard.Tests.Core
                 OpenStream(),
                 DateTime.Now);
 
-            foreach (var uri in repository.ListUris())
-            {
-                repository.RemoveValue(uri);
-                repository.StoreValue(
-                    uri,
-                    new byte[] { 0xFF, 0xBA, 0xDD, 0xFF });
-            }
+            repository.CorruptUris(
+                repository.ListUris());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotExists(logPosition));
@@ -175,15 +168,12 @@ namespace Chunkyard.Tests.Core
                 DateTime.Now);
 
             var snapshot = snapshotStore.GetSnapshot(logPosition);
-            var urisToRemove = snapshot.ContentReferences
+            var contentUris = snapshot.ContentReferences
                 .Select(contentReference => contentReference.Chunks)
                 .SelectMany(chunk => chunk)
                 .Select(chunk => chunk.ContentUri);
 
-            foreach (var uri in urisToRemove)
-            {
-                repository.RemoveValue(uri);
-            }
+            repository.RemoveUris(contentUris);
 
             Assert.False(snapshotStore.CheckSnapshotExists(logPosition));
             Assert.False(snapshotStore.CheckSnapshotValid(logPosition));
@@ -201,18 +191,12 @@ namespace Chunkyard.Tests.Core
                 DateTime.Now);
 
             var snapshot = snapshotStore.GetSnapshot(logPosition);
-            var urisToRemove = snapshot.ContentReferences
+            var contentUris = snapshot.ContentReferences
                 .Select(contentReference => contentReference.Chunks)
                 .SelectMany(chunk => chunk)
                 .Select(chunk => chunk.ContentUri);
 
-            foreach (var uri in urisToRemove)
-            {
-                repository.RemoveValue(uri);
-                repository.StoreValue(
-                    uri,
-                    new byte[] { 0xFF, 0xBA, 0xDD, 0xFF});
-            }
+            repository.CorruptUris(contentUris);
 
             Assert.True(snapshotStore.CheckSnapshotExists(logPosition));
             Assert.False(snapshotStore.CheckSnapshotValid(logPosition));

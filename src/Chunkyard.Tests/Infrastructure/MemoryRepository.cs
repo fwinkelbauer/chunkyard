@@ -5,7 +5,7 @@ using Chunkyard.Core;
 
 namespace Chunkyard.Tests.Infrastructure
 {
-    public class MemoryRepository : IRepository
+    internal class MemoryRepository : IRepository
     {
         private readonly Dictionary<Uri, byte[]> _valuesByUri;
         private readonly Dictionary<int, byte[]> _valuesByLog;
@@ -74,6 +74,22 @@ namespace Chunkyard.Tests.Infrastructure
         public int[] ListLogPositions()
         {
             return _valuesByLog.Keys.ToArray();
+        }
+
+        public void RemoveUris(IEnumerable<Uri> contentUris)
+        {
+            foreach (var contentUri in contentUris)
+            {
+                _valuesByUri.Remove(contentUri);
+            }
+        }
+
+        public void CorruptUris(IEnumerable<Uri> contentUris)
+        {
+            foreach (var contentUri in contentUris)
+            {
+                _valuesByUri[contentUri] = new byte[] { 0xFF, 0xBA, 0xDD, 0xFF};
+            }
         }
     }
 }
