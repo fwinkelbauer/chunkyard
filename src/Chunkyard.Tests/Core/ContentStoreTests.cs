@@ -41,7 +41,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void Store_Detects_Same_Content()
+        public static void Store_Detects_Already_Stored_Content()
         {
             var contentStore = CreateContentStore();
 

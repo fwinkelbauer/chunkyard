@@ -9,7 +9,7 @@ namespace Chunkyard.Tests.Core
     public static class IRepositoryExtensionsTests
     {
         [Fact]
-        public static void StoreValue_Stores_Value_Once()
+        public static void StoreValue_Detects_Stored_Value()
         {
             var repository = new MemoryRepository();
             var hashAlgorithmName = HashAlgorithmName.SHA256;
@@ -84,7 +84,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void KeepLatestLogPositions_Does_Nothing_If_Inside()
+        public static void KeepLatestLogPositions_Does_Nothing_If_It_Equals_Current_Size()
         {
             var repository = new MemoryRepository();
             var content = new byte[] { 0xFF };
@@ -100,7 +100,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void KeepLatestLogPositions_Does_Nothing_If_Over()
+        public static void KeepLatestLogPositions_Does_Nothing_If_Greater_Than_Current_Size()
         {
             var repository = new MemoryRepository();
             var content = new byte[] { 0xFF };

@@ -14,11 +14,12 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void SpacedPattern_Matches_Everything()
+        public static void Spaces_Are_Treated_As_Wildcards()
         {
             var fuzzy = new Fuzzy("He ld");
 
             Assert.True(fuzzy.IsMatch("Hello World!"));
+            Assert.True(fuzzy.IsMatch("Held"));
             Assert.False(fuzzy.IsMatch("Goodbye World!"));
         }
     }

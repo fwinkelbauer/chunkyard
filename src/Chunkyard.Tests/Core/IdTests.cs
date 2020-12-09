@@ -8,7 +8,7 @@ namespace Chunkyard.Tests.Core
     public static class IdTests
     {
         [Fact]
-        public static void ComputeContentUri_CreatesUri_From_Content()
+        public static void ComputeContentUri_Creates_Uri_From_Content()
         {
             var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
             var expectedUri = new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e");
@@ -21,7 +21,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void FromContentUri_Can_Split_ContentUri()
+        public static void FromContentUri_Can_Split_Content_Uri()
         {
             var contentUri = new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e");
             var expectedAlgorithm = HashAlgorithmName.SHA256;
