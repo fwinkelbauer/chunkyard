@@ -24,11 +24,7 @@ namespace Chunkyard.Tests.Core
                 nonce);
 
             var actualText = Encoding.UTF8.GetString(
-                AesGcmCrypto.Decrypt(
-                    secretText,
-                    tag,
-                    key,
-                    nonce));
+                AesGcmCrypto.Decrypt(secretText, tag, key, nonce));
 
             Assert.Equal(expectedText, actualText);
         }

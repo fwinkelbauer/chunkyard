@@ -223,14 +223,10 @@ namespace Chunkyard.Tests.Core
         {
             var snapshotStore = CreateSnapshotStore();
             var content = new byte[] { 0x11, 0x22, 0x33, 0x44 };
-            var bytesPerContent = new Dictionary<string, byte[]>
-            {
-                { "some content", content }
-            };
 
             var logPosition = snapshotStore.AppendSnapshot(
                 new[] { "some content" },
-                OpenStream(bytesPerContent),
+                OpenStream(content),
                 DateTime.Now);
 
             var actualContentName = "";
@@ -376,12 +372,12 @@ namespace Chunkyard.Tests.Core
         }
 
         private static Func<string, Stream> OpenStream(
-            Dictionary<string, byte[]>? bytesPerContent = null)
+            byte[]? content = null)
         {
             return (s) => new MemoryStream(
-                bytesPerContent == null
+                content == null
                     ? new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }
-                    : bytesPerContent[s]);
+                    : content);
         }
 
         private static SnapshotStore CreateSnapshotStore(

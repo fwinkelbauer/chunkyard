@@ -41,7 +41,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void Store_Detects_Already_Stored_Content()
+        public static void Store_Detects_Already_Stored_Content_Using_Same_Nonce()
         {
             var contentStore = CreateContentStore();
 
@@ -129,9 +129,9 @@ namespace Chunkyard.Tests.Core
                 AesGcmCrypto.GenerateNonce(),
                 out _);
 
-            foreach (var chunk in contentReference.Chunks)
+            foreach (var uri in contentStore.Repository.ListUris())
             {
-                contentStore.Repository.RemoveValue(chunk.ContentUri);
+                contentStore.Repository.RemoveValue(uri);
             }
 
             Assert.False(contentStore.ContentExists(contentReference));
@@ -149,11 +149,11 @@ namespace Chunkyard.Tests.Core
                 AesGcmCrypto.GenerateNonce(),
                 out _);
 
-            foreach (var chunk in contentReference.Chunks)
+            foreach (var uri in contentStore.Repository.ListUris())
             {
-                contentStore.Repository.RemoveValue(chunk.ContentUri);
+                contentStore.Repository.RemoveValue(uri);
                 contentStore.Repository.StoreValue(
-                    chunk.ContentUri,
+                    uri,
                     new byte[] { 0xFF, 0xBA, 0xDD, 0xFF  });
             }
 

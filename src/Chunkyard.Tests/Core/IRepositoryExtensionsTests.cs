@@ -9,7 +9,7 @@ namespace Chunkyard.Tests.Core
     public static class IRepositoryExtensionsTests
     {
         [Fact]
-        public static void StoreValue_Detects_Stored_Value()
+        public static void StoreValue_Detects_Already_Stored_Value()
         {
             var repository = new MemoryRepository();
             var hashAlgorithmName = HashAlgorithmName.SHA256;

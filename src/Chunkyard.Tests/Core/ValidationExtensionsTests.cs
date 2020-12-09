@@ -10,6 +10,7 @@ namespace Chunkyard.Tests.Core
         public static void EnsureNotNull_Throws_If_Null()
         {
             string? value = null;
+
             var ex = Assert.Throws<ArgumentNullException>(
                 () => value.EnsureNotNull(nameof(value)));
 
@@ -21,8 +22,8 @@ namespace Chunkyard.Tests.Core
         {
             var expectedValue = "hello";
 
-            var actualValue = expectedValue
-                .EnsureNotNull(nameof(expectedValue));
+            var actualValue = expectedValue.EnsureNotNull(
+                nameof(expectedValue));
 
             Assert.Equal(expectedValue, actualValue);
         }
@@ -44,8 +45,8 @@ namespace Chunkyard.Tests.Core
         {
             var expectedValue = "hello!";
 
-            var actualValue = expectedValue
-                .EnsureNotNullOrEmpty(nameof(expectedValue));
+            var actualValue = expectedValue.EnsureNotNullOrEmpty(
+                nameof(expectedValue));
 
             Assert.Equal(expectedValue, actualValue);
         }
