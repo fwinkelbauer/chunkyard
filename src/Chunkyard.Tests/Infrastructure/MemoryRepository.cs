@@ -88,7 +88,7 @@ namespace Chunkyard.Tests.Infrastructure
         {
             foreach (var contentUri in contentUris)
             {
-                _valuesByUri[contentUri] = new byte[] { 0xFF, 0xBA, 0xDD, 0xFF};
+                _valuesByUri[contentUri] = new byte[] { 0xFF, 0xBA, 0xDD, 0xFF };
             }
         }
     }
