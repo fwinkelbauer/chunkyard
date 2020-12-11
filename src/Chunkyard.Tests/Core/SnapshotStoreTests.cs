@@ -169,8 +169,7 @@ namespace Chunkyard.Tests.Core
 
             var snapshot = snapshotStore.GetSnapshot(logPosition);
             var contentUris = snapshot.ContentReferences
-                .Select(contentReference => contentReference.Chunks)
-                .SelectMany(chunk => chunk)
+                .SelectMany(contentReference => contentReference.Chunks)
                 .Select(chunk => chunk.ContentUri);
 
             repository.RemoveUris(contentUris);
@@ -192,8 +191,7 @@ namespace Chunkyard.Tests.Core
 
             var snapshot = snapshotStore.GetSnapshot(logPosition);
             var contentUris = snapshot.ContentReferences
-                .Select(contentReference => contentReference.Chunks)
-                .SelectMany(chunk => chunk)
+                .SelectMany(contentReference => contentReference.Chunks)
                 .Select(chunk => chunk.ContentUri);
 
             repository.CorruptUris(contentUris);

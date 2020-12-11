@@ -219,8 +219,7 @@ namespace Chunkyard.Core
         private Uri[] ListUris(IEnumerable<int> logPositions)
         {
             return logPositions
-                .Select(position => ListUris(position))
-                .SelectMany(position => position)
+                .SelectMany(position => ListUris(position))
                 .Distinct()
                 .ToArray();
         }
