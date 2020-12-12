@@ -124,6 +124,10 @@ namespace Chunkyard.Core
                 contentReference = _contentStore.RetrieveFromLog(logPosition)
                     .ContentReference;
             }
+            catch (ChunkyardException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new ChunkyardException(
@@ -250,6 +254,10 @@ namespace Chunkyard.Core
             {
                 return _contentStore.RetrieveDocument<Snapshot>(
                     contentReference);
+            }
+            catch (ChunkyardException)
+            {
+                throw;
             }
             catch (Exception e)
             {
