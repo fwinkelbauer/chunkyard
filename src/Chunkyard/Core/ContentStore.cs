@@ -191,7 +191,7 @@ namespace Chunkyard.Core
             if (!CurrentLogPosition.HasValue)
             {
                 throw new ChunkyardException(
-                    "Cannot load snapshot from an empty repository");
+                    "Cannot operate on an empty repository");
             }
 
             //  0: the first element

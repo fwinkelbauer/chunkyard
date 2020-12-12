@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 
 namespace Chunkyard.Core
 {
@@ -41,7 +42,17 @@ namespace Chunkyard.Core
             byte[] plaintext = new byte[ciphertext.Length];
 
             using var aesGcm = new AesGcm(key);
-            aesGcm.Decrypt(nonce, ciphertext, tag, plaintext);
+
+            try
+            {
+                aesGcm.Decrypt(nonce, ciphertext, tag, plaintext);
+            }
+            catch (Exception e)
+            {
+                throw new ChunkyardException(
+                    "Could not decrypt data",
+                    e);
+            }
 
             return plaintext;
         }
