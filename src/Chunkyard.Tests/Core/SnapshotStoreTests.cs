@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using Chunkyard.Core;
 using Chunkyard.Tests.Infrastructure;
 using Xunit;
@@ -204,11 +205,10 @@ namespace Chunkyard.Tests.Core
         public static void Restore_Writes_Content_To_Streams()
         {
             var snapshotStore = CreateSnapshotStore();
-            var content = new byte[] { 0x11, 0x22, 0x33, 0x44 };
 
             var logPosition = snapshotStore.AppendSnapshot(
                 new[] { "some content" },
-                OpenStream(content),
+                OpenStream(),
                 DateTime.Now);
 
             var actualContentName = "";
@@ -223,7 +223,9 @@ namespace Chunkyard.Tests.Core
             snapshotStore.RestoreSnapshot(logPosition, "", openWrite);
 
             Assert.Equal("some content", actualContentName);
-            Assert.Equal(content, writeStream.ToArray());
+            Assert.Equal(
+                ToContent("some content"),
+                writeStream.ToArray());
         }
 
         [Fact]
@@ -353,13 +355,14 @@ namespace Chunkyard.Tests.Core
                 destinationRepository.ListLogPositions());
         }
 
-        private static Func<string, Stream> OpenStream(
-            byte[]? content = null)
+        private static Func<string, Stream> OpenStream()
         {
-            return (s) => new MemoryStream(
-                content == null
-                    ? new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }
-                    : content);
+            return s => new MemoryStream(ToContent(s));
+        }
+
+        private static byte[] ToContent(string contentName)
+        {
+            return Encoding.UTF8.GetBytes(contentName);
         }
 
         private static SnapshotStore CreateSnapshotStore(
