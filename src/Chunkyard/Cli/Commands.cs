@@ -207,20 +207,23 @@ namespace Chunkyard.Cli
                 new CreateOptions(
                     config.Repository,
                     config.Files,
-                    config.ExcludePatterns,
-                    config.Cached,
-                    FastCdc.DefaultMin,
-                    FastCdc.DefaultAvg,
-                    FastCdc.DefaultMax));
+                    (IEnumerable<string>?)config.ExcludePatterns ?? new List<string>(),
+                    config.Cached ?? false,
+                    config.Min ?? FastCdc.DefaultMin,
+                    config.Avg ?? FastCdc.DefaultAvg,
+                    config.Max ?? FastCdc.DefaultMax));
 
-            KeepSnapshots(
-                new KeepOptions(
-                    config.Repository,
-                    config.LatestCount));
+            if (config.LatestCount.HasValue)
+            {
+                KeepSnapshots(
+                    new KeepOptions(
+                        config.Repository,
+                        config.LatestCount.Value));
 
-            GarbageCollect(
-                new GarbageCollectOptions(
-                    config.Repository));
+                GarbageCollect(
+                    new GarbageCollectOptions(
+                        config.Repository));
+            }
         }
 
         public static void CopySnapshots(CopyOptions o)
