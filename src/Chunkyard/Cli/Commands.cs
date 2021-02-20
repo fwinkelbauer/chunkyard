@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -22,6 +23,9 @@ namespace Chunkyard.Cli
 
         private static readonly HashAlgorithmName DefaultAlgorithm =
             HashAlgorithmName.SHA256;
+
+        private static Dictionary<Uri, IContentStore> _contentStores =
+            new Dictionary<Uri, IContentStore>();
 
         public static void PreviewFiles(PreviewOptions o)
         {
@@ -194,6 +198,31 @@ namespace Chunkyard.Cli
                 .GarbageCollect();
         }
 
+        public static void Dot(DotOptions o)
+        {
+            var config = DataConvert.ToObject<DotConfig>(
+                File.ReadAllBytes(o.File));
+
+            CreateSnapshot(
+                new CreateOptions(
+                    config.Repository,
+                    config.Files,
+                    config.ExcludePatterns,
+                    config.Cached,
+                    FastCdc.DefaultMin,
+                    FastCdc.DefaultAvg,
+                    FastCdc.DefaultMax));
+
+            KeepSnapshots(
+                new KeepOptions(
+                    config.Repository,
+                    config.LatestCount));
+
+            GarbageCollect(
+                new GarbageCollectOptions(
+                    config.Repository));
+        }
+
         public static void CopySnapshots(CopyOptions o)
         {
             var sourceStore = CreateSnapshotStore(o.SourceRepository);
@@ -228,13 +257,22 @@ namespace Chunkyard.Cli
             IRepository repository,
             FastCdc? fastCdc = null)
         {
-            return new PrintingContentStore(
+            if (_contentStores.ContainsKey(repository.RepositoryUri))
+            {
+                return _contentStores[repository.RepositoryUri];
+            }
+
+            var contentStore = new PrintingContentStore(
                 new ContentStore(
                     repository,
                     fastCdc ?? new FastCdc(),
                     DefaultAlgorithm,
                     new EnvironmentPrompt(
                         new ConsolePrompt())));
+
+            _contentStores.Add(repository.RepositoryUri, contentStore);
+
+            return contentStore;
         }
 
         private static IRepository CreateRepository(

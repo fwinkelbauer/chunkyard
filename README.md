@@ -103,6 +103,23 @@ chunkyard keep -r "$repo" --latest 4
 chunkyard gc -r "$repo"
 ```
 
+The same backup process can be achieved by using a `.chunkyard` file with the
+`dot` command:
+
+``` json
+{
+  "Repository": "/backup/location",
+  "Files": [
+    "~/Music",
+    "~/Pictures",
+    "~/Videos"
+  ],
+  "ExcludePatterns": [],
+  "Cached": true,
+  "LatestCount": 4
+}
+```
+
 [fastcdc-rs]: https://github.com/nlfiedler/fastcdc-rs
 [fastcdc-py]: https://github.com/titusz/fastcdc-py
 [backup-tools]: https://github.com/restic/others
