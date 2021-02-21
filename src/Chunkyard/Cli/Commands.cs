@@ -91,18 +91,10 @@ namespace Chunkyard.Cli
                     Path.Combine(parent, subPath));
             }
 
-            var logPosition = snapshotStore.AppendSnapshot(
+            snapshotStore.AppendSnapshot(
                 contentNames,
                 openRead,
                 DateTime.Now);
-
-            var snapshotExists = snapshotStore.CheckSnapshotExists(logPosition);
-
-            if (!snapshotExists)
-            {
-                throw new ChunkyardException(
-                    "Missign content after creating snapshot");
-            }
         }
 
         public static void CheckSnapshot(CheckOptions o)
@@ -224,6 +216,13 @@ namespace Chunkyard.Cli
                     new GarbageCollectOptions(
                         config.Repository));
             }
+
+            CheckSnapshot(
+                new CheckOptions(
+                    config.Repository,
+                    Commands.LatestLogPosition,
+                    "",
+                    false));
         }
 
         public static void CopySnapshots(CopyOptions o)

@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The name of the argument `log-position` to `snapshot` for all CLI verbs
 
+### Removed
+
+- A shallow check after creating a new snapshot using the `create` command. This
+  feature is now part of the `dot` command.
+
 ## 4.0.0 - 2020-11-29
 
 ### Changed
