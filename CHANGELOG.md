@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 5.0.0 - 2021-02-23
+
 ### Added
 
 - The `dot` command
