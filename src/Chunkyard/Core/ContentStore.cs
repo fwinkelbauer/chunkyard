@@ -113,7 +113,7 @@ namespace Chunkyard.Core
             contentReference.EnsureNotNull(nameof(contentReference));
 
             return contentReference.Chunks
-                .Select(chunk => _repository.UriValid(chunk.ContentUri))
+                .Select(chunk => _repository.ValueValid(chunk.ContentUri))
                 .Aggregate(true, (total, next) => total &= next);
         }
 

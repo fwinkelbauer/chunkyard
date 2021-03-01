@@ -33,16 +33,16 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void UriValid_Returns_False_If_Not_Exists()
+        public static void ValueValid_Returns_False_If_Not_Exists()
         {
             var repository = new MemoryRepository();
             var contentUri = new Uri("sha256://abcabcabc/");
 
-            Assert.False(repository.UriValid(contentUri));
+            Assert.False(repository.ValueValid(contentUri));
         }
 
         [Fact]
-        public static void UriValid_Returns_False_If_Hash_Mismatch()
+        public static void ValueValid_Returns_False_If_Hash_Mismatch()
         {
             var repository = new MemoryRepository();
             var contentUri = new Uri("sha256://badbadbad/");
@@ -50,11 +50,11 @@ namespace Chunkyard.Tests.Core
 
             repository.StoreValue(contentUri, content);
 
-            Assert.False(repository.UriValid(contentUri));
+            Assert.False(repository.ValueValid(contentUri));
         }
 
         [Fact]
-        public static void UriValid_Returns_True_If_Hash_Match()
+        public static void ValueValid_Returns_True_If_Hash_Match()
         {
             var repository = new MemoryRepository();
             var contentUri = new Uri("sha256://a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89/");
@@ -62,7 +62,7 @@ namespace Chunkyard.Tests.Core
 
             repository.StoreValue(contentUri, content);
 
-            Assert.True(repository.UriValid(contentUri));
+            Assert.True(repository.ValueValid(contentUri));
         }
 
         [Fact]
