@@ -11,56 +11,24 @@ namespace Chunkyard.Core
     /// </summary>
     public class ContentStore : IContentStore
     {
-        private readonly IRepository _repository;
         private readonly FastCdc _fastCdc;
         private readonly HashAlgorithmName _hashAlgorithmName;
-        private readonly byte[] _salt;
-        private readonly int _iterations;
-        private readonly byte[] _key;
 
         public ContentStore(
             IRepository repository,
             FastCdc fastCdc,
-            HashAlgorithmName hashAlgorithmName,
-            IPrompt prompt)
+            HashAlgorithmName hashAlgorithmName)
         {
-            _repository = repository.EnsureNotNull(nameof(repository));
+            Repository = repository.EnsureNotNull(nameof(repository));
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
-
-            string? password;
-
-            prompt.EnsureNotNull(nameof(prompt));
-
-            var logPositions = repository.ListLogPositions();
-            CurrentLogPosition = logPositions.Length == 0
-                ? null
-                : logPositions[^1];
-
-            if (CurrentLogPosition == null)
-            {
-                password = prompt.NewPassword();
-                _salt = AesGcmCrypto.GenerateSalt();
-                _iterations = AesGcmCrypto.Iterations;
-            }
-            else
-            {
-                var logReference = RetrieveFromLog(
-                    repository,
-                    CurrentLogPosition.Value);
-
-                password = prompt.ExistingPassword();
-                _salt = logReference.Salt;
-                _iterations = logReference.Iterations;
-            }
-
-            _key = AesGcmCrypto.PasswordToKey(password, _salt, _iterations);
         }
 
-        public int? CurrentLogPosition { get; private set; }
+        public IRepository Repository { get; }
 
         public void RetrieveContent(
             ContentReference contentReference,
+            byte[] key,
             Stream outputStream)
         {
             outputStream.EnsureNotNull(nameof(outputStream));
@@ -70,7 +38,7 @@ namespace Chunkyard.Core
             {
                 // Strip away the cryptographic details which we added when
                 // storing the value
-                var value = _repository.RetrieveValue(chunk.ContentUri)
+                var value = Repository.RetrieveValue(chunk.ContentUri)
                     .Skip(AesGcmCrypto.NonceBytes)
                     .SkipLast(AesGcmCrypto.TagBytes)
                     .ToArray();
@@ -78,7 +46,7 @@ namespace Chunkyard.Core
                 var decryptedData = AesGcmCrypto.Decrypt(
                     value,
                     chunk.Tag,
-                    _key,
+                    key,
                     contentReference.Nonce);
 
                 outputStream.Write(decryptedData);
@@ -88,6 +56,7 @@ namespace Chunkyard.Core
         public ContentReference StoreContent(
             Stream inputStream,
             string contentName,
+            byte[] key,
             byte[] nonce,
             ContentType type,
             out bool isNewContent)
@@ -95,7 +64,7 @@ namespace Chunkyard.Core
             return new ContentReference(
                 contentName,
                 nonce,
-                WriteChunks(nonce, inputStream, out isNewContent),
+                WriteChunks(key, nonce, inputStream, out isNewContent),
                 type);
         }
 
@@ -104,7 +73,7 @@ namespace Chunkyard.Core
             contentReference.EnsureNotNull(nameof(contentReference));
 
             return contentReference.Chunks
-                .Select(chunk => _repository.ValueExists(chunk.ContentUri))
+                .Select(chunk => Repository.ValueExists(chunk.ContentUri))
                 .Aggregate(true, (total, next) => total &= next);
         }
 
@@ -113,44 +82,27 @@ namespace Chunkyard.Core
             contentReference.EnsureNotNull(nameof(contentReference));
 
             return contentReference.Chunks
-                .Select(chunk => _repository.ValueValid(chunk.ContentUri))
+                .Select(chunk => Repository.ValueValid(chunk.ContentUri))
                 .Aggregate(true, (total, next) => total &= next);
         }
 
         public int AppendToLog(
             int newLogPosition,
-            ContentReference contentReference)
+            LogReference logReference)
         {
-            var logReference = new LogReference(
-                contentReference,
-                _salt,
-                _iterations);
-
-            CurrentLogPosition = _repository.AppendToLog(
+            return Repository.AppendToLog(
                 newLogPosition,
                 DataConvert.ToBytes(logReference));
-
-            return CurrentLogPosition.Value;
         }
 
         public LogReference RetrieveFromLog(int logPosition)
         {
-            return RetrieveFromLog(
-                _repository,
-                ResolveLogPosition(logPosition));
-        }
-
-        private static LogReference RetrieveFromLog(
-            IRepository repository,
-            int logPosition)
-        {
-            repository.EnsureNotNull(nameof(repository));
-
             return DataConvert.ToObject<LogReference>(
-                repository.RetrieveFromLog(logPosition));
+                Repository.RetrieveFromLog(logPosition));
         }
 
         private IImmutableList<ChunkReference> WriteChunks(
+            byte[] key,
             byte[] nonce,
             Stream stream,
             out bool hasNewChunks)
@@ -163,7 +115,7 @@ namespace Chunkyard.Core
             {
                 var (encryptedData, tag) = AesGcmCrypto.Encrypt(
                     chunkedData,
-                    _key,
+                    key,
                     nonce);
 
                 // We add all cryptographic details needed to decrypt a piece of
@@ -174,7 +126,7 @@ namespace Chunkyard.Core
                     .Concat(tag)
                     .ToArray();
 
-                var contentUri = _repository.StoreValue(
+                var contentUri = Repository.StoreValue(
                     _hashAlgorithmName,
                     value,
                     out var isNewValue);
@@ -184,23 +136,6 @@ namespace Chunkyard.Core
             }
 
             return chunkReferences.ToImmutable();
-        }
-
-        private int ResolveLogPosition(int logPosition)
-        {
-            if (!CurrentLogPosition.HasValue)
-            {
-                throw new ChunkyardException(
-                    "Cannot operate on an empty repository");
-            }
-
-            //  0: the first element
-            //  1: the second element
-            // -1: the last element
-            // -2: the second-last element
-            return logPosition >= 0
-                ? logPosition
-                : CurrentLogPosition.Value + logPosition + 1;
         }
     }
 }

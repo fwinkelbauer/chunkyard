@@ -8,15 +8,17 @@ namespace Chunkyard.Core
     /// </summary>
     public interface IContentStore
     {
-        int? CurrentLogPosition { get; }
+        IRepository Repository { get; }
 
         void RetrieveContent(
             ContentReference contentReference,
+            byte[] key,
             Stream outputStream);
 
         ContentReference StoreContent(
             Stream inputStream,
             string contentName,
+            byte[] key,
             byte[] nonce,
             ContentType type,
             out bool isNewContent);
@@ -27,7 +29,7 @@ namespace Chunkyard.Core
 
         int AppendToLog(
             int newLogPosition,
-            ContentReference contentReference);
+            LogReference logReference);
 
         LogReference RetrieveFromLog(int logPosition);
     }

@@ -13,7 +13,7 @@ namespace Chunkyard.Tests.Core
 
             var password = "secret";
             var salt = AesGcmCrypto.GenerateSalt();
-            var iterations = 1000;
+            var iterations = AesGcmCrypto.Iterations;
             var nonce = AesGcmCrypto.GenerateNonce();
 
             var key = AesGcmCrypto.PasswordToKey(password, salt, iterations);

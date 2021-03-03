@@ -24,6 +24,7 @@ namespace Chunkyard.Infrastructure
         public override ContentReference StoreContent(
             Stream inputStream,
             string contentName,
+            byte[] key,
             byte[] nonce,
             ContentType type,
             out bool isNewContent)
@@ -33,6 +34,7 @@ namespace Chunkyard.Infrastructure
                 return Store.StoreContent(
                     inputStream,
                     contentName,
+                    key,
                     nonce,
                     type,
                     out isNewContent);
@@ -49,6 +51,7 @@ namespace Chunkyard.Infrastructure
             var contentReference = Store.StoreContent(
                 inputStream,
                 contentName,
+                key,
                 nonce,
                 type,
                 out isNewContent);

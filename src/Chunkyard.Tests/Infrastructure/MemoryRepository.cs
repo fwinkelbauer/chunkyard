@@ -75,21 +75,5 @@ namespace Chunkyard.Tests.Infrastructure
         {
             return _valuesByLog.Keys.ToArray();
         }
-
-        public void RemoveUris(IEnumerable<Uri> contentUris)
-        {
-            foreach (var contentUri in contentUris)
-            {
-                _valuesByUri.Remove(contentUri);
-            }
-        }
-
-        public void CorruptUris(IEnumerable<Uri> contentUris)
-        {
-            foreach (var contentUri in contentUris)
-            {
-                _valuesByUri[contentUri] = new byte[] { 0xFF, 0xBA, 0xDD, 0xFF };
-            }
-        }
     }
 }

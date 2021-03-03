@@ -13,20 +13,22 @@ namespace Chunkyard.Core
             Store = store;
         }
 
-        protected IContentStore Store { get; }
+        public IRepository Repository => Store.Repository;
 
-        public virtual int? CurrentLogPosition => Store.CurrentLogPosition;
+        protected IContentStore Store { get; }
 
         public virtual void RetrieveContent(
             ContentReference contentReference,
+            byte[] key,
             Stream outputStream)
         {
-            Store.RetrieveContent(contentReference, outputStream);
+            Store.RetrieveContent(contentReference, key, outputStream);
         }
 
         public virtual ContentReference StoreContent(
             Stream inputStream,
             string contentName,
+            byte[] key,
             byte[] nonce,
             ContentType type,
             out bool isNewContent)
@@ -34,6 +36,7 @@ namespace Chunkyard.Core
             return Store.StoreContent(
                 inputStream,
                 contentName,
+                key,
                 nonce,
                 type,
                 out isNewContent);
@@ -51,11 +54,11 @@ namespace Chunkyard.Core
 
         public virtual int AppendToLog(
             int newLogPosition,
-            ContentReference contentReference)
+            LogReference logReference)
         {
             return Store.AppendToLog(
                 newLogPosition,
-                contentReference);
+                logReference);
         }
 
         public virtual LogReference RetrieveFromLog(int logPosition)

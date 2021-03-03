@@ -81,7 +81,7 @@ namespace Chunkyard.Cli
                     cacheDirectory);
             }
 
-            var snapshotStore = new SnapshotStore(contentStore, repository);
+            var snapshotStore = CreateSnapshotStore(contentStore);
 
             var contentNames = FileFetcher.ToContentNames(parent, files);
 
@@ -220,7 +220,7 @@ namespace Chunkyard.Cli
             CheckSnapshot(
                 new CheckOptions(
                     config.Repository,
-                    Commands.LatestLogPosition,
+                    LatestLogPosition,
                     "",
                     false));
         }
@@ -250,9 +250,17 @@ namespace Chunkyard.Cli
             IRepository repository,
             FastCdc? fastCdc = null)
         {
+            return CreateSnapshotStore(
+                CreateContentStore(repository, fastCdc));
+        }
+
+        private static SnapshotStore CreateSnapshotStore(
+            IContentStore contentStore)
+        {
             return new SnapshotStore(
-                CreateContentStore(repository, fastCdc),
-                repository);
+                contentStore,
+                new EnvironmentPrompt(
+                    new ConsolePrompt()));
         }
 
         private static IContentStore CreateContentStore(
@@ -268,9 +276,7 @@ namespace Chunkyard.Cli
                 new ContentStore(
                     repository,
                     fastCdc ?? new FastCdc(),
-                    DefaultAlgorithm,
-                    new EnvironmentPrompt(
-                        new ConsolePrompt())));
+                    DefaultAlgorithm));
 
             _contentStores.Add(repository.RepositoryUri, contentStore);
 
@@ -304,6 +310,7 @@ namespace Chunkyard.Cli
             public override ContentReference StoreContent(
                 Stream inputStream,
                 string contentName,
+                byte[] key,
                 byte[] nonce,
                 ContentType type,
                 out bool isNewContent)
@@ -311,6 +318,7 @@ namespace Chunkyard.Cli
                 var contentReference = base.StoreContent(
                     inputStream,
                     contentName,
+                    key,
                     nonce,
                     type,
                     out isNewContent);
@@ -351,9 +359,10 @@ namespace Chunkyard.Cli
 
             public override void RetrieveContent(
                 ContentReference contentReference,
+                byte[] key,
                 Stream outputStream)
             {
-                base.RetrieveContent(contentReference, outputStream);
+                base.RetrieveContent(contentReference, key, outputStream);
 
                 if (contentReference.Type == ContentType.Blob)
                 {
@@ -382,7 +391,7 @@ namespace Chunkyard.Cli
             {
                 base.RemoveValue(contentUri);
 
-                Console.WriteLine($"Removed snapshot: {contentUri}");
+                Console.WriteLine($"Removed content: {contentUri}");
             }
 
             public override void RemoveFromLog(int logPosition)

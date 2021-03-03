@@ -11,7 +11,7 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void StoreValue_Detects_Already_Stored_Value()
         {
-            var repository = new MemoryRepository();
+            var repository = CreateRepository();
             var hashAlgorithmName = HashAlgorithmName.SHA256;
             var content = new byte[] { 0xFF };
             var expectedContentUri = new Uri("sha256://a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89/");
@@ -35,7 +35,7 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ValueValid_Returns_False_If_Not_Exists()
         {
-            var repository = new MemoryRepository();
+            var repository = CreateRepository();
             var contentUri = new Uri("sha256://abcabcabc/");
 
             Assert.False(repository.ValueValid(contentUri));
@@ -44,7 +44,7 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ValueValid_Returns_False_If_Hash_Mismatch()
         {
-            var repository = new MemoryRepository();
+            var repository = CreateRepository();
             var contentUri = new Uri("sha256://badbadbad/");
             var content = new byte[] { 0xFF };
 
@@ -56,7 +56,7 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ValueValid_Returns_True_If_Hash_Match()
         {
-            var repository = new MemoryRepository();
+            var repository = CreateRepository();
             var contentUri = new Uri("sha256://a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89/");
             var content = new byte[] { 0xFF };
 
@@ -68,7 +68,7 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void KeepLatestLogPositions_Keeps_Latest()
         {
-            var repository = new MemoryRepository();
+            var repository = CreateRepository();
             var content = new byte[] { 0xFF };
 
             repository.AppendToLog(0, content);
@@ -86,7 +86,7 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void KeepLatestLogPositions_Does_Nothing_If_It_Equals_Current_Size()
         {
-            var repository = new MemoryRepository();
+            var repository = CreateRepository();
             var content = new byte[] { 0xFF };
 
             repository.AppendToLog(0, content);
@@ -102,7 +102,7 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void KeepLatestLogPositions_Does_Nothing_If_Greater_Than_Current_Size()
         {
-            var repository = new MemoryRepository();
+            var repository = CreateRepository();
             var content = new byte[] { 0xFF };
 
             repository.AppendToLog(0, content);
@@ -118,7 +118,7 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void KeepLatestLogPositions_Can_Empty_Log()
         {
-            var repository = new MemoryRepository();
+            var repository = CreateRepository();
             var content = new byte[] { 0xFF };
 
             repository.AppendToLog(0, content);
@@ -127,6 +127,11 @@ namespace Chunkyard.Tests.Core
             repository.KeepLatestLogPositions(0);
 
             Assert.Empty(repository.ListLogPositions());
+        }
+
+        private static IRepository CreateRepository()
+        {
+            return new MemoryRepository();
         }
     }
 }

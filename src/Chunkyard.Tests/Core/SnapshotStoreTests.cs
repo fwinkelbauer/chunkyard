@@ -126,8 +126,7 @@ namespace Chunkyard.Tests.Core
                 OpenStream(),
                 DateTime.Now);
 
-            repository.RemoveUris(
-                repository.ListUris());
+            RemoveValues(repository, repository.ListUris());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotExists(logPosition));
@@ -147,8 +146,7 @@ namespace Chunkyard.Tests.Core
                 OpenStream(),
                 DateTime.Now);
 
-            repository.CorruptUris(
-                repository.ListUris());
+            CorruptValues(repository, repository.ListUris());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotExists(logPosition));
@@ -173,7 +171,7 @@ namespace Chunkyard.Tests.Core
                 .SelectMany(contentReference => contentReference.Chunks)
                 .Select(chunk => chunk.ContentUri);
 
-            repository.RemoveUris(contentUris);
+            RemoveValues(repository, contentUris);
 
             Assert.False(snapshotStore.CheckSnapshotExists(logPosition));
             Assert.False(snapshotStore.CheckSnapshotValid(logPosition));
@@ -195,7 +193,7 @@ namespace Chunkyard.Tests.Core
                 .SelectMany(contentReference => contentReference.Chunks)
                 .Select(chunk => chunk.ContentUri);
 
-            repository.CorruptUris(contentUris);
+            CorruptValues(repository, contentUris);
 
             Assert.True(snapshotStore.CheckSnapshotExists(logPosition));
             Assert.False(snapshotStore.CheckSnapshotValid(logPosition));
@@ -368,15 +366,35 @@ namespace Chunkyard.Tests.Core
         private static SnapshotStore CreateSnapshotStore(
             IRepository? repository = null)
         {
-            repository = repository ?? new MemoryRepository();
-
             return new SnapshotStore(
                 new ContentStore(
-                    repository,
+                    repository ?? new MemoryRepository(),
                     new FastCdc(),
-                    HashAlgorithmName.SHA256,
-                    new StaticPrompt()),
-                repository);
+                    HashAlgorithmName.SHA256),
+                new StaticPrompt());
+        }
+
+        private static void CorruptValues(
+            IRepository repository,
+            IEnumerable<Uri> contentUris)
+        {
+            foreach (var contentUri in contentUris)
+            {
+                repository.RemoveValue(contentUri);
+                repository.StoreValue(
+                    contentUri,
+                    new byte[] { 0xFF, 0xBA, 0xDD, 0xFF });
+            }
+        }
+
+        private static void RemoveValues(
+            IRepository repository,
+            IEnumerable<Uri> contentUris)
+        {
+            foreach (var contentUri in contentUris)
+            {
+                repository.RemoveValue(contentUri);
+            }
         }
     }
 }

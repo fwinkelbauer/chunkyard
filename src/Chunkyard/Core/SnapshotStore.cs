@@ -16,15 +16,54 @@ namespace Chunkyard.Core
 
         private readonly IContentStore _contentStore;
         private readonly IRepository _repository;
-        private readonly Dictionary<string, ContentReference> _knownContentReferences;
+        private readonly byte[] _salt;
+        private readonly int _iterations;
+        private readonly byte[] _key;
+
+        private int? _currentLogPosition;
+        private Snapshot? _currentSnapshot;
 
         public SnapshotStore(
             IContentStore contentStore,
-            IRepository repository)
+            IPrompt prompt)
         {
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
-            _repository = repository.EnsureNotNull(nameof(repository));
-            _knownContentReferences = new Dictionary<string, ContentReference>();
+            _repository = _contentStore.Repository;
+
+            prompt.EnsureNotNull(nameof(prompt));
+
+            var logPositions = _repository.ListLogPositions();
+            _currentLogPosition = logPositions.Length == 0
+                ? null
+                : logPositions[^1];
+
+            if (_currentLogPosition == null)
+            {
+                _salt = AesGcmCrypto.GenerateSalt();
+                _iterations = AesGcmCrypto.Iterations;
+                _key = AesGcmCrypto.PasswordToKey(
+                    prompt.NewPassword(),
+                    _salt,
+                    _iterations);
+
+                _currentSnapshot = null;
+            }
+            else
+            {
+                var logReference = contentStore.RetrieveFromLog(
+                    _currentLogPosition.Value);
+
+                _salt = logReference.Salt;
+                _iterations = logReference.Iterations;
+                _key = AesGcmCrypto.PasswordToKey(
+                    prompt.ExistingPassword(),
+                    _salt,
+                    _iterations);
+
+                _currentSnapshot = contentStore.RetrieveDocument<Snapshot>(
+                    logReference.ContentReference,
+                    _key);
+            }
         }
 
         public int AppendSnapshot(
@@ -32,8 +71,6 @@ namespace Chunkyard.Core
             Func<string, Stream> openRead,
             DateTime creationTime)
         {
-            RegisterPreviousContent();
-
             contentNames.EnsureNotNull(nameof(contentNames));
             openRead.EnsureNotNull(nameof(openRead));
 
@@ -45,35 +82,45 @@ namespace Chunkyard.Core
                     return _contentStore.StoreBlob(
                         contentStream,
                         contentName,
+                        _key,
                         GenerateNonce(contentName),
                         out _);
                 })
                 .ToImmutableArray();
 
-            var snapshotContentReference = _contentStore.StoreDocument(
-                new Snapshot(
-                    creationTime,
-                    contentReferences),
-                SnapshotFile,
-                AesGcmCrypto.GenerateNonce(),
-                out _);
+            var snapshot = new Snapshot(
+                creationTime,
+                contentReferences);
 
-            var newLogPosition = _contentStore.CurrentLogPosition.HasValue
-                ? _contentStore.CurrentLogPosition.Value + 1
+            var logReference = new LogReference(
+                _contentStore.StoreDocument(
+                    snapshot,
+                    SnapshotFile,
+                    _key,
+                    AesGcmCrypto.GenerateNonce(),
+                    out _),
+                _salt,
+                _iterations);
+
+            var newLogPosition = _currentLogPosition.HasValue
+                ? _currentLogPosition.Value + 1
                 : 0;
 
-            return _contentStore.AppendToLog(
+            _currentLogPosition = _contentStore.AppendToLog(
                 newLogPosition,
-                snapshotContentReference);
+                logReference);
+
+            _currentSnapshot = snapshot;
+
+            return _currentLogPosition.Value;
         }
 
         public bool CheckSnapshotExists(
             int logPosition,
             string fuzzyPattern = "")
         {
-            var snapshot = GetSnapshot(logPosition);
-            var filteredContentReferences = FuzzyFilter(
-                snapshot.ContentReferences,
+            var filteredContentReferences = ShowSnapshot(
+                logPosition,
                 fuzzyPattern);
 
             return filteredContentReferences
@@ -85,9 +132,8 @@ namespace Chunkyard.Core
             int logPosition,
             string fuzzyPattern = "")
         {
-            var snapshot = GetSnapshot(logPosition);
-            var filteredContentReferences = FuzzyFilter(
-                snapshot.ContentReferences,
+            var filteredContentReferences = ShowSnapshot(
+                logPosition,
                 fuzzyPattern);
 
             return filteredContentReferences
@@ -102,16 +148,15 @@ namespace Chunkyard.Core
         {
             openWrite.EnsureNotNull(nameof(openWrite));
 
-            var snapshot = GetSnapshot(logPosition);
-            var filteredContentReferences = FuzzyFilter(
-                snapshot.ContentReferences,
+            var filteredContentReferences = ShowSnapshot(
+                logPosition,
                 fuzzyPattern);
 
             foreach (var contentReference in filteredContentReferences)
             {
                 using var stream = openWrite(contentReference.Name);
 
-                _contentStore.RetrieveContent(contentReference, stream);
+                _contentStore.RetrieveContent(contentReference, _key, stream);
             }
         }
 
@@ -119,9 +164,11 @@ namespace Chunkyard.Core
         {
             ContentReference? contentReference;
 
+            var resolvedLogPosition = ResolveLogPosition(logPosition);
+
             try
             {
-                contentReference = _contentStore.RetrieveFromLog(logPosition)
+                contentReference = _contentStore.RetrieveFromLog(resolvedLogPosition)
                     .ContentReference;
             }
             catch (ChunkyardException)
@@ -131,7 +178,7 @@ namespace Chunkyard.Core
             catch (Exception e)
             {
                 throw new ChunkyardException(
-                    $"Snapshot #{logPosition} does not exist",
+                    $"Snapshot #{resolvedLogPosition} does not exist",
                     e);
             }
 
@@ -142,9 +189,11 @@ namespace Chunkyard.Core
             int logPosition,
             string fuzzyPattern = "")
         {
-            return FuzzyFilter(
-                GetSnapshot(logPosition).ContentReferences,
-                fuzzyPattern);
+            var fuzzy = new Fuzzy(fuzzyPattern);
+            var contentReferences = GetSnapshot(logPosition).ContentReferences;
+
+            return contentReferences.Where(c => fuzzy.IsMatch(c.Name))
+                .ToArray();
         }
 
         public void GarbageCollect()
@@ -248,12 +297,30 @@ namespace Chunkyard.Core
             return uris.ToArray();
         }
 
+        private int ResolveLogPosition(int logPosition)
+        {
+            if (!_currentLogPosition.HasValue)
+            {
+                throw new ChunkyardException(
+                    "Cannot operate on an empty repository");
+            }
+
+            //  0: the first element
+            //  1: the second element
+            // -1: the last element
+            // -2: the second-last element
+            return logPosition >= 0
+                ? logPosition
+                : _currentLogPosition.Value + logPosition + 1;
+        }
+
         private Snapshot GetSnapshot(ContentReference contentReference)
         {
             try
             {
                 return _contentStore.RetrieveDocument<Snapshot>(
-                    contentReference);
+                    contentReference,
+                    _key);
             }
             catch (ChunkyardException)
             {
@@ -267,43 +334,15 @@ namespace Chunkyard.Core
             }
         }
 
-        private void RegisterPreviousContent()
-        {
-            if (_contentStore.CurrentLogPosition == null)
-            {
-                return;
-            }
-
-            var currentSnapshot = GetSnapshot(
-                _contentStore.CurrentLogPosition.Value);
-
-            foreach (var contentReference in currentSnapshot.ContentReferences)
-            {
-                _knownContentReferences[contentReference.Name] =
-                    contentReference;
-            }
-        }
-
         private byte[] GenerateNonce(string contentName)
         {
-            _knownContentReferences.TryGetValue(
-                contentName,
-                out var knownContentReference);
-
             // Known files should be encrypted using the same nonce
-            return knownContentReference == null
-                ? AesGcmCrypto.GenerateNonce()
-                : knownContentReference.Nonce;
-        }
+            var previousNonce = _currentSnapshot?.ContentReferences
+                .Where(c => c.Name == contentName)
+                .Select(c => c.Nonce)
+                .FirstOrDefault();
 
-        private static ContentReference[] FuzzyFilter(
-            IEnumerable<ContentReference> contentReferences,
-            string fuzzyPattern)
-        {
-            var fuzzy = new Fuzzy(fuzzyPattern);
-
-            return contentReferences.Where(c => fuzzy.IsMatch(c.Name))
-                .ToArray();
+            return previousNonce ?? AesGcmCrypto.GenerateNonce();
         }
     }
 }

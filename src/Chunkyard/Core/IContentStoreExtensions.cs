@@ -9,7 +9,8 @@ namespace Chunkyard.Core
     {
         public static T RetrieveDocument<T>(
             this IContentStore store,
-            ContentReference contentReference)
+            ContentReference contentReference,
+            byte[] key)
             where T : notnull
         {
             store.EnsureNotNull(nameof(store));
@@ -18,6 +19,7 @@ namespace Chunkyard.Core
 
             store.RetrieveContent(
                 contentReference,
+                key,
                 memoryStream);
 
             return DataConvert.ToObject<T>(memoryStream.ToArray());
@@ -27,6 +29,7 @@ namespace Chunkyard.Core
             this IContentStore store,
             Stream inputStream,
             string contentName,
+            byte[] key,
             byte[] nonce,
             out bool isNewContent)
         {
@@ -35,6 +38,7 @@ namespace Chunkyard.Core
             return store.StoreContent(
                 inputStream,
                 contentName,
+                key,
                 nonce,
                 ContentType.Blob,
                 out isNewContent);
@@ -44,6 +48,7 @@ namespace Chunkyard.Core
             this IContentStore store,
             T value,
             string contentName,
+            byte[] key,
             byte[] nonce,
             out bool isNewContent)
             where T : notnull
@@ -56,6 +61,7 @@ namespace Chunkyard.Core
             return store.StoreContent(
                 memoryStream,
                 contentName,
+                key,
                 nonce,
                 ContentType.Document,
                 out isNewContent);
