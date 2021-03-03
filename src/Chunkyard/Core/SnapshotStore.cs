@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Chunkyard.Core
 {
@@ -75,6 +76,8 @@ namespace Chunkyard.Core
             openRead.EnsureNotNull(nameof(openRead));
 
             var contentReferences = contentNames
+                .Distinct()
+                .AsParallel()
                 .Select(contentName =>
                 {
                     using var contentStream = openRead(contentName);
@@ -124,6 +127,7 @@ namespace Chunkyard.Core
                 fuzzyPattern);
 
             return filteredContentReferences
+                .AsParallel()
                 .Select(cr => _contentStore.ContentExists(cr))
                 .Aggregate(true, (total, next) => total &= next);
         }
@@ -137,6 +141,7 @@ namespace Chunkyard.Core
                 fuzzyPattern);
 
             return filteredContentReferences
+                .AsParallel()
                 .Select(cr => _contentStore.ContentValid(cr))
                 .Aggregate(true, (total, next) => total &= next);
         }
@@ -152,12 +157,18 @@ namespace Chunkyard.Core
                 logPosition,
                 fuzzyPattern);
 
-            foreach (var contentReference in filteredContentReferences)
-            {
-                using var stream = openWrite(contentReference.Name);
+            Parallel.ForEach(
+                filteredContentReferences,
+                contentReference =>
+                {
+                    using var stream = openWrite(
+                        contentReference.Name);
 
-                _contentStore.RetrieveContent(contentReference, _key, stream);
-            }
+                    _contentStore.RetrieveContent(
+                        contentReference,
+                        _key,
+                        stream);
+                });
         }
 
         public Snapshot GetSnapshot(int logPosition)
@@ -193,6 +204,7 @@ namespace Chunkyard.Core
             var contentReferences = GetSnapshot(logPosition).ContentReferences;
 
             return contentReferences.Where(c => fuzzy.IsMatch(c.Name))
+                .Distinct()
                 .ToArray();
         }
 
@@ -201,10 +213,9 @@ namespace Chunkyard.Core
             var allContentUris = _repository.ListUris();
             var usedUris = ListUris();
 
-            foreach (var contentUri in allContentUris.Except(usedUris))
-            {
-                _repository.RemoveValue(contentUri);
-            }
+            Parallel.ForEach(
+                allContentUris.Except(usedUris),
+                contentUri => _repository.RemoveValue(contentUri));
         }
 
         public int[] CopySnapshots(IRepository otherRepository)
@@ -246,12 +257,14 @@ namespace Chunkyard.Core
             var urisToCopy = ListUris(logPositionsToCopy)
                 .Except(otherRepository.ListUris());
 
-            foreach (var contentUri in urisToCopy)
-            {
-                otherRepository.StoreValue(
-                    contentUri,
-                    _repository.RetrieveValue(contentUri));
-            }
+            Parallel.ForEach(
+                urisToCopy,
+                contentUri =>
+                {
+                    otherRepository.StoreValue(
+                        contentUri,
+                        _repository.RetrieveValue(contentUri));
+                });
 
             foreach (var logPosition in logPositionsToCopy)
             {

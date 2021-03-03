@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- Parallelism for several read/write operations
+
 ### Changed
 
 - The `dot` command to search for two default files (`config/chunkyard.json` and

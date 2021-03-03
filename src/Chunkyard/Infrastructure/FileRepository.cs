@@ -11,11 +11,13 @@ namespace Chunkyard.Infrastructure
     /// </summary>
     public class FileRepository : IRepository
     {
+        private readonly NamedMonitor _monitor;
         private readonly string _contentDirectory;
         private readonly string _refLogDirectory;
 
         public FileRepository(string directory)
         {
+            _monitor = new NamedMonitor();
             _contentDirectory = Path.Combine(directory, "content");
             _refLogDirectory = Path.Combine(directory, "reflog");
 
@@ -28,21 +30,24 @@ namespace Chunkyard.Infrastructure
         {
             var file = ToFilePath(contentUri);
 
-            if (File.Exists(file))
+            lock (_monitor[file])
             {
-                return false;
+                if (File.Exists(file))
+                {
+                    return false;
+                }
+
+                DirectoryUtil.CreateParent(file);
+
+                using var fileStream = new FileStream(
+                    file,
+                    FileMode.CreateNew,
+                    FileAccess.Write);
+
+                fileStream.Write(value);
+
+                return true;
             }
-
-            DirectoryUtil.CreateParent(file);
-
-            using var fileStream = new FileStream(
-                file,
-                FileMode.CreateNew,
-                FileAccess.Write);
-
-            fileStream.Write(value);
-
-            return true;
         }
 
         public byte[] RetrieveValue(Uri contentUri)

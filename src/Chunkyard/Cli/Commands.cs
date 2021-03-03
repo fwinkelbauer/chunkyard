@@ -24,8 +24,8 @@ namespace Chunkyard.Cli
         private static readonly HashAlgorithmName DefaultAlgorithm =
             HashAlgorithmName.SHA256;
 
-        private static Dictionary<Uri, IContentStore> _contentStores =
-            new Dictionary<Uri, IContentStore>();
+        private static Dictionary<Uri, SnapshotStore> _snapshotStores =
+            new Dictionary<Uri, SnapshotStore>();
 
         public static void PreviewFiles(PreviewOptions o)
         {
@@ -268,30 +268,32 @@ namespace Chunkyard.Cli
         private static SnapshotStore CreateSnapshotStore(
             IContentStore contentStore)
         {
-            return new SnapshotStore(
+            var repository = contentStore.Repository;
+
+            if (_snapshotStores.ContainsKey(repository.RepositoryUri))
+            {
+                return _snapshotStores[repository.RepositoryUri];
+            }
+
+            var snapshotStore = new SnapshotStore(
                 contentStore,
                 new EnvironmentPrompt(
                     new ConsolePrompt()));
+
+            _snapshotStores[repository.RepositoryUri] = snapshotStore;
+
+            return snapshotStore;
         }
 
         private static IContentStore CreateContentStore(
             IRepository repository,
             FastCdc? fastCdc = null)
         {
-            if (_contentStores.ContainsKey(repository.RepositoryUri))
-            {
-                return _contentStores[repository.RepositoryUri];
-            }
-
-            var contentStore = new PrintingContentStore(
+            return new PrintingContentStore(
                 new ContentStore(
                     repository,
                     fastCdc ?? new FastCdc(),
                     DefaultAlgorithm));
-
-            _contentStores.Add(repository.RepositoryUri, contentStore);
-
-            return contentStore;
         }
 
         private static IRepository CreateRepository(

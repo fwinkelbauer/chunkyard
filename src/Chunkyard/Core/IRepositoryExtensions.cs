@@ -26,7 +26,9 @@ namespace Chunkyard.Core
             return contentUri;
         }
 
-        public static bool ValueValid(this IRepository repository, Uri contentUri)
+        public static bool ValueValid(
+            this IRepository repository,
+            Uri contentUri)
         {
             repository.EnsureNotNull(nameof(repository));
             contentUri.EnsureNotNull(nameof(contentUri));
