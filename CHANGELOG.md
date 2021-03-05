@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The `dot` command to search for two default files (`config/chunkyard.json` and
+  `.chunkyard`)
+
 ## 5.0.0 - 2021-02-23
 
 ### Added

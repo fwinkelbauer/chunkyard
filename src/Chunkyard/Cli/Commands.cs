@@ -192,8 +192,19 @@ namespace Chunkyard.Cli
 
         public static void Dot(DotOptions o)
         {
+            static string? FindFile(string file)
+            {
+                return File.Exists(file)
+                    ? file
+                    : null;
+            }
+
+            var file = o.File
+                ?? FindFile(".config/chunkyard.json")
+                ?? ".chunkyard";
+
             var config = DataConvert.ToObject<DotConfig>(
-                File.ReadAllBytes(o.File));
+                File.ReadAllBytes(file));
 
             CreateSnapshot(
                 new CreateOptions(
