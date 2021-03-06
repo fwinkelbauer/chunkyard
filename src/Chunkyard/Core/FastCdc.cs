@@ -321,6 +321,11 @@ namespace Chunkyard.Core
         {
         }
 
+        public int ExpectedChunkCount(long length)
+        {
+            return (int)(length / _avgSize);
+        }
+
         public IEnumerable<byte[]> SplitIntoChunks(Stream sourceStream)
         {
             sourceStream.EnsureNotNull(nameof(sourceStream));

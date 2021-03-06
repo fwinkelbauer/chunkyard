@@ -148,29 +148,41 @@ namespace Chunkyard.Core
             byte[] nonce,
             Stream stream)
         {
-            return _fastCdc.SplitIntoChunks(stream)
-                .Select(chunk =>
-                {
-                    var (encryptedData, tag) = AesGcmCrypto.Encrypt(
-                        chunk,
-                        key,
-                        nonce);
+            ChunkReference WriteChunk(byte[] chunk)
+            {
+                var (encryptedData, tag) = AesGcmCrypto.Encrypt(
+                    chunk,
+                    key,
+                    nonce);
 
-                    // We add all cryptographic details needed to decrypt a piece of
-                    // content so that we can recover it even if a snapshot gets
-                    // corrupted.
-                    var value = nonce
-                        .Concat(encryptedData)
-                        .Concat(tag)
-                        .ToArray();
+                // We add all cryptographic details needed to decrypt a piece of
+                // content so that we can recover it even if a snapshot gets
+                // corrupted.
+                var value = nonce
+                    .Concat(encryptedData)
+                    .Concat(tag)
+                    .ToArray();
 
-                    var contentUri = Repository.StoreValue(
-                        _hashAlgorithmName,
-                        value);
+                var contentUri = Repository.StoreValue(
+                    _hashAlgorithmName,
+                    value);
 
-                    return new ChunkReference(contentUri, tag);
-                })
-                .ToImmutableArray();
+                return new ChunkReference(contentUri, tag);
+            }
+
+            if (_fastCdc.ExpectedChunkCount(stream.Length) > 100)
+            {
+                return _fastCdc.SplitIntoChunks(stream)
+                    .AsParallel()
+                    .Select(WriteChunk)
+                    .ToImmutableArray();
+            }
+            else
+            {
+                return _fastCdc.SplitIntoChunks(stream)
+                    .Select(WriteChunk)
+                    .ToImmutableArray();
+            }
         }
     }
 }
