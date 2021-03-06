@@ -78,25 +78,28 @@ namespace Chunkyard.Core
                 .AsParallel()
                 .Select(blob =>
                 {
-                    var cached = _useCache
-                        ? _currentSnapshot?.BlobReferences
-                            .Where(b => b.Name == blob.Name)
-                            .FirstOrDefault()
-                        : null;
+                    var previous = _currentSnapshot?.BlobReferences
+                        .Where(b => b.Name == blob.Name)
+                        .FirstOrDefault();
 
-                    if (cached != null
-                        && cached.Length == blob.Length
-                        && cached.CreationTimeUtc.Equals(blob.CreationTimeUtc)
-                        && cached.LastWriteTimeUtc.Equals(blob.LastWriteTimeUtc)
-                        && _contentStore.ContentExists(cached))
+                    if (_useCache
+                        && previous != null
+                        && previous.Length == blob.Length
+                        && previous.CreationTimeUtc.Equals(blob.CreationTimeUtc)
+                        && previous.LastWriteTimeUtc.Equals(blob.LastWriteTimeUtc)
+                        && _contentStore.ContentExists(previous))
                     {
-                        return cached;
+                        return previous;
                     }
+
+                    // Known files should be encrypted using the same nonce
+                    var nonce = previous?.Nonce
+                        ?? AesGcmCrypto.GenerateNonce();
 
                     return _contentStore.StoreBlob(
                         blob,
                         _key,
-                        GenerateNonce(blob.Name));
+                        nonce);
                 })
                 .ToImmutableArray();
 
@@ -351,17 +354,6 @@ namespace Chunkyard.Core
                     "Could not retrieve snapshot",
                     e);
             }
-        }
-
-        private byte[] GenerateNonce(string blobName)
-        {
-            // Known files should be encrypted using the same nonce
-            var previousNonce = _currentSnapshot?.BlobReferences
-                .Where(c => c.Name == blobName)
-                .Select(c => c.Nonce)
-                .FirstOrDefault();
-
-            return previousNonce ?? AesGcmCrypto.GenerateNonce();
         }
     }
 }
