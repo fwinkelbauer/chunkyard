@@ -26,7 +26,7 @@ namespace Chunkyard.Infrastructure
 
         public Uri RepositoryUri { get; }
 
-        public bool StoreValue(Uri contentUri, byte[] value)
+        public void StoreValue(Uri contentUri, byte[] value)
         {
             var file = ToFilePath(contentUri);
 
@@ -34,7 +34,7 @@ namespace Chunkyard.Infrastructure
             {
                 if (File.Exists(file))
                 {
-                    return false;
+                    return;
                 }
 
                 DirectoryUtil.CreateParent(file);
@@ -45,8 +45,6 @@ namespace Chunkyard.Infrastructure
                     FileAccess.Write);
 
                 fileStream.Write(value);
-
-                return true;
             }
         }
 

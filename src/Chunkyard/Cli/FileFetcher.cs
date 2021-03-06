@@ -96,24 +96,34 @@ namespace Chunkyard.Cli
             return filteredFiles;
         }
 
-        public static IEnumerable<string> ToContentNames(
+        public static IEnumerable<Blob> FetchBlobs(
             string parent,
             IEnumerable<string> files)
         {
             foreach (var file in files)
             {
-                var contentName = string.IsNullOrEmpty(parent)
+                var blobName = string.IsNullOrEmpty(parent)
                     ? file
                     : Path.GetRelativePath(parent, file);
 
                 // Using a content name with backslashes will not create
                 // sub-directories when restoring a file on Linux.
                 //
-                // Also we don't want to include any ":" so that cont name can
-                // be turned into valid paths.
-                yield return contentName
+                // Also we don't want to include any ":" so that Windows drive
+                // letters can be turned into valid paths.
+                blobName = blobName
                     .Replace('\\', '/')
                     .Replace(":", "");
+
+                var path = Path.Combine(parent, blobName);
+                var info = new FileInfo(path);
+
+                yield return new Blob(
+                    () => File.OpenRead(path),
+                    blobName,
+                    info.Length,
+                    info.CreationTimeUtc,
+                    info.LastWriteTimeUtc);
             }
         }
 

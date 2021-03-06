@@ -13,10 +13,9 @@ namespace Chunkyard.Core
     /// </summary>
     public class SnapshotStore
     {
-        private const string SnapshotFile = ".chunkyard-snapshot";
-
         private readonly IContentStore _contentStore;
         private readonly IRepository _repository;
+        private readonly bool _useCache;
         private readonly byte[] _salt;
         private readonly int _iterations;
         private readonly byte[] _key;
@@ -26,10 +25,12 @@ namespace Chunkyard.Core
 
         public SnapshotStore(
             IContentStore contentStore,
-            IPrompt prompt)
+            IPrompt prompt,
+            bool useCache)
         {
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
             _repository = _contentStore.Repository;
+            _useCache = useCache;
 
             prompt.EnsureNotNull(nameof(prompt));
 
@@ -62,46 +63,52 @@ namespace Chunkyard.Core
                     _iterations);
 
                 _currentSnapshot = contentStore.RetrieveDocument<Snapshot>(
-                    logReference.ContentReference,
+                    logReference.DocumentReference,
                     _key);
             }
         }
 
         public int AppendSnapshot(
-            IEnumerable<string> contentNames,
-            Func<string, Stream> openRead,
+            IEnumerable<Blob> blobs,
             DateTime creationTime)
         {
-            contentNames.EnsureNotNull(nameof(contentNames));
-            openRead.EnsureNotNull(nameof(openRead));
+            blobs.EnsureNotNull(nameof(blobs));
 
-            var contentReferences = contentNames
-                .Distinct()
+            var blobReferences = blobs
                 .AsParallel()
-                .Select(contentName =>
+                .Select(blob =>
                 {
-                    using var contentStream = openRead(contentName);
+                    var cached = _useCache
+                        ? _currentSnapshot?.BlobReferences
+                            .Where(b => b.Name == blob.Name)
+                            .FirstOrDefault()
+                        : null;
+
+                    if (cached != null
+                        && cached.Length == blob.Length
+                        && cached.CreationTimeUtc.Equals(blob.CreationTimeUtc)
+                        && cached.LastWriteTimeUtc.Equals(blob.LastWriteTimeUtc)
+                        && _contentStore.ContentExists(cached))
+                    {
+                        return cached;
+                    }
 
                     return _contentStore.StoreBlob(
-                        contentStream,
-                        contentName,
+                        blob,
                         _key,
-                        GenerateNonce(contentName),
-                        out _);
+                        GenerateNonce(blob.Name));
                 })
                 .ToImmutableArray();
 
             var snapshot = new Snapshot(
                 creationTime,
-                contentReferences);
+                blobReferences);
 
             var logReference = new LogReference(
                 _contentStore.StoreDocument(
                     snapshot,
-                    SnapshotFile,
                     _key,
-                    AesGcmCrypto.GenerateNonce(),
-                    out _),
+                    AesGcmCrypto.GenerateNonce()),
                 _salt,
                 _iterations);
 
@@ -122,11 +129,11 @@ namespace Chunkyard.Core
             int logPosition,
             string fuzzyPattern = "")
         {
-            var filteredContentReferences = ShowSnapshot(
+            var blobReferences = ShowSnapshot(
                 logPosition,
                 fuzzyPattern);
 
-            return filteredContentReferences
+            return blobReferences
                 .AsParallel()
                 .Select(cr => _contentStore.ContentExists(cr))
                 .Aggregate(true, (total, next) => total &= next);
@@ -136,11 +143,11 @@ namespace Chunkyard.Core
             int logPosition,
             string fuzzyPattern = "")
         {
-            var filteredContentReferences = ShowSnapshot(
+            var blobReferences = ShowSnapshot(
                 logPosition,
                 fuzzyPattern);
 
-            return filteredContentReferences
+            return blobReferences
                 .AsParallel()
                 .Select(cr => _contentStore.ContentValid(cr))
                 .Aggregate(true, (total, next) => total &= next);
@@ -153,19 +160,19 @@ namespace Chunkyard.Core
         {
             openWrite.EnsureNotNull(nameof(openWrite));
 
-            var filteredContentReferences = ShowSnapshot(
+            var blobReferences = ShowSnapshot(
                 logPosition,
                 fuzzyPattern);
 
             Parallel.ForEach(
-                filteredContentReferences,
-                contentReference =>
+                blobReferences,
+                blobReference =>
                 {
                     using var stream = openWrite(
-                        contentReference.Name);
+                        blobReference.Name);
 
-                    _contentStore.RetrieveContent(
-                        contentReference,
+                    _contentStore.RetrieveBlob(
+                        blobReference,
                         _key,
                         stream);
                 });
@@ -173,14 +180,14 @@ namespace Chunkyard.Core
 
         public Snapshot GetSnapshot(int logPosition)
         {
-            ContentReference? contentReference;
+            DocumentReference? documentReference;
 
             var resolvedLogPosition = ResolveLogPosition(logPosition);
 
             try
             {
-                contentReference = _contentStore.RetrieveFromLog(resolvedLogPosition)
-                    .ContentReference;
+                documentReference = _contentStore.RetrieveFromLog(resolvedLogPosition)
+                    .DocumentReference;
             }
             catch (ChunkyardException)
             {
@@ -193,18 +200,17 @@ namespace Chunkyard.Core
                     e);
             }
 
-            return GetSnapshot(contentReference);
+            return GetSnapshot(documentReference);
         }
 
-        public ContentReference[] ShowSnapshot(
+        public BlobReference[] ShowSnapshot(
             int logPosition,
             string fuzzyPattern = "")
         {
             var fuzzy = new Fuzzy(fuzzyPattern);
-            var contentReferences = GetSnapshot(logPosition).ContentReferences;
 
-            return contentReferences.Where(c => fuzzy.IsMatch(c.Name))
-                .Distinct()
+            return GetSnapshot(logPosition).BlobReferences
+                .Where(c => fuzzy.IsMatch(c.Name))
                 .ToArray();
         }
 
@@ -294,17 +300,17 @@ namespace Chunkyard.Core
         {
             var uris = new List<Uri>();
             var snapshotReference = _contentStore.RetrieveFromLog(logPosition)
-                .ContentReference;
+                .DocumentReference;
 
             uris.AddRange(
                 snapshotReference.Chunks.Select(c => c.ContentUri));
 
             var snapshot = GetSnapshot(snapshotReference);
 
-            foreach (var contentReference in snapshot.ContentReferences)
+            foreach (var blobReference in snapshot.BlobReferences)
             {
                 uris.AddRange(
-                    contentReference.Chunks.Select(c => c.ContentUri));
+                    blobReference.Chunks.Select(c => c.ContentUri));
             }
 
             return uris.ToArray();
@@ -327,12 +333,12 @@ namespace Chunkyard.Core
                 : _currentLogPosition.Value + logPosition + 1;
         }
 
-        private Snapshot GetSnapshot(ContentReference contentReference)
+        private Snapshot GetSnapshot(DocumentReference documentReference)
         {
             try
             {
                 return _contentStore.RetrieveDocument<Snapshot>(
-                    contentReference,
+                    documentReference,
                     _key);
             }
             catch (ChunkyardException)
@@ -347,11 +353,11 @@ namespace Chunkyard.Core
             }
         }
 
-        private byte[] GenerateNonce(string contentName)
+        private byte[] GenerateNonce(string blobName)
         {
             // Known files should be encrypted using the same nonce
-            var previousNonce = _currentSnapshot?.ContentReferences
-                .Where(c => c.Name == contentName)
+            var previousNonce = _currentSnapshot?.BlobReferences
+                .Where(c => c.Name == blobName)
                 .Select(c => c.Nonce)
                 .FirstOrDefault();
 

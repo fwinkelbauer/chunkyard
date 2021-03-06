@@ -18,18 +18,14 @@ namespace Chunkyard.Tests.Core
 
             var actualContentUri1 = repository.StoreValue(
                 hashAlgorithmName,
-                content,
-                out var isNewValue1);
+                content);
 
             var actualContentUri2 = repository.StoreValue(
                 hashAlgorithmName,
-                content,
-                out var isNewValue2);
+                content);
 
             Assert.Equal(expectedContentUri, actualContentUri1);
             Assert.Equal(expectedContentUri, actualContentUri2);
-            Assert.True(isNewValue1);
-            Assert.False(isNewValue2);
         }
 
         [Fact]

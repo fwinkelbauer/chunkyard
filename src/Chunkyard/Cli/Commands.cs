@@ -15,12 +15,6 @@ namespace Chunkyard.Cli
     {
         public const int LatestLogPosition = -1;
 
-        private static readonly string CacheDirectoryPath = Path.Combine(
-            Environment.GetFolderPath(
-                Environment.SpecialFolder.ApplicationData),
-            "chunkyard",
-            "cache");
-
         private static readonly HashAlgorithmName DefaultAlgorithm =
             HashAlgorithmName.SHA256;
 
@@ -54,46 +48,16 @@ namespace Chunkyard.Cli
                 return;
             }
 
-            var repository = CreateRepository(
-                o.Repository,
-                ensureRepository: false);
+            var snapshotStore = CreateSnapshotStore(
+                CreateContentStore(
+                    CreateRepository(o.Repository, ensureRepository: false),
+                    new FastCdc(o.Min, o.Avg, o.Max)),
+                o.Cached);
 
-            var contentStore = CreateContentStore(
-                repository,
-                new FastCdc(o.Min, o.Avg, o.Max));
-
-            if (o.Cached)
-            {
-                // Each repository should have its own cache
-                var shortHash = Id.ComputeHash(
-                    HashAlgorithmName.SHA256,
-                    repository.RepositoryUri.AbsoluteUri)
-                    .Substring(0, 8);
-
-                var cacheDirectory = Path.Combine(
-                    CacheDirectoryPath,
-                    shortHash);
-
-                Console.WriteLine($"Using cache: {cacheDirectory}");
-
-                contentStore = new CachedContentStore(
-                    contentStore,
-                    cacheDirectory);
-            }
-
-            var snapshotStore = CreateSnapshotStore(contentStore);
-
-            var contentNames = FileFetcher.ToContentNames(parent, files);
-
-            Stream openRead(string subPath)
-            {
-                return File.OpenRead(
-                    Path.Combine(parent, subPath));
-            }
+            var blobs = FileFetcher.FetchBlobs(parent, files);
 
             snapshotStore.AppendSnapshot(
-                contentNames,
-                openRead,
+                blobs,
                 DateTime.Now);
         }
 
@@ -124,13 +88,13 @@ namespace Chunkyard.Cli
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            var contentReferences = snapshotStore.ShowSnapshot(
+            var blobReferences = snapshotStore.ShowSnapshot(
                 o.LogPosition,
                 o.IncludeFuzzy);
 
-            foreach (var contentReference in contentReferences)
+            foreach (var blobReference in blobReferences)
             {
-                Console.WriteLine(contentReference.Name);
+                Console.WriteLine(blobReference.Name);
             }
         }
 
@@ -239,6 +203,7 @@ namespace Chunkyard.Cli
         public static void CopySnapshots(CopyOptions o)
         {
             var sourceStore = CreateSnapshotStore(o.SourceRepository);
+
             var destinationRepository = CreateRepository(
                 o.DestinationRepository,
                 ensureRepository: false);
@@ -266,7 +231,8 @@ namespace Chunkyard.Cli
         }
 
         private static SnapshotStore CreateSnapshotStore(
-            IContentStore contentStore)
+            IContentStore contentStore,
+            bool useCache = false)
         {
             var repository = contentStore.Repository;
 
@@ -278,7 +244,8 @@ namespace Chunkyard.Cli
             var snapshotStore = new SnapshotStore(
                 contentStore,
                 new EnvironmentPrompt(
-                    new ConsolePrompt()));
+                    new ConsolePrompt()),
+                useCache);
 
             _snapshotStores[repository.RepositoryUri] = snapshotStore;
 
@@ -320,67 +287,56 @@ namespace Chunkyard.Cli
             {
             }
 
-            public override ContentReference StoreContent(
-                Stream inputStream,
-                string contentName,
+            public override void RetrieveBlob(
+                BlobReference blobReference,
                 byte[] key,
-                byte[] nonce,
-                ContentType type,
-                out bool isNewContent)
+                Stream outputStream)
             {
-                var contentReference = base.StoreContent(
-                    inputStream,
-                    contentName,
-                    key,
-                    nonce,
-                    type,
-                    out isNewContent);
+                base.RetrieveBlob(blobReference, key, outputStream);
 
-                if (contentReference.Type == ContentType.Blob
-                    && isNewContent)
-                {
-                    Console.WriteLine($"Stored content: {contentName}");
-                }
+                Console.WriteLine($"Restored blob: {blobReference.Name}");
+            }
 
-                return contentReference;
+            public override BlobReference StoreBlob(
+                Blob blob,
+                byte[] key,
+                byte[] nonce)
+            {
+                var blobReference = base.StoreBlob(blob, key, nonce);
+
+                Console.WriteLine($"Stored blob: {blobReference.Name}");
+
+                return blobReference;
             }
 
             public override bool ContentExists(
-                ContentReference contentReference)
+                IContentReference contentReference)
             {
                 var exists = base.ContentExists(contentReference);
 
-                if (!exists)
+                if (!exists
+                    && contentReference is BlobReference blobReference)
                 {
-                    Console.WriteLine($"Missing content: {contentReference.Name}");
+                    Console.WriteLine(
+                        $"Missing blob: {blobReference.Name}");
                 }
 
                 return exists;
             }
 
-            public override bool ContentValid(ContentReference contentReference)
+            public override bool ContentValid(
+                IContentReference contentReference)
             {
                 var valid = base.ContentValid(contentReference);
 
-                if (!valid)
+                if (!valid
+                    && contentReference is BlobReference blobReference)
                 {
-                    Console.WriteLine($"Invalid content: {contentReference.Name}");
+                    Console.WriteLine(
+                        $"Invalid blob: {blobReference.Name}");
                 }
 
                 return valid;
-            }
-
-            public override void RetrieveContent(
-                ContentReference contentReference,
-                byte[] key,
-                Stream outputStream)
-            {
-                base.RetrieveContent(contentReference, key, outputStream);
-
-                if (contentReference.Type == ContentType.Blob)
-                {
-                    Console.WriteLine($"Restored content: {contentReference.Name}");
-                }
             }
         }
 

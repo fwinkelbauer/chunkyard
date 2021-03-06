@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The `dot` command to search for two default files (`config/chunkyard.json` and
   `.chunkyard`)
+- The storage format to include more meta data
 
 ## 5.0.0 - 2021-02-23
 

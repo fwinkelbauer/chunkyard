@@ -10,22 +10,30 @@ namespace Chunkyard.Core
     {
         IRepository Repository { get; }
 
-        void RetrieveContent(
-            ContentReference contentReference,
+        void RetrieveBlob(
+            BlobReference blobReference,
             byte[] key,
             Stream outputStream);
 
-        ContentReference StoreContent(
-            Stream inputStream,
-            string contentName,
+        T RetrieveDocument<T>(
+            DocumentReference documentReference,
+            byte[] key)
+            where T : notnull;
+
+        BlobReference StoreBlob(
+            Blob blob,
             byte[] key,
-            byte[] nonce,
-            ContentType type,
-            out bool isNewContent);
+            byte[] nonce);
 
-        bool ContentExists(ContentReference contentReference);
+        DocumentReference StoreDocument<T>(
+            T value,
+            byte[] key,
+            byte[] nonce)
+            where T : notnull;
 
-        bool ContentValid(ContentReference contentReference);
+        bool ContentExists(IContentReference contentReference);
+
+        bool ContentValid(IContentReference contentReference);
 
         int AppendToLog(
             int newLogPosition,

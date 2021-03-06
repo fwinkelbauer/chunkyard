@@ -12,26 +12,26 @@ namespace Chunkyard.Core
     {
         public Snapshot(
             DateTime creationTime,
-            IImmutableList<ContentReference> contentReferences)
+            IImmutableList<BlobReference> blobReferences)
         {
             CreationTime = creationTime;
-            ContentReferences = contentReferences;
+            BlobReferences = blobReferences;
         }
 
         public DateTime CreationTime { get; }
 
-        public IImmutableList<ContentReference> ContentReferences { get; }
+        public IImmutableList<BlobReference> BlobReferences { get; }
 
         public override bool Equals(object? obj)
         {
             return obj is Snapshot other
                 && CreationTime == other.CreationTime
-                && ContentReferences.SequenceEqual(other.ContentReferences);
+                && BlobReferences.SequenceEqual(other.BlobReferences);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(CreationTime, ContentReferences);
+            return HashCode.Combine(CreationTime, BlobReferences);
         }
     }
 }

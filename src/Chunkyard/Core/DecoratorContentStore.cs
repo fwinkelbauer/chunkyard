@@ -17,37 +17,45 @@ namespace Chunkyard.Core
 
         protected IContentStore Store { get; }
 
-        public virtual void RetrieveContent(
-            ContentReference contentReference,
+        public virtual void RetrieveBlob(
+            BlobReference blobReference,
             byte[] key,
             Stream outputStream)
         {
-            Store.RetrieveContent(contentReference, key, outputStream);
+            Store.RetrieveBlob(blobReference, key, outputStream);
         }
 
-        public virtual ContentReference StoreContent(
-            Stream inputStream,
-            string contentName,
-            byte[] key,
-            byte[] nonce,
-            ContentType type,
-            out bool isNewContent)
+        public virtual T RetrieveDocument<T>(
+            DocumentReference documentReference,
+            byte[] key)
+            where T : notnull
         {
-            return Store.StoreContent(
-                inputStream,
-                contentName,
-                key,
-                nonce,
-                type,
-                out isNewContent);
+            return Store.RetrieveDocument<T>(documentReference, key);
         }
 
-        public virtual bool ContentExists(ContentReference contentReference)
+        public virtual BlobReference StoreBlob(
+            Blob blob,
+            byte[] key,
+            byte[] nonce)
+        {
+            return Store.StoreBlob(blob, key, nonce);
+        }
+
+        public virtual DocumentReference StoreDocument<T>(
+            T value,
+            byte[] key,
+            byte[] nonce)
+            where T : notnull
+        {
+            return Store.StoreDocument<T>(value, key, nonce);
+        }
+
+        public virtual bool ContentExists(IContentReference contentReference)
         {
             return Store.ContentExists(contentReference);
         }
 
-        public virtual bool ContentValid(ContentReference contentReference)
+        public virtual bool ContentValid(IContentReference contentReference)
         {
             return Store.ContentValid(contentReference);
         }

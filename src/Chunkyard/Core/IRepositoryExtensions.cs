@@ -12,8 +12,7 @@ namespace Chunkyard.Core
         public static Uri StoreValue(
             this IRepository repository,
             HashAlgorithmName hashAlgorithmName,
-            byte[] value,
-            out bool isNewValue)
+            byte[] value)
         {
             repository.EnsureNotNull(nameof(repository));
 
@@ -21,7 +20,7 @@ namespace Chunkyard.Core
                 hashAlgorithmName,
                 value);
 
-            isNewValue = repository.StoreValue(contentUri, value);
+            repository.StoreValue(contentUri, value);
 
             return contentUri;
         }

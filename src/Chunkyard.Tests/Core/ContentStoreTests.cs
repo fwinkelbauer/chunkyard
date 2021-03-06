@@ -17,92 +17,29 @@ namespace Chunkyard.Tests.Core
             var contentStore = CreateContentStore();
 
             var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-            using var inputStream = new MemoryStream(expectedBytes);
+            var blob = CreateBlob("some data", expectedBytes);
+            var key = CreateKey();
 
-            var contentName = "some data";
-            var key = GenerateKey();
-
-            var contentReference = contentStore.StoreBlob(
-                inputStream,
-                contentName,
+            var blobReference = contentStore.StoreBlob(
+                blob,
                 key,
-                AesGcmCrypto.GenerateNonce(),
-                out var isNewContent);
+                AesGcmCrypto.GenerateNonce());
 
             using var outputStream = new MemoryStream();
-            contentStore.RetrieveContent(
-                contentReference,
+            contentStore.RetrieveBlob(
+                blobReference,
                 key,
                 outputStream);
 
             var actualBytes = outputStream.ToArray();
 
-            Assert.True(isNewContent);
             Assert.Equal(expectedBytes, actualBytes);
-            Assert.Equal(contentName, contentReference.Name);
-            Assert.True(contentStore.ContentExists(contentReference));
-            Assert.True(contentStore.ContentValid(contentReference));
-        }
-
-        [Fact]
-        public static void Store_Detects_Already_Stored_Content_Using_Same_Nonce()
-        {
-            var contentStore = CreateContentStore();
-
-            var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-            using var inputStream1 = new MemoryStream(bytes);
-            using var inputStream2 = new MemoryStream(bytes);
-
-            var contentName = "some data";
-            var key = GenerateKey();
-            var nonce = AesGcmCrypto.GenerateNonce();
-
-            contentStore.StoreBlob(
-                inputStream1,
-                contentName,
-                key,
-                nonce,
-                out var isNewContent1);
-
-            contentStore.StoreBlob(
-                inputStream2,
-                contentName,
-                key,
-                nonce,
-                out var isNewContent2);
-
-            Assert.True(isNewContent1);
-            Assert.False(isNewContent2);
-        }
-
-        [Fact]
-        public static void Store_Does_Not_Detect_Same_Content_Using_Other_Nonce()
-        {
-            var contentStore = CreateContentStore();
-
-            var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-            using var inputStream1 = new MemoryStream(bytes);
-            using var inputStream2 = new MemoryStream(bytes);
-
-            var contentName = "some data";
-            var key = GenerateKey();
-
-            contentStore.StoreBlob(
-                inputStream1,
-                contentName,
-                key,
-                AesGcmCrypto.GenerateNonce(),
-                out var isNewContent1);
-
-            contentStore.StoreBlob(
-                inputStream2,
-                contentName,
-                key,
-                AesGcmCrypto.GenerateNonce(),
-                out var isNewContent2);
-
-            Assert.True(isNewContent1);
-            Assert.True(isNewContent2);
+            Assert.Equal(blob.Name, blobReference.Name);
+            Assert.Equal(blob.Length, blobReference.Length);
+            Assert.Equal(blob.CreationTimeUtc, blobReference.CreationTimeUtc);
+            Assert.Equal(blob.LastWriteTimeUtc, blobReference.LastWriteTimeUtc);
+            Assert.True(contentStore.ContentExists(blobReference));
+            Assert.True(contentStore.ContentValid(blobReference));
         }
 
         [Fact]
@@ -111,24 +48,20 @@ namespace Chunkyard.Tests.Core
             var contentStore = CreateContentStore();
 
             var expectedText = "some text";
-            var contentName = "some name";
-            var key = GenerateKey();
+            var key = CreateKey();
 
-            var contentReference = contentStore.StoreDocument(
+            var documentReference = contentStore.StoreDocument(
                 expectedText,
-                contentName,
                 key,
-                AesGcmCrypto.GenerateNonce(),
-                out _);
+                AesGcmCrypto.GenerateNonce());
 
             var actualText = contentStore.RetrieveDocument<string>(
-                contentReference,
+                documentReference,
                 key);
 
             Assert.Equal(expectedText, actualText);
-            Assert.Equal(contentName, contentReference.Name);
-            Assert.True(contentStore.ContentExists(contentReference));
-            Assert.True(contentStore.ContentValid(contentReference));
+            Assert.True(contentStore.ContentExists(documentReference));
+            Assert.True(contentStore.ContentValid(documentReference));
         }
 
         [Fact]
@@ -137,17 +70,15 @@ namespace Chunkyard.Tests.Core
             var repository = new MemoryRepository();
             var contentStore = CreateContentStore(repository);
 
-            var contentReference = contentStore.StoreDocument(
+            var documentReference = contentStore.StoreDocument(
                 "some text",
-                "with some name",
-                GenerateKey(),
-                AesGcmCrypto.GenerateNonce(),
-                out _);
+                CreateKey(),
+                AesGcmCrypto.GenerateNonce());
 
             RemoveValues(repository, repository.ListUris());
 
-            Assert.False(contentStore.ContentExists(contentReference));
-            Assert.False(contentStore.ContentValid(contentReference));
+            Assert.False(contentStore.ContentExists(documentReference));
+            Assert.False(contentStore.ContentValid(documentReference));
         }
 
         [Fact]
@@ -156,17 +87,15 @@ namespace Chunkyard.Tests.Core
             var repository = new MemoryRepository();
             var contentStore = CreateContentStore(repository);
 
-            var contentReference = contentStore.StoreDocument(
+            var documentReference = contentStore.StoreDocument(
                 "some text",
-                "with some name",
-                GenerateKey(),
-                AesGcmCrypto.GenerateNonce(),
-                out _);
+                CreateKey(),
+                AesGcmCrypto.GenerateNonce());
 
             CorruptValues(repository, repository.ListUris());
 
-            Assert.True(contentStore.ContentExists(contentReference));
-            Assert.False(contentStore.ContentValid(contentReference));
+            Assert.True(contentStore.ContentExists(documentReference));
+            Assert.False(contentStore.ContentValid(documentReference));
         }
 
         [Fact]
@@ -175,14 +104,12 @@ namespace Chunkyard.Tests.Core
             var contentStore = CreateContentStore();
 
             var expectedLogReference = new LogReference(
-                new ContentReference(
-                    "some reference",
+                new DocumentReference(
                     AesGcmCrypto.GenerateNonce(),
                     ImmutableArray.Create(
                         new ChunkReference(
                             new Uri("sha256://abcdef123456"),
-                            new byte[] { 0xFF })),
-                    ContentType.Blob),
+                            new byte[] { 0xFF }))),
                 AesGcmCrypto.GenerateSalt(),
                 AesGcmCrypto.Iterations);
 
@@ -218,7 +145,7 @@ namespace Chunkyard.Tests.Core
                 HashAlgorithmName.SHA256);
         }
 
-        private static byte[] GenerateKey()
+        private static byte[] CreateKey()
         {
             return AesGcmCrypto.PasswordToKey(
                 "test",
@@ -247,6 +174,16 @@ namespace Chunkyard.Tests.Core
             {
                 repository.RemoveValue(contentUri);
             }
+        }
+
+        private static Blob CreateBlob(string name, byte[] bytes)
+        {
+            return new Blob(
+                () => new MemoryStream(bytes),
+                name,
+                bytes.Length,
+                DateTime.Now,
+                DateTime.Now);
         }
     }
 }

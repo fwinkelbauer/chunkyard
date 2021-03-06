@@ -17,9 +17,9 @@ namespace Chunkyard.Core
 
         protected IRepository Repository { get; }
 
-        public virtual bool StoreValue(Uri contentUri, byte[] value)
+        public virtual void StoreValue(Uri contentUri, byte[] value)
         {
-            return Repository.StoreValue(contentUri, value);
+            Repository.StoreValue(contentUri, value);
         }
 
         public virtual byte[] RetrieveValue(Uri contentUri)

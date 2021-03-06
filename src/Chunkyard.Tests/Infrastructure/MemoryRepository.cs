@@ -22,18 +22,16 @@ namespace Chunkyard.Tests.Infrastructure
 
         public Uri RepositoryUri { get; }
 
-        public bool StoreValue(Uri contentUri, byte[] value)
+        public void StoreValue(Uri contentUri, byte[] value)
         {
             lock (_lock)
             {
                 if (_valuesByUri.ContainsKey(contentUri))
                 {
-                    return false;
+                    return;
                 }
 
                 _valuesByUri[contentUri] = value;
-
-                return true;
             }
         }
 

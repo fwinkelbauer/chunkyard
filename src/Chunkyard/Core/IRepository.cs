@@ -10,7 +10,7 @@ namespace Chunkyard.Core
     {
         Uri RepositoryUri { get; }
 
-        bool StoreValue(Uri contentUri, byte[] value);
+        void StoreValue(Uri contentUri, byte[] value);
 
         byte[] RetrieveValue(Uri contentUri);
 

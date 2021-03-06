@@ -26,14 +26,39 @@ namespace Chunkyard.Core
 
         public IRepository Repository { get; }
 
-        public void RetrieveContent(
-            ContentReference contentReference,
+        public void RetrieveBlob(
+            BlobReference blobReference,
             byte[] key,
             Stream outputStream)
         {
+            blobReference.EnsureNotNull(nameof(blobReference));
             outputStream.EnsureNotNull(nameof(outputStream));
-            contentReference.EnsureNotNull(nameof(contentReference));
 
+            RetrieveContent(blobReference, key, outputStream);
+        }
+
+        public T RetrieveDocument<T>(
+            DocumentReference documentReference,
+            byte[] key)
+            where T : notnull
+        {
+            documentReference.EnsureNotNull(nameof(documentReference));
+
+            using var memoryStream = new MemoryStream();
+
+            RetrieveContent(
+                documentReference,
+                key,
+                memoryStream);
+
+            return DataConvert.ToObject<T>(memoryStream.ToArray());
+        }
+
+        private void RetrieveContent(
+            IContentReference contentReference,
+            byte[] key,
+            Stream outputStream)
+        {
             foreach (var chunk in contentReference.Chunks)
             {
                 // Strip away the cryptographic details which we added when
@@ -53,22 +78,39 @@ namespace Chunkyard.Core
             }
         }
 
-        public ContentReference StoreContent(
-            Stream inputStream,
-            string contentName,
+        public BlobReference StoreBlob(
+            Blob blob,
             byte[] key,
-            byte[] nonce,
-            ContentType type,
-            out bool isNewContent)
+            byte[] nonce)
         {
-            return new ContentReference(
-                contentName,
+            blob.EnsureNotNull(nameof(blob));
+
+            var stream = blob.OpenRead();
+
+            return new BlobReference(
+                blob.Name,
+                blob.Length,
+                blob.CreationTimeUtc,
+                blob.LastWriteTimeUtc,
                 nonce,
-                WriteChunks(key, nonce, inputStream, out isNewContent),
-                type);
+                WriteChunks(key, nonce, stream));
         }
 
-        public bool ContentExists(ContentReference contentReference)
+        public DocumentReference StoreDocument<T>(
+            T value,
+            byte[] key,
+            byte[] nonce)
+            where T : notnull
+        {
+            using var memoryStream = new MemoryStream(
+                DataConvert.ToBytes(value));
+
+            return new DocumentReference(
+                nonce,
+                WriteChunks(key, nonce, memoryStream));
+        }
+
+        public bool ContentExists(IContentReference contentReference)
         {
             contentReference.EnsureNotNull(nameof(contentReference));
 
@@ -77,7 +119,7 @@ namespace Chunkyard.Core
                 .Aggregate(true, (total, next) => total &= next);
         }
 
-        public bool ContentValid(ContentReference contentReference)
+        public bool ContentValid(IContentReference contentReference)
         {
             contentReference.EnsureNotNull(nameof(contentReference));
 
@@ -104,38 +146,31 @@ namespace Chunkyard.Core
         private IImmutableList<ChunkReference> WriteChunks(
             byte[] key,
             byte[] nonce,
-            Stream stream,
-            out bool hasNewChunks)
+            Stream stream)
         {
-            var chunkedDataItems = _fastCdc.SplitIntoChunks(stream);
-            var chunkReferences = ImmutableArray.CreateBuilder<ChunkReference>();
-            hasNewChunks = false;
+            return _fastCdc.SplitIntoChunks(stream)
+                .Select(chunk =>
+                {
+                    var (encryptedData, tag) = AesGcmCrypto.Encrypt(
+                        chunk,
+                        key,
+                        nonce);
 
-            foreach (var chunkedData in chunkedDataItems)
-            {
-                var (encryptedData, tag) = AesGcmCrypto.Encrypt(
-                    chunkedData,
-                    key,
-                    nonce);
+                    // We add all cryptographic details needed to decrypt a piece of
+                    // content so that we can recover it even if a snapshot gets
+                    // corrupted.
+                    var value = nonce
+                        .Concat(encryptedData)
+                        .Concat(tag)
+                        .ToArray();
 
-                // We add all cryptographic details needed to decrypt a piece of
-                // content so that we can recover it even if a snapshot gets
-                // corrupted.
-                var value = nonce
-                    .Concat(encryptedData)
-                    .Concat(tag)
-                    .ToArray();
+                    var contentUri = Repository.StoreValue(
+                        _hashAlgorithmName,
+                        value);
 
-                var contentUri = Repository.StoreValue(
-                    _hashAlgorithmName,
-                    value,
-                    out var isNewValue);
-
-                hasNewChunks |= isNewValue;
-                chunkReferences.Add(new ChunkReference(contentUri, tag));
-            }
-
-            return chunkReferences.ToImmutable();
+                    return new ChunkReference(contentUri, tag);
+                })
+                .ToImmutableArray();
         }
     }
 }

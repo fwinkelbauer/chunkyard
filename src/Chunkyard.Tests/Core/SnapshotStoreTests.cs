@@ -17,18 +17,19 @@ namespace Chunkyard.Tests.Core
         {
             var snapshotStore = CreateSnapshotStore();
 
+            var expectedNames = new[] { "some content" };
+
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(expectedNames),
                 DateTime.Now);
 
             var snapshot = snapshotStore.GetSnapshot(logPosition);
-            var contentReferences = snapshot.ContentReferences;
+            var blobReferences = snapshot.BlobReferences;
 
             Assert.Equal(0, logPosition);
             Assert.Equal(
-                new[] { "some content" },
-                contentReferences.Select(c => c.Name));
+                expectedNames,
+                blobReferences.Select(c => c.Name));
         }
 
         [Fact]
@@ -36,22 +37,22 @@ namespace Chunkyard.Tests.Core
         {
             var snapshotStore = CreateSnapshotStore();
 
+            var blobs = CreateBlobs(new[] { "some content" });
+
             var logPosition1 = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                blobs,
                 DateTime.Now);
 
             var logPosition2 = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                blobs,
                 DateTime.Now);
 
             var snapshot1 = snapshotStore.GetSnapshot(logPosition1);
             var snapshot2 = snapshotStore.GetSnapshot(logPosition2);
 
             Assert.Equal(
-                snapshot1.ContentReferences,
-                snapshot2.ContentReferences);
+                snapshot1.BlobReferences,
+                snapshot2.BlobReferences);
         }
 
         [Fact]
@@ -60,8 +61,7 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore();
 
             var logPosition = snapshotStore.AppendSnapshot(
-                Array.Empty<string>(),
-                OpenStream(),
+                CreateBlobs(Array.Empty<string>()),
                 DateTime.Now);
 
             Assert.Equal(0, logPosition);
@@ -71,16 +71,14 @@ namespace Chunkyard.Tests.Core
         public static void AppendSnapshot_Creates_Snapshot_Without_New_Data()
         {
             var snapshotStore = CreateSnapshotStore();
-            var contents = new[] { "some content" };
+            var blobs = CreateBlobs(new[] { "some content" });
 
             snapshotStore.AppendSnapshot(
-                contents,
-                OpenStream(),
+                blobs,
                 DateTime.Now);
 
             var logPosition = snapshotStore.AppendSnapshot(
-                contents,
-                OpenStream(),
+                blobs,
                 DateTime.Now);
 
             Assert.Equal(1, logPosition);
@@ -92,8 +90,7 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore();
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             Assert.Equal(
@@ -107,8 +104,7 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore();
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             Assert.True(snapshotStore.CheckSnapshotExists(logPosition));
@@ -122,8 +118,7 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore(repository);
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             RemoveValues(repository, repository.ListUris());
@@ -142,8 +137,7 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore(repository);
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             CorruptValues(repository, repository.ListUris());
@@ -162,13 +156,12 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore(repository);
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             var snapshot = snapshotStore.GetSnapshot(logPosition);
-            var contentUris = snapshot.ContentReferences
-                .SelectMany(contentReference => contentReference.Chunks)
+            var contentUris = snapshot.BlobReferences
+                .SelectMany(blobReference => blobReference.Chunks)
                 .Select(chunk => chunk.ContentUri);
 
             RemoveValues(repository, contentUris);
@@ -184,13 +177,12 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore(repository);
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             var snapshot = snapshotStore.GetSnapshot(logPosition);
-            var contentUris = snapshot.ContentReferences
-                .SelectMany(contentReference => contentReference.Chunks)
+            var contentUris = snapshot.BlobReferences
+                .SelectMany(blobReference => blobReference.Chunks)
                 .Select(chunk => chunk.ContentUri);
 
             CorruptValues(repository, contentUris);
@@ -205,24 +197,23 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore();
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
-            var actualContentName = "";
+            var actualBlobName = "";
             using var writeStream = new MemoryStream();
 
             Stream openWrite(string s)
             {
-                actualContentName = s;
+                actualBlobName = s;
                 return writeStream;
             }
 
             snapshotStore.RestoreSnapshot(logPosition, "", openWrite);
 
-            Assert.Equal("some content", actualContentName);
+            Assert.Equal("some content", actualBlobName);
             Assert.Equal(
-                ToContent("some content"),
+                ToBytes("some content"),
                 writeStream.ToArray());
         }
 
@@ -230,15 +221,15 @@ namespace Chunkyard.Tests.Core
         public static void ShowSnapshot_Lists_Content()
         {
             var snapshotStore = CreateSnapshotStore();
-            var contents = new[] { "some content" };
+
+            var blobs = CreateBlobs(new[] { "some content" });
 
             var logPosition = snapshotStore.AppendSnapshot(
-                contents,
-                OpenStream(),
+                blobs,
                 DateTime.Now);
 
             Assert.Equal(
-                contents,
+                blobs.Select(b => b.Name),
                 snapshotStore.ShowSnapshot(logPosition).Select(c => c.Name));
         }
 
@@ -248,8 +239,7 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore();
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             snapshotStore.GarbageCollect();
@@ -265,8 +255,7 @@ namespace Chunkyard.Tests.Core
                 repository);
 
             var logPosition = snapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             repository.RemoveFromLog(logPosition);
@@ -287,20 +276,17 @@ namespace Chunkyard.Tests.Core
                 destinationRepository);
 
             var firstLogPosition = sourceSnapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             sourceSnapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             sourceRepository.RemoveFromLog(firstLogPosition);
 
             destinationSnapshotStore.AppendSnapshot(
-                new[] { "some other content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some other content" }),
                 DateTime.Now);
 
             Assert.Throws<ChunkyardException>(
@@ -317,13 +303,11 @@ namespace Chunkyard.Tests.Core
                 destinationRepository);
 
             sourceSnapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             destinationSnapshotStore.AppendSnapshot(
-                new[] { "some other content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some other content" }),
                 DateTime.Now);
 
             Assert.Throws<ChunkyardException>(
@@ -338,8 +322,7 @@ namespace Chunkyard.Tests.Core
             var destinationRepository = new MemoryRepository();
 
             sourceSnapshotStore.AppendSnapshot(
-                new[] { "some content" },
-                OpenStream(),
+                CreateBlobs(new[] { "some content" }),
                 DateTime.Now);
 
             sourceSnapshotStore.CopySnapshots(destinationRepository);
@@ -353,25 +336,39 @@ namespace Chunkyard.Tests.Core
                 destinationRepository.ListLogPositions());
         }
 
-        private static Func<string, Stream> OpenStream()
+        private static Blob[] CreateBlobs(IEnumerable<string> names)
         {
-            return s => new MemoryStream(ToContent(s));
+            return names.Select(
+                name =>
+                {
+                    var bytes = ToBytes(name);
+
+                    return new Blob(
+                        () => new MemoryStream(bytes),
+                        name,
+                        bytes.Length,
+                        DateTime.Now,
+                        DateTime.Now);
+                })
+                .ToArray();
         }
 
-        private static byte[] ToContent(string contentName)
+        private static byte[] ToBytes(string content)
         {
-            return Encoding.UTF8.GetBytes(contentName);
+            return Encoding.UTF8.GetBytes(content);
         }
 
         private static SnapshotStore CreateSnapshotStore(
-            IRepository? repository = null)
+            IRepository? repository = null,
+            bool useCache = false)
         {
             return new SnapshotStore(
                 new ContentStore(
                     repository ?? new MemoryRepository(),
                     new FastCdc(),
                     HashAlgorithmName.SHA256),
-                new StaticPrompt());
+                new StaticPrompt(),
+                useCache);
         }
 
         private static void CorruptValues(
