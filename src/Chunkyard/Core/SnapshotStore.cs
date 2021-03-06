@@ -104,6 +104,10 @@ namespace Chunkyard.Core
                 creationTime,
                 blobReferences);
 
+            var newLogPosition = _currentLogPosition.HasValue
+                ? _currentLogPosition.Value + 1
+                : 0;
+
             var logReference = new LogReference(
                 _contentStore.StoreDocument(
                     snapshot,
@@ -111,10 +115,6 @@ namespace Chunkyard.Core
                     AesGcmCrypto.GenerateNonce()),
                 _salt,
                 _iterations);
-
-            var newLogPosition = _currentLogPosition.HasValue
-                ? _currentLogPosition.Value + 1
-                : 0;
 
             _currentLogPosition = _contentStore.AppendToLog(
                 newLogPosition,
