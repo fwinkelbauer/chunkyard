@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 6.0.0 - 2021-03-07
+
 ### Added
 
 - Parallelism for several read/write operations
@@ -16,6 +18,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 - The `dot` command to search for two default files (`config/chunkyard.json` and
   `.chunkyard`)
 - The storage format to include more meta data
+
+### Removed
+
+- The external caching directory. This feature is now integrated into the
+  storage format
 
 ## 5.0.0 - 2021-02-23
 
