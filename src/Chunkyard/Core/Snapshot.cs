@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -10,17 +11,33 @@ namespace Chunkyard.Core
     /// </summary>
     public class Snapshot
     {
+        private readonly Dictionary<string, BlobReference> _lookup;
+
         public Snapshot(
             DateTime creationTime,
             IImmutableList<BlobReference> blobReferences)
         {
             CreationTime = creationTime;
             BlobReferences = blobReferences;
+
+            _lookup = new Dictionary<string, BlobReference>();
+
+            foreach (var blobReference in BlobReferences)
+            {
+                _lookup[blobReference.Name] = blobReference;
+            }
         }
 
         public DateTime CreationTime { get; }
 
         public IImmutableList<BlobReference> BlobReferences { get; }
+
+        public BlobReference? Find(string blobName)
+        {
+            return _lookup.TryGetValue(blobName, out var blob)
+                ? blob
+                : null;
+        }
 
         public override bool Equals(object? obj)
         {

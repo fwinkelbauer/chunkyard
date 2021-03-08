@@ -78,9 +78,7 @@ namespace Chunkyard.Core
                 .AsParallel()
                 .Select(blob =>
                 {
-                    var previous = _currentSnapshot?.BlobReferences
-                        .Where(b => b.Name == blob.Name)
-                        .FirstOrDefault();
+                    var previous = _currentSnapshot?.Find(blob.Name);
 
                     if (_useCache
                         && previous != null
