@@ -21,14 +21,22 @@ namespace Chunkyard.Core
             byte[] nonce)
         {
             plaintext.EnsureNotNull(nameof(plaintext));
+            nonce.EnsureNotNull(nameof(nonce));
 
             var tag = new byte[TagBytes];
-            var ciphertext = new byte[plaintext.Length];
+
+            var buffer = new byte[nonce.Length + plaintext.Length + tag.Length];
+            var ciphertext = new Span<byte>(buffer, nonce.Length, plaintext.Length);
 
             using var aesGcm = new AesGcm(key);
             aesGcm.Encrypt(nonce, plaintext, ciphertext, tag);
 
-            return (ciphertext, tag);
+            // We add all cryptographic details needed to decrypt a piece of
+            // content so that we can recover it even if we lose our meta data
+            Array.Copy(nonce, 0, buffer, 0, nonce.Length);
+            Array.Copy(tag, 0, buffer, buffer.Length - tag.Length, tag.Length);
+
+            return (buffer, tag);
         }
 
         public static byte[] Decrypt(
@@ -38,14 +46,20 @@ namespace Chunkyard.Core
             byte[] nonce)
         {
             ciphertext.EnsureNotNull(nameof(ciphertext));
+            tag.EnsureNotNull(nameof(tag));
+            nonce.EnsureNotNull(nameof(nonce));
 
-            byte[] plaintext = new byte[ciphertext.Length];
+            byte[] plaintext = new byte[ciphertext.Length - nonce.Length - tag.Length];
+
+            // Strip away the cryptographic details which we added when
+            // encrypting the value
+            var buffer = new Span<byte>(ciphertext, nonce.Length, plaintext.Length);
 
             using var aesGcm = new AesGcm(key);
 
             try
             {
-                aesGcm.Decrypt(nonce, ciphertext, tag, plaintext);
+                aesGcm.Decrypt(nonce, buffer, tag, plaintext);
             }
             catch (Exception e)
             {
