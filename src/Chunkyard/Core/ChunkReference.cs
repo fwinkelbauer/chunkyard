@@ -11,13 +11,17 @@ namespace Chunkyard.Core
     {
         public ChunkReference(
             Uri contentUri,
+            int length,
             byte[] tag)
         {
             ContentUri = contentUri;
+            Length = length;
             Tag = tag;
         }
 
         public Uri ContentUri { get; }
+
+        public int Length { get; }
 
         public byte[] Tag { get; }
 
@@ -25,12 +29,13 @@ namespace Chunkyard.Core
         {
             return obj is ChunkReference other
                 && ContentUri.Equals(other.ContentUri)
+                && Length == other.Length
                 && Tag.SequenceEqual(other.Tag);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ContentUri, Tag);
+            return HashCode.Combine(ContentUri, Length, Tag);
         }
     }
 }

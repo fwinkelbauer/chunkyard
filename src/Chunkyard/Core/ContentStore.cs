@@ -89,7 +89,6 @@ namespace Chunkyard.Core
 
             return new BlobReference(
                 blob.Name,
-                blob.Length,
                 blob.CreationTimeUtc,
                 blob.LastWriteTimeUtc,
                 nonce,
@@ -167,7 +166,10 @@ namespace Chunkyard.Core
                     _hashAlgorithmName,
                     value);
 
-                return new ChunkReference(contentUri, tag);
+                return new ChunkReference(
+                    contentUri,
+                    encryptedData.Length,
+                    tag);
             }
 
             if (_fastCdc.ExpectedChunkCount(stream.Length) > 100)

@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The storage format by adding a length property to every chunk
+
 ## 6.0.0 - 2021-03-07
 
 ### Added

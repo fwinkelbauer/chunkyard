@@ -84,7 +84,7 @@ namespace Chunkyard.Core
 
                     if (_useCache
                         && previous != null
-                        && previous.Length == blob.Length
+                        && previous.Chunks.Sum(c => (long)c.Length) == blob.Length
                         && previous.CreationTimeUtc.Equals(blob.CreationTimeUtc)
                         && previous.LastWriteTimeUtc.Equals(blob.LastWriteTimeUtc)
                         && _contentStore.ContentExists(previous))

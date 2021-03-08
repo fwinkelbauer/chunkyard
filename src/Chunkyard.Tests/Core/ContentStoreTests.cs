@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using Chunkyard.Core;
 using Chunkyard.Tests.Infrastructure;
@@ -35,7 +36,7 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(expectedBytes, actualBytes);
             Assert.Equal(blob.Name, blobReference.Name);
-            Assert.Equal(blob.Length, blobReference.Length);
+            Assert.Equal(blob.Length, blobReference.Chunks.Sum(c => (long)c.Length));
             Assert.Equal(blob.CreationTimeUtc, blobReference.CreationTimeUtc);
             Assert.Equal(blob.LastWriteTimeUtc, blobReference.LastWriteTimeUtc);
             Assert.True(contentStore.ContentExists(blobReference));
@@ -109,6 +110,7 @@ namespace Chunkyard.Tests.Core
                     ImmutableArray.Create(
                         new ChunkReference(
                             new Uri("sha256://abcdef123456"),
+                            1,
                             new byte[] { 0xFF }))),
                 AesGcmCrypto.GenerateSalt(),
                 AesGcmCrypto.Iterations);
