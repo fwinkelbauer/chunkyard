@@ -13,21 +13,17 @@ namespace Chunkyard.Core
         public Blob(
             Func<Stream> openRead,
             string name,
-            long length,
             DateTime creationTimeUtc,
             DateTime lastWriteTimeUtc)
         {
             _openRead = openRead;
 
             Name = name;
-            Length = length;
             CreationTimeUtc = creationTimeUtc;
             LastWriteTimeUtc = lastWriteTimeUtc;
         }
 
         public string Name { get; }
-
-        public long Length { get; }
 
         public DateTime CreationTimeUtc { get; }
 

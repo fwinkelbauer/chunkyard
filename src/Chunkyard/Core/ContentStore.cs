@@ -168,7 +168,6 @@ namespace Chunkyard.Core
 
                 return new ChunkReference(
                     contentUri,
-                    encryptedData.Length,
                     tag);
             }
 

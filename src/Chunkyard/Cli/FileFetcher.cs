@@ -116,14 +116,12 @@ namespace Chunkyard.Cli
                     .Replace(":", "");
 
                 var path = Path.Combine(parent, blobName);
-                var info = new FileInfo(path);
 
                 yield return new Blob(
                     () => File.OpenRead(path),
                     blobName,
-                    info.Length,
-                    info.CreationTimeUtc,
-                    info.LastWriteTimeUtc);
+                    File.GetCreationTimeUtc(path),
+                    File.GetLastWriteTimeUtc(path));
             }
         }
 

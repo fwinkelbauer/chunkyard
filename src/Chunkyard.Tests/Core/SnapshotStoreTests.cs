@@ -341,12 +341,9 @@ namespace Chunkyard.Tests.Core
             return names.Select(
                 name =>
                 {
-                    var bytes = ToBytes(name);
-
                     return new Blob(
-                        () => new MemoryStream(bytes),
+                        () => new MemoryStream(ToBytes(name)),
                         name,
-                        bytes.Length,
                         DateTime.Now,
                         DateTime.Now);
                 })

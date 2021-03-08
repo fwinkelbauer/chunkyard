@@ -36,7 +36,6 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(expectedBytes, actualBytes);
             Assert.Equal(blob.Name, blobReference.Name);
-            Assert.Equal(blob.Length, blobReference.Chunks.Sum(c => (long)c.Length));
             Assert.Equal(blob.CreationTimeUtc, blobReference.CreationTimeUtc);
             Assert.Equal(blob.LastWriteTimeUtc, blobReference.LastWriteTimeUtc);
             Assert.True(contentStore.ContentExists(blobReference));
@@ -110,7 +109,6 @@ namespace Chunkyard.Tests.Core
                     ImmutableArray.Create(
                         new ChunkReference(
                             new Uri("sha256://abcdef123456"),
-                            1,
                             new byte[] { 0xFF }))),
                 AesGcmCrypto.GenerateSalt(),
                 AesGcmCrypto.Iterations);
@@ -183,7 +181,6 @@ namespace Chunkyard.Tests.Core
             return new Blob(
                 () => new MemoryStream(bytes),
                 name,
-                bytes.Length,
                 DateTime.Now,
                 DateTime.Now);
         }
