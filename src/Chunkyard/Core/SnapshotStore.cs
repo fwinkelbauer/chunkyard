@@ -129,11 +129,7 @@ namespace Chunkyard.Core
             int logPosition,
             string fuzzyPattern = "")
         {
-            var blobReferences = ShowSnapshot(
-                logPosition,
-                fuzzyPattern);
-
-            return blobReferences
+            return ShowSnapshot(logPosition, fuzzyPattern)
                 .AsParallel()
                 .Select(cr => _contentStore.ContentExists(cr))
                 .Aggregate(true, (total, next) => total &= next);
@@ -143,11 +139,7 @@ namespace Chunkyard.Core
             int logPosition,
             string fuzzyPattern = "")
         {
-            var blobReferences = ShowSnapshot(
-                logPosition,
-                fuzzyPattern);
-
-            return blobReferences
+            return ShowSnapshot(logPosition, fuzzyPattern)
                 .AsParallel()
                 .Select(cr => _contentStore.ContentValid(cr))
                 .Aggregate(true, (total, next) => total &= next);
