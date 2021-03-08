@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace Chunkyard.Core
 {
@@ -344,7 +343,8 @@ namespace Chunkyard.Core
 
                 sourceStream.Position = bytesProcessed;
 
-                yield return buffer.Take(chunkSize).ToArray();
+                yield return new Span<byte>(buffer, 0, chunkSize)
+                    .ToArray();
             }
         }
 
