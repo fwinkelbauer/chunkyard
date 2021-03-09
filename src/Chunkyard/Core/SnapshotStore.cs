@@ -75,6 +75,7 @@ namespace Chunkyard.Core
             blobs.EnsureNotNull(nameof(blobs));
 
             var blobReferences = blobs
+                .ToArray()
                 .AsParallel()
                 .Select(blob =>
                 {
@@ -210,9 +211,10 @@ namespace Chunkyard.Core
         {
             var allContentUris = _repository.ListUris();
             var usedUris = ListUris();
+            var unusedUris = allContentUris.Except(usedUris).ToArray();
 
             Parallel.ForEach(
-                allContentUris.Except(usedUris),
+                unusedUris,
                 contentUri => _repository.RemoveValue(contentUri));
         }
 
@@ -253,7 +255,8 @@ namespace Chunkyard.Core
                 .ToArray();
 
             var urisToCopy = ListUris(logPositionsToCopy)
-                .Except(otherRepository.ListUris());
+                .Except(otherRepository.ListUris())
+                .ToArray();
 
             Parallel.ForEach(
                 urisToCopy,
