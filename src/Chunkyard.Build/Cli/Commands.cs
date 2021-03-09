@@ -23,22 +23,7 @@ namespace Chunkyard.Build.Cli
                 $"clean {Solution}",
                 $"-c {o.Configuration}");
 
-            var dirInfo = new DirectoryInfo(ArtifactsDirectory);
-
-            if (!dirInfo.Exists)
-            {
-                return;
-            }
-
-            foreach (var fileInfo in dirInfo.GetFiles())
-            {
-                fileInfo.Delete();
-            }
-
-            foreach (var subDirInfo in dirInfo.GetDirectories())
-            {
-                subDirInfo.Delete(true);
-            }
+            CleanDirectory(ArtifactsDirectory);
         });
 
         public static void Build(DotnetOptions o) => Once(() =>
@@ -161,6 +146,26 @@ namespace Chunkyard.Build.Cli
             action();
 
             Executed.Add(memberName);
+        }
+
+        private static void CleanDirectory(string directory)
+        {
+            var dirInfo = new DirectoryInfo(directory);
+
+            if (!dirInfo.Exists)
+            {
+                return;
+            }
+
+            foreach (var fileInfo in dirInfo.GetFiles())
+            {
+                fileInfo.Delete();
+            }
+
+            foreach (var subDirInfo in dirInfo.GetDirectories())
+            {
+                subDirInfo.Delete(true);
+            }
         }
     }
 }
