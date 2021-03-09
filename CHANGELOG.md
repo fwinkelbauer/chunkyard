@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ### Changed
 
-- The storage format by adding a length property to every chunk
+- The storage format by removing the length property from blob references
 
 ## 6.0.0 - 2021-03-07
 
