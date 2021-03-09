@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 6.1.0 - 2021-03-09
+
 ### Changed
 
 - The storage format by removing the length property from blob references
