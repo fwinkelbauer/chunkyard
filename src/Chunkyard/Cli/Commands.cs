@@ -197,7 +197,7 @@ namespace Chunkyard.Cli
                     config.Repository,
                     LatestLogPosition,
                     "",
-                    false));
+                    true));
         }
 
         public static void CopySnapshots(CopyOptions o)

@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The storage format by removing the length property from blob references
 
+### Fixed
+
+- The `dot` command to perform a shallow instead of a full check
+
 ## 6.0.0 - 2021-03-07
 
 ### Added
