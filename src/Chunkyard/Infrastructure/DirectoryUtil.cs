@@ -7,9 +7,15 @@ namespace Chunkyard.Infrastructure
     /// </summary>
     public static class DirectoryUtil
     {
+        public static string GetParent(string file)
+        {
+            return Path.GetDirectoryName(file)
+                ?? file;
+        }
+
         public static void CreateParent(string file)
         {
-            var parent = Path.GetDirectoryName(file);
+            var parent = GetParent(file);
 
             if (!string.IsNullOrEmpty(parent))
             {

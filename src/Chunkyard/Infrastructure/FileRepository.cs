@@ -67,18 +67,17 @@ namespace Chunkyard.Infrastructure
 
         public void RemoveValue(Uri contentUri)
         {
-            var filePath = ToFilePath(contentUri);
-            var directoryPath = Path.GetDirectoryName(filePath);
+            var file = ToFilePath(contentUri);
+            var directory = DirectoryUtil.GetParent(file);
 
-            File.Delete(filePath);
+            File.Delete(file);
 
-            if (string.IsNullOrEmpty(directoryPath)
-                || Directory.EnumerateFileSystemEntries(directoryPath).Any())
+            if (Directory.EnumerateFileSystemEntries(directory).Any())
             {
                 return;
             }
 
-            Directory.Delete(directoryPath);
+            Directory.Delete(directory);
         }
 
         public int AppendToLog(int newLogPosition, byte[] value)
@@ -157,10 +156,8 @@ namespace Chunkyard.Infrastructure
         private static Uri ToContentUri(string filePath)
         {
             var hashAlgorithmName = Path.GetFileName(
-                Path.GetDirectoryName(
-                    Path.GetDirectoryName(filePath)
-                    ?? ""))
-                ?? "";
+                DirectoryUtil.GetParent(
+                    DirectoryUtil.GetParent(filePath)));
 
             return Id.ToContentUri(
                 hashAlgorithmName,
