@@ -331,10 +331,10 @@ namespace Chunkyard.Core
 
             long bytesProcessed = 0;
             long bytesRemaining = sourceStream.Length;
+            var buffer = new byte[_maxSize];
 
             while (bytesRemaining > 0)
             {
-                var buffer = new byte[_maxSize];
                 var bytesRead = sourceStream.Read(buffer, 0, buffer.Length);
 
                 var chunkSize = Cut(buffer, bytesRead);
