@@ -141,6 +141,7 @@ namespace Chunkyard.Infrastructure
 
             foreach (var hashDirectory in hashDirectories)
             {
+                var hashAlgorithmName = Path.GetFileName(hashDirectory);
                 var contentFiles = Directory.EnumerateFiles(
                     hashDirectory,
                     "*",
@@ -148,20 +149,11 @@ namespace Chunkyard.Infrastructure
 
                 foreach (var contentFile in contentFiles)
                 {
-                    yield return ToContentUri(contentFile);
+                    yield return Id.ToContentUri(
+                        hashAlgorithmName,
+                        Path.GetFileNameWithoutExtension(contentFile));
                 }
             }
-        }
-
-        private static Uri ToContentUri(string filePath)
-        {
-            var hashAlgorithmName = Path.GetFileName(
-                DirectoryUtil.GetParent(
-                    DirectoryUtil.GetParent(filePath)));
-
-            return Id.ToContentUri(
-                hashAlgorithmName,
-                Path.GetFileNameWithoutExtension(filePath));
         }
 
         private string ToFilePath(int logPosition)
