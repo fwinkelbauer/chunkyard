@@ -37,12 +37,11 @@ namespace Chunkyard.Core
                 return false;
             }
 
+            var (algorithm, hash) = Id.DestructureContentUri(contentUri);
             var content = repository.RetrieveValue(contentUri);
-            var computedUri = Id.ComputeContentUri(
-                Id.AlgorithmFromContentUri(contentUri),
-                content);
+            var computedHash = Id.ComputeHash(algorithm, content);
 
-            return contentUri.Equals(computedUri);
+            return hash.Equals(computedHash);
         }
 
         public static void KeepLatestLogPositions(

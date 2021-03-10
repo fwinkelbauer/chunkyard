@@ -27,8 +27,8 @@ namespace Chunkyard.Tests.Core
             var expectedAlgorithm = HashAlgorithmName.SHA256;
             var expectedHash = "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e";
 
-            var actualAlgorithm = Id.AlgorithmFromContentUri(contentUri);
-            var actualHash = Id.HashFromContentUri(contentUri);
+            var (actualAlgorithm, actualHash) = Id.DestructureContentUri(
+                contentUri);
 
             Assert.Equal(expectedAlgorithm, actualAlgorithm);
             Assert.Equal(expectedHash, actualHash);

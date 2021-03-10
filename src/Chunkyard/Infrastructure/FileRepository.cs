@@ -173,10 +173,10 @@ namespace Chunkyard.Infrastructure
 
         private string ToFilePath(Uri contentUri)
         {
-            var hash = Id.HashFromContentUri(contentUri);
+            var (algorithm, hash) = Id.DestructureContentUri(contentUri);
             var directory = Path.Combine(
                 _contentDirectory,
-                Id.AlgorithmFromContentUri(contentUri).Name!.ToLower(),
+                algorithm.Name!.ToLower(),
                 hash.Substring(0, 2));
 
             return Path.Combine(

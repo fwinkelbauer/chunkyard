@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Chunkyard.Core
 {
@@ -16,7 +15,7 @@ namespace Chunkyard.Core
             byte[] data)
         {
             return ToContentUri(
-                hashAlgorithmName,
+                hashAlgorithmName.Name!,
                 ComputeHash(hashAlgorithmName, data));
         }
 
@@ -29,21 +28,13 @@ namespace Chunkyard.Core
             return ToHexString(algorithm!.ComputeHash(data));
         }
 
-        public static HashAlgorithmName AlgorithmFromContentUri(Uri contentUri)
+        public static (HashAlgorithmName HashAlgorithmName, string Hash) DestructureContentUri(
+            Uri contentUri)
         {
             contentUri.EnsureNotNull(nameof(contentUri));
 
-            return new HashAlgorithmName(contentUri.Scheme.ToUpper());
-        }
-
-        public static string HashFromContentUri(Uri contentUri)
-        {
-            contentUri.EnsureNotNull(nameof(contentUri));
-
-            // Check that this is a valid content URI
-            _ = AlgorithmFromContentUri(contentUri);
-
-            return contentUri.Host;
+            return (new HashAlgorithmName(contentUri.Scheme.ToUpper()),
+                contentUri.Host);
         }
 
         public static Uri ToContentUri(
@@ -52,16 +43,7 @@ namespace Chunkyard.Core
         {
             hashAlgorithmName.EnsureNotNullOrEmpty(nameof(hashAlgorithmName));
 
-            return ToContentUri(
-                new HashAlgorithmName(hashAlgorithmName.ToUpper()),
-                hash);
-        }
-
-        private static Uri ToContentUri(
-            HashAlgorithmName hashAlgorithmName,
-            string hash)
-        {
-            return new Uri($"{hashAlgorithmName.Name!.ToLower()}://{hash}");
+            return new Uri($"{hashAlgorithmName.ToLower()}://{hash}");
         }
 
         private static string ToHexString(byte[] hash)
