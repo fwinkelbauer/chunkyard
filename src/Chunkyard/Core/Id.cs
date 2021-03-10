@@ -29,15 +29,6 @@ namespace Chunkyard.Core
             return ToHexString(algorithm!.ComputeHash(data));
         }
 
-        public static string ComputeHash(
-            HashAlgorithmName hashAlgorithmName,
-            string data)
-        {
-            return ComputeHash(
-                hashAlgorithmName,
-                Encoding.UTF8.GetBytes(data));
-        }
-
         public static HashAlgorithmName AlgorithmFromContentUri(Uri contentUri)
         {
             contentUri.EnsureNotNull(nameof(contentUri));

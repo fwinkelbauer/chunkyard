@@ -35,19 +35,6 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void ComputeHash_Creates_Hash_From_Text()
-        {
-            var text = "abcd";
-            var expectedhash = "88d4266fd4e6338d13b845fcf289579d209c897823b9217da3e161936f031589";
-
-            var actualHash = Id.ComputeHash(
-                HashAlgorithmName.SHA256,
-                text);
-
-            Assert.Equal(expectedhash, actualHash);
-        }
-
-        [Fact]
         public static void ComputeHash_Creates_Hash_From_Bytes()
         {
             var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
