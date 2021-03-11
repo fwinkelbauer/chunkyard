@@ -47,7 +47,6 @@ namespace Chunkyard.Build
                 .WithParsed<PublishOptions>(o => Commands.Publish(o))
                 .WithParsed<ReleaseOptions>(_ => Commands.Release())
                 .WithParsed<FmtOptions>(_ => Commands.Fmt())
-                .WithParsed<UpgradeOptions>(_ => Commands.Upgrade())
                 .WithNotParsed(_ => Environment.ExitCode = 1);
         }
     }

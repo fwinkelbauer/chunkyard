@@ -59,14 +59,6 @@ namespace Chunkyard.Build.Cli
             Dotnet($"format {Solution}");
         });
 
-        public static void Upgrade() => Once(() =>
-        {
-            Dotnet(
-                $"outdated {Solution}",
-                "--upgrade",
-                "--exclude xunit.runner.visualstudio");
-        });
-
         public static void Release() => Once(() =>
         {
             var message = $"Prepare Chunkyard release v{Version}";
