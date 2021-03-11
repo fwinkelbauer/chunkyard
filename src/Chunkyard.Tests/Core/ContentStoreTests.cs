@@ -12,7 +12,7 @@ namespace Chunkyard.Tests.Core
     public static class ContentStoreTests
     {
         [Fact]
-        public static void Store_And_RetrieveContent_Return_Data()
+        public static void Store_And_RetrieveBlob_Return_Data()
         {
             var contentStore = CreateContentStore();
 
