@@ -64,8 +64,7 @@ namespace Chunkyard.Core
             {
                 var decryptedData = AesGcmCrypto.Decrypt(
                     Repository.RetrieveValue(contentUri),
-                    key,
-                    contentReference.Nonce);
+                    key);
 
                 outputStream.Write(decryptedData);
             }
@@ -85,7 +84,7 @@ namespace Chunkyard.Core
                 blob.CreationTimeUtc,
                 blob.LastWriteTimeUtc,
                 nonce,
-                WriteChunks(key, nonce, stream));
+                WriteChunks(nonce, stream, key));
         }
 
         public DocumentReference StoreDocument<T>(
@@ -99,7 +98,7 @@ namespace Chunkyard.Core
 
             return new DocumentReference(
                 nonce,
-                WriteChunks(key, nonce, memoryStream));
+                WriteChunks(nonce, memoryStream, key));
         }
 
         public bool ContentExists(IContentReference contentReference)
@@ -136,16 +135,16 @@ namespace Chunkyard.Core
         }
 
         private IImmutableList<Uri> WriteChunks(
-            byte[] key,
             byte[] nonce,
-            Stream stream)
+            Stream stream,
+            byte[] key)
         {
             Uri WriteChunk(byte[] chunk)
             {
                 var encryptedData = AesGcmCrypto.Encrypt(
+                    nonce,
                     chunk,
-                    key,
-                    nonce);
+                    key);
 
                 var contentUri = Repository.StoreValue(
                     _hashAlgorithmName,

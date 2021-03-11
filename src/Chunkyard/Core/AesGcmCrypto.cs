@@ -16,47 +16,60 @@ namespace Chunkyard.Core
         private const int SaltBytes = 12;
 
         public static byte[] Encrypt(
-            byte[] plaintext,
-            byte[] key,
-            byte[] nonce)
+            byte[] nonce,
+            byte[] plainText,
+            byte[] key)
         {
-            plaintext.EnsureNotNull(nameof(plaintext));
             nonce.EnsureNotNull(nameof(nonce));
+            plainText.EnsureNotNull(nameof(plainText));
 
-            var buffer = new byte[nonce.Length + plaintext.Length + TagBytes];
-            var ciphertext = new Span<byte>(buffer, nonce.Length, plaintext.Length);
-            var tag = new Span<byte>(buffer, buffer.Length - TagBytes, TagBytes);
+            var cipherText = new byte[
+                nonce.Length + plainText.Length + TagBytes];
+
+            var innerCiphertext = new Span<byte>(
+                cipherText,
+                nonce.Length,
+                plainText.Length);
+
+            var tag = new Span<byte>(
+                cipherText,
+                cipherText.Length - TagBytes,
+                TagBytes);
 
             using var aesGcm = new AesGcm(key);
-            aesGcm.Encrypt(nonce, plaintext, ciphertext, tag);
+            aesGcm.Encrypt(nonce, plainText, innerCiphertext, tag);
 
-            // We add all cryptographic details needed to decrypt a piece of
-            // content so that we can recover it even if we lose our meta data
-            Array.Copy(nonce, 0, buffer, 0, nonce.Length);
+            Array.Copy(nonce, 0, cipherText, 0, nonce.Length);
 
-            return buffer;
+            return cipherText;
         }
 
         public static byte[] Decrypt(
-            byte[] ciphertext,
-            byte[] key,
-            byte[] nonce)
+            byte[] cipherText,
+            byte[] key)
         {
-            ciphertext.EnsureNotNull(nameof(ciphertext));
-            nonce.EnsureNotNull(nameof(nonce));
+            cipherText.EnsureNotNull(nameof(cipherText));
 
-            byte[] plaintext = new byte[ciphertext.Length - nonce.Length - TagBytes];
+            byte[] plainText = new byte[
+                cipherText.Length - NonceBytes - TagBytes];
 
-            // Strip away the cryptographic details which we added when
-            // encrypting the value
-            var buffer = new Span<byte>(ciphertext, nonce.Length, plaintext.Length);
-            var tag = new Span<byte>(ciphertext, ciphertext.Length - TagBytes, TagBytes);
+            var nonce = new Span<byte>(cipherText, 0, NonceBytes);
+
+            var innerCipherText = new Span<byte>(
+                cipherText,
+                nonce.Length,
+                plainText.Length);
+
+            var tag = new Span<byte>(
+                cipherText,
+                cipherText.Length - TagBytes,
+                TagBytes);
 
             using var aesGcm = new AesGcm(key);
 
             try
             {
-                aesGcm.Decrypt(nonce, buffer, tag, plaintext);
+                aesGcm.Decrypt(nonce, innerCipherText, tag, plainText);
             }
             catch (Exception e)
             {
@@ -65,7 +78,7 @@ namespace Chunkyard.Core
                     e);
             }
 
-            return plaintext;
+            return plainText;
         }
 
         public static byte[] PasswordToKey(
