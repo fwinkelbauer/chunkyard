@@ -22,7 +22,7 @@ namespace Chunkyard
             }
             catch (CryptographicException)
             {
-                WriteError("Could not decrypt data");
+                WriteError("Error: Could not decrypt data");
             }
             catch (Exception e)
             {
