@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,13 +12,13 @@ namespace Chunkyard.Infrastructure
     /// </summary>
     internal class FileRepository : IRepository
     {
-        private readonly NamedMonitor _monitor;
+        private readonly ConcurrentDictionary<string, object> _locks;
         private readonly string _contentDirectory;
         private readonly string _refLogDirectory;
 
         public FileRepository(string directory)
         {
-            _monitor = new NamedMonitor();
+            _locks = new ConcurrentDictionary<string, object>();
             _contentDirectory = Path.Combine(directory, "content");
             _refLogDirectory = Path.Combine(directory, "reflog");
 
@@ -30,7 +31,7 @@ namespace Chunkyard.Infrastructure
         {
             var file = ToFilePath(contentUri);
 
-            lock (_monitor[file])
+            lock (_locks.GetOrAdd(file, _ => new object()))
             {
                 if (File.Exists(file))
                 {
