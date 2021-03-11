@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The storage format by removing cryptographic tags
 
+### Removed
+
+- Chunk size settings from all CLI verbs
+
 ## 6.1.0 - 2021-03-09
 
 ### Changed

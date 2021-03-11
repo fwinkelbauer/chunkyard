@@ -50,7 +50,7 @@ namespace Chunkyard.Cli
             var snapshotStore = CreateSnapshotStore(
                 CreateContentStore(
                     CreateRepository(o.Repository, ensureRepository: false),
-                    new FastCdc(o.Min, o.Avg, o.Max)),
+                    new FastCdc()),
                 o.Cached);
 
             var blobs = FileFetcher.FetchBlobs(files);
@@ -174,10 +174,7 @@ namespace Chunkyard.Cli
                     config.Repository,
                     config.Files,
                     (IEnumerable<string>?)config.ExcludePatterns ?? new List<string>(),
-                    config.Cached ?? false,
-                    config.Min ?? FastCdc.DefaultMin,
-                    config.Avg ?? FastCdc.DefaultAvg,
-                    config.Max ?? FastCdc.DefaultMax));
+                    config.Cached ?? false));
 
             if (config.LatestCount.HasValue)
             {

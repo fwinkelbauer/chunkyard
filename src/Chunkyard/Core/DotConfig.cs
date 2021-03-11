@@ -12,18 +12,12 @@ namespace Chunkyard.Core
             IImmutableList<string> files,
             IImmutableList<string>? excludePatterns,
             bool? cached,
-            int? min,
-            int? avg,
-            int? max,
             int? latestCount)
         {
             Repository = repository;
             Files = files;
             ExcludePatterns = excludePatterns;
             Cached = cached;
-            Min = min;
-            Avg = avg;
-            Max = max;
             LatestCount = latestCount;
         }
 
@@ -34,12 +28,6 @@ namespace Chunkyard.Core
         public IImmutableList<string>? ExcludePatterns { get; }
 
         public bool? Cached { get; }
-
-        public int? Min { get; }
-
-        public int? Avg { get; }
-
-        public int? Max { get; }
 
         public int? LatestCount { get; }
     }
