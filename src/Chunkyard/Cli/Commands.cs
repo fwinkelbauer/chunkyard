@@ -280,39 +280,59 @@ namespace Chunkyard.Cli
             return repository;
         }
 
-        private class PrintingContentStore : DecoratorContentStore
+        private class PrintingContentStore : IContentStore
         {
+            private readonly IContentStore _store;
+
             public PrintingContentStore(IContentStore store)
-                : base(store)
             {
+                _store = store;
             }
 
-            public override void RetrieveBlob(
+            public IRepository Repository => _store.Repository;
+
+            public void RetrieveBlob(
                 BlobReference blobReference,
                 byte[] key,
                 Stream outputStream)
             {
-                base.RetrieveBlob(blobReference, key, outputStream);
+                _store.RetrieveBlob(blobReference, key, outputStream);
 
                 Console.WriteLine($"Restored blob: {blobReference.Name}");
             }
 
-            public override BlobReference StoreBlob(
+            public T RetrieveDocument<T>(
+                DocumentReference documentReference,
+                byte[] key)
+                where T : notnull
+            {
+                return _store.RetrieveDocument<T>(documentReference, key);
+            }
+
+            public BlobReference StoreBlob(
                 Blob blob,
                 byte[] key,
                 byte[] nonce)
             {
-                var blobReference = base.StoreBlob(blob, key, nonce);
+                var blobReference = _store.StoreBlob(blob, key, nonce);
 
                 Console.WriteLine($"Stored blob: {blobReference.Name}");
 
                 return blobReference;
             }
 
-            public override bool ContentExists(
-                IContentReference contentReference)
+            public DocumentReference StoreDocument<T>(
+                T value,
+                byte[] key,
+                byte[] nonce)
+                where T : notnull
             {
-                var exists = base.ContentExists(contentReference);
+                return _store.StoreDocument(value, key, nonce);
+            }
+
+            public bool ContentExists(IContentReference contentReference)
+            {
+                var exists = _store.ContentExists(contentReference);
 
                 if (!exists
                     && contentReference is BlobReference blobReference)
@@ -324,10 +344,9 @@ namespace Chunkyard.Cli
                 return exists;
             }
 
-            public override bool ContentValid(
-                IContentReference contentReference)
+            public bool ContentValid(IContentReference contentReference)
             {
-                var valid = base.ContentValid(contentReference);
+                var valid = _store.ContentValid(contentReference);
 
                 if (!valid
                     && contentReference is BlobReference blobReference)
@@ -338,36 +357,84 @@ namespace Chunkyard.Cli
 
                 return valid;
             }
-        }
 
-        private class PrintingRepository : DecoratorRepository
-        {
-            public PrintingRepository(IRepository repository)
-                : base(repository)
+            public int AppendToLog(
+                int newLogPosition,
+                LogReference logReference)
             {
+                return _store.AppendToLog(
+                    newLogPosition,
+                    logReference);
             }
 
-            public override int AppendToLog(int newLogPosition, byte[] value)
+            public LogReference RetrieveFromLog(int logPosition)
             {
-                var logPosition = base.AppendToLog(newLogPosition, value);
+                return _store.RetrieveFromLog(logPosition);
+            }
+        }
+
+        private class PrintingRepository : IRepository
+        {
+            private readonly IRepository _repository;
+
+            public PrintingRepository(IRepository repository)
+            {
+                _repository = repository;
+            }
+
+            public Uri RepositoryUri => _repository.RepositoryUri;
+
+            public void StoreValue(Uri contentUri, byte[] value)
+            {
+                _repository.StoreValue(contentUri, value);
+            }
+
+            public byte[] RetrieveValue(Uri contentUri)
+            {
+                return _repository.RetrieveValue(contentUri);
+            }
+
+            public bool ValueExists(Uri contentUri)
+            {
+                return _repository.ValueExists(contentUri);
+            }
+
+            public Uri[] ListUris()
+            {
+                return _repository.ListUris();
+            }
+
+            public void RemoveValue(Uri contentUri)
+            {
+                _repository.RemoveValue(contentUri);
+
+                Console.WriteLine($"Removed content: {contentUri}");
+            }
+
+            public int AppendToLog(int newLogPosition, byte[] value)
+            {
+                var logPosition = _repository.AppendToLog(newLogPosition, value);
 
                 Console.WriteLine($"Created snapshot: #{logPosition}");
 
                 return logPosition;
             }
 
-            public override void RemoveValue(Uri contentUri)
+            public byte[] RetrieveFromLog(int logPosition)
             {
-                base.RemoveValue(contentUri);
-
-                Console.WriteLine($"Removed content: {contentUri}");
+                return _repository.RetrieveFromLog(logPosition);
             }
 
-            public override void RemoveFromLog(int logPosition)
+            public void RemoveFromLog(int logPosition)
             {
-                base.RemoveFromLog(logPosition);
+                _repository.RemoveFromLog(logPosition);
 
                 Console.WriteLine($"Removed snapshot: #{logPosition}");
+            }
+
+            public int[] ListLogPositions()
+            {
+                return _repository.ListLogPositions();
             }
         }
     }
