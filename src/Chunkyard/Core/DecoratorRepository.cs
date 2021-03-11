@@ -6,7 +6,7 @@ namespace Chunkyard.Core
     /// An abstract implementation of <see cref="IRepository"/> which can be
     /// used to implement decorators.
     /// </summary>
-    public abstract class DecoratorRepository : IRepository
+    internal abstract class DecoratorRepository : IRepository
     {
         protected DecoratorRepository(IRepository repository)
         {

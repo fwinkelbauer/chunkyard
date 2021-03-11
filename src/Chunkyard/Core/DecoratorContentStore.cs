@@ -6,7 +6,7 @@ namespace Chunkyard.Core
     /// An abstract implementation of <see cref="IContentStore"/> which can be
     /// used to implement decorators.
     /// </summary>
-    public abstract class DecoratorContentStore : IContentStore
+    internal abstract class DecoratorContentStore : IContentStore
     {
         protected DecoratorContentStore(IContentStore store)
         {

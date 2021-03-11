@@ -5,7 +5,7 @@ namespace Chunkyard.Core
     /// <summary>
     /// A utility class to convert objects into bytes
     /// </summary>
-    public static class DataConvert
+    internal static class DataConvert
     {
         public static byte[] ToBytes(object o)
         {

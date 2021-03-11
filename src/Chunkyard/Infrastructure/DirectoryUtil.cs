@@ -5,7 +5,7 @@ namespace Chunkyard.Infrastructure
     /// <summary>
     /// A set of directory utility methods.
     /// </summary>
-    public static class DirectoryUtil
+    internal static class DirectoryUtil
     {
         public static string GetParent(string file)
         {

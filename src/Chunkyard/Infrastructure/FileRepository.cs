@@ -9,7 +9,7 @@ namespace Chunkyard.Infrastructure
     /// <summary>
     /// An implementation of <see cref="IRepository"/> using the file system.
     /// </summary>
-    public class FileRepository : IRepository
+    internal class FileRepository : IRepository
     {
         private readonly NamedMonitor _monitor;
         private readonly string _contentDirectory;
