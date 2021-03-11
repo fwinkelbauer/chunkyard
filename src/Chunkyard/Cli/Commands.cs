@@ -15,10 +15,7 @@ namespace Chunkyard.Cli
     {
         public const int LatestLogPosition = -1;
 
-        private static readonly HashAlgorithmName DefaultAlgorithm =
-            HashAlgorithmName.SHA256;
-
-        private static Dictionary<Uri, SnapshotStore> _snapshotStores =
+        private readonly static Dictionary<Uri, SnapshotStore> _snapshotStores =
             new Dictionary<Uri, SnapshotStore>();
 
         public static void PreviewFiles(PreviewOptions o)
@@ -253,7 +250,7 @@ namespace Chunkyard.Cli
                 new ContentStore(
                     repository,
                     fastCdc ?? new FastCdc(),
-                    DefaultAlgorithm));
+                    HashAlgorithmName.SHA256));
         }
 
         private static IRepository CreateRepository(
