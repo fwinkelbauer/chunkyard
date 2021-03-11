@@ -67,16 +67,7 @@ namespace Chunkyard.Core
 
             using var aesGcm = new AesGcm(key);
 
-            try
-            {
-                aesGcm.Decrypt(nonce, innerCipherText, tag, plainText);
-            }
-            catch (Exception e)
-            {
-                throw new ChunkyardException(
-                    "Could not decrypt data",
-                    e);
-            }
+            aesGcm.Decrypt(nonce, innerCipherText, tag, plainText);
 
             return plainText;
         }
