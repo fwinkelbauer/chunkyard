@@ -40,7 +40,6 @@ namespace Chunkyard.Cli
         public static void CreateSnapshot(CreateOptions o)
         {
             var files = FileFetcher.Find(o.Files, o.ExcludePatterns);
-            var parent = FileFetcher.FindCommonParent(files);
 
             if (files.Length == 0)
             {
@@ -54,7 +53,7 @@ namespace Chunkyard.Cli
                     new FastCdc(o.Min, o.Avg, o.Max)),
                 o.Cached);
 
-            var blobs = FileFetcher.FetchBlobs(parent, files);
+            var blobs = FileFetcher.FetchBlobs(files);
 
             snapshotStore.AppendSnapshot(
                 blobs,

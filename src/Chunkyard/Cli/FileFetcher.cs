@@ -96,10 +96,10 @@ namespace Chunkyard.Cli
             return filteredFiles;
         }
 
-        public static IEnumerable<Blob> FetchBlobs(
-            string parent,
-            IEnumerable<string> files)
+        public static IEnumerable<Blob> FetchBlobs(string[] files)
         {
+            var parent = FindCommonParent(files);
+
             foreach (var file in files)
             {
                 var blobName = string.IsNullOrEmpty(parent)
@@ -126,7 +126,7 @@ namespace Chunkyard.Cli
         }
 
         // https://rosettacode.org/wiki/Find_common_directory_path#C.23
-        public static string FindCommonParent(IList<string> files)
+        private static string FindCommonParent(string[] files)
         {
             var parent = "";
             var separatedPaths = files
