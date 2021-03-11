@@ -102,7 +102,7 @@ namespace Chunkyard.Cli
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            Stream openWrite(string s)
+            Stream OpenWrite(string s)
             {
                 var mode = o.Overwrite
                     ? FileMode.OpenOrCreate
@@ -118,7 +118,7 @@ namespace Chunkyard.Cli
             snapshotStore.RestoreSnapshot(
                 o.LogPosition,
                 o.IncludeFuzzy,
-                openWrite);
+                OpenWrite);
         }
 
         public static void ListSnapshots(ListOptions o)
@@ -208,10 +208,7 @@ namespace Chunkyard.Cli
                 o.DestinationRepository,
                 ensureRepository: false);
 
-            if (!sourceStore.CopySnapshots(destinationRepository).Any())
-            {
-                Console.WriteLine("No new snapshots to copy");
-            }
+            sourceStore.CopySnapshots(destinationRepository);
         }
 
         private static SnapshotStore CreateSnapshotStore(

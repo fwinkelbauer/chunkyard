@@ -218,7 +218,7 @@ namespace Chunkyard.Core
                 contentUri => _repository.RemoveValue(contentUri));
         }
 
-        public int[] CopySnapshots(IRepository otherRepository)
+        public void CopySnapshots(IRepository otherRepository)
         {
             otherRepository.EnsureNotNull(nameof(otherRepository));
 
@@ -273,8 +273,6 @@ namespace Chunkyard.Core
                     logPosition,
                     _repository.RetrieveFromLog(logPosition));
             }
-
-            return logPositionsToCopy;
         }
 
         private Uri[] ListUris()
