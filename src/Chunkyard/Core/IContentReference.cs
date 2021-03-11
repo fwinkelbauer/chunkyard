@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 
 namespace Chunkyard.Core
 {
@@ -10,6 +11,6 @@ namespace Chunkyard.Core
     {
         public byte[] Nonce { get; }
 
-        public IImmutableList<ChunkReference> Chunks { get; }
+        public IImmutableList<Uri> ContentUris { get; }
     }
 }

@@ -14,13 +14,13 @@ namespace Chunkyard.Tests.Core
             var key = CreateKey();
             var nonce = AesGcmCrypto.GenerateNonce();
 
-            var (secretText, tag) = AesGcmCrypto.Encrypt(
+            var secretText = AesGcmCrypto.Encrypt(
                 Encoding.UTF8.GetBytes(expectedText),
                 key,
                 nonce);
 
             var actualText = Encoding.UTF8.GetString(
-                AesGcmCrypto.Decrypt(secretText, tag, key, nonce));
+                AesGcmCrypto.Decrypt(secretText, key, nonce));
 
             Assert.Equal(expectedText, actualText);
         }
@@ -32,17 +32,15 @@ namespace Chunkyard.Tests.Core
             var key = CreateKey();
             var nonce = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
-            var (secretText, tag) = AesGcmCrypto.Encrypt(
+            var secretText = AesGcmCrypto.Encrypt(
                 plainText,
                 key,
                 nonce);
 
-            Assert.Equal(
-                nonce.Length + plainText.Length + tag.Length,
-                secretText.Length);
-
             Assert.Equal(nonce, secretText.Take(nonce.Length));
-            Assert.Equal(tag, secretText.TakeLast(tag.Length));
+            Assert.Equal(
+                nonce.Length + plainText.Length + AesGcmCrypto.TagBytes,
+                secretText.Length);
         }
 
         private static byte[] CreateKey()

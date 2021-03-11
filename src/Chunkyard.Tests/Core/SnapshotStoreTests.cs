@@ -161,8 +161,7 @@ namespace Chunkyard.Tests.Core
 
             var snapshot = snapshotStore.GetSnapshot(logPosition);
             var contentUris = snapshot.BlobReferences
-                .SelectMany(blobReference => blobReference.Chunks)
-                .Select(chunk => chunk.ContentUri);
+                .SelectMany(blobReference => blobReference.ContentUris);
 
             RemoveValues(repository, contentUris);
 
@@ -182,8 +181,7 @@ namespace Chunkyard.Tests.Core
 
             var snapshot = snapshotStore.GetSnapshot(logPosition);
             var contentUris = snapshot.BlobReferences
-                .SelectMany(blobReference => blobReference.Chunks)
-                .Select(chunk => chunk.ContentUri);
+                .SelectMany(blobReference => blobReference.ContentUris);
 
             CorruptValues(repository, contentUris);
 

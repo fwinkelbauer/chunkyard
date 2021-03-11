@@ -15,13 +15,13 @@ namespace Chunkyard.Core
             DateTime creationTimeUtc,
             DateTime lastWriteTimeUtc,
             byte[] nonce,
-            IImmutableList<ChunkReference> chunks)
+            IImmutableList<Uri> contentUris)
         {
             Name = name;
             CreationTimeUtc = creationTimeUtc;
             LastWriteTimeUtc = lastWriteTimeUtc;
             Nonce = nonce;
-            Chunks = chunks;
+            ContentUris = contentUris;
         }
 
         public string Name { get; }
@@ -32,7 +32,7 @@ namespace Chunkyard.Core
 
         public byte[] Nonce { get; }
 
-        public IImmutableList<ChunkReference> Chunks { get; }
+        public IImmutableList<Uri> ContentUris { get; }
 
         public override bool Equals(object? obj)
         {
@@ -41,7 +41,7 @@ namespace Chunkyard.Core
                 && CreationTimeUtc.Equals(other.CreationTimeUtc)
                 && LastWriteTimeUtc.Equals(other.LastWriteTimeUtc)
                 && Nonce.SequenceEqual(other.Nonce)
-                && Chunks.SequenceEqual(other.Chunks);
+                && ContentUris.SequenceEqual(other.ContentUris);
         }
 
         public override int GetHashCode()
@@ -51,7 +51,7 @@ namespace Chunkyard.Core
                 CreationTimeUtc,
                 LastWriteTimeUtc,
                 Nonce,
-                Chunks);
+                ContentUris);
         }
     }
 }

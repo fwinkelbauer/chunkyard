@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -59,11 +60,10 @@ namespace Chunkyard.Core
             byte[] key,
             Stream outputStream)
         {
-            foreach (var chunk in contentReference.Chunks)
+            foreach (var contentUri in contentReference.ContentUris)
             {
                 var decryptedData = AesGcmCrypto.Decrypt(
-                    Repository.RetrieveValue(chunk.ContentUri),
-                    chunk.Tag,
+                    Repository.RetrieveValue(contentUri),
                     key,
                     contentReference.Nonce);
 
@@ -106,8 +106,8 @@ namespace Chunkyard.Core
         {
             contentReference.EnsureNotNull(nameof(contentReference));
 
-            return contentReference.Chunks
-                .Select(chunk => Repository.ValueExists(chunk.ContentUri))
+            return contentReference.ContentUris
+                .Select(contentUri => Repository.ValueExists(contentUri))
                 .Aggregate(true, (total, next) => total &= next);
         }
 
@@ -115,8 +115,8 @@ namespace Chunkyard.Core
         {
             contentReference.EnsureNotNull(nameof(contentReference));
 
-            return contentReference.Chunks
-                .Select(chunk => Repository.ValueValid(chunk.ContentUri))
+            return contentReference.ContentUris
+                .Select(contentUri => Repository.ValueValid(contentUri))
                 .Aggregate(true, (total, next) => total &= next);
         }
 
@@ -135,14 +135,14 @@ namespace Chunkyard.Core
                 Repository.RetrieveFromLog(logPosition));
         }
 
-        private IImmutableList<ChunkReference> WriteChunks(
+        private IImmutableList<Uri> WriteChunks(
             byte[] key,
             byte[] nonce,
             Stream stream)
         {
-            ChunkReference WriteChunk(byte[] chunk)
+            Uri WriteChunk(byte[] chunk)
             {
-                var (encryptedData, tag) = AesGcmCrypto.Encrypt(
+                var encryptedData = AesGcmCrypto.Encrypt(
                     chunk,
                     key,
                     nonce);
@@ -151,9 +151,7 @@ namespace Chunkyard.Core
                     _hashAlgorithmName,
                     encryptedData);
 
-                return new ChunkReference(
-                    contentUri,
-                    tag);
+                return contentUri;
             }
 
             if (_fastCdc.ExpectedChunkCount(stream.Length) > 100)

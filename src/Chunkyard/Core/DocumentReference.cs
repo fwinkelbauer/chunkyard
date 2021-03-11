@@ -12,26 +12,26 @@ namespace Chunkyard.Core
     {
         public DocumentReference(
             byte[] nonce,
-            IImmutableList<ChunkReference> chunks)
+            IImmutableList<Uri> contentUris)
         {
             Nonce = nonce;
-            Chunks = chunks;
+            ContentUris = contentUris;
         }
 
         public byte[] Nonce { get; }
 
-        public IImmutableList<ChunkReference> Chunks { get; }
+        public IImmutableList<Uri> ContentUris { get; }
 
         public override bool Equals(object? obj)
         {
             return obj is DocumentReference other
                 && Nonce.SequenceEqual(other.Nonce)
-                && Chunks.SequenceEqual(other.Chunks);
+                && ContentUris.SequenceEqual(other.ContentUris);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Nonce, Chunks);
+            return HashCode.Combine(Nonce, ContentUris);
         }
     }
 }

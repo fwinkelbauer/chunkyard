@@ -105,10 +105,7 @@ namespace Chunkyard.Tests.Core
             var expectedLogReference = new LogReference(
                 new DocumentReference(
                     AesGcmCrypto.GenerateNonce(),
-                    ImmutableArray.Create(
-                        new ChunkReference(
-                            new Uri("sha256://abcdef123456"),
-                            new byte[] { 0xFF }))),
+                    ImmutableArray.Create(new Uri("sha256://abcdef123456"))),
                 AesGcmCrypto.GenerateSalt(),
                 AesGcmCrypto.Iterations);
 

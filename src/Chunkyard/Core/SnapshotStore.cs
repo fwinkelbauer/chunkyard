@@ -294,18 +294,16 @@ namespace Chunkyard.Core
         private Uri[] ListUris(int logPosition)
         {
             var uris = new List<Uri>();
-            var snapshotReference = _contentStore.RetrieveFromLog(logPosition)
+            var documentReference = _contentStore.RetrieveFromLog(logPosition)
                 .DocumentReference;
 
-            uris.AddRange(
-                snapshotReference.Chunks.Select(c => c.ContentUri));
+            uris.AddRange(documentReference.ContentUris);
 
-            var snapshot = GetSnapshot(snapshotReference);
+            var snapshot = GetSnapshot(documentReference);
 
             foreach (var blobReference in snapshot.BlobReferences)
             {
-                uris.AddRange(
-                    blobReference.Chunks.Select(c => c.ContentUri));
+                uris.AddRange(blobReference.ContentUris);
             }
 
             return uris.ToArray();

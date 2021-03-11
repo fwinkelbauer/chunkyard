@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The storage format by removing cryptographic tags
+
 ## 6.1.0 - 2021-03-09
 
 ### Changed
