@@ -173,14 +173,18 @@ namespace Chunkyard.Core
 
         public Snapshot GetSnapshot(int logPosition)
         {
-            DocumentReference? documentReference;
-
             var resolvedLogPosition = ResolveLogPosition(logPosition);
 
             try
             {
-                documentReference = _contentStore.RetrieveFromLog(resolvedLogPosition)
-                    .DocumentReference;
+                var logReference = _contentStore.RetrieveFromLog(
+                    resolvedLogPosition);
+
+                return GetSnapshot(logReference.DocumentReference);
+            }
+            catch (ChunkyardException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -188,8 +192,6 @@ namespace Chunkyard.Core
                     $"Snapshot #{resolvedLogPosition} does not exist",
                     e);
             }
-
-            return GetSnapshot(documentReference);
         }
 
         public BlobReference[] ShowSnapshot(
