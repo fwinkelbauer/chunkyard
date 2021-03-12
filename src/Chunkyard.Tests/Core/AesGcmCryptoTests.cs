@@ -10,7 +10,10 @@ namespace Chunkyard.Tests.Core
         public static void Encrypt_And_Decrypt_Return_Input()
         {
             var expectedText = "Hello!";
-            var key = CreateKey();
+            var key = AesGcmCrypto.PasswordToKey(
+                "secret",
+                AesGcmCrypto.GenerateSalt(),
+                AesGcmCrypto.Iterations);
 
             var cipherText = AesGcmCrypto.Encrypt(
                 AesGcmCrypto.GenerateNonce(),
@@ -21,14 +24,6 @@ namespace Chunkyard.Tests.Core
                 AesGcmCrypto.Decrypt(cipherText, key));
 
             Assert.Equal(expectedText, actualText);
-        }
-
-        private static byte[] CreateKey()
-        {
-            return AesGcmCrypto.PasswordToKey(
-                "secret",
-                AesGcmCrypto.GenerateSalt(),
-                AesGcmCrypto.Iterations);
         }
     }
 }
