@@ -85,6 +85,28 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
+        public static void New_SnapshotStore_Can_Read_Existing_Snapshot()
+        {
+            var repository = new MemoryRepository();
+            var snapshotStore = CreateSnapshotStore(repository);
+
+            var expectedNames = new[] { "some content" };
+
+            var logPosition = snapshotStore.AppendSnapshot(
+                CreateBlobs(expectedNames),
+                DateTime.Now);
+
+            snapshotStore = CreateSnapshotStore(repository);
+
+            var snapshot = snapshotStore.GetSnapshot(logPosition);
+            var blobReferences = snapshot.BlobReferences;
+
+            Assert.Equal(
+                expectedNames,
+                blobReferences.Select(c => c.Name));
+        }
+
+        [Fact]
         public static void GetSnapshot_Accepts_Negative_LogPositions()
         {
             var snapshotStore = CreateSnapshotStore();
