@@ -15,7 +15,41 @@ namespace Chunkyard.Cli
         private static readonly string HomeDirectory =
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        public static string[] Find(
+        public static Blob[] FindBlobs(
+            IEnumerable<string> files,
+            IEnumerable<string> excludePatterns)
+        {
+            var foundFiles = FindFiles(files, excludePatterns);
+            var parent = FindCommonParent(foundFiles);
+
+            return foundFiles.Select(
+                file =>
+                {
+                    var blobName = string.IsNullOrEmpty(parent)
+                        ? file
+                        : Path.GetRelativePath(parent, file);
+
+                    // Using a content name with backslashes will not create
+                    // sub-directories when restoring a file on Linux.
+                    //
+                    // Also we don't want to include any ":" so that Windows
+                    // drive letters can be turned into valid paths.
+                    blobName = blobName
+                        .Replace('\\', '/')
+                        .Replace(":", "");
+
+                    var path = Path.Combine(parent, blobName);
+
+                    return new Blob(
+                        () => File.OpenRead(path),
+                        blobName,
+                        File.GetCreationTimeUtc(path),
+                        File.GetLastWriteTimeUtc(path));
+                })
+                .ToArray();
+        }
+
+        private static string[] FindFiles(
             IEnumerable<string> files,
             IEnumerable<string> excludePatterns)
         {
@@ -94,35 +128,6 @@ namespace Chunkyard.Cli
             }
 
             return filteredFiles;
-        }
-
-        public static IEnumerable<Blob> FetchBlobs(string[] files)
-        {
-            var parent = FindCommonParent(files);
-
-            foreach (var file in files)
-            {
-                var blobName = string.IsNullOrEmpty(parent)
-                    ? file
-                    : Path.GetRelativePath(parent, file);
-
-                // Using a content name with backslashes will not create
-                // sub-directories when restoring a file on Linux.
-                //
-                // Also we don't want to include any ":" so that Windows drive
-                // letters can be turned into valid paths.
-                blobName = blobName
-                    .Replace('\\', '/')
-                    .Replace(":", "");
-
-                var path = Path.Combine(parent, blobName);
-
-                yield return new Blob(
-                    () => File.OpenRead(path),
-                    blobName,
-                    File.GetCreationTimeUtc(path),
-                    File.GetLastWriteTimeUtc(path));
-            }
         }
 
         // https://rosettacode.org/wiki/Find_common_directory_path#C.23

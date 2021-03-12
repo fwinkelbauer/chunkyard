@@ -20,25 +20,25 @@ namespace Chunkyard.Cli
 
         public static void PreviewFiles(PreviewOptions o)
         {
-            var files = FileFetcher.Find(o.Files, o.ExcludePatterns);
+            var blobs = FileFetcher.FindBlobs(o.Files, o.ExcludePatterns);
 
-            if (files.Length == 0)
+            if (blobs.Length == 0)
             {
                 Console.WriteLine("Empty file list. Nothing to do!");
                 return;
             }
 
-            foreach (var file in files)
+            foreach (var blob in blobs)
             {
-                Console.WriteLine(file);
+                Console.WriteLine(blob.Name);
             }
         }
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            var files = FileFetcher.Find(o.Files, o.ExcludePatterns);
+            var blobs = FileFetcher.FindBlobs(o.Files, o.ExcludePatterns);
 
-            if (files.Length == 0)
+            if (blobs.Length == 0)
             {
                 Console.WriteLine("Empty file list. Nothing to do!");
                 return;
@@ -49,8 +49,6 @@ namespace Chunkyard.Cli
                     CreateRepository(o.Repository, ensureRepository: false),
                     new FastCdc()),
                 o.Cached);
-
-            var blobs = FileFetcher.FetchBlobs(files);
 
             snapshotStore.AppendSnapshot(
                 blobs,
