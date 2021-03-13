@@ -109,12 +109,15 @@ namespace Chunkyard.Tests.Core
                 AesGcmCrypto.GenerateSalt(),
                 AesGcmCrypto.Iterations);
 
-            var firstLogPosition = contentStore.AppendToLog(
-                0,
+            var firstLogPosition = 0;
+            var secondLogPosition = 1;
+
+            contentStore.AppendToLog(
+                firstLogPosition,
                 expectedLogReference);
 
-            var secondLogPosition = contentStore.AppendToLog(
-                firstLogPosition + 1,
+            contentStore.AppendToLog(
+                secondLogPosition,
                 expectedLogReference);
 
             var firstReference = contentStore.RetrieveFromLog(

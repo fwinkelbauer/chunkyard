@@ -35,7 +35,7 @@ namespace Chunkyard.Core
 
         bool ContentValid(IContentReference contentReference);
 
-        int AppendToLog(
+        void AppendToLog(
             int newLogPosition,
             LogReference logReference);
 

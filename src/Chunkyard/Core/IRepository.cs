@@ -20,7 +20,7 @@ namespace Chunkyard.Core
 
         void RemoveValue(Uri contentUri);
 
-        int AppendToLog(int newLogPosition, byte[] value);
+        void AppendToLog(int newLogPosition, byte[] value);
 
         byte[] RetrieveFromLog(int logPosition);
 

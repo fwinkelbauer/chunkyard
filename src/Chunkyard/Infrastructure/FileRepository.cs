@@ -81,7 +81,7 @@ namespace Chunkyard.Infrastructure
             Directory.Delete(directory);
         }
 
-        public int AppendToLog(int newLogPosition, byte[] value)
+        public void AppendToLog(int newLogPosition, byte[] value)
         {
             var file = ToFilePath(newLogPosition);
 
@@ -93,8 +93,6 @@ namespace Chunkyard.Infrastructure
                 FileAccess.Write);
 
             fileStream.Write(value);
-
-            return newLogPosition;
         }
 
         public byte[] RetrieveFromLog(int logPosition)

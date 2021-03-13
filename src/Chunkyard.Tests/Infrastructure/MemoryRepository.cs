@@ -69,13 +69,11 @@ namespace Chunkyard.Tests.Infrastructure
             }
         }
 
-        public int AppendToLog(int newLogPosition, byte[] value)
+        public void AppendToLog(int newLogPosition, byte[] value)
         {
             lock (_lock)
             {
                 _valuesByLog.Add(newLogPosition, value);
-
-                return newLogPosition;
             }
         }
 

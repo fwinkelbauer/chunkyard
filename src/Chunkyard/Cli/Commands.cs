@@ -346,11 +346,11 @@ namespace Chunkyard.Cli
                 return valid;
             }
 
-            public int AppendToLog(
+            public void AppendToLog(
                 int newLogPosition,
                 LogReference logReference)
             {
-                return _store.AppendToLog(
+                _store.AppendToLog(
                     newLogPosition,
                     logReference);
             }
@@ -399,13 +399,11 @@ namespace Chunkyard.Cli
                 Console.WriteLine($"Removed content: {contentUri}");
             }
 
-            public int AppendToLog(int newLogPosition, byte[] value)
+            public void AppendToLog(int newLogPosition, byte[] value)
             {
-                var logPosition = _repository.AppendToLog(newLogPosition, value);
+                _repository.AppendToLog(newLogPosition, value);
 
-                Console.WriteLine($"Created snapshot: #{logPosition}");
-
-                return logPosition;
+                Console.WriteLine($"Created snapshot: #{newLogPosition}");
             }
 
             public byte[] RetrieveFromLog(int logPosition)

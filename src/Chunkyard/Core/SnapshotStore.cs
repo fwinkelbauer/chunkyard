@@ -117,10 +117,11 @@ namespace Chunkyard.Core
                 _salt,
                 _iterations);
 
-            _currentLogPosition = _contentStore.AppendToLog(
+            _contentStore.AppendToLog(
                 newLogPosition,
                 logReference);
 
+            _currentLogPosition = newLogPosition;
             _currentSnapshot = snapshot;
 
             return _currentLogPosition.Value;

@@ -119,11 +119,11 @@ namespace Chunkyard.Core
                 .Aggregate(true, (total, next) => total &= next);
         }
 
-        public int AppendToLog(
+        public void AppendToLog(
             int newLogPosition,
             LogReference logReference)
         {
-            return Repository.AppendToLog(
+            Repository.AppendToLog(
                 newLogPosition,
                 DataConvert.ToBytes(logReference));
         }
