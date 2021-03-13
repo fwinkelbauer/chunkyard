@@ -22,5 +22,21 @@ namespace Chunkyard.Core
         public DateTime CreationTimeUtc { get; }
 
         public DateTime LastWriteTimeUtc { get; }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is Blob other
+                && Name == other.Name
+                && CreationTimeUtc.Equals(other.CreationTimeUtc)
+                && LastWriteTimeUtc.Equals(other.LastWriteTimeUtc);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(
+                Name,
+                CreationTimeUtc,
+                LastWriteTimeUtc);
+        }
     }
 }
