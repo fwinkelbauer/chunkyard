@@ -10,30 +10,32 @@ namespace Chunkyard.Core
     /// </summary>
     public class Snapshot
     {
-        private readonly Dictionary<string, BlobReference> _lookup;
+        private readonly Dictionary<string, BlobReference> _blobReferences;
 
         public Snapshot(
             DateTime creationTime,
             IReadOnlyCollection<BlobReference> blobReferences)
         {
+            blobReferences.EnsureNotNull(nameof(blobReferences));
+
             CreationTime = creationTime;
-            BlobReferences = blobReferences;
 
-            _lookup = new Dictionary<string, BlobReference>();
+            _blobReferences = new Dictionary<string, BlobReference>();
 
-            foreach (var blobReference in BlobReferences)
+            foreach (var blobReference in blobReferences)
             {
-                _lookup[blobReference.Name] = blobReference;
+                _blobReferences[blobReference.Name] = blobReference;
             }
         }
 
         public DateTime CreationTime { get; }
 
-        public IReadOnlyCollection<BlobReference> BlobReferences { get; }
+        public IReadOnlyCollection<BlobReference> BlobReferences
+            => _blobReferences.Values;
 
         public BlobReference? Find(string blobName)
         {
-            return _lookup.TryGetValue(blobName, out var blob)
+            return _blobReferences.TryGetValue(blobName, out var blob)
                 ? blob
                 : null;
         }
