@@ -102,13 +102,13 @@ namespace Chunkyard.Cli
 
             Stream OpenWrite(BlobReference blobReference)
             {
-                var mode = o.Overwrite
-                    ? FileMode.OpenOrCreate
-                    : FileMode.CreateNew;
-
                 var file = Path.Combine(o.Directory, blobReference.Name);
 
                 DirectoryUtil.CreateParent(file);
+
+                var mode = o.Overwrite
+                    ? FileMode.OpenOrCreate
+                    : FileMode.CreateNew;
 
                 return new FileStream(file, mode, FileAccess.Write);
             }
