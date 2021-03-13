@@ -13,10 +13,9 @@ namespace Chunkyard.Core
     /// </summary>
     public class FastCdc
     {
-        public const int DefaultMin = 4 * 1024 * 1024;
-        public const int DefaultAvg = 8 * 1024 * 1024;
-        public const int DefaultMax = 16 * 1024 * 1024;
-
+        private const int DefaultMin = 4 * 1024 * 1024;
+        private const int DefaultAvg = 8 * 1024 * 1024;
+        private const int DefaultMax = 16 * 1024 * 1024;
         private const int MinimumMin = 64;
         private const int MinimumMax = 64 * 1024 * 1024;
         private const int AverageMin = 256;

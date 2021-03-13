@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Chunkyard.Tests.Core
 {
-    public static class IRepositoryExtensionsTests
+    public static class RepositoryExtensionsTests
     {
         [Fact]
         public static void StoreValue_Calculates_Same_Hash_For_Same_Input()

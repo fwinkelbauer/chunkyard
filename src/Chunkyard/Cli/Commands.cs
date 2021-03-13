@@ -11,11 +11,11 @@ namespace Chunkyard.Cli
     /// <summary>
     /// Describes every available command line verb of the Chunkyard assembly.
     /// </summary>
-    internal class Commands
+    internal static class Commands
     {
         public const int LatestLogPosition = -1;
 
-        private readonly static Dictionary<Uri, SnapshotStore> _snapshotStores =
+        private readonly static Dictionary<Uri, SnapshotStore> SnapshotStores =
             new Dictionary<Uri, SnapshotStore>();
 
         public static void PreviewFiles(PreviewOptions o)
@@ -228,9 +228,9 @@ namespace Chunkyard.Cli
         {
             var repository = contentStore.Repository;
 
-            if (_snapshotStores.ContainsKey(repository.RepositoryUri))
+            if (SnapshotStores.ContainsKey(repository.RepositoryUri))
             {
-                return _snapshotStores[repository.RepositoryUri];
+                return SnapshotStores[repository.RepositoryUri];
             }
 
             var snapshotStore = new SnapshotStore(
@@ -239,7 +239,7 @@ namespace Chunkyard.Cli
                     new ConsolePrompt()),
                 useCache);
 
-            _snapshotStores[repository.RepositoryUri] = snapshotStore;
+            SnapshotStores[repository.RepositoryUri] = snapshotStore;
 
             return snapshotStore;
         }

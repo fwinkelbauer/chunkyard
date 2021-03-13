@@ -237,13 +237,13 @@ namespace Chunkyard.Tests.Core
             var actualBlobName = "";
             using var writeStream = new MemoryStream();
 
-            Stream openWrite(BlobReference blobReference)
+            Stream OpenWrite(BlobReference blobReference)
             {
                 actualBlobName = blobReference.Name;
                 return writeStream;
             }
 
-            snapshotStore.RestoreSnapshot(logPosition, "", openWrite);
+            snapshotStore.RestoreSnapshot(logPosition, "", OpenWrite);
 
             Assert.Equal("some content", actualBlobName);
             Assert.Equal(

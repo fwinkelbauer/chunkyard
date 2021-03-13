@@ -7,7 +7,7 @@ namespace Chunkyard.Core
     /// <summary>
     /// A set of extension methods to work with <see cref="IRepository"/>.
     /// </summary>
-    public static class IRepositoryExtensions
+    public static class RepositoryExtensions
     {
         public static Uri StoreValue(
             this IRepository repository,
