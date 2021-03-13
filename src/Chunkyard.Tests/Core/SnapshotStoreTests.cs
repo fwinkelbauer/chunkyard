@@ -237,9 +237,9 @@ namespace Chunkyard.Tests.Core
             var actualBlobName = "";
             using var writeStream = new MemoryStream();
 
-            Stream OpenWrite(BlobReference blobReference)
+            Stream OpenWrite(string blobName)
             {
-                actualBlobName = blobReference.Name;
+                actualBlobName = blobName;
                 return writeStream;
             }
 
@@ -386,9 +386,9 @@ namespace Chunkyard.Tests.Core
                 .ToArray();
         }
 
-        private static Stream OpenRead(Blob blob)
+        private static Stream OpenRead(string blobName)
         {
-            return new MemoryStream(ToBytes(blob.Name));
+            return new MemoryStream(ToBytes(blobName));
         }
 
         private static byte[] ToBytes(string content)

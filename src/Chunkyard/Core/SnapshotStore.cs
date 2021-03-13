@@ -70,7 +70,7 @@ namespace Chunkyard.Core
         public int AppendSnapshot(
             IEnumerable<Blob> blobs,
             DateTime creationTime,
-            Func<Blob, Stream> openRead)
+            Func<string, Stream> openRead)
         {
             blobs.EnsureNotNull(nameof(blobs));
 
@@ -94,7 +94,7 @@ namespace Chunkyard.Core
                     var nonce = previous?.Nonce
                         ?? AesGcmCrypto.GenerateNonce();
 
-                    using var stream = openRead(blob);
+                    using var stream = openRead(blob.Name);
 
                     return _contentStore.StoreBlob(
                         blob,
@@ -153,7 +153,7 @@ namespace Chunkyard.Core
         public void RestoreSnapshot(
             int logPosition,
             string fuzzyPattern,
-            Func<BlobReference, Stream> openWrite)
+            Func<string, Stream> openWrite)
         {
             openWrite.EnsureNotNull(nameof(openWrite));
 
@@ -165,7 +165,7 @@ namespace Chunkyard.Core
                 blobReferences,
                 blobReference =>
                 {
-                    using var stream = openWrite(blobReference);
+                    using var stream = openWrite(blobReference.Name);
 
                     _contentStore.RetrieveBlob(
                         blobReference,

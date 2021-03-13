@@ -55,8 +55,8 @@ namespace Chunkyard.Cli
             snapshotStore.AppendSnapshot(
                 blobs,
                 DateTime.Now,
-                blob => File.OpenRead(
-                    Path.Combine(parent, blob.Name)));
+                blobName => File.OpenRead(
+                    Path.Combine(parent, blobName)));
         }
 
         public static void CheckSnapshot(CheckOptions o)
@@ -100,9 +100,9 @@ namespace Chunkyard.Cli
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            Stream OpenWrite(BlobReference blobReference)
+            Stream OpenWrite(string blobName)
             {
-                var file = Path.Combine(o.Directory, blobReference.Name);
+                var file = Path.Combine(o.Directory, blobName);
 
                 DirectoryUtil.CreateParent(file);
 
