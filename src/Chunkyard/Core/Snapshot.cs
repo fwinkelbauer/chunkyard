@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Chunkyard.Core
@@ -15,7 +14,7 @@ namespace Chunkyard.Core
 
         public Snapshot(
             DateTime creationTime,
-            IImmutableList<BlobReference> blobReferences)
+            IReadOnlyCollection<BlobReference> blobReferences)
         {
             CreationTime = creationTime;
             BlobReferences = blobReferences;
@@ -30,7 +29,7 @@ namespace Chunkyard.Core
 
         public DateTime CreationTime { get; }
 
-        public IImmutableList<BlobReference> BlobReferences { get; }
+        public IReadOnlyCollection<BlobReference> BlobReferences { get; }
 
         public BlobReference? Find(string blobName)
         {

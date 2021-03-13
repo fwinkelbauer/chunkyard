@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -103,7 +102,7 @@ namespace Chunkyard.Core
                         nonce,
                         stream);
                 })
-                .ToImmutableArray();
+                .ToArray();
 
             var snapshot = new Snapshot(
                 creationTime,

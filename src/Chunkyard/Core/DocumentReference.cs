@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Chunkyard.Core
@@ -12,7 +12,7 @@ namespace Chunkyard.Core
     {
         public DocumentReference(
             byte[] nonce,
-            IImmutableList<Uri> contentUris)
+            IReadOnlyCollection<Uri> contentUris)
         {
             Nonce = nonce;
             ContentUris = contentUris;
@@ -20,7 +20,7 @@ namespace Chunkyard.Core
 
         public byte[] Nonce { get; }
 
-        public IImmutableList<Uri> ContentUris { get; }
+        public IReadOnlyCollection<Uri> ContentUris { get; }
 
         public override bool Equals(object? obj)
         {

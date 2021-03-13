@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Chunkyard.Core
@@ -15,7 +15,7 @@ namespace Chunkyard.Core
             DateTime creationTimeUtc,
             DateTime lastWriteTimeUtc,
             byte[] nonce,
-            IImmutableList<Uri> contentUris)
+            IReadOnlyCollection<Uri> contentUris)
         {
             Name = name;
             CreationTimeUtc = creationTimeUtc;
@@ -32,7 +32,7 @@ namespace Chunkyard.Core
 
         public byte[] Nonce { get; }
 
-        public IImmutableList<Uri> ContentUris { get; }
+        public IReadOnlyCollection<Uri> ContentUris { get; }
 
         public override bool Equals(object? obj)
         {

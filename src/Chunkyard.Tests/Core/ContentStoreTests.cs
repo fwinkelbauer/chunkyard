@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Security.Cryptography;
 using Chunkyard.Core;
@@ -107,7 +106,7 @@ namespace Chunkyard.Tests.Core
             var expectedLogReference = new LogReference(
                 new DocumentReference(
                     AesGcmCrypto.GenerateNonce(),
-                    ImmutableArray.Create(new Uri("sha256://abcdef123456"))),
+                    new[] { new Uri("sha256://abcdef123456") }),
                 AesGcmCrypto.GenerateSalt(),
                 AesGcmCrypto.Iterations);
 

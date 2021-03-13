@@ -172,7 +172,7 @@ namespace Chunkyard.Cli
                 new CreateOptions(
                     config.Repository,
                     config.Files,
-                    (IEnumerable<string>?)config.ExcludePatterns ?? new List<string>(),
+                    config.ExcludePatterns ?? Array.Empty<string>(),
                     config.Cached ?? false));
 
             if (config.LatestCount.HasValue)

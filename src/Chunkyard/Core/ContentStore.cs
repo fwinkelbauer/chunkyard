@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -134,7 +133,7 @@ namespace Chunkyard.Core
                 Repository.RetrieveFromLog(logPosition));
         }
 
-        private IImmutableList<Uri> WriteChunks(
+        private Uri[] WriteChunks(
             byte[] nonce,
             Stream stream,
             byte[] key)
@@ -158,13 +157,13 @@ namespace Chunkyard.Core
                 return _fastCdc.SplitIntoChunks(stream)
                     .AsParallel()
                     .Select(WriteChunk)
-                    .ToImmutableArray();
+                    .ToArray();
             }
             else
             {
                 return _fastCdc.SplitIntoChunks(stream)
                     .Select(WriteChunk)
-                    .ToImmutableArray();
+                    .ToArray();
             }
         }
     }

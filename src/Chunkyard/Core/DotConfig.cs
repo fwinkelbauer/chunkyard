@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
 
 namespace Chunkyard.Core
 {
@@ -9,8 +9,8 @@ namespace Chunkyard.Core
     {
         public DotConfig(
             string repository,
-            IImmutableList<string> files,
-            IImmutableList<string>? excludePatterns,
+            IReadOnlyCollection<string> files,
+            IReadOnlyCollection<string>? excludePatterns,
             bool? cached,
             int? latestCount)
         {
@@ -23,9 +23,9 @@ namespace Chunkyard.Core
 
         public string Repository { get; }
 
-        public IImmutableList<string> Files { get; }
+        public IReadOnlyCollection<string> Files { get; }
 
-        public IImmutableList<string>? ExcludePatterns { get; }
+        public IReadOnlyCollection<string>? ExcludePatterns { get; }
 
         public bool? Cached { get; }
 
