@@ -23,7 +23,8 @@ namespace Chunkyard.Core
         BlobReference StoreBlob(
             Blob blob,
             byte[] key,
-            byte[] nonce);
+            byte[] nonce,
+            Stream inputStream);
 
         DocumentReference StoreDocument<T>(
             T value,

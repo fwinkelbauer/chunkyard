@@ -20,7 +20,7 @@ namespace Chunkyard.Cli
 
         public static void PreviewFiles(PreviewOptions o)
         {
-            var blobs = FileFetcher.FindBlobs(o.Files, o.ExcludePatterns);
+            var (_, blobs) = FileFetcher.FindBlobs(o.Files, o.ExcludePatterns);
 
             if (blobs.Length == 0)
             {
@@ -36,7 +36,9 @@ namespace Chunkyard.Cli
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            var blobs = FileFetcher.FindBlobs(o.Files, o.ExcludePatterns);
+            var (parent, blobs) = FileFetcher.FindBlobs(
+                o.Files,
+                o.ExcludePatterns);
 
             if (blobs.Length == 0)
             {
@@ -52,7 +54,9 @@ namespace Chunkyard.Cli
 
             snapshotStore.AppendSnapshot(
                 blobs,
-                DateTime.Now);
+                DateTime.Now,
+                blob => File.OpenRead(
+                    Path.Combine(parent, blob.Name)));
         }
 
         public static void CheckSnapshot(CheckOptions o)
@@ -96,13 +100,13 @@ namespace Chunkyard.Cli
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            Stream OpenWrite(string s)
+            Stream OpenWrite(BlobReference blobReference)
             {
                 var mode = o.Overwrite
                     ? FileMode.OpenOrCreate
                     : FileMode.CreateNew;
 
-                var file = Path.Combine(o.Directory, s);
+                var file = Path.Combine(o.Directory, blobReference.Name);
 
                 DirectoryUtil.CreateParent(file);
 
@@ -300,9 +304,10 @@ namespace Chunkyard.Cli
             public BlobReference StoreBlob(
                 Blob blob,
                 byte[] key,
-                byte[] nonce)
+                byte[] nonce,
+                Stream inputStream)
             {
-                var blobReference = _store.StoreBlob(blob, key, nonce);
+                var blobReference = _store.StoreBlob(blob, key, nonce, inputStream);
 
                 Console.WriteLine($"Stored blob: {blobReference.Name}");
 

@@ -73,18 +73,18 @@ namespace Chunkyard.Core
         public BlobReference StoreBlob(
             Blob blob,
             byte[] key,
-            byte[] nonce)
+            byte[] nonce,
+            Stream inputStream)
         {
             blob.EnsureNotNull(nameof(blob));
-
-            var stream = blob.OpenRead();
+            inputStream.EnsureNotNull(nameof(inputStream));
 
             return new BlobReference(
                 blob.Name,
                 blob.CreationTimeUtc,
                 blob.LastWriteTimeUtc,
                 nonce,
-                WriteChunks(nonce, stream, key));
+                WriteChunks(nonce, inputStream, key));
         }
 
         public DocumentReference StoreDocument<T>(

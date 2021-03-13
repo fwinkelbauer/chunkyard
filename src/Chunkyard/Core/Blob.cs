@@ -1,23 +1,17 @@
 ﻿using System;
-using System.IO;
 
 namespace Chunkyard.Core
 {
     /// <summary>
-    /// Defines a named block of binary data with some meta data.
+    /// Describes meta data of a binary data block.
     /// </summary>
     public class Blob
     {
-        private readonly Func<Stream> _openRead;
-
         public Blob(
-            Func<Stream> openRead,
             string name,
             DateTime creationTimeUtc,
             DateTime lastWriteTimeUtc)
         {
-            _openRead = openRead;
-
             Name = name;
             CreationTimeUtc = creationTimeUtc;
             LastWriteTimeUtc = lastWriteTimeUtc;
@@ -28,10 +22,5 @@ namespace Chunkyard.Core
         public DateTime CreationTimeUtc { get; }
 
         public DateTime LastWriteTimeUtc { get; }
-
-        public Stream OpenRead()
-        {
-            return _openRead();
-        }
     }
 }

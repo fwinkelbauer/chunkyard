@@ -17,13 +17,15 @@ namespace Chunkyard.Tests.Core
             var contentStore = CreateContentStore();
 
             var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-            var blob = CreateBlob("some data", expectedBytes);
+            using var inputStream = new MemoryStream(expectedBytes);
+            var blob = CreateBlob("some data");
             var key = CreateKey();
 
             var blobReference = contentStore.StoreBlob(
                 blob,
                 key,
-                AesGcmCrypto.GenerateNonce());
+                AesGcmCrypto.GenerateNonce(),
+                inputStream);
 
             using var outputStream = new MemoryStream();
             contentStore.RetrieveBlob(
@@ -175,10 +177,9 @@ namespace Chunkyard.Tests.Core
             }
         }
 
-        private static Blob CreateBlob(string name, byte[] bytes)
+        private static Blob CreateBlob(string name)
         {
             return new Blob(
-                () => new MemoryStream(bytes),
                 name,
                 DateTime.Now,
                 DateTime.Now);

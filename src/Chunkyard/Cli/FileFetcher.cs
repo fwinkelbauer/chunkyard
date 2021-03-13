@@ -15,14 +15,14 @@ namespace Chunkyard.Cli
         private static readonly string HomeDirectory =
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        public static Blob[] FindBlobs(
+        public static (string Parent, Blob[] Blobs) FindBlobs(
             IEnumerable<string> files,
             IEnumerable<string> excludePatterns)
         {
             var foundFiles = FindFiles(files, excludePatterns);
             var parent = FindCommonParent(foundFiles);
 
-            return foundFiles
+            var blobs = foundFiles
                 .Select(file =>
                 {
                     var blobName = string.IsNullOrEmpty(parent)
@@ -41,12 +41,13 @@ namespace Chunkyard.Cli
                     var path = Path.Combine(parent, blobName);
 
                     return new Blob(
-                        () => File.OpenRead(path),
                         blobName,
                         File.GetCreationTimeUtc(path),
                         File.GetLastWriteTimeUtc(path));
                 })
                 .ToArray();
+
+            return (parent, blobs);
         }
 
         private static string[] FindFiles(
