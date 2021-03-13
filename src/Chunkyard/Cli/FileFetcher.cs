@@ -22,8 +22,8 @@ namespace Chunkyard.Cli
             var foundFiles = FindFiles(files, excludePatterns);
             var parent = FindCommonParent(foundFiles);
 
-            return foundFiles.Select(
-                file =>
+            return foundFiles
+                .Select(file =>
                 {
                     var blobName = string.IsNullOrEmpty(parent)
                         ? file

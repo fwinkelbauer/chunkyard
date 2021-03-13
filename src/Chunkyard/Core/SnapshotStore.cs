@@ -132,7 +132,7 @@ namespace Chunkyard.Core
         {
             return ShowSnapshot(logPosition, fuzzyPattern)
                 .AsParallel()
-                .Select(cr => _contentStore.ContentExists(cr))
+                .Select(br => _contentStore.ContentExists(br))
                 .Aggregate(true, (total, next) => total &= next);
         }
 
@@ -142,7 +142,7 @@ namespace Chunkyard.Core
         {
             return ShowSnapshot(logPosition, fuzzyPattern)
                 .AsParallel()
-                .Select(cr => _contentStore.ContentValid(cr))
+                .Select(br => _contentStore.ContentValid(br))
                 .Aggregate(true, (total, next) => total &= next);
         }
 
