@@ -62,7 +62,6 @@ namespace Chunkyard
                 .WithParsed<ListOptions>(Commands.ListSnapshots)
                 .WithParsed<GarbageCollectOptions>(Commands.GarbageCollect)
                 .WithParsed<CopyOptions>(Commands.CopySnapshots)
-                .WithParsed<DotOptions>(Commands.Dot)
                 .WithNotParsed(_ => Environment.ExitCode = 1);
         }
     }

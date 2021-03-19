@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Removed
+
+- The `dot` command. The shallow check is again part of the `create` command
+
 ## 7.0.0 - 2021-03-12
 
 ### Changed

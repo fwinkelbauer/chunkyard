@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -14,9 +13,6 @@ namespace Chunkyard.Cli
     internal static class Commands
     {
         public const int LatestLogPosition = -1;
-
-        private static readonly Dictionary<Uri, SnapshotStore> SnapshotStores =
-            new Dictionary<Uri, SnapshotStore>();
 
         public static void PreviewFiles(PreviewOptions o)
         {
@@ -52,11 +48,17 @@ namespace Chunkyard.Cli
                     new FastCdc()),
                 o.Cached);
 
-            snapshotStore.AppendSnapshot(
+            var logPosition = snapshotStore.AppendSnapshot(
                 blobs,
                 DateTime.Now,
                 blobName => File.OpenRead(
                     Path.Combine(parent, blobName)));
+
+            if (!snapshotStore.CheckSnapshotExists(logPosition))
+            {
+                throw new ChunkyardException(
+                    "Missign content after creating snapshot");
+            }
         }
 
         public static void CheckSnapshot(CheckOptions o)
@@ -152,49 +154,6 @@ namespace Chunkyard.Cli
                 .GarbageCollect();
         }
 
-        public static void Dot(DotOptions o)
-        {
-            static string? FindFile(string file)
-            {
-                return File.Exists(file)
-                    ? file
-                    : null;
-            }
-
-            var file = o.File
-                ?? FindFile(".config/chunkyard.json")
-                ?? ".chunkyard";
-
-            var config = DataConvert.ToObject<DotConfig>(
-                File.ReadAllBytes(file));
-
-            CreateSnapshot(
-                new CreateOptions(
-                    config.Repository,
-                    config.Files,
-                    config.ExcludePatterns ?? Array.Empty<string>(),
-                    config.Cached ?? false));
-
-            if (config.LatestCount.HasValue)
-            {
-                KeepSnapshots(
-                    new KeepOptions(
-                        config.Repository,
-                        config.LatestCount.Value));
-
-                GarbageCollect(
-                    new GarbageCollectOptions(
-                        config.Repository));
-            }
-
-            CheckSnapshot(
-                new CheckOptions(
-                    config.Repository,
-                    LatestLogPosition,
-                    "",
-                    true));
-        }
-
         public static void CopySnapshots(CopyOptions o)
         {
             var sourceStore = CreateSnapshotStore(o.SourceRepository);
@@ -226,22 +185,11 @@ namespace Chunkyard.Cli
             IContentStore contentStore,
             bool useCache = false)
         {
-            var repository = contentStore.Repository;
-
-            if (SnapshotStores.ContainsKey(repository.RepositoryUri))
-            {
-                return SnapshotStores[repository.RepositoryUri];
-            }
-
-            var snapshotStore = new SnapshotStore(
+            return new SnapshotStore(
                 contentStore,
                 new EnvironmentPrompt(
                     new ConsolePrompt()),
                 useCache);
-
-            SnapshotStores[repository.RepositoryUri] = snapshotStore;
-
-            return snapshotStore;
         }
 
         private static IContentStore CreateContentStore(
