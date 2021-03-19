@@ -21,13 +21,13 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void DestructureContentUri_Can_Split_Content_Uri()
+        public static void DeconstructContentUri_Can_Split_Content_Uri()
         {
             var contentUri = new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e");
             var expectedAlgorithm = HashAlgorithmName.SHA256;
             var expectedHash = "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e";
 
-            var (actualAlgorithm, actualHash) = Id.DestructureContentUri(
+            var (actualAlgorithm, actualHash) = Id.DeconstructContentUri(
                 contentUri);
 
             Assert.Equal(expectedAlgorithm, actualAlgorithm);
@@ -38,13 +38,13 @@ namespace Chunkyard.Tests.Core
         public static void ComputeHash_Creates_Hash_From_Bytes()
         {
             var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-            var expectedhash = "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e";
+            var expectedHash = "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e";
 
             var actualHash = Id.ComputeHash(
                 HashAlgorithmName.SHA256,
                 bytes);
 
-            Assert.Equal(expectedhash, actualHash);
+            Assert.Equal(expectedHash, actualHash);
         }
 
         [Fact]

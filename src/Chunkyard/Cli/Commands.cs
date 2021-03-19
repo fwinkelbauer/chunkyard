@@ -15,7 +15,7 @@ namespace Chunkyard.Cli
     {
         public const int LatestLogPosition = -1;
 
-        private readonly static Dictionary<Uri, SnapshotStore> SnapshotStores =
+        private static readonly Dictionary<Uri, SnapshotStore> SnapshotStores =
             new Dictionary<Uri, SnapshotStore>();
 
         public static void PreviewFiles(PreviewOptions o)

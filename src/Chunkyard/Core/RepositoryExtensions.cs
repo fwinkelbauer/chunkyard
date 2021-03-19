@@ -37,7 +37,7 @@ namespace Chunkyard.Core
                 return false;
             }
 
-            var (algorithm, hash) = Id.DestructureContentUri(contentUri);
+            var (algorithm, hash) = Id.DeconstructContentUri(contentUri);
             var content = repository.RetrieveValue(contentUri);
             var computedHash = Id.ComputeHash(algorithm, content);
 

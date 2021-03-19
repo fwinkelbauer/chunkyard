@@ -108,9 +108,8 @@ namespace Chunkyard.Core
                 creationTime,
                 blobReferences);
 
-            var newLogPosition = _currentLogPosition.HasValue
-                ? _currentLogPosition.Value + 1
-                : 0;
+            var newLogPosition = _currentLogPosition + 1
+                ?? 0;
 
             var logReference = new LogReference(
                 _contentStore.StoreDocument(
@@ -137,7 +136,7 @@ namespace Chunkyard.Core
             return ShowSnapshot(logPosition, fuzzyPattern)
                 .AsParallel()
                 .Select(br => _contentStore.ContentExists(br))
-                .Aggregate(true, (total, next) => total &= next);
+                .Aggregate(true, (total, next) => total & next);
         }
 
         public bool CheckSnapshotValid(
@@ -147,7 +146,7 @@ namespace Chunkyard.Core
             return ShowSnapshot(logPosition, fuzzyPattern)
                 .AsParallel()
                 .Select(br => _contentStore.ContentValid(br))
-                .Aggregate(true, (total, next) => total &= next);
+                .Aggregate(true, (total, next) => total & next);
         }
 
         public void RestoreSnapshot(
@@ -285,7 +284,7 @@ namespace Chunkyard.Core
         private Uri[] ListUris(IEnumerable<int> logPositions)
         {
             return logPositions
-                .SelectMany(position => ListUris(position))
+                .SelectMany(ListUris)
                 .Distinct()
                 .ToArray();
         }

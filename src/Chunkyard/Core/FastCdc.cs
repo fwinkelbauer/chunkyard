@@ -329,7 +329,7 @@ namespace Chunkyard.Core
             sourceStream.EnsureNotNull(nameof(sourceStream));
 
             long bytesProcessed = 0;
-            long bytesRemaining = sourceStream.Length;
+            var bytesRemaining = sourceStream.Length;
             var buffer = new byte[_maxSize];
 
             while (bytesRemaining > 0)

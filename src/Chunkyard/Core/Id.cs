@@ -28,7 +28,7 @@ namespace Chunkyard.Core
             return ToHexString(algorithm!.ComputeHash(data));
         }
 
-        public static (HashAlgorithmName HashAlgorithmName, string Hash) DestructureContentUri(
+        public static (HashAlgorithmName HashAlgorithmName, string Hash) DeconstructContentUri(
             Uri contentUri)
         {
             contentUri.EnsureNotNull(nameof(contentUri));

@@ -42,9 +42,9 @@ namespace Chunkyard.Build
                 .ToArray();
 
             Parser.Default.ParseArguments(args, optionTypes)
-                .WithParsed<CleanOptions>(o => Commands.Clean(o))
-                .WithParsed<BuildOptions>(o => Commands.Build(o))
-                .WithParsed<PublishOptions>(o => Commands.Publish(o))
+                .WithParsed<CleanOptions>(Commands.Clean)
+                .WithParsed<BuildOptions>(Commands.Build)
+                .WithParsed<PublishOptions>(Commands.Publish)
                 .WithParsed<ReleaseOptions>(_ => Commands.Release())
                 .WithParsed<FmtOptions>(_ => Commands.Fmt())
                 .WithNotParsed(_ => Environment.ExitCode = 1);

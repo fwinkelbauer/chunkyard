@@ -90,15 +90,15 @@ namespace Chunkyard.Core
 
         public static byte[] GenerateSalt()
         {
-            return GenerateRandomMumber(SaltBytes);
+            return GenerateRandomNumber(SaltBytes);
         }
 
         public static byte[] GenerateNonce()
         {
-            return GenerateRandomMumber(NonceBytes);
+            return GenerateRandomNumber(NonceBytes);
         }
 
-        private static byte[] GenerateRandomMumber(int length)
+        private static byte[] GenerateRandomNumber(int length)
         {
             using var randomGenerator = new RNGCryptoServiceProvider();
             var randomNumber = new byte[length];

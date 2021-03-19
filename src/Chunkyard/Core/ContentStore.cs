@@ -106,7 +106,7 @@ namespace Chunkyard.Core
 
             return contentReference.ContentUris
                 .Select(contentUri => Repository.ValueExists(contentUri))
-                .Aggregate(true, (total, next) => total &= next);
+                .Aggregate(true, (total, next) => total & next);
         }
 
         public bool ContentValid(IContentReference contentReference)
@@ -115,7 +115,7 @@ namespace Chunkyard.Core
 
             return contentReference.ContentUris
                 .Select(contentUri => Repository.ValueValid(contentUri))
-                .Aggregate(true, (total, next) => total &= next);
+                .Aggregate(true, (total, next) => total & next);
         }
 
         public void AppendToLog(
