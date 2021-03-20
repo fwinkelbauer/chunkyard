@@ -63,17 +63,18 @@ namespace Chunkyard.Tests.Core
             Assert.Equal(nameof(value), ex.ParamName);
         }
 
-        [Fact]
-        public static void EnsureBetween_Returns_Value_If_In_Range()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(5)]
+        [InlineData(10)]
+        public static void EnsureBetween_Returns_Value_If_In_Range(int value)
         {
-            var expectedValue = 5;
-
-            var actualValue = expectedValue.EnsureBetween(
+            var actualValue = value.EnsureBetween(
                 0,
                 10,
-                nameof(expectedValue));
+                nameof(value));
 
-            Assert.Equal(expectedValue, actualValue);
+            Assert.Equal(value, actualValue);
         }
     }
 }
