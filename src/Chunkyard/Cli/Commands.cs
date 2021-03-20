@@ -323,8 +323,6 @@ namespace Chunkyard.Cli
                 _repository = repository;
             }
 
-            public Uri RepositoryUri => _repository.RepositoryUri;
-
             public void StoreValue(Uri contentUri, byte[] value)
             {
                 _repository.StoreValue(contentUri, value);

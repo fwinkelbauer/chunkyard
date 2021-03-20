@@ -8,8 +8,6 @@ namespace Chunkyard.Core
     /// </summary>
     public interface IRepository
     {
-        Uri RepositoryUri { get; }
-
         void StoreValue(Uri contentUri, byte[] value);
 
         byte[] RetrieveValue(Uri contentUri);

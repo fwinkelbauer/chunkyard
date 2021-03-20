@@ -21,11 +21,7 @@ namespace Chunkyard.Infrastructure
             _locks = new ConcurrentDictionary<string, object>();
             _contentDirectory = Path.Combine(directory, "content");
             _refLogDirectory = Path.Combine(directory, "reflog");
-
-            RepositoryUri = new Uri(Path.GetFullPath(directory));
         }
-
-        public Uri RepositoryUri { get; }
 
         public void StoreValue(Uri contentUri, byte[] value)
         {

@@ -16,11 +16,7 @@ namespace Chunkyard.Tests.Infrastructure
             _lock = new object();
             _valuesByUri = new Dictionary<Uri, byte[]>();
             _valuesByLog = new Dictionary<int, byte[]>();
-
-            RepositoryUri = new Uri($"memory://{Guid.NewGuid()}");
         }
-
-        public Uri RepositoryUri { get; }
 
         public void StoreValue(Uri contentUri, byte[] value)
         {
