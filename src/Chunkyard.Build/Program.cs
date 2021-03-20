@@ -16,7 +16,7 @@ namespace Chunkyard.Build
             }
             catch (Exception e)
             {
-                WriteError($"Error: {e.Message}");
+                WriteError(e.Message);
             }
         }
 
@@ -27,7 +27,7 @@ namespace Chunkyard.Build
             try
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(message);
+                Console.WriteLine($"Error: {message}");
             }
             finally
             {

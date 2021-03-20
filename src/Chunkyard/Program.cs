@@ -16,13 +16,9 @@ namespace Chunkyard
             {
                 ProcessArguments(args);
             }
-            catch (ChunkyardException e)
-            {
-                WriteError($"Error: {e.Message}");
-            }
             catch (CryptographicException)
             {
-                WriteError("Error: Could not decrypt data");
+                WriteError("Could not decrypt data");
             }
             catch (Exception e)
             {
@@ -37,7 +33,7 @@ namespace Chunkyard
             try
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(message);
+                Console.WriteLine($"Error: {message}");
             }
             finally
             {
