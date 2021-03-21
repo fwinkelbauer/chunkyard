@@ -29,6 +29,10 @@ namespace Chunkyard.Build.Cli
         public static void Build(DotnetOptions o) => Once(() =>
         {
             Dotnet(
+                $"format {Solution}",
+                "--check");
+
+            Dotnet(
                 $"build {Solution}",
                 $"-c {o.Configuration}",
                 "-warnaserror");
