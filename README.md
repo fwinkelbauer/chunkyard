@@ -20,7 +20,7 @@ unreferenced files can be deleted using the `chunkyard gc` command.
 
 - Cross platform support
 - Favor simplicity and readability over features and performance
-- Strong encryption (AES Galois/Counter Mode using a 256 bit key)
+- Strong symmetric encryption (AES Galois/Counter Mode using a 256 bit key)
 - Ability to copy from/to other repositories
 - Verifiable backups
 - Minimal dependencies. The Chunkyard binary only utilizes the
@@ -29,9 +29,10 @@ unreferenced files can be deleted using the `chunkyard gc` command.
 ## Not Goals
 
 - Key management
+- Asymmetric encryption
 - Compression
 - File meta data preservation (e.g. creation time, flags, ...)
-- Extended features such as branching
+- Extended features such as branching or tagging
 - Obfuscating/Hiding chunk sizes to prevent [CDC fingerprint attacks][borg]
 - Concurrent operations on a single repository using more than one Chunkyard
   process (e.g. creating a new backup while garbage collecting unused data)
