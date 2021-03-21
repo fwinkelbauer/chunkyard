@@ -17,6 +17,11 @@ namespace Chunkyard.Build.Cli
         private static readonly string Version = FetchVersion();
         private static readonly List<string> Executed = new List<string>();
 
+        public static void Setup() => Once(() =>
+        {
+            Dotnet("tool update -g dotnet-format");
+        });
+
         public static void Clean(DotnetOptions o) => Once(() =>
         {
             Dotnet(

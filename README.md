@@ -39,13 +39,9 @@ unreferenced files can be deleted using the `chunkyard gc` command.
 
 ## Build
 
+Run `./csake setup` to install all necessary dotnet tools globally.
+
 Run `./csake build` to build the solution.
-
-You need to install the dotnet-format tool in order to use the `./csake fmt` command:
-
-``` shell
-dotnet tool install -g dotnet-format
-```
 
 ## Publish
 

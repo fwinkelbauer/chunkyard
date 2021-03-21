@@ -42,6 +42,7 @@ namespace Chunkyard.Build
                 .ToArray();
 
             Parser.Default.ParseArguments(args, optionTypes)
+                .WithParsed<SetupOptions>(_ => Commands.Setup())
                 .WithParsed<CleanOptions>(Commands.Clean)
                 .WithParsed<BuildOptions>(Commands.Build)
                 .WithParsed<PublishOptions>(Commands.Publish)
