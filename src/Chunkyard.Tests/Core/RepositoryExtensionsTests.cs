@@ -13,19 +13,45 @@ namespace Chunkyard.Tests.Core
         {
             var repository = CreateRepository();
             var hashAlgorithmName = HashAlgorithmName.SHA256;
-            var content = new byte[] { 0xFF };
+            var value = new byte[] { 0xFF };
             var expectedContentUri = new Uri("sha256://a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89/");
 
             var actualContentUri1 = repository.StoreValue(
                 hashAlgorithmName,
-                content);
+                value);
 
             var actualContentUri2 = repository.StoreValue(
                 hashAlgorithmName,
-                content);
+                value);
 
             Assert.Equal(expectedContentUri, actualContentUri1);
             Assert.Equal(expectedContentUri, actualContentUri2);
+        }
+
+        [Fact]
+        public static void RetrieValueValid_Retrieves_Valid_Value()
+        {
+            var repository = CreateRepository();
+            var expectedValue = new byte[] { 0xFF };
+
+            var contentUri = repository.StoreValue(HashAlgorithmName.SHA256, expectedValue);
+
+            Assert.Equal(
+                expectedValue,
+                repository.RetrieveValueValid(contentUri));
+        }
+
+        [Fact]
+        public static void RetrieValueValid_Throws_If_Value_Invalid()
+        {
+            var repository = CreateRepository();
+            var contentUri = new Uri("sha256://badbadbad");
+            var value = new byte[] { 0xFF };
+
+            repository.StoreValue(contentUri, value);
+
+            Assert.Throws<ChunkyardException>(
+                () => repository.RetrieveValueValid(contentUri));
         }
 
         [Fact]
@@ -42,9 +68,9 @@ namespace Chunkyard.Tests.Core
         {
             var repository = CreateRepository();
             var contentUri = new Uri("sha256://badbadbad/");
-            var content = new byte[] { 0xFF };
+            var value = new byte[] { 0xFF };
 
-            repository.StoreValue(contentUri, content);
+            repository.StoreValue(contentUri, value);
 
             Assert.False(repository.ValueValid(contentUri));
         }
@@ -54,9 +80,9 @@ namespace Chunkyard.Tests.Core
         {
             var repository = CreateRepository();
             var contentUri = new Uri("sha256://a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89/");
-            var content = new byte[] { 0xFF };
+            var value = new byte[] { 0xFF };
 
-            repository.StoreValue(contentUri, content);
+            repository.StoreValue(contentUri, value);
 
             Assert.True(repository.ValueValid(contentUri));
         }
@@ -65,12 +91,12 @@ namespace Chunkyard.Tests.Core
         public static void KeepLatestLogPositions_Keeps_Latest()
         {
             var repository = CreateRepository();
-            var content = new byte[] { 0xFF };
+            var value = new byte[] { 0xFF };
 
-            repository.AppendToLog(0, content);
-            repository.AppendToLog(1, content);
-            repository.AppendToLog(2, content);
-            repository.AppendToLog(3, content);
+            repository.AppendToLog(0, value);
+            repository.AppendToLog(1, value);
+            repository.AppendToLog(2, value);
+            repository.AppendToLog(3, value);
 
             repository.KeepLatestLogPositions(2);
 
@@ -83,10 +109,10 @@ namespace Chunkyard.Tests.Core
         public static void KeepLatestLogPositions_Does_Nothing_If_It_Equals_Current_Size()
         {
             var repository = CreateRepository();
-            var content = new byte[] { 0xFF };
+            var value = new byte[] { 0xFF };
 
-            repository.AppendToLog(0, content);
-            repository.AppendToLog(1, content);
+            repository.AppendToLog(0, value);
+            repository.AppendToLog(1, value);
 
             repository.KeepLatestLogPositions(2);
 
@@ -99,10 +125,10 @@ namespace Chunkyard.Tests.Core
         public static void KeepLatestLogPositions_Does_Nothing_If_Greater_Than_Current_Size()
         {
             var repository = CreateRepository();
-            var content = new byte[] { 0xFF };
+            var value = new byte[] { 0xFF };
 
-            repository.AppendToLog(0, content);
-            repository.AppendToLog(1, content);
+            repository.AppendToLog(0, value);
+            repository.AppendToLog(1, value);
 
             repository.KeepLatestLogPositions(3);
 
@@ -115,10 +141,10 @@ namespace Chunkyard.Tests.Core
         public static void KeepLatestLogPositions_Can_Empty_Log()
         {
             var repository = CreateRepository();
-            var content = new byte[] { 0xFF };
+            var value = new byte[] { 0xFF };
 
-            repository.AppendToLog(0, content);
-            repository.AppendToLog(1, content);
+            repository.AppendToLog(0, value);
+            repository.AppendToLog(1, value);
 
             repository.KeepLatestLogPositions(0);
 

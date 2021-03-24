@@ -62,7 +62,7 @@ namespace Chunkyard.Core
             foreach (var contentUri in contentReference.ContentUris)
             {
                 var decryptedData = AesGcmCrypto.Decrypt(
-                    Repository.RetrieveValue(contentUri),
+                    Repository.RetrieveValueValid(contentUri),
                     key);
 
                 outputStream.Write(decryptedData);

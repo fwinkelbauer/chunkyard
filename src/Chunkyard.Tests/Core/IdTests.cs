@@ -10,14 +10,32 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ComputeContentUri_Creates_Uri_From_Content()
         {
-            var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+            var content = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
             var expectedUri = new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e");
 
             var actualUri = Id.ComputeContentUri(
                 HashAlgorithmName.SHA256,
-                bytes);
+                content);
 
             Assert.Equal(expectedUri, actualUri);
+        }
+
+        [Fact]
+        public static void ContentUriValid_Returns_False_If_Not_Valid()
+        {
+            var contentUri = new Uri("sha256://badbadbad");
+            var content = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+
+            Assert.False(Id.ContentUriValid(contentUri, content));
+        }
+
+        [Fact]
+        public static void ContentUriValid_Returns_True_If_Valid()
+        {
+            var contentUri = new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e");
+            var content = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+
+            Assert.True(Id.ContentUriValid(contentUri, content));
         }
 
         [Fact]
@@ -31,19 +49,6 @@ namespace Chunkyard.Tests.Core
                 contentUri);
 
             Assert.Equal(expectedAlgorithm, actualAlgorithm);
-            Assert.Equal(expectedHash, actualHash);
-        }
-
-        [Fact]
-        public static void ComputeHash_Creates_Hash_From_Bytes()
-        {
-            var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-            var expectedHash = "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e";
-
-            var actualHash = Id.ComputeHash(
-                HashAlgorithmName.SHA256,
-                bytes);
-
             Assert.Equal(expectedHash, actualHash);
         }
 

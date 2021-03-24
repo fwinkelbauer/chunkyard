@@ -25,6 +25,22 @@ namespace Chunkyard.Core
             return contentUri;
         }
 
+        public static byte[] RetrieveValueValid(
+            this IRepository repository,
+            Uri contentUri)
+        {
+            repository.EnsureNotNull(nameof(repository));
+
+            var content = repository.RetrieveValue(contentUri);
+
+            if (!Id.ContentUriValid(contentUri, content))
+            {
+                throw new ChunkyardException($"Invalid content: {contentUri}");
+            }
+
+            return content;
+        }
+
         public static bool ValueValid(
             this IRepository repository,
             Uri contentUri)
@@ -37,11 +53,9 @@ namespace Chunkyard.Core
                 return false;
             }
 
-            var (algorithm, hash) = Id.DeconstructContentUri(contentUri);
-            var content = repository.RetrieveValue(contentUri);
-            var computedHash = Id.ComputeHash(algorithm, content);
-
-            return hash.Equals(computedHash);
+            return Id.ContentUriValid(
+                contentUri,
+                repository.RetrieveValue(contentUri));
         }
 
         public static void KeepLatestLogPositions(

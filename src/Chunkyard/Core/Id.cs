@@ -12,20 +12,21 @@ namespace Chunkyard.Core
     {
         public static Uri ComputeContentUri(
             HashAlgorithmName hashAlgorithmName,
-            byte[] data)
+            byte[] content)
         {
             return ToContentUri(
                 hashAlgorithmName.Name!,
-                ComputeHash(hashAlgorithmName, data));
+                ComputeHash(hashAlgorithmName, content));
         }
 
-        public static string ComputeHash(
-            HashAlgorithmName hashAlgorithmName,
-            byte[] data)
+        public static bool ContentUriValid(
+            Uri contentUri,
+            byte[] content)
         {
-            using var algorithm = HashAlgorithm.Create(hashAlgorithmName.Name!);
+            var (algorithm, hash) = DeconstructContentUri(contentUri);
+            var computedHash = ComputeHash(algorithm, content);
 
-            return ToHexString(algorithm!.ComputeHash(data));
+            return hash.Equals(computedHash);
         }
 
         public static (HashAlgorithmName HashAlgorithmName, string Hash) DeconstructContentUri(
@@ -44,6 +45,15 @@ namespace Chunkyard.Core
             hashAlgorithmName.EnsureNotNullOrEmpty(nameof(hashAlgorithmName));
 
             return new Uri($"{hashAlgorithmName.ToLower()}://{hash}");
+        }
+
+        private static string ComputeHash(
+            HashAlgorithmName hashAlgorithmName,
+            byte[] content)
+        {
+            using var algorithm = HashAlgorithm.Create(hashAlgorithmName.Name!);
+
+            return ToHexString(algorithm!.ComputeHash(content));
         }
 
         private static string ToHexString(byte[] hash)

@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The `restore` command to check data before restoring it
+
 ### Removed
 
 - The `dot` command. The shallow check is again part of the `create` command
