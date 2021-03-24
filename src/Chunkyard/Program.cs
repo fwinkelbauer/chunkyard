@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using Chunkyard.Cli;
-using Chunkyard.Core;
 using CommandLine;
 
 namespace Chunkyard
