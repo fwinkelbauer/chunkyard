@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 8.0.0 - 2021-03-26
+
 ### Changed
 
 - The `restore` command to check data before restoring it
