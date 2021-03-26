@@ -20,6 +20,7 @@ namespace Chunkyard.Tests.Core
 
             Assert.True(fuzzy.IsMatch("Hello World!"));
             Assert.True(fuzzy.IsMatch("Held"));
+            Assert.False(fuzzy.IsMatch("hello world!"));
             Assert.False(fuzzy.IsMatch("Goodbye World!"));
         }
     }
