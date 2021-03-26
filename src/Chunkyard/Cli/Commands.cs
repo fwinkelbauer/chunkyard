@@ -57,7 +57,7 @@ namespace Chunkyard.Cli
             if (!snapshotStore.CheckSnapshotExists(logPosition))
             {
                 throw new ChunkyardException(
-                    "Missign content after creating snapshot");
+                    "Missing content after creating snapshot");
             }
         }
 
