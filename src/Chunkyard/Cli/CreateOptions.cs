@@ -10,12 +10,12 @@ namespace Chunkyard.Cli
             string repository,
             IEnumerable<string> files,
             IEnumerable<string> excludePatterns,
-            bool cached)
+            IEnumerable<string> scanPatterns)
         {
             Repository = repository;
             Files = files;
             ExcludePatterns = excludePatterns;
-            Cached = cached;
+            ScanPatterns = scanPatterns;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
@@ -27,7 +27,7 @@ namespace Chunkyard.Cli
         [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude")]
         public IEnumerable<string> ExcludePatterns { get; }
 
-        [Option("cached", Required = false, HelpText = "Use a file cache to improve performance", Default = false)]
-        public bool Cached { get; }
+        [Option("scan", Required = false, HelpText = "The fuzzy patterns for files to always inspect for changes")]
+        public IEnumerable<string> ScanPatterns { get; }
     }
 }

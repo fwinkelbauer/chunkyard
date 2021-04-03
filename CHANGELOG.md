@@ -16,6 +16,9 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The fuzzy pattern parameter of the `check`, `restore`, `show` command into a
   collection
+- The `--cached` parameter of the `create` command to a fuzzy patterns parameter
+  called `--scan`. This parameter can be used inspect files without comparing
+  them to the latest stored snapshot
 
 ## 8.0.0 - 2021-03-26
 

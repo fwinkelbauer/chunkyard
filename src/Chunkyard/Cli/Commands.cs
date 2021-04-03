@@ -45,13 +45,11 @@ namespace Chunkyard.Cli
             }
 
             var snapshotStore = CreateSnapshotStore(
-                CreateContentStore(
-                    CreateRepository(o.Repository, ensureRepository: false),
-                    new FastCdc()),
-                o.Cached);
+                CreateRepository(o.Repository, ensureRepository: false));
 
             var logPosition = snapshotStore.AppendSnapshot(
                 blobs,
+                new Fuzzy(o.ScanPatterns, false),
                 DateTime.Now,
                 blobName => File.OpenRead(
                     Path.Combine(parent, blobName)));
@@ -184,19 +182,10 @@ namespace Chunkyard.Cli
             IRepository repository,
             FastCdc? fastCdc = null)
         {
-            return CreateSnapshotStore(
-                CreateContentStore(repository, fastCdc));
-        }
-
-        private static SnapshotStore CreateSnapshotStore(
-            IContentStore contentStore,
-            bool useCache = false)
-        {
             return new SnapshotStore(
-                contentStore,
+                CreateContentStore(repository, fastCdc),
                 new EnvironmentPrompt(
-                    new ConsolePrompt()),
-                useCache);
+                    new ConsolePrompt()));
         }
 
         private static IContentStore CreateContentStore(

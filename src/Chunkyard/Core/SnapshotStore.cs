@@ -14,7 +14,6 @@ namespace Chunkyard.Core
     {
         private readonly IContentStore _contentStore;
         private readonly IRepository _repository;
-        private readonly bool _useCache;
         private readonly byte[] _salt;
         private readonly int _iterations;
         private readonly byte[] _key;
@@ -24,12 +23,10 @@ namespace Chunkyard.Core
 
         public SnapshotStore(
             IContentStore contentStore,
-            IPrompt prompt,
-            bool useCache)
+            IPrompt prompt)
         {
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
             _repository = _contentStore.Repository;
-            _useCache = useCache;
 
             prompt.EnsureNotNull(nameof(prompt));
 
@@ -69,6 +66,7 @@ namespace Chunkyard.Core
 
         public int AppendSnapshot(
             IEnumerable<Blob> blobs,
+            Fuzzy scanFuzzy,
             DateTime creationTime,
             Func<string, Stream> openRead)
         {
@@ -81,7 +79,7 @@ namespace Chunkyard.Core
                 {
                     var previous = _currentSnapshot?.Find(blob.Name);
 
-                    if (_useCache
+                    if (!scanFuzzy.IsMatch(blob.Name)
                         && previous != null
                         && previous.CreationTimeUtc.Equals(blob.CreationTimeUtc)
                         && previous.LastWriteTimeUtc.Equals(blob.LastWriteTimeUtc)

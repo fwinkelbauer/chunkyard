@@ -21,6 +21,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(expectedNames),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -42,11 +43,13 @@ namespace Chunkyard.Tests.Core
 
             var logPosition1 = snapshotStore.AppendSnapshot(
                 blobs,
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
             var logPosition2 = snapshotStore.AppendSnapshot(
                 blobs,
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -65,6 +68,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(Array.Empty<string>()),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -79,11 +83,13 @@ namespace Chunkyard.Tests.Core
 
             snapshotStore.AppendSnapshot(
                 blobs,
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
             var logPosition = snapshotStore.AppendSnapshot(
                 blobs,
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -100,6 +106,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(expectedNames),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -120,6 +127,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -136,6 +144,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -152,6 +161,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -173,6 +183,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -194,6 +205,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -216,6 +228,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -236,6 +249,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -267,6 +281,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 blobs,
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -286,6 +301,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -304,6 +320,7 @@ namespace Chunkyard.Tests.Core
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -326,11 +343,13 @@ namespace Chunkyard.Tests.Core
 
             var firstLogPosition = sourceSnapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
             sourceSnapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -338,6 +357,7 @@ namespace Chunkyard.Tests.Core
 
             destinationSnapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some other content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -356,11 +376,13 @@ namespace Chunkyard.Tests.Core
 
             sourceSnapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
             destinationSnapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some other content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -377,6 +399,7 @@ namespace Chunkyard.Tests.Core
 
             sourceSnapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
                 DateTime.Now,
                 OpenRead);
 
@@ -409,16 +432,14 @@ namespace Chunkyard.Tests.Core
         }
 
         private static SnapshotStore CreateSnapshotStore(
-            IRepository? repository = null,
-            bool useCache = false)
+            IRepository? repository = null)
         {
             return new SnapshotStore(
                 new ContentStore(
                     repository ?? new MemoryRepository(),
                     new FastCdc(),
                     HashAlgorithmName.SHA256),
-                new StaticPrompt(),
-                useCache);
+                new StaticPrompt());
         }
 
         private static void CorruptValues(
