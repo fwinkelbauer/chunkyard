@@ -12,9 +12,6 @@ namespace Chunkyard.Cli
     /// </summary>
     internal static class FileFetcher
     {
-        private static readonly string HomeDirectory =
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
         public static (string Parent, Blob[] Blobs) FindBlobs(
             IEnumerable<string> files,
             Fuzzy excludeFuzzy)
@@ -54,32 +51,10 @@ namespace Chunkyard.Cli
             IEnumerable<string> files,
             Fuzzy excludeFuzzy)
         {
-            return FindEnumerate(files, excludeFuzzy)
+            return files.Select(Path.GetFullPath)
+                .SelectMany(f => Find(f, excludeFuzzy))
                 .Distinct()
                 .ToArray();
-        }
-
-        private static IEnumerable<string> FindEnumerate(
-            IEnumerable<string> files,
-            Fuzzy excludeFuzzy)
-        {
-            foreach (var file in files)
-            {
-                foreach (var path in Find(ResolvePath(file), excludeFuzzy))
-                {
-                    yield return path;
-                }
-            }
-        }
-
-        private static string ResolvePath(string path)
-        {
-            if (path.StartsWith("~"))
-            {
-                path = path.Replace("~", HomeDirectory);
-            }
-
-            return Path.GetFullPath(path);
         }
 
         private static IEnumerable<string> Find(
