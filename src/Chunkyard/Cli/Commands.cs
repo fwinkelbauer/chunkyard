@@ -275,11 +275,11 @@ namespace Chunkyard.Cli
             {
                 var exists = _store.ContentExists(contentReference);
 
-                if (!exists
-                    && contentReference is BlobReference blobReference)
+                if (contentReference is BlobReference blobReference)
                 {
-                    Console.WriteLine(
-                        $"Missing blob: {blobReference.Name}");
+                    Console.WriteLine(exists
+                        ? $"Existing blob: {blobReference.Name}"
+                        : $"Missing blob: {blobReference.Name}");
                 }
 
                 return exists;
@@ -289,11 +289,11 @@ namespace Chunkyard.Cli
             {
                 var valid = _store.ContentValid(contentReference);
 
-                if (!valid
-                    && contentReference is BlobReference blobReference)
+                if (contentReference is BlobReference blobReference)
                 {
-                    Console.WriteLine(
-                        $"Invalid blob: {blobReference.Name}");
+                    Console.WriteLine(valid
+                        ? $"Valid blob: {blobReference.Name}"
+                        : $"Invalid blob: {blobReference.Name}");
                 }
 
                 return valid;
