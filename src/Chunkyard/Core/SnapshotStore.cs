@@ -131,9 +131,9 @@ namespace Chunkyard.Core
 
         public bool CheckSnapshotExists(
             int logPosition,
-            string fuzzyPattern = "")
+            Fuzzy includeFuzzy)
         {
-            return ShowSnapshot(logPosition, fuzzyPattern)
+            return ShowSnapshot(logPosition, includeFuzzy)
                 .AsParallel()
                 .Select(br => _contentStore.ContentExists(br))
                 .Aggregate(true, (total, next) => total & next);
@@ -141,9 +141,9 @@ namespace Chunkyard.Core
 
         public bool CheckSnapshotValid(
             int logPosition,
-            string fuzzyPattern = "")
+            Fuzzy includeFuzzy)
         {
-            return ShowSnapshot(logPosition, fuzzyPattern)
+            return ShowSnapshot(logPosition, includeFuzzy)
                 .AsParallel()
                 .Select(br => _contentStore.ContentValid(br))
                 .Aggregate(true, (total, next) => total & next);
@@ -151,14 +151,14 @@ namespace Chunkyard.Core
 
         public void RestoreSnapshot(
             int logPosition,
-            string fuzzyPattern,
+            Fuzzy includeFuzzy,
             Func<string, Stream> openWrite)
         {
             openWrite.EnsureNotNull(nameof(openWrite));
 
             var blobReferences = ShowSnapshot(
                 logPosition,
-                fuzzyPattern);
+                includeFuzzy);
 
             Parallel.ForEach(
                 blobReferences,
@@ -198,12 +198,10 @@ namespace Chunkyard.Core
 
         public BlobReference[] ShowSnapshot(
             int logPosition,
-            string fuzzyPattern = "")
+            Fuzzy includeFuzzy)
         {
-            var fuzzy = new Fuzzy(fuzzyPattern);
-
             return GetSnapshot(logPosition).BlobReferences
-                .Where(c => fuzzy.IsMatch(c.Name))
+                .Where(c => includeFuzzy.IsMatch(c.Name))
                 .ToArray();
         }
 

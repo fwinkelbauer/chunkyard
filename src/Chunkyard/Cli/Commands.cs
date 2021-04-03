@@ -16,7 +16,9 @@ namespace Chunkyard.Cli
 
         public static void PreviewFiles(PreviewOptions o)
         {
-            var (_, blobs) = FileFetcher.FindBlobs(o.Files, o.ExcludePatterns);
+            var (_, blobs) = FileFetcher.FindBlobs(
+                o.Files,
+                new Fuzzy(o.ExcludePatterns, false));
 
             if (blobs.Length == 0)
             {
@@ -34,7 +36,7 @@ namespace Chunkyard.Cli
         {
             var (parent, blobs) = FileFetcher.FindBlobs(
                 o.Files,
-                o.ExcludePatterns);
+                new Fuzzy(o.ExcludePatterns, false));
 
             if (blobs.Length == 0)
             {
@@ -54,7 +56,11 @@ namespace Chunkyard.Cli
                 blobName => File.OpenRead(
                     Path.Combine(parent, blobName)));
 
-            if (!snapshotStore.CheckSnapshotExists(logPosition))
+            var exists = snapshotStore.CheckSnapshotExists(
+                logPosition,
+                Fuzzy.MatchAll);
+
+            if (!exists)
             {
                 throw new ChunkyardException(
                     "Missing content after creating snapshot");
@@ -64,14 +70,15 @@ namespace Chunkyard.Cli
         public static void CheckSnapshot(CheckOptions o)
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
+            var fuzzy = new Fuzzy(o.IncludePatterns, true);
 
             var ok = o.Shallow
                 ? snapshotStore.CheckSnapshotExists(
                     o.LogPosition,
-                    o.IncludeFuzzy)
+                    fuzzy)
                 : snapshotStore.CheckSnapshotValid(
                     o.LogPosition,
-                    o.IncludeFuzzy);
+                    fuzzy);
 
             if (ok)
             {
@@ -90,7 +97,7 @@ namespace Chunkyard.Cli
 
             var blobReferences = snapshotStore.ShowSnapshot(
                 o.LogPosition,
-                o.IncludeFuzzy);
+                new Fuzzy(o.IncludePatterns, true));
 
             foreach (var blobReference in blobReferences)
             {
@@ -117,7 +124,7 @@ namespace Chunkyard.Cli
 
             snapshotStore.RestoreSnapshot(
                 o.LogPosition,
-                o.IncludeFuzzy,
+                new Fuzzy(o.IncludePatterns, true),
                 OpenWrite);
         }
 

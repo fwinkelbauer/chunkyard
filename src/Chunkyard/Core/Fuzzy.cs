@@ -1,4 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Chunkyard.Core
 {
@@ -7,18 +10,35 @@ namespace Chunkyard.Core
     /// </summary>
     public class Fuzzy
     {
-        private readonly Regex _compiledRegex;
+        public static readonly Fuzzy MatchAll = new Fuzzy(
+            Array.Empty<string>(),
+            true);
 
-        public Fuzzy(string pattern)
+        public static readonly Fuzzy MatchNothing = new Fuzzy(
+            Array.Empty<string>(),
+            false);
+
+        private readonly Regex[] _compiledRegex;
+        private readonly bool _initial;
+
+        public Fuzzy(
+            IEnumerable<string> patterns,
+            bool emptyMatches)
         {
-            _compiledRegex = new Regex(string.IsNullOrEmpty(pattern)
-                ? ".*"
-                : pattern.Replace(" ", ".*"));
+            _compiledRegex = patterns
+                .Select(p => new Regex(string.IsNullOrEmpty(p)
+                    ? ".*"
+                    : p.Replace(" ", ".*")))
+                .ToArray();
+
+            _initial = _compiledRegex.Length == 0 && emptyMatches;
         }
 
         public bool IsMatch(string input)
         {
-            return _compiledRegex.IsMatch(input);
+            return _compiledRegex
+                .Select(r => r.IsMatch(input))
+                .Aggregate(_initial, (total, next) => total | next);
         }
     }
 }

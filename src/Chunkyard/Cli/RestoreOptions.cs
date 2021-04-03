@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using System.Collections.Generic;
+using CommandLine;
 
 namespace Chunkyard.Cli
 {
@@ -8,13 +9,13 @@ namespace Chunkyard.Cli
         public RestoreOptions(
             string repository,
             string directory,
-            string includeFuzzy,
+            IEnumerable<string> includePatterns,
             int logPosition,
             bool overwrite)
         {
             Repository = repository;
             Directory = directory;
-            IncludeFuzzy = includeFuzzy;
+            IncludePatterns = includePatterns;
             LogPosition = logPosition;
             Overwrite = overwrite;
         }
@@ -25,8 +26,8 @@ namespace Chunkyard.Cli
         [Option('d', "directory", Required = false, HelpText = "The directory to restore into", Default = ".")]
         public string Directory { get; }
 
-        [Option('i', "include", Required = false, HelpText = "The fuzzy pattern for files to include")]
-        public string IncludeFuzzy { get; }
+        [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
+        public IEnumerable<string> IncludePatterns { get; }
 
         [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = Commands.LatestLogPosition)]
         public int LogPosition { get; }

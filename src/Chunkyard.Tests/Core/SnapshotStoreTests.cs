@@ -132,14 +132,15 @@ namespace Chunkyard.Tests.Core
         public static void CheckSnapshot_Detects_Ok()
         {
             var snapshotStore = CreateSnapshotStore();
+            var fuzzy = Fuzzy.MatchAll;
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
                 DateTime.Now,
                 OpenRead);
 
-            Assert.True(snapshotStore.CheckSnapshotExists(logPosition));
-            Assert.True(snapshotStore.CheckSnapshotValid(logPosition));
+            Assert.True(snapshotStore.CheckSnapshotExists(logPosition, fuzzy));
+            Assert.True(snapshotStore.CheckSnapshotValid(logPosition, fuzzy));
         }
 
         [Fact]
@@ -147,6 +148,7 @@ namespace Chunkyard.Tests.Core
         {
             var repository = new MemoryRepository();
             var snapshotStore = CreateSnapshotStore(repository);
+            var fuzzy = Fuzzy.MatchAll;
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
@@ -156,10 +158,10 @@ namespace Chunkyard.Tests.Core
             RemoveValues(repository, repository.ListUris());
 
             Assert.Throws<ChunkyardException>(
-                () => snapshotStore.CheckSnapshotExists(logPosition));
+                () => snapshotStore.CheckSnapshotExists(logPosition, fuzzy));
 
             Assert.Throws<ChunkyardException>(
-                () => snapshotStore.CheckSnapshotValid(logPosition));
+                () => snapshotStore.CheckSnapshotValid(logPosition, fuzzy));
         }
 
         [Fact]
@@ -167,6 +169,7 @@ namespace Chunkyard.Tests.Core
         {
             var repository = new MemoryRepository();
             var snapshotStore = CreateSnapshotStore(repository);
+            var fuzzy = Fuzzy.MatchAll;
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
@@ -176,10 +179,10 @@ namespace Chunkyard.Tests.Core
             CorruptValues(repository, repository.ListUris());
 
             Assert.Throws<ChunkyardException>(
-                () => snapshotStore.CheckSnapshotExists(logPosition));
+                () => snapshotStore.CheckSnapshotExists(logPosition, fuzzy));
 
             Assert.Throws<ChunkyardException>(
-                () => snapshotStore.CheckSnapshotValid(logPosition));
+                () => snapshotStore.CheckSnapshotValid(logPosition, fuzzy));
         }
 
         [Fact]
@@ -187,6 +190,7 @@ namespace Chunkyard.Tests.Core
         {
             var repository = new MemoryRepository();
             var snapshotStore = CreateSnapshotStore(repository);
+            var fuzzy = Fuzzy.MatchAll;
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
@@ -199,8 +203,8 @@ namespace Chunkyard.Tests.Core
 
             RemoveValues(repository, contentUris);
 
-            Assert.False(snapshotStore.CheckSnapshotExists(logPosition));
-            Assert.False(snapshotStore.CheckSnapshotValid(logPosition));
+            Assert.False(snapshotStore.CheckSnapshotExists(logPosition, fuzzy));
+            Assert.False(snapshotStore.CheckSnapshotValid(logPosition, fuzzy));
         }
 
         [Fact]
@@ -208,6 +212,7 @@ namespace Chunkyard.Tests.Core
         {
             var repository = new MemoryRepository();
             var snapshotStore = CreateSnapshotStore(repository);
+            var fuzzy = Fuzzy.MatchAll;
 
             var logPosition = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
@@ -220,8 +225,8 @@ namespace Chunkyard.Tests.Core
 
             CorruptValues(repository, contentUris);
 
-            Assert.True(snapshotStore.CheckSnapshotExists(logPosition));
-            Assert.False(snapshotStore.CheckSnapshotValid(logPosition));
+            Assert.True(snapshotStore.CheckSnapshotExists(logPosition, fuzzy));
+            Assert.False(snapshotStore.CheckSnapshotValid(logPosition, fuzzy));
         }
 
         [Fact]
@@ -243,7 +248,10 @@ namespace Chunkyard.Tests.Core
                 return writeStream;
             }
 
-            snapshotStore.RestoreSnapshot(logPosition, "", OpenWrite);
+            snapshotStore.RestoreSnapshot(
+                logPosition,
+                Fuzzy.MatchAll,
+                OpenWrite);
 
             Assert.Equal("some content", actualBlobName);
             Assert.Equal(
@@ -255,7 +263,6 @@ namespace Chunkyard.Tests.Core
         public static void ShowSnapshot_Lists_Content()
         {
             var snapshotStore = CreateSnapshotStore();
-
             var blobs = CreateBlobs(new[] { "some content" });
 
             var logPosition = snapshotStore.AppendSnapshot(
@@ -263,9 +270,13 @@ namespace Chunkyard.Tests.Core
                 DateTime.Now,
                 OpenRead);
 
+            var blobReferences = snapshotStore.ShowSnapshot(
+                logPosition,
+                Fuzzy.MatchAll);
+
             Assert.Equal(
                 blobs.Select(b => b.Name),
-                snapshotStore.ShowSnapshot(logPosition).Select(c => c.Name));
+                blobReferences.Select(c => c.Name));
         }
 
         [Fact]
@@ -280,7 +291,8 @@ namespace Chunkyard.Tests.Core
 
             snapshotStore.GarbageCollect();
 
-            Assert.True(snapshotStore.CheckSnapshotValid(logPosition));
+            Assert.True(
+                snapshotStore.CheckSnapshotValid(logPosition, Fuzzy.MatchAll));
         }
 
         [Fact]

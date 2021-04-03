@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 - An error which prevented the `copy` command to append to an existing
   repository
 
+### Changed
+
+- The fuzzy pattern parameter of the `check`, `restore`, `show` command into a
+  collection
+
 ## 8.0.0 - 2021-03-26
 
 ### Changed

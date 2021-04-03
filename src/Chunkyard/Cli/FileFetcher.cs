@@ -17,9 +17,9 @@ namespace Chunkyard.Cli
 
         public static (string Parent, Blob[] Blobs) FindBlobs(
             IEnumerable<string> files,
-            IEnumerable<string> excludePatterns)
+            Fuzzy excludeFuzzy)
         {
-            var foundFiles = FindFiles(files, excludePatterns);
+            var foundFiles = FindFiles(files, excludeFuzzy);
             var parent = FindCommonParent(foundFiles);
 
             var blobs = foundFiles
@@ -52,22 +52,20 @@ namespace Chunkyard.Cli
 
         private static string[] FindFiles(
             IEnumerable<string> files,
-            IEnumerable<string> excludePatterns)
+            Fuzzy excludeFuzzy)
         {
-            return FindEnumerate(
-                files,
-                excludePatterns.ToArray())
+            return FindEnumerate(files, excludeFuzzy)
                 .Distinct()
                 .ToArray();
         }
 
         private static IEnumerable<string> FindEnumerate(
             IEnumerable<string> files,
-            string[] excludePatterns)
+            Fuzzy excludeFuzzy)
         {
             foreach (var file in files)
             {
-                foreach (var path in Find(ResolvePath(file), excludePatterns))
+                foreach (var path in Find(ResolvePath(file), excludeFuzzy))
                 {
                     yield return path;
                 }
@@ -86,7 +84,7 @@ namespace Chunkyard.Cli
 
         private static IEnumerable<string> Find(
             string file,
-            string[] excludePatterns)
+            Fuzzy excludeFuzzy)
         {
             if (Directory.Exists(file))
             {
@@ -95,13 +93,13 @@ namespace Chunkyard.Cli
                         file,
                         "*",
                         SearchOption.AllDirectories),
-                    excludePatterns);
+                    excludeFuzzy);
             }
             else if (File.Exists(file))
             {
                 return Filter(
                     new[] { file },
-                    excludePatterns);
+                    excludeFuzzy);
             }
             else
             {
@@ -111,21 +109,17 @@ namespace Chunkyard.Cli
 
         private static List<string> Filter(
             string[] files,
-            string[] excludePatterns)
+            Fuzzy excludeFuzzy)
         {
             var filteredFiles = files.ToList();
 
-            foreach (var excludePattern in excludePatterns)
-            {
-                var fuzzy = new Fuzzy(excludePattern);
-                var excludedFiles = filteredFiles
-                    .Where(f => fuzzy.IsMatch(f))
-                    .ToArray();
+            var excludedFiles = filteredFiles
+                .Where(f => excludeFuzzy.IsMatch(f))
+                .ToArray();
 
-                foreach (var excludedFile in excludedFiles)
-                {
-                    filteredFiles.Remove(excludedFile);
-                }
+            foreach (var excludedFile in excludedFiles)
+            {
+                filteredFiles.Remove(excludedFile);
             }
 
             return filteredFiles;
@@ -134,6 +128,11 @@ namespace Chunkyard.Cli
         // https://rosettacode.org/wiki/Find_common_directory_path#C.23
         private static string FindCommonParent(string[] files)
         {
+            if (files.Length == 0)
+            {
+                return "";
+            }
+
             var parent = "";
             var separatedPaths = files
                 .First(str => str.Length == files.Max(st2 => st2.Length))
