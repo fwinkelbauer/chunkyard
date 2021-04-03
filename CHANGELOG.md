@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Fixed
+
+- An error which prevented the `copy` command to append to an existing
+  repository
+
 ## 8.0.0 - 2021-03-26
 
 ### Changed

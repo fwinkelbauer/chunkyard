@@ -239,7 +239,7 @@ namespace Chunkyard.Core
                 var bytes = _repository.RetrieveFromLog(logPosition);
                 var otherBytes = otherRepository.RetrieveFromLog(logPosition);
 
-                if (!bytes.Equals(otherBytes))
+                if (!bytes.SequenceEqual(otherBytes))
                 {
                     throw new ChunkyardException(
                         $"Repositories differ at position #{logPosition}");
