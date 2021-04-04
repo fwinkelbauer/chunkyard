@@ -20,6 +20,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
   called `--scan`. This parameter can be used inspect files without comparing
   them to the latest stored snapshot
 
+### Removed
+
+- The shallow check performed by the `create` command
+
 ## 8.0.0 - 2021-03-26
 
 ### Changed

@@ -53,16 +53,6 @@ namespace Chunkyard.Cli
                 DateTime.Now,
                 blobName => File.OpenRead(
                     Path.Combine(parent, blobName)));
-
-            var exists = snapshotStore.CheckSnapshotExists(
-                logPosition,
-                Fuzzy.MatchAll);
-
-            if (!exists)
-            {
-                throw new ChunkyardException(
-                    "Missing content after creating snapshot");
-            }
         }
 
         public static void CheckSnapshot(CheckOptions o)
