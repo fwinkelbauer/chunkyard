@@ -7,10 +7,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
-### Fixed
-
-- An error which prevented the `copy` command to append to an existing
-  repository
+## 8.1.0 - 2021-04-04
 
 ### Changed
 
@@ -19,6 +16,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 - The `--cached` parameter of the `create` command to a fuzzy patterns parameter
   called `--scan`. This parameter can be used inspect files without comparing
   them to the latest stored snapshot
+
+### Fixed
+
+- An error which prevented the `copy` command to append to an existing
+  repository
 
 ### Removed
 
