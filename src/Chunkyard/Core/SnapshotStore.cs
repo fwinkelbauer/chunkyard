@@ -82,8 +82,7 @@ namespace Chunkyard.Core
                     if (!scanFuzzy.IsMatch(blob.Name)
                         && previous != null
                         && previous.CreationTimeUtc.Equals(blob.CreationTimeUtc)
-                        && previous.LastWriteTimeUtc.Equals(blob.LastWriteTimeUtc)
-                        && _contentStore.ContentExists(previous))
+                        && previous.LastWriteTimeUtc.Equals(blob.LastWriteTimeUtc))
                     {
                         return previous;
                     }
