@@ -208,9 +208,10 @@ namespace Chunkyard.Core
             var usedUris = ListUris();
             var unusedUris = allContentUris.Except(usedUris).ToArray();
 
-            Parallel.ForEach(
-                unusedUris,
-                contentUri => _repository.RemoveValue(contentUri));
+            foreach (var contentUri in unusedUris)
+            {
+                _repository.RemoveValue(contentUri);
+            }
         }
 
         public void CopySnapshots(IRepository otherRepository)
@@ -253,14 +254,12 @@ namespace Chunkyard.Core
                 .Except(otherRepository.ListUris())
                 .ToArray();
 
-            Parallel.ForEach(
-                urisToCopy,
-                contentUri =>
-                {
-                    otherRepository.StoreValue(
-                        contentUri,
-                        _repository.RetrieveValue(contentUri));
-                });
+            foreach (var contentUri in urisToCopy)
+            {
+                otherRepository.StoreValue(
+                    contentUri,
+                    _repository.RetrieveValue(contentUri));
+            }
 
             foreach (var logPosition in logPositionsToCopy)
             {
