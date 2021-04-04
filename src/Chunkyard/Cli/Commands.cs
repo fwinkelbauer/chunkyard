@@ -70,7 +70,9 @@ namespace Chunkyard.Cli
 
             if (ok)
             {
-                Console.WriteLine("Snapshot is valid");
+                Console.WriteLine(o.Shallow
+                    ? "Snapshot is complete"
+                    : "Snapshot is valid");
             }
             else
             {
