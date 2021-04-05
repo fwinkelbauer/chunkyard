@@ -61,43 +61,25 @@ namespace Chunkyard.Cli
             string file,
             Fuzzy excludeFuzzy)
         {
+            IEnumerable<string>? files = null;
+
             if (Directory.Exists(file))
             {
-                return Filter(
-                    Directory.GetFiles(
-                        file,
-                        "*",
-                        SearchOption.AllDirectories),
-                    excludeFuzzy);
+                files = Directory.GetFiles(
+                    file,
+                    "*",
+                    SearchOption.AllDirectories);
             }
             else if (File.Exists(file))
             {
-                return Filter(
-                    new[] { file },
-                    excludeFuzzy);
+                files = new[] { file };
             }
             else
             {
                 throw new FileNotFoundException("Could not find file", file);
             }
-        }
 
-        private static List<string> Filter(
-            string[] files,
-            Fuzzy excludeFuzzy)
-        {
-            var filteredFiles = files.ToList();
-
-            var excludedFiles = filteredFiles
-                .Where(f => excludeFuzzy.IsMatch(f))
-                .ToArray();
-
-            foreach (var excludedFile in excludedFiles)
-            {
-                filteredFiles.Remove(excludedFile);
-            }
-
-            return filteredFiles;
+            return files.Where(f => !excludeFuzzy.IsMatch(f));
         }
 
         // https://rosettacode.org/wiki/Find_common_directory_path#C.23
