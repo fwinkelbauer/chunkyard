@@ -23,8 +23,9 @@ unreferenced files can be deleted using the `chunkyard gc` command.
 - Strong symmetric encryption (AES Galois/Counter Mode using a 256 bit key)
 - Ability to copy from/to other repositories
 - Verifiable backups
-- Minimal dependencies. The Chunkyard binary only utilizes the
-  `commandlineparser` package to create its command line interface
+- Minimal NuGet dependencies. The Chunkyard binary only utilizes the
+  [commandlineparser][commandlineparser] package to create its command line
+  interface
 
 ## Not Goals
 
@@ -104,4 +105,5 @@ chunkyard gc -r "$repo"
 [fastcdc-rs]: https://github.com/nlfiedler/fastcdc-rs
 [fastcdc-py]: https://github.com/titusz/fastcdc-py
 [backup-tools]: https://github.com/restic/others
+[commandlineparser]: https://www.nuget.org/packages/CommandLineParser
 [borg]: https://borgbackup.readthedocs.io/en/stable/internals/security.html#fingerprinting
