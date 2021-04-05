@@ -64,17 +64,8 @@ namespace Chunkyard.Infrastructure
 
         public void RemoveValue(Uri contentUri)
         {
-            var file = ToFilePath(contentUri);
-            var directory = DirectoryUtil.GetParent(file);
-
-            File.Delete(file);
-
-            if (Directory.EnumerateFileSystemEntries(directory).Any())
-            {
-                return;
-            }
-
-            Directory.Delete(directory);
+            File.Delete(
+                ToFilePath(contentUri));
         }
 
         public void AppendToLog(int newLogPosition, byte[] value)
