@@ -151,6 +151,52 @@ namespace Chunkyard.Tests.Core
             Assert.Empty(repository.ListLogPositions());
         }
 
+        [Fact]
+        public static void Copy_Throws_If_No_Overlap()
+        {
+            var repository = new MemoryRepository();
+            var otherRepository = new MemoryRepository();
+
+            repository.AppendToLog(0, new byte[] { 0x00 });
+            otherRepository.AppendToLog(1, new byte[] { 0x01 });
+
+            Assert.Throws<ChunkyardException>(
+                () => repository.Copy(otherRepository));
+        }
+
+        [Fact]
+        public static void Copy_Throws_If_Logs_Dont_Match()
+        {
+            var repository = new MemoryRepository();
+            var otherRepository = new MemoryRepository();
+
+            repository.AppendToLog(0, new byte[] { 0x00 });
+            otherRepository.AppendToLog(0, new byte[] { 0x01 });
+
+            Assert.Throws<ChunkyardException>(
+                () => repository.Copy(otherRepository));
+        }
+
+        [Fact]
+        public static void Copy_Copies_Missing_Data()
+        {
+            var repository = new MemoryRepository();
+            var otherRepository = new MemoryRepository();
+
+            repository.AppendToLog(0, new byte[] { 0x00 });
+            repository.StoreValue(HashAlgorithmName.SHA256, new byte[] { 0xFF });
+
+            repository.Copy(otherRepository);
+
+            Assert.Equal(
+                repository.ListUris(),
+                otherRepository.ListUris());
+
+            Assert.Equal(
+                repository.ListLogPositions(),
+                otherRepository.ListLogPositions());
+        }
+
         private static IRepository CreateRepository()
         {
             return new MemoryRepository();

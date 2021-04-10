@@ -151,15 +151,14 @@ namespace Chunkyard.Cli
                 .GarbageCollect();
         }
 
-        public static void CopySnapshots(CopyOptions o)
+        public static void Copy(CopyOptions o)
         {
-            var sourceStore = CreateSnapshotStore(o.SourceRepository);
-
-            var destinationRepository = CreateRepository(
+            var repository = CreateRepository(o.SourceRepository);
+            var otherRepository = CreateRepository(
                 o.DestinationRepository,
                 ensureRepository: false);
 
-            sourceStore.CopySnapshots(destinationRepository);
+            repository.Copy(otherRepository);
         }
 
         private static SnapshotStore CreateSnapshotStore(

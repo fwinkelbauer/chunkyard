@@ -214,91 +214,33 @@ namespace Chunkyard.Core
             }
         }
 
-        public void CopySnapshots(IRepository otherRepository)
+        private Uri[] ListUris()
         {
-            otherRepository.EnsureNotNull(nameof(otherRepository));
-
-            var thisLogs = _repository.ListLogPositions();
-            var otherLogs = otherRepository.ListLogPositions();
-            var intersection = thisLogs.Intersect(otherLogs)
-                .ToArray();
-
-            if (intersection.Length == 0
-                && otherLogs.Length > 0)
+            IEnumerable<Uri> ListUris(int logPosition)
             {
-                throw new ChunkyardException(
-                    "Cannot operate on repositories without overlapping log positions");
-            }
+                var documentReference = _contentStore.RetrieveFromLog(logPosition)
+                    .DocumentReference;
 
-            foreach (var logPosition in intersection)
-            {
-                var bytes = _repository.RetrieveFromLog(logPosition);
-                var otherBytes = otherRepository.RetrieveFromLog(logPosition);
-
-                if (!bytes.SequenceEqual(otherBytes))
+                foreach (var contentUri in documentReference.ContentUris)
                 {
-                    throw new ChunkyardException(
-                        $"Repositories differ at position #{logPosition}");
+                    yield return contentUri;
+                }
+
+                var snapshot = GetSnapshot(documentReference);
+
+                foreach (var blobReference in snapshot.BlobReferences)
+                {
+                    foreach (var contentUri in blobReference.ContentUris)
+                    {
+                        yield return contentUri;
+                    }
                 }
             }
 
-            var otherMax = otherLogs.Length == 0
-                ? -1
-                : otherLogs.Max();
-
-            var logPositionsToCopy = thisLogs
-                .Where(l => l > otherMax)
-                .ToArray();
-
-            var urisToCopy = ListUris(logPositionsToCopy)
-                .Except(otherRepository.ListUris())
-                .ToArray();
-
-            foreach (var contentUri in urisToCopy)
-            {
-                otherRepository.StoreValue(
-                    contentUri,
-                    _repository.RetrieveValue(contentUri));
-            }
-
-            foreach (var logPosition in logPositionsToCopy)
-            {
-                otherRepository.AppendToLog(
-                    logPosition,
-                    _repository.RetrieveFromLog(logPosition));
-            }
-        }
-
-        private Uri[] ListUris()
-        {
-            return ListUris(
-                _repository.ListLogPositions());
-        }
-
-        private Uri[] ListUris(IEnumerable<int> logPositions)
-        {
-            return logPositions
+            return _repository.ListLogPositions()
                 .SelectMany(ListUris)
                 .Distinct()
                 .ToArray();
-        }
-
-        private Uri[] ListUris(int logPosition)
-        {
-            var uris = new List<Uri>();
-            var documentReference = _contentStore.RetrieveFromLog(logPosition)
-                .DocumentReference;
-
-            uris.AddRange(documentReference.ContentUris);
-
-            var snapshot = GetSnapshot(documentReference);
-
-            foreach (var blobReference in snapshot.BlobReferences)
-            {
-                uris.AddRange(blobReference.ContentUris);
-            }
-
-            return uris.ToArray();
         }
 
         private int ResolveLogPosition(int logPosition)

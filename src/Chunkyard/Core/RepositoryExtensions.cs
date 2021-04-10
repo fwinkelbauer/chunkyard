@@ -75,5 +75,63 @@ namespace Chunkyard.Core
                 repository.RemoveFromLog(logPosition);
             }
         }
+
+        public static void Copy(
+            this IRepository repository,
+            IRepository otherRepository)
+        {
+            repository.EnsureNotNull(nameof(repository));
+            otherRepository.EnsureNotNull(nameof(otherRepository));
+
+            var thisLogs = repository.ListLogPositions();
+            var otherLogs = otherRepository.ListLogPositions();
+            var intersection = thisLogs.Intersect(otherLogs)
+                .ToArray();
+
+            if (intersection.Length == 0
+                && otherLogs.Length > 0)
+            {
+                throw new ChunkyardException(
+                    "Cannot operate on repositories without overlapping log positions");
+            }
+
+            foreach (var logPosition in intersection)
+            {
+                var bytes = repository.RetrieveFromLog(logPosition);
+                var otherBytes = otherRepository.RetrieveFromLog(logPosition);
+
+                if (!bytes.SequenceEqual(otherBytes))
+                {
+                    throw new ChunkyardException(
+                        $"Repositories differ at position #{logPosition}");
+                }
+            }
+
+            var otherMax = otherLogs.Length == 0
+                ? -1
+                : otherLogs.Max();
+
+            var logPositionsToCopy = thisLogs
+                .Where(l => l > otherMax)
+                .ToArray();
+
+            var urisToCopy = repository.ListUris()
+                .Except(otherRepository.ListUris())
+                .ToArray();
+
+            foreach (var contentUri in urisToCopy)
+            {
+                otherRepository.StoreValue(
+                    contentUri,
+                    repository.RetrieveValue(contentUri));
+            }
+
+            foreach (var logPosition in logPositionsToCopy)
+            {
+                otherRepository.AppendToLog(
+                    logPosition,
+                    repository.RetrieveFromLog(logPosition));
+            }
+        }
     }
 }
