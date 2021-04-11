@@ -59,13 +59,20 @@ namespace Chunkyard.Core
             byte[] key,
             Stream outputStream)
         {
-            foreach (var contentUri in contentReference.ContentUris)
+            try
             {
-                var decryptedData = AesGcmCrypto.Decrypt(
-                    Repository.RetrieveValueValid(contentUri),
-                    key);
+                foreach (var contentUri in contentReference.ContentUris)
+                {
+                    var decryptedData = AesGcmCrypto.Decrypt(
+                        Repository.RetrieveValueValid(contentUri),
+                        key);
 
-                outputStream.Write(decryptedData);
+                    outputStream.Write(decryptedData);
+                }
+            }
+            catch (CryptographicException e)
+            {
+                throw new ChunkyardException("Could not decrypt data", e);
             }
         }
 

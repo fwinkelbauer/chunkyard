@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
 using Chunkyard.Cli;
 using CommandLine;
 
@@ -14,10 +13,6 @@ namespace Chunkyard
             try
             {
                 ProcessArguments(args);
-            }
-            catch (CryptographicException)
-            {
-                WriteError("Could not decrypt data");
             }
             catch (Exception e)
             {
