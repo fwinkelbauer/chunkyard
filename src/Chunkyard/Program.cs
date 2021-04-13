@@ -50,6 +50,7 @@ namespace Chunkyard
                 .WithParsed<RemoveOptions>(Commands.RemoveSnapshot)
                 .WithParsed<KeepOptions>(Commands.KeepSnapshots)
                 .WithParsed<ListOptions>(Commands.ListSnapshots)
+                .WithParsed<DiffOptions>(Commands.DiffSnapshots)
                 .WithParsed<GarbageCollectOptions>(Commands.GarbageCollect)
                 .WithParsed<CopyOptions>(Commands.Copy)
                 .WithNotParsed(_ => Environment.ExitCode = 1);

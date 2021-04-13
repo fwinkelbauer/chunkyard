@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- The `diff` command to outline changes between two snapshots
+
 ### Changed
 
 - The `copy` command to no longer need a password prompt

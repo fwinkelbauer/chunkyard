@@ -1,0 +1,73 @@
+﻿using System;
+using Chunkyard.Core;
+using Xunit;
+
+namespace Chunkyard.Tests.Core
+{
+    public static class SnapshotTests
+    {
+        [Fact]
+        public static void Diff_Shows_Differences_Between_Snapshots()
+        {
+            var date = DateTime.Now;
+            var nonce = new byte[] { 0xFF };
+
+            var snapshot1 = new Snapshot(
+                date,
+                new[]
+                {
+                    new BlobReference(
+                        "some blob",
+                        date,
+                        date,
+                        nonce,
+                        new[] { new Uri("some://uri") }),
+                    new BlobReference(
+                        "changed blob",
+                        date,
+                        date,
+                        nonce,
+                        new[] { new Uri("some://uri") }),
+                    new BlobReference(
+                        "removed blob",
+                        date,
+                        date,
+                        nonce,
+                        new[] { new Uri("some://uri") })
+                });
+
+            var snapshot2 = new Snapshot(
+                date,
+                new[]
+                {
+                    new BlobReference(
+                        "some blob",
+                        date,
+                        date,
+                        nonce,
+                        new[] { new Uri("some://uri") }),
+                    new BlobReference(
+                        "changed blob",
+                        date,
+                        date,
+                        nonce,
+                        new[] { new Uri("some://new.uri") }),
+                    new BlobReference(
+                        "new blob",
+                        date,
+                        date,
+                        nonce,
+                        new[] { new Uri("some://uri") })
+                });
+
+            var expectedDiff = new DiffSet(
+                new[] { "new blob" },
+                new[] { "changed blob" },
+                new[] { "removed blob" });
+
+            Assert.Equal(
+                expectedDiff,
+                Snapshot.Diff(snapshot1, snapshot2));
+        }
+    }
+}

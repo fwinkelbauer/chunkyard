@@ -51,5 +51,30 @@ namespace Chunkyard.Core
         {
             return HashCode.Combine(CreationTime, BlobReferences);
         }
+
+        public static DiffSet Diff(Snapshot snapshot1, Snapshot snapshot2)
+        {
+            snapshot1.EnsureNotNull(nameof(snapshot1));
+            snapshot2.EnsureNotNull(nameof(snapshot2));
+
+            var names1 = snapshot1.BlobReferences.Select(b => b.Name).ToArray();
+            var names2 = snapshot2.BlobReferences.Select(b => b.Name).ToArray();
+
+            var changed = names1.Intersect(names2)
+                .Where(
+                    name =>
+                    {
+                        var blob1 = snapshot1.Find(name);
+                        var blob2 = snapshot2.Find(name);
+
+                        return !blob1!.Equals(blob2);
+                    })
+                .ToArray();
+
+            return new DiffSet(
+                names2.Except(names1).ToArray(),
+                changed,
+                names1.Except(names2).ToArray());
+        }
     }
 }

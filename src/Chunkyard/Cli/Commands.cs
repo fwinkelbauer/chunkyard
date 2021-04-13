@@ -134,6 +134,30 @@ namespace Chunkyard.Cli
             }
         }
 
+        public static void DiffSnapshots(DiffOptions o)
+        {
+            var snapshotStore = CreateSnapshotStore(o.Repository);
+
+            var diff = Snapshot.Diff(
+                snapshotStore.GetSnapshot(o.FirstLogPosition),
+                snapshotStore.GetSnapshot(o.SecondLogPosition));
+
+            foreach (var added in diff.Added)
+            {
+                Console.WriteLine($"+ {added}");
+            }
+
+            foreach (var changed in diff.Changed)
+            {
+                Console.WriteLine($"~ {changed}");
+            }
+
+            foreach (var removed in diff.Removed)
+            {
+                Console.WriteLine($"- {removed}");
+            }
+        }
+
         public static void RemoveSnapshot(RemoveOptions o)
         {
             CreateRepository(o.Repository)
