@@ -57,18 +57,17 @@ namespace Chunkyard.Core
             snapshot1.EnsureNotNull(nameof(snapshot1));
             snapshot2.EnsureNotNull(nameof(snapshot2));
 
-            var names1 = snapshot1.BlobReferences.Select(b => b.Name).ToArray();
-            var names2 = snapshot2.BlobReferences.Select(b => b.Name).ToArray();
+            var names1 = snapshot1._blobReferences.Keys;
+            var names2 = snapshot2._blobReferences.Keys;
 
             var changed = names1.Intersect(names2)
-                .Where(
-                    name =>
-                    {
-                        var blob1 = snapshot1.Find(name);
-                        var blob2 = snapshot2.Find(name);
+                .Where(name =>
+                {
+                    var blob1 = snapshot1._blobReferences[name];
+                    var blob2 = snapshot2._blobReferences[name];
 
-                        return !blob1!.Equals(blob2);
-                    })
+                    return !blob1.Equals(blob2);
+                })
                 .ToArray();
 
             return new DiffSet(
