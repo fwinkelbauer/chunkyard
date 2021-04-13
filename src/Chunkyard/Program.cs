@@ -16,7 +16,7 @@ namespace Chunkyard
             }
             catch (Exception e)
             {
-                WriteError(e.ToString());
+                WriteError(e.Message);
             }
         }
 
