@@ -12,6 +12,8 @@ namespace Chunkyard.Core
     /// </summary>
     public class SnapshotStore
     {
+        public const int LatestSnapshotId = -1;
+
         private readonly IContentStore _contentStore;
         private readonly IRepository _repository;
         private readonly byte[] _salt;

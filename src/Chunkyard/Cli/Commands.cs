@@ -12,8 +12,6 @@ namespace Chunkyard.Cli
     /// </summary>
     internal static class Commands
     {
-        public const int LatestSnapshotId = -1;
-
         public static void PreviewFiles(PreviewOptions o)
         {
             var (_, blobs) = FileFetcher.FindBlobs(
