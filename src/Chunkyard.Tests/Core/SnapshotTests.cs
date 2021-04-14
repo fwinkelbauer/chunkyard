@@ -13,6 +13,7 @@ namespace Chunkyard.Tests.Core
             var nonce = new byte[] { 0xFF };
 
             var snapshot1 = new Snapshot(
+                1,
                 date,
                 new[]
                 {
@@ -37,6 +38,7 @@ namespace Chunkyard.Tests.Core
                 });
 
             var snapshot2 = new Snapshot(
+                2,
                 date,
                 new[]
                 {

@@ -7,16 +7,16 @@ namespace Chunkyard.Cli
     {
         public RemoveOptions(
             string repository,
-            int logPosition)
+            int snapshotId)
         {
             Repository = repository;
-            LogPosition = logPosition;
+            SnapshotId = snapshotId;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
         public string Repository { get; }
 
         [Option('s', "snapshot", Required = true, HelpText = "The snapshot ID")]
-        public int LogPosition { get; }
+        public int SnapshotId { get; }
     }
 }

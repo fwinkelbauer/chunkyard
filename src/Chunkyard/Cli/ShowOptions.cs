@@ -8,19 +8,19 @@ namespace Chunkyard.Cli
     {
         public ShowOptions(
             string repository,
-            int logPosition,
+            int snapshotId,
             IEnumerable<string> includePatterns)
         {
             Repository = repository;
-            LogPosition = logPosition;
+            SnapshotId = snapshotId;
             IncludePatterns = includePatterns;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
         public string Repository { get; }
 
-        [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = Commands.LatestLogPosition)]
-        public int LogPosition { get; }
+        [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = Commands.LatestSnapshotId)]
+        public int SnapshotId { get; }
 
         [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
         public IEnumerable<string> IncludePatterns { get; }

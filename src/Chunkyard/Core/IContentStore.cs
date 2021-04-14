@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Chunkyard.Core
 {
@@ -8,8 +9,6 @@ namespace Chunkyard.Core
     /// </summary>
     public interface IContentStore
     {
-        IRepository Repository { get; }
-
         void RetrieveBlob(
             BlobReference blobReference,
             byte[] key,
@@ -36,10 +35,8 @@ namespace Chunkyard.Core
 
         bool ContentValid(IContentReference contentReference);
 
-        void AppendToLog(
-            int newLogPosition,
-            LogReference logReference);
+        Uri[] ListContentUris();
 
-        LogReference RetrieveFromLog(int logPosition);
+        void RemoveContent(Uri contentUri);
     }
 }

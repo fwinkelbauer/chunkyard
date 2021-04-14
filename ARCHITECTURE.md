@@ -17,7 +17,8 @@ This document should provide an overview of how Chunkyard is built.
   - **DocumentReference:** Contains no additional meta data
 - **Snapshot:** A set of BlobReferences. This can be seen as a snapshot of the
   file system at a given point in time
-- **LogReference:** A reference to a DocumentReference
+- **SnapshotReference:** A reference to a DocumentReference which contains a
+  Snapshot
 
 ## Main Components
 
@@ -37,11 +38,12 @@ These classes contain the most important logic:
   list of BlobReferences
 - Bundle all BlobReferences into a Snapshot and store this Snapshot as a
   document (which creates a DocumentReference)
-- Store a LogReference which points to the DocumentReference of the created snapshot
+- Store a SnapshotReference which points to the DocumentReference of the created
+  snapshot
 
 ## Basic Restore Workflow
 
-- Read a LogReference
-- Retrieve a Snapshot using the DocumentReference found in the LogReference
+- Read a SnapshotReference
+- Retrieve a Snapshot using the DocumentReference found in the SnapshotReference
 - Retrieve blobs using the BlobReferences of the given Snapshot
-- Decrypt and assembly all files using their BlobReferences
+- Decrypt and assemble all files using their BlobReferences

@@ -10,13 +10,13 @@ namespace Chunkyard.Cli
             string repository,
             string directory,
             IEnumerable<string> includePatterns,
-            int logPosition,
+            int snapshotId,
             bool overwrite)
         {
             Repository = repository;
             Directory = directory;
             IncludePatterns = includePatterns;
-            LogPosition = logPosition;
+            SnapshotId = snapshotId;
             Overwrite = overwrite;
         }
 
@@ -29,8 +29,8 @@ namespace Chunkyard.Cli
         [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
         public IEnumerable<string> IncludePatterns { get; }
 
-        [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = Commands.LatestLogPosition)]
-        public int LogPosition { get; }
+        [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = Commands.LatestSnapshotId)]
+        public int SnapshotId { get; }
 
         [Option("overwrite", Required = false, HelpText = "If files should be overwritten", Default = false)]
         public bool Overwrite { get; }

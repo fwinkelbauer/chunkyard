@@ -99,41 +99,25 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void Append_And_RetrieveFromLog_Return_Reference()
+        public static void RemoveContent_Removes_Content()
         {
             var contentStore = CreateContentStore();
 
-            var expectedLogReference = new LogReference(
-                new DocumentReference(
-                    AesGcmCrypto.GenerateNonce(),
-                    new[] { new Uri("sha256://abcdef123456") }),
-                AesGcmCrypto.GenerateSalt(),
-                AesGcmCrypto.Iterations);
-
-            var firstLogPosition = 0;
-            var secondLogPosition = 1;
-
-            contentStore.AppendToLog(
-                firstLogPosition,
-                expectedLogReference);
-
-            contentStore.AppendToLog(
-                secondLogPosition,
-                expectedLogReference);
-
-            var firstReference = contentStore.RetrieveFromLog(
-                firstLogPosition);
-
-            var secondReference = contentStore.RetrieveFromLog(
-                secondLogPosition);
+            var documentReference = contentStore.StoreDocument(
+                "some text",
+                CreateKey(),
+                AesGcmCrypto.GenerateNonce());
 
             Assert.Equal(
-                expectedLogReference,
-                firstReference);
+                documentReference.ContentUris,
+                contentStore.ListContentUris());
 
-            Assert.Equal(
-                expectedLogReference,
-                secondReference);
+            foreach (var contentUri in documentReference.ContentUris)
+            {
+                contentStore.RemoveContent(contentUri);
+            }
+
+            Assert.Empty(contentStore.ListContentUris());
         }
 
         private static ContentStore CreateContentStore(

@@ -11,6 +11,7 @@ namespace Chunkyard.Core
     /// </summary>
     public class ContentStore : IContentStore
     {
+        private readonly IRepository _repository;
         private readonly FastCdc _fastCdc;
         private readonly HashAlgorithmName _hashAlgorithmName;
 
@@ -19,12 +20,10 @@ namespace Chunkyard.Core
             FastCdc fastCdc,
             HashAlgorithmName hashAlgorithmName)
         {
-            Repository = repository.EnsureNotNull(nameof(repository));
+            _repository = repository.EnsureNotNull(nameof(repository));
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
         }
-
-        public IRepository Repository { get; }
 
         public void RetrieveBlob(
             BlobReference blobReference,
@@ -64,7 +63,7 @@ namespace Chunkyard.Core
                 foreach (var contentUri in contentReference.ContentUris)
                 {
                     var decryptedData = AesGcmCrypto.Decrypt(
-                        Repository.RetrieveValueValid(contentUri),
+                        _repository.RetrieveValueValid(contentUri),
                         key);
 
                     outputStream.Write(decryptedData);
@@ -112,7 +111,7 @@ namespace Chunkyard.Core
             contentReference.EnsureNotNull(nameof(contentReference));
 
             return contentReference.ContentUris
-                .Select(contentUri => Repository.ValueExists(contentUri))
+                .Select(contentUri => _repository.ValueExists(contentUri))
                 .Aggregate(true, (total, next) => total & next);
         }
 
@@ -121,23 +120,18 @@ namespace Chunkyard.Core
             contentReference.EnsureNotNull(nameof(contentReference));
 
             return contentReference.ContentUris
-                .Select(contentUri => Repository.ValueValid(contentUri))
+                .Select(contentUri => _repository.ValueValid(contentUri))
                 .Aggregate(true, (total, next) => total & next);
         }
 
-        public void AppendToLog(
-            int newLogPosition,
-            LogReference logReference)
+        public Uri[] ListContentUris()
         {
-            Repository.AppendToLog(
-                newLogPosition,
-                DataConvert.ToBytes(logReference));
+            return _repository.ListUris();
         }
 
-        public LogReference RetrieveFromLog(int logPosition)
+        public void RemoveContent(Uri contentUri)
         {
-            return DataConvert.ToObject<LogReference>(
-                Repository.RetrieveFromLog(logPosition));
+            _repository.RemoveValue(contentUri);
         }
 
         private Uri[] WriteChunks(
@@ -152,7 +146,7 @@ namespace Chunkyard.Core
                     chunk,
                     key);
 
-                var contentUri = Repository.StoreValue(
+                var contentUri = _repository.StoreValue(
                     _hashAlgorithmName,
                     encryptedData);
 

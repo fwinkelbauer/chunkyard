@@ -13,11 +13,13 @@ namespace Chunkyard.Core
         private readonly Dictionary<string, BlobReference> _blobReferences;
 
         public Snapshot(
+            int snapshotId,
             DateTime creationTime,
             IReadOnlyCollection<BlobReference> blobReferences)
         {
             blobReferences.EnsureNotNull(nameof(blobReferences));
 
+            SnapshotId = snapshotId;
             CreationTime = creationTime;
 
             _blobReferences = new Dictionary<string, BlobReference>();
@@ -27,6 +29,8 @@ namespace Chunkyard.Core
                 _blobReferences[blobReference.Name] = blobReference;
             }
         }
+
+        public int SnapshotId { get; }
 
         public DateTime CreationTime { get; }
 
@@ -43,13 +47,14 @@ namespace Chunkyard.Core
         public override bool Equals(object? obj)
         {
             return obj is Snapshot other
+                && SnapshotId == other.SnapshotId
                 && CreationTime == other.CreationTime
                 && BlobReferences.SequenceEqual(other.BlobReferences);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(CreationTime, BlobReferences);
+            return HashCode.Combine(SnapshotId, CreationTime, BlobReferences);
         }
 
         public static DiffSet Diff(Snapshot snapshot1, Snapshot snapshot2)

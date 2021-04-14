@@ -18,24 +18,24 @@ namespace Chunkyard.Core
         private readonly int _iterations;
         private readonly byte[] _key;
 
-        private int? _currentLogPosition;
         private Snapshot? _currentSnapshot;
 
         public SnapshotStore(
             IContentStore contentStore,
+            IRepository repository,
             IPrompt prompt)
         {
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
-            _repository = _contentStore.Repository;
+            _repository = repository.EnsureNotNull(nameof(repository));
 
             prompt.EnsureNotNull(nameof(prompt));
 
-            var logPositions = _repository.ListLogPositions();
-            _currentLogPosition = logPositions.Length == 0
+            var snapshotIds = _repository.ListLogPositions();
+            int? currentSnapshotId = snapshotIds.Length == 0
                 ? null
-                : logPositions[^1];
+                : snapshotIds[^1];
 
-            if (_currentLogPosition == null)
+            if (currentSnapshotId == null)
             {
                 _salt = AesGcmCrypto.GenerateSalt();
                 _iterations = AesGcmCrypto.Iterations;
@@ -48,23 +48,23 @@ namespace Chunkyard.Core
             }
             else
             {
-                var logReference = contentStore.RetrieveFromLog(
-                    _currentLogPosition.Value);
+                var snapshotReference = GetSnapshotReference(
+                    currentSnapshotId.Value);
 
-                _salt = logReference.Salt;
-                _iterations = logReference.Iterations;
+                _salt = snapshotReference.Salt;
+                _iterations = snapshotReference.Iterations;
                 _key = AesGcmCrypto.PasswordToKey(
                     prompt.ExistingPassword(),
                     _salt,
                     _iterations);
 
                 _currentSnapshot = contentStore.RetrieveDocument<Snapshot>(
-                    logReference.DocumentReference,
+                    snapshotReference.DocumentReference,
                     _key);
             }
         }
 
-        public int AppendSnapshot(
+        public Snapshot AppendSnapshot(
             IEnumerable<Blob> blobs,
             Fuzzy scanFuzzy,
             DateTime creationTime,
@@ -101,60 +101,55 @@ namespace Chunkyard.Core
                 })
                 .ToArray();
 
-            var snapshot = new Snapshot(
+            _currentSnapshot = new Snapshot(
+                _currentSnapshot?.SnapshotId + 1 ?? 0,
                 creationTime,
                 blobReferences);
 
-            var newLogPosition = _currentLogPosition + 1
-                ?? 0;
-
-            var logReference = new LogReference(
+            var snapshotReference = new SnapshotReference(
                 _contentStore.StoreDocument(
-                    snapshot,
+                    _currentSnapshot,
                     _key,
                     AesGcmCrypto.GenerateNonce()),
                 _salt,
                 _iterations);
 
-            _contentStore.AppendToLog(
-                newLogPosition,
-                logReference);
+            _repository.AppendToLog(
+                _currentSnapshot.SnapshotId,
+                DataConvert.ToBytes(snapshotReference));
 
-            _currentLogPosition = newLogPosition;
-            _currentSnapshot = snapshot;
-
-            return _currentLogPosition.Value;
+            return _currentSnapshot;
         }
 
         public bool CheckSnapshotExists(
-            int logPosition,
+            int snapshotId,
             Fuzzy includeFuzzy)
         {
-            return ShowSnapshot(logPosition, includeFuzzy)
+            return ShowSnapshot(snapshotId, includeFuzzy)
                 .AsParallel()
                 .Select(br => _contentStore.ContentExists(br))
                 .Aggregate(true, (total, next) => total & next);
         }
 
         public bool CheckSnapshotValid(
-            int logPosition,
+            int snapshotId,
             Fuzzy includeFuzzy)
         {
-            return ShowSnapshot(logPosition, includeFuzzy)
+            return ShowSnapshot(snapshotId, includeFuzzy)
                 .AsParallel()
                 .Select(br => _contentStore.ContentValid(br))
                 .Aggregate(true, (total, next) => total & next);
         }
 
         public void RestoreSnapshot(
-            int logPosition,
+            int snapshotId,
             Fuzzy includeFuzzy,
             Func<string, Stream> openWrite)
         {
             openWrite.EnsureNotNull(nameof(openWrite));
 
             var blobReferences = ShowSnapshot(
-                logPosition,
+                snapshotId,
                 includeFuzzy);
 
             Parallel.ForEach(
@@ -170,16 +165,16 @@ namespace Chunkyard.Core
                 });
         }
 
-        public Snapshot GetSnapshot(int logPosition)
+        public Snapshot GetSnapshot(int snapshotId)
         {
-            var resolvedLogPosition = ResolveLogPosition(logPosition);
+            var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
 
             try
             {
-                var logReference = _contentStore.RetrieveFromLog(
-                    resolvedLogPosition);
+                var snapshotReference = GetSnapshotReference(
+                    resolvedSnapshotId);
 
-                return GetSnapshot(logReference.DocumentReference);
+                return GetSnapshot(snapshotReference.DocumentReference);
             }
             catch (ChunkyardException)
             {
@@ -188,37 +183,44 @@ namespace Chunkyard.Core
             catch (Exception e)
             {
                 throw new ChunkyardException(
-                    $"Snapshot #{resolvedLogPosition} does not exist",
+                    $"Snapshot #{resolvedSnapshotId} does not exist",
                     e);
             }
         }
 
+        public Snapshot[] GetSnapshots()
+        {
+            return _repository.ListLogPositions()
+                .Select(GetSnapshot)
+                .ToArray();
+        }
+
         public BlobReference[] ShowSnapshot(
-            int logPosition,
+            int snapshotId,
             Fuzzy includeFuzzy)
         {
-            return GetSnapshot(logPosition).BlobReferences
+            return GetSnapshot(snapshotId).BlobReferences
                 .Where(c => includeFuzzy.IsMatch(c.Name))
                 .ToArray();
         }
 
         public void GarbageCollect()
         {
-            var allContentUris = _repository.ListUris();
+            var allContentUris = _contentStore.ListContentUris();
             var usedUris = ListUris();
             var unusedUris = allContentUris.Except(usedUris).ToArray();
 
             foreach (var contentUri in unusedUris)
             {
-                _repository.RemoveValue(contentUri);
+                _contentStore.RemoveContent(contentUri);
             }
         }
 
         private Uri[] ListUris()
         {
-            IEnumerable<Uri> ListUris(int logPosition)
+            IEnumerable<Uri> ListUris(int snapshotId)
             {
-                var documentReference = _contentStore.RetrieveFromLog(logPosition)
+                var documentReference = GetSnapshotReference(snapshotId)
                     .DocumentReference;
 
                 foreach (var contentUri in documentReference.ContentUris)
@@ -243,9 +245,9 @@ namespace Chunkyard.Core
                 .ToArray();
         }
 
-        private int ResolveLogPosition(int logPosition)
+        private int ResolveSnapshotId(int snapshotId)
         {
-            if (!_currentLogPosition.HasValue)
+            if (_currentSnapshot == null)
             {
                 throw new ChunkyardException(
                     "Cannot operate on an empty repository");
@@ -255,9 +257,9 @@ namespace Chunkyard.Core
             //  1: the second element
             // -1: the last element
             // -2: the second-last element
-            return logPosition >= 0
-                ? logPosition
-                : _currentLogPosition.Value + logPosition + 1;
+            return snapshotId >= 0
+                ? snapshotId
+                : _currentSnapshot.SnapshotId + snapshotId + 1;
         }
 
         private Snapshot GetSnapshot(DocumentReference documentReference)
@@ -274,6 +276,12 @@ namespace Chunkyard.Core
                     "Could not retrieve snapshot",
                     e);
             }
+        }
+
+        private SnapshotReference GetSnapshotReference(int snapshotId)
+        {
+            return DataConvert.ToObject<SnapshotReference>(
+                _repository.RetrieveFromLog(snapshotId));
         }
     }
 }

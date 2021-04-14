@@ -12,7 +12,7 @@ namespace Chunkyard.Cli
     /// </summary>
     internal static class Commands
     {
-        public const int LatestLogPosition = -1;
+        public const int LatestSnapshotId = -1;
 
         public static void PreviewFiles(PreviewOptions o)
         {
@@ -48,7 +48,7 @@ namespace Chunkyard.Cli
                 o.Repository,
                 ensureRepository: false);
 
-            var logPosition = snapshotStore.AppendSnapshot(
+            snapshotStore.AppendSnapshot(
                 blobs,
                 new Fuzzy(o.ScanPatterns, false),
                 DateTime.Now,
@@ -63,10 +63,10 @@ namespace Chunkyard.Cli
 
             var ok = o.Shallow
                 ? snapshotStore.CheckSnapshotExists(
-                    o.LogPosition,
+                    o.SnapshotId,
                     fuzzy)
                 : snapshotStore.CheckSnapshotValid(
-                    o.LogPosition,
+                    o.SnapshotId,
                     fuzzy);
 
             if (ok)
@@ -87,7 +87,7 @@ namespace Chunkyard.Cli
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
             var blobReferences = snapshotStore.ShowSnapshot(
-                o.LogPosition,
+                o.SnapshotId,
                 new Fuzzy(o.IncludePatterns, true));
 
             foreach (var blobReference in blobReferences)
@@ -114,23 +114,22 @@ namespace Chunkyard.Cli
             }
 
             snapshotStore.RestoreSnapshot(
-                o.LogPosition,
+                o.SnapshotId,
                 new Fuzzy(o.IncludePatterns, true),
                 OpenWrite);
         }
 
         public static void ListSnapshots(ListOptions o)
         {
-            var repository = CreateRepository(o.Repository);
-            var snapshotStore = CreateSnapshotStore(repository);
+            var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            foreach (var logPosition in repository.ListLogPositions())
+            foreach (var snapshot in snapshotStore.GetSnapshots())
             {
-                var snapshot = snapshotStore.GetSnapshot(logPosition);
                 var isoDate = snapshot.CreationTime.ToString(
                     "yyyy-MM-dd HH:mm:ss");
 
-                Console.WriteLine($"Snapshot #{logPosition}: {isoDate}");
+                Console.WriteLine(
+                    $"Snapshot #{snapshot.SnapshotId}: {isoDate}");
             }
         }
 
@@ -139,8 +138,8 @@ namespace Chunkyard.Cli
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
             var diff = Snapshot.Diff(
-                snapshotStore.GetSnapshot(o.FirstLogPosition),
-                snapshotStore.GetSnapshot(o.SecondLogPosition));
+                snapshotStore.GetSnapshot(o.FirstSnapshotId),
+                snapshotStore.GetSnapshot(o.SecondSnapshotId));
 
             foreach (var added in diff.Added)
             {
@@ -161,7 +160,7 @@ namespace Chunkyard.Cli
         public static void RemoveSnapshot(RemoveOptions o)
         {
             CreateRepository(o.Repository)
-                .RemoveFromLog(o.LogPosition);
+                .RemoveFromLog(o.SnapshotId);
         }
 
         public static void KeepSnapshots(KeepOptions o)
@@ -190,18 +189,15 @@ namespace Chunkyard.Cli
             string repositoryPath,
             bool ensureRepository = true)
         {
-            return CreateSnapshotStore(
-                CreateRepository(repositoryPath, ensureRepository));
-        }
+            var repository = CreateRepository(repositoryPath, ensureRepository);
 
-        private static SnapshotStore CreateSnapshotStore(IRepository repository)
-        {
             return new SnapshotStore(
                 new PrintingContentStore(
                     new ContentStore(
                         repository,
                         new FastCdc(),
                         HashAlgorithmName.SHA256)),
+                repository,
                 new EnvironmentPrompt(
                     new ConsolePrompt()));
         }
@@ -231,8 +227,6 @@ namespace Chunkyard.Cli
             {
                 _store = store;
             }
-
-            public IRepository Repository => _store.Repository;
 
             public void RetrieveBlob(
                 BlobReference blobReference,
@@ -302,18 +296,14 @@ namespace Chunkyard.Cli
                 return valid;
             }
 
-            public void AppendToLog(
-                int newLogPosition,
-                LogReference logReference)
+            public Uri[] ListContentUris()
             {
-                _store.AppendToLog(
-                    newLogPosition,
-                    logReference);
+                return _store.ListContentUris();
             }
 
-            public LogReference RetrieveFromLog(int logPosition)
+            public void RemoveContent(Uri contentUri)
             {
-                return _store.RetrieveFromLog(logPosition);
+                _store.RemoveContent(contentUri);
             }
         }
 

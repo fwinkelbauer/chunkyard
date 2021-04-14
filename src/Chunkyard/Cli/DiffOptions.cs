@@ -7,21 +7,21 @@ namespace Chunkyard.Cli
     {
         public DiffOptions(
             string repository,
-            int firstLogPosition,
-            int secondLogPosition)
+            int firstSnapshotId,
+            int secondSnapshotId)
         {
             Repository = repository;
-            FirstLogPosition = firstLogPosition;
-            SecondLogPosition = secondLogPosition;
+            FirstSnapshotId = firstSnapshotId;
+            SecondSnapshotId = secondSnapshotId;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
         public string Repository { get; }
 
-        [Option('f', "first", Required = false, HelpText = "The first snapshot ID", Default = Commands.LatestLogPosition - 1)]
-        public int FirstLogPosition { get; }
+        [Option('f', "first", Required = false, HelpText = "The first snapshot ID", Default = Commands.LatestSnapshotId - 1)]
+        public int FirstSnapshotId { get; }
 
-        [Option('s', "second", Required = false, HelpText = "The second snapshot ID", Default = Commands.LatestLogPosition)]
-        public int SecondLogPosition { get; }
+        [Option('s', "second", Required = false, HelpText = "The second snapshot ID", Default = Commands.LatestSnapshotId)]
+        public int SecondSnapshotId { get; }
     }
 }

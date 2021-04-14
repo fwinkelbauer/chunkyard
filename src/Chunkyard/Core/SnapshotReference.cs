@@ -4,13 +4,12 @@ using System.Linq;
 namespace Chunkyard.Core
 {
     /// <summary>
-    /// The highest level reference which describes how to retrieve a set of
-    /// data stored in a <see cref="ContentStore"/>. This reference can be used
-    /// to recreate a key from a password.
+    /// A reference which can be used to retrieve a <see cref="Snapshot"/> from
+    /// a <see cref="ContentStore"/> based on a password based encryption key.
     /// </summary>
-    public class LogReference
+    public class SnapshotReference
     {
-        public LogReference(
+        public SnapshotReference(
             DocumentReference documentReference,
             byte[] salt,
             int iterations)
@@ -28,7 +27,7 @@ namespace Chunkyard.Core
 
         public override bool Equals(object? obj)
         {
-            return obj is LogReference other
+            return obj is SnapshotReference other
                 && DocumentReference.Equals(other.DocumentReference)
                 && Salt.SequenceEqual(other.Salt)
                 && Iterations == other.Iterations;
