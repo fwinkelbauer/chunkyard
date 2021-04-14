@@ -29,7 +29,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void RetrieValueValid_Retrieves_Valid_Value()
+        public static void RetrieveValueValid_Retrieves_Valid_Value()
         {
             var repository = CreateRepository();
             var expectedValue = new byte[] { 0xFF };
@@ -42,7 +42,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void RetrieValueValid_Throws_If_Value_Invalid()
+        public static void RetrieveValueValid_Throws_If_Value_Invalid()
         {
             var repository = CreateRepository();
             var contentUri = new Uri("sha256://badbadbad");
