@@ -88,7 +88,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void KeepLastValues_Keeps_Last()
+        public static void KeepLatestValues_Keeps_Latest()
         {
             var repository = CreateIntRepository();
             var value = new byte[] { 0xFF };
@@ -98,7 +98,7 @@ namespace Chunkyard.Tests.Core
             repository.StoreValue(2, value);
             repository.StoreValue(3, value);
 
-            repository.KeepLastValues(2);
+            repository.KeepLatestValues(2);
 
             Assert.Equal(
                 new[] { 2, 3 },
@@ -106,7 +106,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void KeepLastValues_Does_Nothing_If_It_Equals_Current_Size()
+        public static void KeepLatestValues_Does_Nothing_If_It_Equals_Current_Size()
         {
             var repository = CreateIntRepository();
             var value = new byte[] { 0xFF };
@@ -114,7 +114,7 @@ namespace Chunkyard.Tests.Core
             repository.StoreValue(0, value);
             repository.StoreValue(1, value);
 
-            repository.KeepLastValues(2);
+            repository.KeepLatestValues(2);
 
             Assert.Equal(
                 new[] { 0, 1 },
@@ -122,7 +122,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void KeepLastValues_Does_Nothing_If_Greater_Than_Current_Size()
+        public static void KeepLatestValues_Does_Nothing_If_Greater_Than_Current_Size()
         {
             var repository = CreateIntRepository();
             var value = new byte[] { 0xFF };
@@ -130,7 +130,7 @@ namespace Chunkyard.Tests.Core
             repository.StoreValue(0, value);
             repository.StoreValue(1, value);
 
-            repository.KeepLastValues(3);
+            repository.KeepLatestValues(3);
 
             Assert.Equal(
                 new[] { 0, 1 },
@@ -138,7 +138,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void KeepLastValues_Can_Empty_Log()
+        public static void KeepLatestValues_Can_Empty_Log()
         {
             var repository = CreateIntRepository();
             var value = new byte[] { 0xFF };
@@ -146,7 +146,7 @@ namespace Chunkyard.Tests.Core
             repository.StoreValue(0, value);
             repository.StoreValue(1, value);
 
-            repository.KeepLastValues(0);
+            repository.KeepLatestValues(0);
 
             Assert.Empty(repository.ListKeys());
         }

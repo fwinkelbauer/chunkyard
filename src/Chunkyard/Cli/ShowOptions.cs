@@ -20,7 +20,7 @@ namespace Chunkyard.Cli
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
         public string Repository { get; }
 
-        [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LastSnapshotId)]
+        [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
         public int SnapshotId { get; }
 
         [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]

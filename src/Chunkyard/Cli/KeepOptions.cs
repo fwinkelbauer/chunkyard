@@ -7,16 +7,16 @@ namespace Chunkyard.Cli
     {
         public KeepOptions(
             string repository,
-            int lastCount)
+            int latestCount)
         {
             Repository = repository;
-            LastCount = lastCount;
+            LatestCount = latestCount;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
         public string Repository { get; }
 
-        [Option("last", Required = true, HelpText = "The count of the last snapshots to keep")]
-        public int LastCount { get; }
+        [Option("latest", Required = true, HelpText = "The count of the latest snapshots to keep")]
+        public int LatestCount { get; }
     }
 }

@@ -30,7 +30,7 @@ namespace Chunkyard.Cli
         [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
         public IEnumerable<string> IncludePatterns { get; }
 
-        [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LastSnapshotId)]
+        [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
         public int SnapshotId { get; }
 
         [Option("overwrite", Required = false, HelpText = "If files should be overwritten", Default = false)]

@@ -58,7 +58,7 @@ namespace Chunkyard.Core
                 repository.RetrieveValue(contentUri));
         }
 
-        public static void KeepLastValues(
+        public static void KeepLatestValues(
             this IRepository<int> repository,
             int count)
         {

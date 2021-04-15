@@ -97,8 +97,8 @@ export CHUNKYARD_PASSWORD="my secret password"
 # Create backup (and also run a shallow check)
 chunkyard create -r "$repo" -f ${directories[*]}
 
-# Keep the last four backups
-chunkyard keep -r "$repo" --last 4
+# Keep the latest four backups
+chunkyard keep -r "$repo" --latest 4
 chunkyard gc -r "$repo"
 ```
 

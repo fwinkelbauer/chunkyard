@@ -164,7 +164,7 @@ namespace Chunkyard.Cli
         public static void KeepSnapshots(KeepOptions o)
         {
             CreateIntRepository(o.Repository)
-                .KeepLastValues(o.LastCount);
+                .KeepLatestValues(o.LatestCount);
         }
 
         public static void GarbageCollect(GarbageCollectOptions o)

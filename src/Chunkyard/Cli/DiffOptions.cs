@@ -19,10 +19,10 @@ namespace Chunkyard.Cli
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
         public string Repository { get; }
 
-        [Option('f', "first", Required = false, HelpText = "The first snapshot ID", Default = SnapshotStore.LastSnapshotId - 1)]
+        [Option('f', "first", Required = false, HelpText = "The first snapshot ID", Default = SnapshotStore.LatestSnapshotId - 1)]
         public int FirstSnapshotId { get; }
 
-        [Option('s', "second", Required = false, HelpText = "The second snapshot ID", Default = SnapshotStore.LastSnapshotId)]
+        [Option('s', "second", Required = false, HelpText = "The second snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
         public int SecondSnapshotId { get; }
     }
 }
