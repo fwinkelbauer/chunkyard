@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 ### Changed
 
 - The `copy` command to no longer need a password prompt
-- The storage format by adding snapshot IDs
+- The storage format by adding snapshot IDs and renaming directories
 
 ## 8.1.0 - 2021-04-04
 
