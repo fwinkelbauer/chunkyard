@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 9.0.0 - 2021-04-15
+
 ### Added
 
 - The `diff` command to outline changes between two snapshots
