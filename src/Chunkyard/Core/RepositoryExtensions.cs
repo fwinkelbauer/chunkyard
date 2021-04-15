@@ -10,7 +10,7 @@ namespace Chunkyard.Core
     public static class RepositoryExtensions
     {
         public static Uri StoreValue(
-            this IRepository repository,
+            this IRepository<Uri> repository,
             HashAlgorithmName hashAlgorithmName,
             byte[] value)
         {
@@ -26,7 +26,7 @@ namespace Chunkyard.Core
         }
 
         public static byte[] RetrieveValueValid(
-            this IRepository repository,
+            this IRepository<Uri> repository,
             Uri contentUri)
         {
             repository.EnsureNotNull(nameof(repository));
@@ -42,7 +42,7 @@ namespace Chunkyard.Core
         }
 
         public static bool ValueValid(
-            this IRepository repository,
+            this IRepository<Uri> repository,
             Uri contentUri)
         {
             repository.EnsureNotNull(nameof(repository));
@@ -58,79 +58,41 @@ namespace Chunkyard.Core
                 repository.RetrieveValue(contentUri));
         }
 
-        public static void KeepLatestLogPositions(
-            this IRepository repository,
+        public static void KeepLastValues(
+            this IRepository<int> repository,
             int count)
         {
             repository.EnsureNotNull(nameof(repository));
 
-            var logPositions = repository.ListLogPositions();
-            var logPositionsToKeep = logPositions.TakeLast(count);
+            var keys = repository.ListKeys();
 
-            var logPositionsToDelete = logPositions
-                .Except(logPositionsToKeep);
+            Array.Sort(keys);
 
-            foreach (var logPosition in logPositionsToDelete)
+            var keysToKeep = keys.TakeLast(count);
+            var keysToDelete = keys.Except(keysToKeep);
+
+            foreach (var key in keysToDelete)
             {
-                repository.RemoveFromLog(logPosition);
+                repository.RemoveValue(key);
             }
         }
 
-        public static void Copy(
-            this IRepository repository,
-            IRepository otherRepository)
+        public static void Copy<T>(
+            this IRepository<T> repository,
+            IRepository<T> otherRepository)
         {
             repository.EnsureNotNull(nameof(repository));
             otherRepository.EnsureNotNull(nameof(otherRepository));
 
-            var thisLogs = repository.ListLogPositions();
-            var otherLogs = otherRepository.ListLogPositions();
-            var intersection = thisLogs.Intersect(otherLogs)
+            var keysToCopy = repository.ListKeys()
+                .Except(otherRepository.ListKeys())
                 .ToArray();
 
-            if (intersection.Length == 0
-                && otherLogs.Length > 0)
-            {
-                throw new ChunkyardException(
-                    "Cannot operate on repositories without overlapping log positions");
-            }
-
-            foreach (var logPosition in intersection)
-            {
-                var bytes = repository.RetrieveFromLog(logPosition);
-                var otherBytes = otherRepository.RetrieveFromLog(logPosition);
-
-                if (!bytes.SequenceEqual(otherBytes))
-                {
-                    throw new ChunkyardException(
-                        $"Repositories differ at position #{logPosition}");
-                }
-            }
-
-            var otherMax = otherLogs.Length == 0
-                ? -1
-                : otherLogs.Max();
-
-            var logPositionsToCopy = thisLogs
-                .Where(l => l > otherMax)
-                .ToArray();
-
-            var urisToCopy = repository.ListUris()
-                .Except(otherRepository.ListUris())
-                .ToArray();
-
-            foreach (var contentUri in urisToCopy)
+            foreach (var key in keysToCopy)
             {
                 otherRepository.StoreValue(
-                    contentUri,
-                    repository.RetrieveValue(contentUri));
-            }
-
-            foreach (var logPosition in logPositionsToCopy)
-            {
-                otherRepository.AppendToLog(
-                    logPosition,
-                    repository.RetrieveFromLog(logPosition));
+                    key,
+                    repository.RetrieveValue(key));
             }
         }
     }

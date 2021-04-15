@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 namespace Chunkyard.Core
 {
     /// <summary>
-    /// A class which uses <see cref="IContentStore"/> and <see
-    /// cref="IRepository"/> to store snapshots of a set of files.
+    /// A class which uses <see cref="IContentStore"/> and
+    /// <see cref="IRepository{int}"/> to store snapshots of a set of files.
     /// </summary>
     public class SnapshotStore
     {
-        public const int LatestSnapshotId = -1;
+        public const int LastSnapshotId = -1;
 
         private readonly IContentStore _contentStore;
-        private readonly IRepository _repository;
+        private readonly IRepository<int> _repository;
         private readonly byte[] _salt;
         private readonly int _iterations;
         private readonly byte[] _key;
@@ -24,7 +24,7 @@ namespace Chunkyard.Core
 
         public SnapshotStore(
             IContentStore contentStore,
-            IRepository repository,
+            IRepository<int> repository,
             IPrompt prompt)
         {
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
@@ -32,7 +32,10 @@ namespace Chunkyard.Core
 
             prompt.EnsureNotNull(nameof(prompt));
 
-            var snapshotIds = _repository.ListLogPositions();
+            var snapshotIds = _repository.ListKeys();
+
+            Array.Sort(snapshotIds);
+
             int? currentSnapshotId = snapshotIds.Length == 0
                 ? null
                 : snapshotIds[^1];
@@ -116,7 +119,7 @@ namespace Chunkyard.Core
                 _salt,
                 _iterations);
 
-            _repository.AppendToLog(
+            _repository.StoreValue(
                 _currentSnapshot.SnapshotId,
                 DataConvert.ToBytes(snapshotReference));
 
@@ -192,7 +195,11 @@ namespace Chunkyard.Core
 
         public Snapshot[] GetSnapshots()
         {
-            return _repository.ListLogPositions()
+            var snapshotIds = _repository.ListKeys();
+
+            Array.Sort(snapshotIds);
+
+            return snapshotIds
                 .Select(GetSnapshot)
                 .ToArray();
         }
@@ -241,7 +248,7 @@ namespace Chunkyard.Core
                 }
             }
 
-            return _repository.ListLogPositions()
+            return _repository.ListKeys()
                 .SelectMany(ListUris)
                 .Distinct()
                 .ToArray();
@@ -283,7 +290,7 @@ namespace Chunkyard.Core
         private SnapshotReference GetSnapshotReference(int snapshotId)
         {
             return DataConvert.ToObject<SnapshotReference>(
-                _repository.RetrieveFromLog(snapshotId));
+                _repository.RetrieveValue(snapshotId));
         }
     }
 }

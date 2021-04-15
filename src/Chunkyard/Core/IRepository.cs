@@ -1,29 +1,19 @@
-﻿using System;
-
-namespace Chunkyard.Core
+﻿namespace Chunkyard.Core
 {
     /// <summary>
     /// Defines a basic contract to store and retrieve bytes. Stored data can be
-    /// referenced using an URI.
+    /// referenced using a key.
     /// </summary>
-    public interface IRepository
+    public interface IRepository<T>
     {
-        void StoreValue(Uri contentUri, byte[] value);
+        void StoreValue(T key, byte[] value);
 
-        byte[] RetrieveValue(Uri contentUri);
+        byte[] RetrieveValue(T key);
 
-        bool ValueExists(Uri contentUri);
+        bool ValueExists(T key);
 
-        Uri[] ListUris();
+        T[] ListKeys();
 
-        void RemoveValue(Uri contentUri);
-
-        void AppendToLog(int newLogPosition, byte[] value);
-
-        byte[] RetrieveFromLog(int logPosition);
-
-        void RemoveFromLog(int logPosition);
-
-        int[] ListLogPositions();
+        void RemoveValue(T key);
     }
 }

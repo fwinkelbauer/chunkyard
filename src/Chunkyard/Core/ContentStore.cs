@@ -7,16 +7,16 @@ namespace Chunkyard.Core
 {
     /// <summary>
     /// An implementation of <see cref="IContentStore"/> which splits and
-    /// encrypts files before storing them in an <see cref="IRepository"/>.
+    /// encrypts files before storing them in an <see cref="IRepository{Uri}"/>.
     /// </summary>
     public class ContentStore : IContentStore
     {
-        private readonly IRepository _repository;
+        private readonly IRepository<Uri> _repository;
         private readonly FastCdc _fastCdc;
         private readonly HashAlgorithmName _hashAlgorithmName;
 
         public ContentStore(
-            IRepository repository,
+            IRepository<Uri> repository,
             FastCdc fastCdc,
             HashAlgorithmName hashAlgorithmName)
         {
@@ -126,7 +126,7 @@ namespace Chunkyard.Core
 
         public Uri[] ListContentUris()
         {
-            return _repository.ListUris();
+            return _repository.ListKeys();
         }
 
         public void RemoveContent(Uri contentUri)

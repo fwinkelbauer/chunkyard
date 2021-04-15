@@ -1,99 +1,64 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Chunkyard.Core;
 
 namespace Chunkyard.Tests.Infrastructure
 {
-    internal class MemoryRepository : IRepository
+    internal class MemoryRepository<T> : IRepository<T>
+        where T : notnull
     {
         private readonly object _lock;
-        private readonly Dictionary<Uri, byte[]> _valuesByUri;
-        private readonly Dictionary<int, byte[]> _valuesByLog;
+        private readonly Dictionary<T, byte[]> _valuesPerKey;
 
         public MemoryRepository()
         {
             _lock = new object();
-            _valuesByUri = new Dictionary<Uri, byte[]>();
-            _valuesByLog = new Dictionary<int, byte[]>();
+            _valuesPerKey = new Dictionary<T, byte[]>();
         }
 
-        public void StoreValue(Uri contentUri, byte[] value)
+        public void StoreValue(T key, byte[] value)
         {
             lock (_lock)
             {
-                if (_valuesByUri.ContainsKey(contentUri))
+                if (_valuesPerKey.ContainsKey(key))
                 {
                     return;
                 }
 
-                _valuesByUri[contentUri] = value;
+                _valuesPerKey[key] = value;
             }
         }
 
-        public byte[] RetrieveValue(Uri contentUri)
+        public byte[] RetrieveValue(T key)
         {
             lock (_lock)
             {
-                return _valuesByUri[contentUri];
+                return _valuesPerKey[key];
             }
         }
 
-        public bool ValueExists(Uri contentUri)
+        public bool ValueExists(T key)
         {
             lock (_lock)
             {
-                return _valuesByUri.ContainsKey(contentUri);
+                return _valuesPerKey.ContainsKey(key);
             }
         }
 
-        public Uri[] ListUris()
+        public T[] ListKeys()
         {
             lock (_lock)
             {
-                return _valuesByUri.Keys
-                    .OrderByDescending(uri => uri.AbsoluteUri)
+                return _valuesPerKey.Keys
                     .ToArray();
             }
         }
 
-        public void RemoveValue(Uri contentUri)
+        public void RemoveValue(T key)
         {
             lock (_lock)
             {
-                _valuesByUri.Remove(contentUri);
-            }
-        }
-
-        public void AppendToLog(int newLogPosition, byte[] value)
-        {
-            lock (_lock)
-            {
-                _valuesByLog.Add(newLogPosition, value);
-            }
-        }
-
-        public byte[] RetrieveFromLog(int logPosition)
-        {
-            lock (_lock)
-            {
-                return _valuesByLog[logPosition];
-            }
-        }
-
-        public void RemoveFromLog(int logPosition)
-        {
-            lock (_lock)
-            {
-                _valuesByLog.Remove(logPosition);
-            }
-        }
-
-        public int[] ListLogPositions()
-        {
-            lock (_lock)
-            {
-                return _valuesByLog.Keys.ToArray();
+                _valuesPerKey.Remove(key);
             }
         }
     }

@@ -157,14 +157,14 @@ namespace Chunkyard.Cli
 
         public static void RemoveSnapshot(RemoveOptions o)
         {
-            CreateRepository(o.Repository)
-                .RemoveFromLog(o.SnapshotId);
+            CreateIntRepository(o.Repository)
+                .RemoveValue(o.SnapshotId);
         }
 
         public static void KeepSnapshots(KeepOptions o)
         {
-            CreateRepository(o.Repository)
-                .KeepLatestLogPositions(o.LatestCount);
+            CreateIntRepository(o.Repository)
+                .KeepLastValues(o.LastCount);
         }
 
         public static void GarbageCollect(GarbageCollectOptions o)
@@ -175,46 +175,52 @@ namespace Chunkyard.Cli
 
         public static void Copy(CopyOptions o)
         {
-            var repository = CreateRepository(o.SourceRepository);
-            var otherRepository = CreateRepository(
-                o.DestinationRepository,
-                ensureRepository: false);
+            CreateUriRepository(o.SourceRepository)
+                .Copy(CreateUriRepository(o.DestinationRepository));
 
-            repository.Copy(otherRepository);
+            CreateIntRepository(o.SourceRepository)
+                .Copy(CreateIntRepository(
+                    o.DestinationRepository,
+                    ensureRepository: false));
         }
 
         private static SnapshotStore CreateSnapshotStore(
             string repositoryPath,
             bool ensureRepository = true)
         {
-            var repository = CreateRepository(repositoryPath, ensureRepository);
-
             return new SnapshotStore(
                 new PrintingContentStore(
                     new ContentStore(
-                        repository,
+                        CreateUriRepository(repositoryPath),
                         new FastCdc(),
                         HashAlgorithmName.SHA256)),
-                repository,
+                CreateIntRepository(repositoryPath, ensureRepository),
                 new EnvironmentPrompt(
                     new ConsolePrompt()));
         }
 
-        private static IRepository CreateRepository(
+        private static IRepository<int> CreateIntRepository(
             string repositoryPath,
             bool ensureRepository = true)
         {
             var repository = new PrintingRepository(
-                new FileRepository(repositoryPath));
+                FileRepository<int>.CreateIntRepository(repositoryPath));
 
             if (ensureRepository
-                && !repository.ListLogPositions().Any())
+                && !repository.ListKeys().Any())
             {
                 throw new ChunkyardException(
                     "Cannot perform command on an empty repository");
             }
 
             return repository;
+        }
+
+        private static IRepository<Uri> CreateUriRepository(
+            string repositoryPath)
+        {
+            return FileRepository<int>.CreateUriRepository(
+                repositoryPath);
         }
 
         private class PrintingContentStore : IContentStore
@@ -302,67 +308,47 @@ namespace Chunkyard.Cli
             public void RemoveContent(Uri contentUri)
             {
                 _store.RemoveContent(contentUri);
+
+                Console.WriteLine($"Removed content: {contentUri}");
             }
         }
 
-        private class PrintingRepository : IRepository
+        private class PrintingRepository : IRepository<int>
         {
-            private readonly IRepository _repository;
+            private readonly IRepository<int> _repository;
 
-            public PrintingRepository(IRepository repository)
+            public PrintingRepository(IRepository<int> repository)
             {
                 _repository = repository;
             }
 
-            public void StoreValue(Uri contentUri, byte[] value)
+            public void StoreValue(int key, byte[] value)
             {
-                _repository.StoreValue(contentUri, value);
+                _repository.StoreValue(key, value);
+
+                Console.WriteLine($"Created snapshot: #{key}");
             }
 
-            public byte[] RetrieveValue(Uri contentUri)
+            public byte[] RetrieveValue(int key)
             {
-                return _repository.RetrieveValue(contentUri);
+                return _repository.RetrieveValue(key);
             }
 
-            public bool ValueExists(Uri contentUri)
+            public bool ValueExists(int key)
             {
-                return _repository.ValueExists(contentUri);
+                return _repository.ValueExists(key);
             }
 
-            public Uri[] ListUris()
+            public int[] ListKeys()
             {
-                return _repository.ListUris();
+                return _repository.ListKeys();
             }
 
-            public void RemoveValue(Uri contentUri)
+            public void RemoveValue(int key)
             {
-                _repository.RemoveValue(contentUri);
+                _repository.RemoveValue(key);
 
-                Console.WriteLine($"Removed content: {contentUri}");
-            }
-
-            public void AppendToLog(int newLogPosition, byte[] value)
-            {
-                _repository.AppendToLog(newLogPosition, value);
-
-                Console.WriteLine($"Created snapshot: #{newLogPosition}");
-            }
-
-            public byte[] RetrieveFromLog(int logPosition)
-            {
-                return _repository.RetrieveFromLog(logPosition);
-            }
-
-            public void RemoveFromLog(int logPosition)
-            {
-                _repository.RemoveFromLog(logPosition);
-
-                Console.WriteLine($"Removed snapshot: #{logPosition}");
-            }
-
-            public int[] ListLogPositions()
-            {
-                return _repository.ListLogPositions();
+                Console.WriteLine($"Removed snapshot: #{key}");
             }
         }
     }

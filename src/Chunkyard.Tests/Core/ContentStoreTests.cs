@@ -67,15 +67,15 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ContentExists_Detects_Missing_Content()
         {
-            var repository = new MemoryRepository();
-            var contentStore = CreateContentStore(repository);
+            var uriRepository = CreateUriRepository();
+            var contentStore = CreateContentStore(uriRepository);
 
             var documentReference = contentStore.StoreDocument(
                 "some text",
                 CreateKey(),
                 AesGcmCrypto.GenerateNonce());
 
-            RemoveValues(repository, repository.ListUris());
+            RemoveValues(uriRepository, uriRepository.ListKeys());
 
             Assert.False(contentStore.ContentExists(documentReference));
             Assert.False(contentStore.ContentValid(documentReference));
@@ -84,15 +84,15 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ContentValid_Detects_Corrupted_Content()
         {
-            var repository = new MemoryRepository();
-            var contentStore = CreateContentStore(repository);
+            var uriRrepository = CreateUriRepository();
+            var contentStore = CreateContentStore(uriRrepository);
 
             var documentReference = contentStore.StoreDocument(
                 "some text",
                 CreateKey(),
                 AesGcmCrypto.GenerateNonce());
 
-            CorruptValues(repository, repository.ListUris());
+            CorruptValues(uriRrepository, uriRrepository.ListKeys());
 
             Assert.True(contentStore.ContentExists(documentReference));
             Assert.False(contentStore.ContentValid(documentReference));
@@ -121,12 +121,17 @@ namespace Chunkyard.Tests.Core
         }
 
         private static ContentStore CreateContentStore(
-            IRepository? repository = null)
+            IRepository<Uri>? uriRepository = null)
         {
             return new ContentStore(
-                repository ?? new MemoryRepository(),
+                uriRepository ?? CreateUriRepository(),
                 new FastCdc(),
                 HashAlgorithmName.SHA256);
+        }
+
+        private static IRepository<Uri> CreateUriRepository()
+        {
+            return new MemoryRepository<Uri>();
         }
 
         private static byte[] CreateKey()
@@ -138,7 +143,7 @@ namespace Chunkyard.Tests.Core
         }
 
         private static void CorruptValues(
-            IRepository repository,
+            IRepository<Uri> repository,
             IEnumerable<Uri> contentUris)
         {
             foreach (var contentUri in contentUris)
@@ -151,7 +156,7 @@ namespace Chunkyard.Tests.Core
         }
 
         private static void RemoveValues(
-            IRepository repository,
+            IRepository<Uri> repository,
             IEnumerable<Uri> contentUris)
         {
             foreach (var contentUri in contentUris)

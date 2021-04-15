@@ -7,12 +7,9 @@ This document should provide an overview of how Chunkyard is built.
 - **Content:** A piece of data
   - **Blob:** Binary data (e.g. the content of a file)
   - **Document:** A serialized C# object
-- **Repository:** The place where Chunkyard persists data. A repository contains
-  two storage systems:
-  - A content defined storage to store random content
-  - A log storage to store ordered documents
+- **Repository:** A key/value store which Chunkyard uses to persists data
 - **ContentReference:** A reference which can be used to retrieve content from a
-  Chunkyard repository. This can be compared to the key in a key/value store
+  ContentStore
   - **BlobReference:** Contains additional meta data such as a file name
   - **DocumentReference:** Contains no additional meta data
 - **Snapshot:** A set of BlobReferences. This can be seen as a snapshot of the
@@ -24,18 +21,19 @@ This document should provide an overview of how Chunkyard is built.
 
 These classes contain the most important logic:
 
+- **IRepository.cs:** Provides a key/value store
 - **Commands.cs:** Defines all verbs of the command line interface
 - **SnapshotStore.cs:** Provides a set of operations to work with snapshots
   (e.g. create new snapshots, validate a snapshot or restore files from a
-  snapshot)
-- **ContentStore.cs:** Encrypts and deduplicates content and stores it in a
-  Chunkyard repository
+  snapshot). Snapshots are stored in an IRepository using an int key
+- **ContentStore.cs:** Encrypts, deduplicates and stores content in an
+  IRepository using a URI key
 
 ## Basic Backup Workflow
 
 - Take a set of files
-- Split files into encrypted chunks, store them in a repository and return a
-  list of BlobReferences
+- Split files into encrypted chunks, store them as blobs and return a list of
+  BlobReferences
 - Bundle all BlobReferences into a Snapshot and store this Snapshot as a
   document (which creates a DocumentReference)
 - Store a SnapshotReference which points to the DocumentReference of the created

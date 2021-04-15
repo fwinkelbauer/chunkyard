@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Chunkyard.Core;
@@ -8,24 +7,29 @@ using Chunkyard.Core;
 namespace Chunkyard.Infrastructure
 {
     /// <summary>
-    /// An implementation of <see cref="IRepository"/> using the file system.
+    /// An implementation of <see cref="IRepository{T}"/> using the file system.
     /// </summary>
-    internal class FileRepository : IRepository
+    internal class FileRepository<T> : IRepository<T>
     {
         private readonly ConcurrentDictionary<string, object> _locks;
-        private readonly string _contentDirectory;
-        private readonly string _refLogDirectory;
+        private readonly string _directory;
+        private readonly Func<T, string> _toFile;
+        private readonly Func<string, T> _fromFile;
 
-        public FileRepository(string directory)
+        private FileRepository(
+            string directory,
+            Func<T, string> toFile,
+            Func<string, T> fromFile)
         {
             _locks = new ConcurrentDictionary<string, object>();
-            _contentDirectory = Path.Combine(directory, "content");
-            _refLogDirectory = Path.Combine(directory, "reflog");
+            _directory = directory;
+            _toFile = toFile;
+            _fromFile = fromFile;
         }
 
-        public void StoreValue(Uri contentUri, byte[] value)
+        public void StoreValue(T key, byte[] value)
         {
-            var file = ToFilePath(contentUri);
+            var file = ToFile(key);
 
             lock (_locks.GetOrAdd(file, _ => new object()))
             {
@@ -45,121 +49,82 @@ namespace Chunkyard.Infrastructure
             }
         }
 
-        public byte[] RetrieveValue(Uri contentUri)
+        public byte[] RetrieveValue(T key)
         {
             return File.ReadAllBytes(
-                ToFilePath(contentUri));
+                ToFile(key));
         }
 
-        public bool ValueExists(Uri contentUri)
+        public bool ValueExists(T key)
         {
             return File.Exists(
-                ToFilePath(contentUri));
+                ToFile(key));
         }
 
-        public Uri[] ListUris()
+        public T[] ListKeys()
         {
-            return EnumerateUris().ToArray();
-        }
-
-        public void RemoveValue(Uri contentUri)
-        {
-            File.Delete(
-                ToFilePath(contentUri));
-        }
-
-        public void AppendToLog(int newLogPosition, byte[] value)
-        {
-            var file = ToFilePath(newLogPosition);
-
-            DirectoryUtil.CreateParent(file);
-
-            using var fileStream = new FileStream(
-                file,
-                FileMode.CreateNew,
-                FileAccess.Write);
-
-            fileStream.Write(value);
-        }
-
-        public byte[] RetrieveFromLog(int logPosition)
-        {
-            return File.ReadAllBytes(
-                ToFilePath(logPosition));
-        }
-
-        public void RemoveFromLog(int logPosition)
-        {
-            File.Delete(
-                ToFilePath(logPosition));
-        }
-
-        public int[] ListLogPositions()
-        {
-            if (!Directory.Exists(_refLogDirectory))
+            if (!Directory.Exists(_directory))
             {
-                return Array.Empty<int>();
+                return Array.Empty<T>();
             }
 
             var files = Directory.GetFiles(
-                _refLogDirectory,
-                "*.json");
+                _directory,
+                "*",
+                SearchOption.AllDirectories);
 
-            var logPositions = files
-                .Select(file => Convert.ToInt32(
-                    Path.GetFileNameWithoutExtension(file)))
+            return files
+                .Select(FromFile)
                 .ToArray();
-
-            Array.Sort(logPositions);
-
-            return logPositions;
         }
 
-        private IEnumerable<Uri> EnumerateUris()
+        public void RemoveValue(T key)
         {
-            if (!Directory.Exists(_contentDirectory))
-            {
-                yield break;
-            }
+            File.Delete(
+                ToFile(key));
+        }
 
-            var hashDirectories = Directory.GetDirectories(
-                _contentDirectory);
+        private string ToFile(T key)
+        {
+            return Path.Combine(
+                _directory,
+                _toFile(key));
+        }
 
-            foreach (var hashDirectory in hashDirectories)
-            {
-                var hashAlgorithmName = Path.GetFileName(hashDirectory);
-                var contentFiles = Directory.EnumerateFiles(
-                    hashDirectory,
-                    "*",
-                    SearchOption.AllDirectories);
+        private T FromFile(string file)
+        {
+            return _fromFile(
+                Path.GetRelativePath(_directory, file));
+        }
 
-                foreach (var contentFile in contentFiles)
+        public static IRepository<Uri> CreateUriRepository(string directory)
+        {
+            return new FileRepository<Uri>(
+                Path.Combine(directory, "blobs"),
+                contentUri =>
                 {
-                    yield return Id.ToContentUri(
-                        hashAlgorithmName,
-                        Path.GetFileNameWithoutExtension(contentFile));
-                }
-            }
+                    var (algorithm, hash) = Id.DeconstructContentUri(contentUri);
+
+                    return Path.Combine(
+                        algorithm.Name!.ToLower(),
+                        hash.Substring(0, 2),
+                        hash);
+                },
+                file =>
+                {
+                    return Id.ToContentUri(
+                        DirectoryUtil.GetParent(
+                            DirectoryUtil.GetParent(file)),
+                        Path.GetFileNameWithoutExtension(file));
+                });
         }
 
-        private string ToFilePath(int logPosition)
+        public static IRepository<int> CreateIntRepository(string directory)
         {
-            return Path.Combine(
-                _refLogDirectory,
-                $"{logPosition}.json");
-        }
-
-        private string ToFilePath(Uri contentUri)
-        {
-            var (algorithm, hash) = Id.DeconstructContentUri(contentUri);
-            var directory = Path.Combine(
-                _contentDirectory,
-                algorithm.Name!.ToLower(),
-                hash.Substring(0, 2));
-
-            return Path.Combine(
-                directory,
-                hash);
+            return new FileRepository<int>(
+                Path.Combine(directory, "snapshots"),
+                number => number.ToString(),
+                file => Convert.ToInt32(file));
         }
     }
 }
