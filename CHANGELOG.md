@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The `restore` command to set the LastWriteTimeUtc and CreationTimeUtc fields
   of restored files
+- The snapshot creation time to be stored in UTC
 
 ## 9.0.0 - 2021-04-15
 

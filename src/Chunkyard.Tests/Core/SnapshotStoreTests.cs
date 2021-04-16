@@ -22,7 +22,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 CreateBlobs(expectedNames),
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             var blobReferences = snapshot.BlobReferences;
@@ -52,13 +52,13 @@ namespace Chunkyard.Tests.Core
             var snapshot1 = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             var snapshot2 = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             Assert.Equal(
@@ -74,7 +74,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 CreateBlobs(Array.Empty<string>()),
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             Assert.Equal(0, snapshot.SnapshotId);
@@ -89,13 +89,13 @@ namespace Chunkyard.Tests.Core
             snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             var snapshot = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             Assert.Equal(1, snapshot.SnapshotId);
@@ -113,7 +113,7 @@ namespace Chunkyard.Tests.Core
                 .AppendSnapshot(
                     CreateBlobs(expectedNames),
                     Fuzzy.MatchNothing,
-                    DateTime.Now,
+                    DateTime.UtcNow,
                     OpenRead).SnapshotId;
 
             var actualNames = CreateSnapshotStore(uriRepository, intRepository)
@@ -133,7 +133,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             Assert.Equal(
@@ -150,7 +150,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             Assert.True(
@@ -170,7 +170,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             RemoveValues(uriRepository, uriRepository.ListKeys());
@@ -196,7 +196,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             CorruptValues(uriRepository, uriRepository.ListKeys());
@@ -222,7 +222,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             var contentUris = snapshot.BlobReferences
@@ -247,7 +247,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             var contentUris = snapshot.BlobReferences
@@ -270,7 +270,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             using var writeStream = new MemoryStream();
@@ -303,7 +303,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             var blobReferences = snapshotStore.ShowSnapshot(
@@ -323,7 +323,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             snapshotStore.GarbageCollect();
@@ -344,7 +344,7 @@ namespace Chunkyard.Tests.Core
             var snapshot = snapshotStore.AppendSnapshot(
                 CreateBlobs(new[] { "some content" }),
                 Fuzzy.MatchNothing,
-                DateTime.Now,
+                DateTime.UtcNow,
                 OpenRead);
 
             intRepository.RemoveValue(snapshot.SnapshotId);
@@ -357,7 +357,7 @@ namespace Chunkyard.Tests.Core
         private static Blob[] CreateBlobs(IEnumerable<string> names)
         {
             return names
-                .Select(n => new Blob(n, DateTime.Now, DateTime.Now))
+                .Select(n => new Blob(n, DateTime.UtcNow, DateTime.UtcNow))
                 .ToArray();
         }
 

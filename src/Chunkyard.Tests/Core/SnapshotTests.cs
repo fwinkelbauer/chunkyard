@@ -9,7 +9,7 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void Diff_Shows_Differences_Between_Snapshots()
         {
-            var date = DateTime.Now;
+            var date = DateTime.UtcNow;
             var nonce = new byte[] { 0xFF };
 
             var snapshot1 = new Snapshot(

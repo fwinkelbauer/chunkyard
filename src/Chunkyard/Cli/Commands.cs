@@ -49,7 +49,7 @@ namespace Chunkyard.Cli
             snapshotStore.AppendSnapshot(
                 blobs,
                 new Fuzzy(o.ScanPatterns, false),
-                DateTime.Now,
+                DateTime.UtcNow,
                 blobName => File.OpenRead(
                     Path.Combine(parent, blobName)));
         }
@@ -131,8 +131,9 @@ namespace Chunkyard.Cli
 
             foreach (var snapshot in snapshotStore.GetSnapshots())
             {
-                var isoDate = snapshot.CreationTime.ToString(
-                    "yyyy-MM-dd HH:mm:ss");
+                var isoDate = snapshot.CreationTimeUtc
+                    .ToLocalTime()
+                    .ToString("yyyy-MM-dd HH:mm:ss");
 
                 Console.WriteLine(
                     $"Snapshot #{snapshot.SnapshotId}: {isoDate}");

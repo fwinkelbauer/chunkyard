@@ -169,8 +169,8 @@ namespace Chunkyard.Tests.Core
         {
             return new Blob(
                 name,
-                DateTime.Now,
-                DateTime.Now);
+                DateTime.UtcNow,
+                DateTime.UtcNow);
         }
     }
 }
