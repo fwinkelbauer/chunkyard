@@ -111,10 +111,18 @@ namespace Chunkyard.Cli
                 return new FileStream(file, mode, FileAccess.Write);
             }
 
-            snapshotStore.RestoreSnapshot(
+            var restoredBlobs = snapshotStore.RestoreSnapshot(
                 o.SnapshotId,
                 new Fuzzy(o.IncludePatterns, true),
                 OpenWrite);
+
+            foreach (var blob in restoredBlobs)
+            {
+                var path = Path.Combine(o.Directory, blob.Name);
+
+                File.SetCreationTimeUtc(path, blob.CreationTimeUtc);
+                File.SetLastWriteTimeUtc(path, blob.LastWriteTimeUtc);
+            }
         }
 
         public static void ListSnapshots(ListOptions o)

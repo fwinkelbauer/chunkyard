@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Chunkyard.Core
 {
@@ -70,7 +69,7 @@ namespace Chunkyard.Core
         }
 
         public Snapshot AppendSnapshot(
-            IEnumerable<Blob> blobs,
+            Blob[] blobs,
             Fuzzy scanFuzzy,
             DateTime creationTime,
             Func<string, Stream> openRead)
@@ -78,7 +77,6 @@ namespace Chunkyard.Core
             blobs.EnsureNotNull(nameof(blobs));
 
             var blobReferences = blobs
-                .ToArray()
                 .AsParallel()
                 .Select(blob =>
                 {
@@ -146,7 +144,7 @@ namespace Chunkyard.Core
                 .Aggregate(true, (total, next) => total & next);
         }
 
-        public void RestoreSnapshot(
+        public Blob[] RestoreSnapshot(
             int snapshotId,
             Fuzzy includeFuzzy,
             Func<string, Stream> openWrite)
@@ -157,9 +155,9 @@ namespace Chunkyard.Core
                 snapshotId,
                 includeFuzzy);
 
-            Parallel.ForEach(
-                blobReferences,
-                blobReference =>
+            return blobReferences
+                .AsParallel()
+                .Select(blobReference =>
                 {
                     using var stream = openWrite(blobReference.Name);
 
@@ -167,7 +165,13 @@ namespace Chunkyard.Core
                         blobReference,
                         _key,
                         stream);
-                });
+
+                    return new Blob(
+                        blobReference.Name,
+                        blobReference.CreationTimeUtc,
+                        blobReference.LastWriteTimeUtc);
+                })
+                .ToArray();
         }
 
         public Snapshot GetSnapshot(int snapshotId)

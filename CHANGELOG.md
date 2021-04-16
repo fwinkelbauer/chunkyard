@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The `restore` command to set the LastWriteTimeUtc and CreationTimeUtc fields
+  of restored files
+
 ## 9.0.0 - 2021-04-15
 
 ### Added

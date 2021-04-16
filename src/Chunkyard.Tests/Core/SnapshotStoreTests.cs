@@ -226,7 +226,7 @@ namespace Chunkyard.Tests.Core
                 OpenRead);
 
             var contentUris = snapshot.BlobReferences
-                .SelectMany(blobReference => blobReference.ContentUris);
+                .SelectMany(b => b.ContentUris);
 
             RemoveValues(uriRepository, contentUris);
 
@@ -251,7 +251,7 @@ namespace Chunkyard.Tests.Core
                 OpenRead);
 
             var contentUris = snapshot.BlobReferences
-                .SelectMany(blobReference => blobReference.ContentUris);
+                .SelectMany(b => b.ContentUris);
 
             CorruptValues(uriRepository, contentUris);
 
@@ -273,21 +273,22 @@ namespace Chunkyard.Tests.Core
                 DateTime.Now,
                 OpenRead);
 
-            var actualBlobName = "";
             using var writeStream = new MemoryStream();
 
             Stream OpenWrite(string blobName)
             {
-                actualBlobName = blobName;
                 return writeStream;
             }
 
-            snapshotStore.RestoreSnapshot(
+            var restoredBlobs = snapshotStore.RestoreSnapshot(
                 snapshot.SnapshotId,
                 Fuzzy.MatchAll,
                 OpenWrite);
 
-            Assert.Equal("some content", actualBlobName);
+            Assert.Equal(
+                new[] { "some content" },
+                restoredBlobs.Select(b => b.Name));
+
             Assert.Equal(
                 ToBytes("some content"),
                 writeStream.ToArray());
@@ -356,7 +357,7 @@ namespace Chunkyard.Tests.Core
         private static Blob[] CreateBlobs(IEnumerable<string> names)
         {
             return names
-                .Select(name => new Blob(name, DateTime.Now, DateTime.Now))
+                .Select(n => new Blob(n, DateTime.Now, DateTime.Now))
                 .ToArray();
         }
 
