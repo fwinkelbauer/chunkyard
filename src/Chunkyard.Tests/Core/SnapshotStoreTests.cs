@@ -29,8 +29,6 @@ namespace Chunkyard.Tests.Core
                 CreationTimeUtc,
                 OpenRead);
 
-            var blobReferences = snapshot.BlobReferences;
-
             Assert.Equal(0, snapshot.SnapshotId);
 
             Assert.Equal(
@@ -43,7 +41,7 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(
                 expectedNames,
-                blobReferences.Select(c => c.Name));
+                snapshot.BlobReferences.Select(c => c.Name));
         }
 
         [Fact]
@@ -88,6 +86,7 @@ namespace Chunkyard.Tests.Core
         public static void AppendSnapshot_Creates_Snapshot_Without_New_Data()
         {
             var snapshotStore = CreateSnapshotStore();
+
             var blobs = CreateBlobs(new[] { "some content" });
 
             snapshotStore.AppendSnapshot(
@@ -294,9 +293,7 @@ namespace Chunkyard.Tests.Core
                 new Blob("some content", CreationTimeUtc, LastWriteTimeUtc)
             };
 
-            Assert.Equal(
-                expectedBlobs,
-                actualBlobs);
+            Assert.Equal(expectedBlobs, actualBlobs);
 
             Assert.Equal(
                 ToBytes("some content"),
