@@ -12,11 +12,11 @@ namespace Chunkyard.Core
     {
         public static readonly Fuzzy MatchAll = new Fuzzy(
             Array.Empty<string>(),
-            true);
+            emptyMatches: true);
 
         public static readonly Fuzzy MatchNothing = new Fuzzy(
             Array.Empty<string>(),
-            false);
+            emptyMatches: false);
 
         private readonly Regex[] _compiledRegex;
         private readonly bool _initial;

@@ -10,8 +10,8 @@ namespace Chunkyard.Tests.Core
         public static void Empty_Pattern_Matches_Everything()
         {
             var fuzzy1 = Fuzzy.MatchAll;
-            var fuzzy2 = new Fuzzy(new[] { "" }, true);
-            var fuzzy3 = new Fuzzy(new[] { "" }, false);
+            var fuzzy2 = new Fuzzy(new[] { "" }, emptyMatches: true);
+            var fuzzy3 = new Fuzzy(new[] { "" }, emptyMatches: false);
 
             Assert.True(fuzzy1.IsMatch("some text!"));
             Assert.True(fuzzy2.IsMatch("some text!"));
@@ -21,8 +21,8 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void No_Parameter_Matches_Maybe()
         {
-            var fuzzy1 = new Fuzzy(Array.Empty<string>(), true);
-            var fuzzy2 = new Fuzzy(Array.Empty<string>(), false);
+            var fuzzy1 = new Fuzzy(Array.Empty<string>(), emptyMatches: true);
+            var fuzzy2 = new Fuzzy(Array.Empty<string>(), emptyMatches: false);
             var fuzzy3 = Fuzzy.MatchNothing;
 
             Assert.True(fuzzy1.IsMatch("some text!"));
@@ -33,7 +33,9 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void Spaces_Are_Treated_As_Wildcards()
         {
-            var fuzzy = new Fuzzy(new[] { "He ld", "HE LD" }, true);
+            var fuzzy = new Fuzzy(
+                new[] { "He ld", "HE LD" },
+                emptyMatches: true);
 
             Assert.True(fuzzy.IsMatch("Hello World!"));
             Assert.True(fuzzy.IsMatch("Held"));

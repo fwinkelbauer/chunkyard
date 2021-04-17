@@ -16,7 +16,7 @@ namespace Chunkyard.Cli
         {
             var (_, blobs) = FileFetcher.FindBlobs(
                 o.Files,
-                new Fuzzy(o.ExcludePatterns, false));
+                new Fuzzy(o.ExcludePatterns, emptyMatches: false));
 
             if (blobs.Length == 0)
             {
@@ -34,7 +34,7 @@ namespace Chunkyard.Cli
         {
             var (parent, blobs) = FileFetcher.FindBlobs(
                 o.Files,
-                new Fuzzy(o.ExcludePatterns, false));
+                new Fuzzy(o.ExcludePatterns, emptyMatches: false));
 
             if (blobs.Length == 0)
             {
@@ -48,7 +48,7 @@ namespace Chunkyard.Cli
 
             snapshotStore.AppendSnapshot(
                 blobs,
-                new Fuzzy(o.ScanPatterns, false),
+                new Fuzzy(o.ScanPatterns, emptyMatches: false),
                 DateTime.UtcNow,
                 blobName => File.OpenRead(
                     Path.Combine(parent, blobName)));
@@ -57,7 +57,7 @@ namespace Chunkyard.Cli
         public static void CheckSnapshot(CheckOptions o)
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
-            var fuzzy = new Fuzzy(o.IncludePatterns, true);
+            var fuzzy = new Fuzzy(o.IncludePatterns, emptyMatches: true);
 
             var ok = o.Shallow
                 ? snapshotStore.CheckSnapshotExists(
@@ -86,7 +86,7 @@ namespace Chunkyard.Cli
 
             var blobReferences = snapshotStore.ShowSnapshot(
                 o.SnapshotId,
-                new Fuzzy(o.IncludePatterns, true));
+                new Fuzzy(o.IncludePatterns, emptyMatches: true));
 
             foreach (var blobReference in blobReferences)
             {
@@ -113,7 +113,7 @@ namespace Chunkyard.Cli
 
             var restoredBlobs = snapshotStore.RestoreSnapshot(
                 o.SnapshotId,
-                new Fuzzy(o.IncludePatterns, true),
+                new Fuzzy(o.IncludePatterns, emptyMatches: true),
                 OpenWrite);
 
             foreach (var blob in restoredBlobs)
