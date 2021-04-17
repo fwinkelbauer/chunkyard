@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 namespace Chunkyard.Core
 {
     /// <summary>
-    /// A set of extension methods to work with <see cref="IRepository"/>.
+    /// A set of extension methods to work with <see cref="IRepository{T}"/>.
     /// </summary>
     public static class RepositoryExtensions
     {
