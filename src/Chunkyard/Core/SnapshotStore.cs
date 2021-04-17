@@ -71,7 +71,7 @@ namespace Chunkyard.Core
         public Snapshot AppendSnapshot(
             Blob[] blobs,
             Fuzzy scanFuzzy,
-            DateTime creationTime,
+            DateTime creationTimeUtc,
             Func<string, Stream> openRead)
         {
             blobs.EnsureNotNull(nameof(blobs));
@@ -106,7 +106,7 @@ namespace Chunkyard.Core
 
             _currentSnapshot = new Snapshot(
                 _currentSnapshot?.SnapshotId + 1 ?? 0,
-                creationTime,
+                creationTimeUtc,
                 blobReferences);
 
             var snapshotReference = new SnapshotReference(
