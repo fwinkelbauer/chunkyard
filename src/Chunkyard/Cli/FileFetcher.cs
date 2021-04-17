@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Chunkyard.Core;
+using Chunkyard.Infrastructure;
 
 namespace Chunkyard.Cli
 {
@@ -88,6 +89,10 @@ namespace Chunkyard.Cli
             if (files.Length == 0)
             {
                 return "";
+            }
+            else if (files.Length == 1)
+            {
+                return DirectoryUtil.GetParent(files[0]);
             }
 
             var parent = "";
