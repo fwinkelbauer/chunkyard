@@ -213,7 +213,7 @@ namespace Chunkyard.Cli
             bool ensureRepository = true)
         {
             var repository = new PrintingRepository(
-                FileRepository<int>.CreateIntRepository(repositoryPath));
+                FileRepository.CreateIntRepository(repositoryPath));
 
             if (ensureRepository
                 && !repository.ListKeys().Any())
@@ -228,7 +228,7 @@ namespace Chunkyard.Cli
         private static IRepository<Uri> CreateUriRepository(
             string repositoryPath)
         {
-            return FileRepository<int>.CreateUriRepository(
+            return FileRepository.CreateUriRepository(
                 repositoryPath);
         }
 

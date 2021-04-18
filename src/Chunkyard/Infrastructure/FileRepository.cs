@@ -16,7 +16,7 @@ namespace Chunkyard.Infrastructure
         private readonly Func<T, string> _toFile;
         private readonly Func<string, T> _fromFile;
 
-        private FileRepository(
+        public FileRepository(
             string directory,
             Func<T, string> toFile,
             Func<string, T> fromFile)
@@ -96,7 +96,10 @@ namespace Chunkyard.Infrastructure
             return _fromFile(
                 Path.GetRelativePath(_directory, file));
         }
+    }
 
+    public static class FileRepository
+    {
         public static IRepository<Uri> CreateUriRepository(string directory)
         {
             return new FileRepository<Uri>(
