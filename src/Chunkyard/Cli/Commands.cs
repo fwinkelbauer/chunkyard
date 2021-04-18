@@ -213,7 +213,8 @@ namespace Chunkyard.Cli
             bool ensureRepository = true)
         {
             var repository = new PrintingRepository(
-                FileRepository.CreateIntRepository(repositoryPath));
+                FileRepository.CreateIntRepository(
+                    Path.Combine(repositoryPath, "snapshots")));
 
             if (ensureRepository
                 && !repository.ListKeys().Any())
@@ -229,7 +230,7 @@ namespace Chunkyard.Cli
             string repositoryPath)
         {
             return FileRepository.CreateUriRepository(
-                repositoryPath);
+                Path.Combine(repositoryPath, "blobs"));
         }
 
         private class PrintingContentStore : IContentStore

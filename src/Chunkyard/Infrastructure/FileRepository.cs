@@ -103,7 +103,7 @@ namespace Chunkyard.Infrastructure
         public static IRepository<Uri> CreateUriRepository(string directory)
         {
             return new FileRepository<Uri>(
-                Path.Combine(directory, "blobs"),
+                directory,
                 contentUri =>
                 {
                     var (algorithm, hash) = Id.DeconstructContentUri(contentUri);
@@ -125,7 +125,7 @@ namespace Chunkyard.Infrastructure
         public static IRepository<int> CreateIntRepository(string directory)
         {
             return new FileRepository<int>(
-                Path.Combine(directory, "snapshots"),
+                directory,
                 number => number.ToString(),
                 file => Convert.ToInt32(file));
         }
