@@ -1,16 +1,36 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Chunkyard.Infrastructure;
 using Xunit;
 
 namespace Chunkyard.Tests.Infrastructure
 {
-    public static class FileRepositoryTests
+    public sealed class FileRepositoryTests : IDisposable
     {
-        [Fact]
-        public static void IntRepository_Can_Read_Write()
+        private readonly string _directory;
+
+        public FileRepositoryTests()
         {
-            var repository = FileRepository.CreateIntRepository("test-repo");
+            _directory = Path.Combine(
+                Path.GetTempPath(),
+                "chunkyard-test-repo");
+        }
+
+        public void Dispose()
+        {
+            if (Directory.Exists(_directory))
+            {
+                Directory.Delete(
+                    _directory,
+                    recursive: true);
+            }
+        }
+
+        [Fact]
+        public void IntRepository_Can_Read_Write()
+        {
+            var repository = FileRepository.CreateIntRepository(_directory);
 
             var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
@@ -21,7 +41,7 @@ namespace Chunkyard.Tests.Infrastructure
 
             Assert.Equal(
                 new[] { 0, 1 },
-                repository.ListKeys());
+                repository.ListKeys().OrderBy(i => i));
 
             Assert.True(repository.ValueExists(0));
             Assert.True(repository.ValueExists(1));
@@ -35,16 +55,12 @@ namespace Chunkyard.Tests.Infrastructure
             Assert.Empty(repository.ListKeys());
             Assert.False(repository.ValueExists(0));
             Assert.False(repository.ValueExists(1));
-
-            Directory.Delete(
-                "test-repo",
-                recursive: true);
         }
 
         [Fact]
-        public static void UriRepository_Can_Read_Write()
+        public void UriRepository_Can_Read_Write()
         {
-            var repository = FileRepository.CreateUriRepository("test-repo");
+            var repository = FileRepository.CreateUriRepository(_directory);
 
             var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
             var uri1 = new Uri("sha256://aa");
@@ -57,7 +73,7 @@ namespace Chunkyard.Tests.Infrastructure
 
             Assert.Equal(
                 new[] { uri1, uri2 },
-                repository.ListKeys());
+                repository.ListKeys().OrderBy(u => u.AbsoluteUri));
 
             Assert.True(repository.ValueExists(uri1));
             Assert.True(repository.ValueExists(uri2));
@@ -71,10 +87,6 @@ namespace Chunkyard.Tests.Infrastructure
             Assert.Empty(repository.ListKeys());
             Assert.False(repository.ValueExists(uri1));
             Assert.False(repository.ValueExists(uri2));
-
-            Directory.Delete(
-                "test-repo",
-                recursive: true);
         }
     }
 }
