@@ -92,14 +92,53 @@ directories=(
     ~/Videos
 )
 
-export CHUNKYARD_PASSWORD="my secret password"
+# Optional: Prevent password prompts
+# export CHUNKYARD_PASSWORD="my secret password"
 
-# Create backup (and also run a shallow check)
+# Create backup
 chunkyard create -r "$repo" -f ${directories[*]}
 
 # Keep the latest four backups
 chunkyard keep -r "$repo" --latest 4
 chunkyard gc -r "$repo"
+```
+
+And here is the same script written in PowerShell:
+
+``` powershell
+function exec {
+    param(
+        [Parameter(Mandatory = $true)]
+        [scriptblock]$ScriptBlock,
+        [int[]]$ValidExitCodes = @(0)
+    )
+
+    $global:LASTEXITCODE = 0
+
+    & $ScriptBlock
+
+    if (-not ($global:LASTEXITCODE -in $ValidExitCodes)) {
+        throw "Invalid exit code: $($global:LASTEXITCODE)"
+    }
+}
+
+$repo = 'D:\backup\location'
+
+$directories = @(
+    "$env:UserProfile\Music",
+    "$env:UserProfile\Pictures",
+    "$env:UserProfile\Videos"
+)
+
+# Optional: Prevent password prompts
+# $env:CHUNKYARD_PASSWORD = 'my secret password'
+
+# Create backup
+exec { chunkyard create --repository $repo --files $directories }
+
+# Keep the latest four backups
+exec { chunkyard keep --repository $repo --latest 4 }
+exec { chunkyard gc --repository $repo }
 ```
 
 [fastcdc-rs]: https://github.com/nlfiedler/fastcdc-rs
