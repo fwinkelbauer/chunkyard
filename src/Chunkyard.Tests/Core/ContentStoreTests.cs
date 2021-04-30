@@ -98,28 +98,6 @@ namespace Chunkyard.Tests.Core
             Assert.False(contentStore.ContentValid(documentReference));
         }
 
-        [Fact]
-        public static void RemoveContent_Removes_Content()
-        {
-            var contentStore = CreateContentStore();
-
-            var documentReference = contentStore.StoreDocument(
-                "some text",
-                CreateKey(),
-                AesGcmCrypto.GenerateNonce());
-
-            Assert.Equal(
-                documentReference.ContentUris,
-                contentStore.ListContentUris());
-
-            foreach (var contentUri in documentReference.ContentUris)
-            {
-                contentStore.RemoveContent(contentUri);
-            }
-
-            Assert.Empty(contentStore.ListContentUris());
-        }
-
         private static ContentStore CreateContentStore(
             IRepository<Uri>? uriRepository = null)
         {

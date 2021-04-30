@@ -6,12 +6,11 @@ using System.Security.Cryptography;
 namespace Chunkyard.Core
 {
     /// <summary>
-    /// An implementation of <see cref="IContentStore"/> which splits and
-    /// encrypts files before storing them in an <see cref="IRepository{Uri}"/>.
+    /// A store which splits and encrypts files before storing them in an <see
+    /// cref="IRepository{Uri}"/>.
     /// </summary>
-    public class ContentStore : IContentStore
+    public class ContentStore
     {
-        private readonly IRepository<Uri> _repository;
         private readonly FastCdc _fastCdc;
         private readonly HashAlgorithmName _hashAlgorithmName;
 
@@ -20,10 +19,13 @@ namespace Chunkyard.Core
             FastCdc fastCdc,
             HashAlgorithmName hashAlgorithmName)
         {
-            _repository = repository.EnsureNotNull(nameof(repository));
+            Repository = repository.EnsureNotNull(nameof(repository));
+
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
         }
+
+        public IRepository<Uri> Repository { get; }
 
         public void RetrieveBlob(
             BlobReference blobReference,
@@ -63,7 +65,7 @@ namespace Chunkyard.Core
                 foreach (var contentUri in contentReference.ContentUris)
                 {
                     var decryptedData = AesGcmCrypto.Decrypt(
-                        _repository.RetrieveValueValid(contentUri),
+                        Repository.RetrieveValueValid(contentUri),
                         key);
 
                     outputStream.Write(decryptedData);
@@ -111,7 +113,7 @@ namespace Chunkyard.Core
             contentReference.EnsureNotNull(nameof(contentReference));
 
             return contentReference.ContentUris
-                .Select(contentUri => _repository.ValueExists(contentUri))
+                .Select(contentUri => Repository.ValueExists(contentUri))
                 .Aggregate(true, (total, next) => total & next);
         }
 
@@ -120,18 +122,8 @@ namespace Chunkyard.Core
             contentReference.EnsureNotNull(nameof(contentReference));
 
             return contentReference.ContentUris
-                .Select(contentUri => _repository.ValueValid(contentUri))
+                .Select(contentUri => Repository.ValueValid(contentUri))
                 .Aggregate(true, (total, next) => total & next);
-        }
-
-        public Uri[] ListContentUris()
-        {
-            return _repository.ListKeys();
-        }
-
-        public void RemoveContent(Uri contentUri)
-        {
-            _repository.RemoveValue(contentUri);
         }
 
         private Uri[] WriteChunks(
@@ -146,7 +138,7 @@ namespace Chunkyard.Core
                     chunk,
                     key);
 
-                var contentUri = _repository.StoreValue(
+                var contentUri = Repository.StoreValue(
                     _hashAlgorithmName,
                     encryptedData);
 

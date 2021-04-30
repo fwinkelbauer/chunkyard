@@ -6,7 +6,7 @@ namespace Chunkyard.Core
 {
     /// <summary>
     /// An implementation of <see cref="IContentReference"/> to store binary
-    /// data in an <see cref="IContentStore"/>.
+    /// data in an <see cref="ContentStore"/>.
     /// </summary>
     public class BlobReference : IContentReference
     {

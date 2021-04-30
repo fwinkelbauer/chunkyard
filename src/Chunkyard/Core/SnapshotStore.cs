@@ -6,65 +6,75 @@ using System.Linq;
 namespace Chunkyard.Core
 {
     /// <summary>
-    /// A class which uses <see cref="IContentStore"/> and
+    /// A class which uses <see cref="ContentStore"/> and
     /// <see cref="IRepository{int}"/> to store snapshots of a set of files.
     /// </summary>
     public class SnapshotStore
     {
         public const int LatestSnapshotId = -1;
 
-        private readonly IContentStore _contentStore;
+        private readonly ContentStore _contentStore;
         private readonly IRepository<int> _repository;
+        private readonly IPrompt _prompt;
         private readonly byte[] _salt;
         private readonly int _iterations;
-        private readonly byte[] _key;
 
-        private Snapshot? _currentSnapshot;
+        private int? _currentSnapshotId;
+        private byte[]? _key;
 
         public SnapshotStore(
-            IContentStore contentStore,
+            ContentStore contentStore,
             IRepository<int> repository,
             IPrompt prompt)
         {
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
             _repository = repository.EnsureNotNull(nameof(repository));
-
-            prompt.EnsureNotNull(nameof(prompt));
+            _prompt = prompt.EnsureNotNull(nameof(prompt));
 
             var snapshotIds = _repository.ListKeys();
 
             Array.Sort(snapshotIds);
 
-            int? currentSnapshotId = snapshotIds.Length == 0
+            _currentSnapshotId = snapshotIds.Length == 0
                 ? null
                 : snapshotIds[^1];
 
-            if (currentSnapshotId == null)
+            _key = null;
+
+            if (_currentSnapshotId == null)
             {
                 _salt = AesGcmCrypto.GenerateSalt();
                 _iterations = AesGcmCrypto.Iterations;
-                _key = AesGcmCrypto.PasswordToKey(
-                    prompt.NewPassword(),
-                    _salt,
-                    _iterations);
-
-                _currentSnapshot = null;
             }
             else
             {
                 var snapshotReference = GetSnapshotReference(
-                    currentSnapshotId.Value);
+                    _currentSnapshotId.Value);
 
                 _salt = snapshotReference.Salt;
                 _iterations = snapshotReference.Iterations;
+            }
+        }
+
+        private byte[] Key
+        {
+            get
+            {
+                if (_key != null)
+                {
+                    return _key;
+                }
+
+                var password = _currentSnapshotId == null
+                    ? _prompt.NewPassword()
+                    : _prompt.ExistingPassword();
+
                 _key = AesGcmCrypto.PasswordToKey(
-                    prompt.ExistingPassword(),
+                    password,
                     _salt,
                     _iterations);
 
-                _currentSnapshot = contentStore.RetrieveDocument<Snapshot>(
-                    snapshotReference.DocumentReference,
-                    _key);
+                return _key;
             }
         }
 
@@ -76,11 +86,25 @@ namespace Chunkyard.Core
         {
             blobs.EnsureNotNull(nameof(blobs));
 
+            // Load Key here so that it does not happen in the parallel loop
+            _ = Key;
+
+            Snapshot? currentSnapshot = null;
+
+            if (_currentSnapshotId != null)
+            {
+                var currentSnapshotReference = GetSnapshotReference(
+                    _currentSnapshotId.Value);
+
+                currentSnapshot = GetSnapshot(
+                    currentSnapshotReference.DocumentReference);
+            }
+
             var blobReferences = blobs
                 .AsParallel()
                 .Select(blob =>
                 {
-                    var previous = _currentSnapshot?.Find(blob.Name);
+                    var previous = currentSnapshot?.Find(blob.Name);
 
                     if (!scanFuzzy.IsMatch(blob.Name)
                         && previous != null
@@ -98,30 +122,34 @@ namespace Chunkyard.Core
 
                     return _contentStore.StoreBlob(
                         blob,
-                        _key,
+                        Key,
                         nonce,
                         stream);
                 })
                 .ToArray();
 
-            _currentSnapshot = new Snapshot(
-                _currentSnapshot?.SnapshotId + 1 ?? 0,
+            _currentSnapshotId = _currentSnapshotId == null
+                ? 0
+                : _currentSnapshotId.Value + 1;
+
+            var newSnapshot = new Snapshot(
+                _currentSnapshotId.Value,
                 creationTimeUtc,
                 blobReferences);
 
-            var snapshotReference = new SnapshotReference(
+            var newSnapshotReference = new SnapshotReference(
                 _contentStore.StoreDocument(
-                    _currentSnapshot,
-                    _key,
+                    newSnapshot,
+                    Key,
                     AesGcmCrypto.GenerateNonce()),
                 _salt,
                 _iterations);
 
             _repository.StoreValue(
-                _currentSnapshot.SnapshotId,
-                DataConvert.ToBytes(snapshotReference));
+                newSnapshot.SnapshotId,
+                DataConvert.ToBytes(newSnapshotReference));
 
-            return _currentSnapshot;
+            return newSnapshot;
         }
 
         public bool CheckSnapshotExists(
@@ -151,6 +179,9 @@ namespace Chunkyard.Core
         {
             openWrite.EnsureNotNull(nameof(openWrite));
 
+            // Load Key here so that it does not happen in the parallel loop
+            _ = Key;
+
             var blobReferences = ShowSnapshot(
                 snapshotId,
                 includeFuzzy);
@@ -163,7 +194,7 @@ namespace Chunkyard.Core
 
                     _contentStore.RetrieveBlob(
                         blobReference,
-                        _key,
+                        Key,
                         stream);
 
                     return new Blob(
@@ -219,14 +250,33 @@ namespace Chunkyard.Core
 
         public void GarbageCollect()
         {
-            var allContentUris = _contentStore.ListContentUris();
+            var allContentUris = _contentStore.Repository.ListKeys();
             var usedUris = ListUris();
             var unusedUris = allContentUris.Except(usedUris).ToArray();
 
             foreach (var contentUri in unusedUris)
             {
-                _contentStore.RemoveContent(contentUri);
+                _contentStore.Repository.RemoveValue(contentUri);
             }
+        }
+
+        public void RemoveSnapshot(int snapshotId)
+        {
+            _repository.RemoveValue(
+                ResolveSnapshotId(snapshotId));
+        }
+
+        public void KeepSnapshots(int latestCount)
+        {
+            _repository.KeepLatestValues(latestCount);
+        }
+
+        public void Copy(
+            IRepository<Uri> contentRepository,
+            IRepository<int> snapshotRepository)
+        {
+            _contentStore.Repository.Copy(contentRepository);
+            _repository.Copy(snapshotRepository);
         }
 
         private Uri[] ListUris()
@@ -260,7 +310,7 @@ namespace Chunkyard.Core
 
         private int ResolveSnapshotId(int snapshotId)
         {
-            if (_currentSnapshot == null)
+            if (_currentSnapshotId == null)
             {
                 throw new ChunkyardException(
                     "Cannot operate on an empty repository");
@@ -272,7 +322,7 @@ namespace Chunkyard.Core
             // -2: the second-last element
             return snapshotId >= 0
                 ? snapshotId
-                : _currentSnapshot.SnapshotId + snapshotId + 1;
+                : _currentSnapshotId.Value + snapshotId + 1;
         }
 
         private Snapshot GetSnapshot(DocumentReference documentReference)
@@ -281,7 +331,7 @@ namespace Chunkyard.Core
             {
                 return _contentStore.RetrieveDocument<Snapshot>(
                     documentReference,
-                    _key);
+                    Key);
             }
             catch (Exception e)
             {

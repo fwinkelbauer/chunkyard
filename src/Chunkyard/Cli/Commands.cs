@@ -42,9 +42,7 @@ namespace Chunkyard.Cli
                 return;
             }
 
-            var snapshotStore = CreateSnapshotStore(
-                o.Repository,
-                ensureRepository: false);
+            var snapshotStore = CreateSnapshotStore(o.Repository);
 
             snapshotStore.AppendSnapshot(
                 blobs,
@@ -166,14 +164,16 @@ namespace Chunkyard.Cli
 
         public static void RemoveSnapshot(RemoveOptions o)
         {
-            CreateIntRepository(o.Repository)
-                .RemoveValue(o.SnapshotId);
+            var snapshotStore = CreateSnapshotStore(o.Repository);
+
+            snapshotStore.RemoveSnapshot(o.SnapshotId);
         }
 
         public static void KeepSnapshots(KeepOptions o)
         {
-            CreateIntRepository(o.Repository)
-                .KeepLatestValues(o.LatestCount);
+            var snapshotStore = CreateSnapshotStore(o.Repository);
+
+            snapshotStore.KeepSnapshots(o.LatestCount);
         }
 
         public static void GarbageCollect(GarbageCollectOptions o)
@@ -185,46 +185,31 @@ namespace Chunkyard.Cli
 
         public static void Copy(CopyOptions o)
         {
-            CreateUriRepository(o.SourceRepository).Copy(
-                CreateUriRepository(o.DestinationRepository));
+            var snapshotStore = CreateSnapshotStore(o.SourceRepository);
 
-            CreateIntRepository(o.SourceRepository).Copy(
-                CreateIntRepository(
-                    o.DestinationRepository,
-                    ensureRepository: false));
+            snapshotStore.Copy(
+                CreateUriRepository(o.DestinationRepository),
+                CreateIntRepository(o.DestinationRepository));
         }
 
         private static SnapshotStore CreateSnapshotStore(
-            string repositoryPath,
-            bool ensureRepository = true)
+            string repositoryPath)
         {
             return new SnapshotStore(
-                new PrintingContentStore(
-                    new ContentStore(
-                        CreateUriRepository(repositoryPath),
-                        new FastCdc(),
-                        HashAlgorithmName.SHA256)),
-                CreateIntRepository(repositoryPath, ensureRepository),
+                new ContentStore(
+                    CreateUriRepository(repositoryPath),
+                    new FastCdc(),
+                    HashAlgorithmName.SHA256),
+                CreateIntRepository(repositoryPath),
                 new EnvironmentPrompt(
                     new ConsolePrompt()));
         }
 
         private static IRepository<int> CreateIntRepository(
-            string repositoryPath,
-            bool ensureRepository = true)
+            string repositoryPath)
         {
-            var repository = new PrintingRepository(
-                FileRepository.CreateIntRepository(
-                    Path.Combine(repositoryPath, "snapshots")));
-
-            if (ensureRepository
-                && !repository.ListKeys().Any())
-            {
-                throw new ChunkyardException(
-                    "Cannot perform command on an empty repository");
-            }
-
-            return repository;
+            return FileRepository.CreateIntRepository(
+                Path.Combine(repositoryPath, "snapshots"));
         }
 
         private static IRepository<Uri> CreateUriRepository(
@@ -232,135 +217,6 @@ namespace Chunkyard.Cli
         {
             return FileRepository.CreateUriRepository(
                 Path.Combine(repositoryPath, "blobs"));
-        }
-
-        private class PrintingContentStore : IContentStore
-        {
-            private readonly IContentStore _store;
-
-            public PrintingContentStore(IContentStore store)
-            {
-                _store = store;
-            }
-
-            public void RetrieveBlob(
-                BlobReference blobReference,
-                byte[] key,
-                Stream outputStream)
-            {
-                _store.RetrieveBlob(blobReference, key, outputStream);
-
-                Console.WriteLine($"Restored blob: {blobReference.Name}");
-            }
-
-            public T RetrieveDocument<T>(
-                DocumentReference documentReference,
-                byte[] key)
-                where T : notnull
-            {
-                return _store.RetrieveDocument<T>(documentReference, key);
-            }
-
-            public BlobReference StoreBlob(
-                Blob blob,
-                byte[] key,
-                byte[] nonce,
-                Stream inputStream)
-            {
-                var blobReference = _store.StoreBlob(blob, key, nonce, inputStream);
-
-                Console.WriteLine($"Stored blob: {blobReference.Name}");
-
-                return blobReference;
-            }
-
-            public DocumentReference StoreDocument<T>(
-                T value,
-                byte[] key,
-                byte[] nonce)
-                where T : notnull
-            {
-                return _store.StoreDocument(value, key, nonce);
-            }
-
-            public bool ContentExists(IContentReference contentReference)
-            {
-                var exists = _store.ContentExists(contentReference);
-
-                if (contentReference is BlobReference blobReference)
-                {
-                    Console.WriteLine(exists
-                        ? $"Existing blob: {blobReference.Name}"
-                        : $"Missing blob: {blobReference.Name}");
-                }
-
-                return exists;
-            }
-
-            public bool ContentValid(IContentReference contentReference)
-            {
-                var valid = _store.ContentValid(contentReference);
-
-                if (contentReference is BlobReference blobReference)
-                {
-                    Console.WriteLine(valid
-                        ? $"Valid blob: {blobReference.Name}"
-                        : $"Invalid blob: {blobReference.Name}");
-                }
-
-                return valid;
-            }
-
-            public Uri[] ListContentUris()
-            {
-                return _store.ListContentUris();
-            }
-
-            public void RemoveContent(Uri contentUri)
-            {
-                _store.RemoveContent(contentUri);
-
-                Console.WriteLine($"Removed content: {contentUri}");
-            }
-        }
-
-        private class PrintingRepository : IRepository<int>
-        {
-            private readonly IRepository<int> _repository;
-
-            public PrintingRepository(IRepository<int> repository)
-            {
-                _repository = repository;
-            }
-
-            public void StoreValue(int key, byte[] value)
-            {
-                _repository.StoreValue(key, value);
-
-                Console.WriteLine($"Created snapshot: #{key}");
-            }
-
-            public byte[] RetrieveValue(int key)
-            {
-                return _repository.RetrieveValue(key);
-            }
-
-            public bool ValueExists(int key)
-            {
-                return _repository.ValueExists(key);
-            }
-
-            public int[] ListKeys()
-            {
-                return _repository.ListKeys();
-            }
-
-            public void RemoveValue(int key)
-            {
-                _repository.RemoveValue(key);
-
-                Console.WriteLine($"Removed snapshot: #{key}");
-            }
         }
     }
 }

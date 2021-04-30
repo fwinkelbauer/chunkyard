@@ -6,7 +6,7 @@ namespace Chunkyard.Core
 {
     /// <summary>
     /// An implementation of <see cref="IContentReference"/> to store objects in
-    /// an <see cref="IContentStore"/>.
+    /// an <see cref="ContentStore"/>.
     /// </summary>
     public class DocumentReference : IContentReference
     {
