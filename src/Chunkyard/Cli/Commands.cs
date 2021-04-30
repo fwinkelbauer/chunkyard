@@ -178,17 +178,18 @@ namespace Chunkyard.Cli
 
         public static void GarbageCollect(GarbageCollectOptions o)
         {
-            CreateSnapshotStore(o.Repository)
-                .GarbageCollect();
+            var snapshotStore = CreateSnapshotStore(o.Repository);
+
+            snapshotStore.GarbageCollect();
         }
 
         public static void Copy(CopyOptions o)
         {
-            CreateUriRepository(o.SourceRepository)
-                .Copy(CreateUriRepository(o.DestinationRepository));
+            CreateUriRepository(o.SourceRepository).Copy(
+                CreateUriRepository(o.DestinationRepository));
 
-            CreateIntRepository(o.SourceRepository)
-                .Copy(CreateIntRepository(
+            CreateIntRepository(o.SourceRepository).Copy(
+                CreateIntRepository(
                     o.DestinationRepository,
                     ensureRepository: false));
         }
