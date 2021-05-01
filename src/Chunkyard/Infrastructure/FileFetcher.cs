@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Chunkyard.Core;
-using Chunkyard.Infrastructure;
 
-namespace Chunkyard.Cli
+namespace Chunkyard.Infrastructure
 {
     /// <summary>
     /// A class to retrieve file names based on a set of directories/files and
