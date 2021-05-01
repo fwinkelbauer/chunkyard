@@ -176,7 +176,7 @@ namespace Chunkyard.Tests.Core
                 CreationTimeUtc,
                 OpenRead);
 
-            RemoveValues(uriRepository, uriRepository.ListKeys());
+            uriRepository.RemoveValues(uriRepository.ListKeys());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotExists(
@@ -202,7 +202,7 @@ namespace Chunkyard.Tests.Core
                 CreationTimeUtc,
                 OpenRead);
 
-            CorruptValues(uriRepository, uriRepository.ListKeys());
+            uriRepository.CorruptValues(uriRepository.ListKeys());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotExists(
@@ -231,7 +231,7 @@ namespace Chunkyard.Tests.Core
             var contentUris = snapshot.BlobReferences
                 .SelectMany(b => b.ContentUris);
 
-            RemoveValues(uriRepository, contentUris);
+            uriRepository.RemoveValues(contentUris);
 
             Assert.False(
                 snapshotStore.CheckSnapshotExists(snapshot.SnapshotId, fuzzy));
@@ -256,7 +256,7 @@ namespace Chunkyard.Tests.Core
             var contentUris = snapshot.BlobReferences
                 .SelectMany(b => b.ContentUris);
 
-            CorruptValues(uriRepository, contentUris);
+            uriRepository.CorruptValues(contentUris);
 
             Assert.True(
                snapshotStore.CheckSnapshotExists(snapshot.SnapshotId, fuzzy));
@@ -401,29 +401,6 @@ namespace Chunkyard.Tests.Core
         private static IRepository<int> CreateIntRepository()
         {
             return new MemoryRepository<int>();
-        }
-
-        private static void CorruptValues(
-            IRepository<Uri> repository,
-            IEnumerable<Uri> contentUris)
-        {
-            foreach (var contentUri in contentUris)
-            {
-                repository.RemoveValue(contentUri);
-                repository.StoreValue(
-                    contentUri,
-                    new byte[] { 0xFF, 0xBA, 0xDD, 0xFF });
-            }
-        }
-
-        private static void RemoveValues(
-            IRepository<Uri> repository,
-            IEnumerable<Uri> contentUris)
-        {
-            foreach (var contentUri in contentUris)
-            {
-                repository.RemoveValue(contentUri);
-            }
         }
     }
 }

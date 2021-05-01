@@ -75,7 +75,7 @@ namespace Chunkyard.Tests.Core
                 CreateKey(),
                 AesGcmCrypto.GenerateNonce());
 
-            RemoveValues(uriRepository, uriRepository.ListKeys());
+            uriRepository.RemoveValues(uriRepository.ListKeys());
 
             Assert.False(contentStore.ContentExists(documentReference));
             Assert.False(contentStore.ContentValid(documentReference));
@@ -92,7 +92,7 @@ namespace Chunkyard.Tests.Core
                 CreateKey(),
                 AesGcmCrypto.GenerateNonce());
 
-            CorruptValues(uriRrepository, uriRrepository.ListKeys());
+            uriRrepository.CorruptValues(uriRrepository.ListKeys());
 
             Assert.True(contentStore.ContentExists(documentReference));
             Assert.False(contentStore.ContentValid(documentReference));
@@ -140,29 +140,6 @@ namespace Chunkyard.Tests.Core
                 "test",
                 AesGcmCrypto.GenerateSalt(),
                 AesGcmCrypto.Iterations);
-        }
-
-        private static void CorruptValues(
-            IRepository<Uri> repository,
-            IEnumerable<Uri> contentUris)
-        {
-            foreach (var contentUri in contentUris)
-            {
-                repository.RemoveValue(contentUri);
-                repository.StoreValue(
-                    contentUri,
-                    new byte[] { 0xFF, 0xBA, 0xDD, 0xFF });
-            }
-        }
-
-        private static void RemoveValues(
-            IRepository<Uri> repository,
-            IEnumerable<Uri> contentUris)
-        {
-            foreach (var contentUri in contentUris)
-            {
-                repository.RemoveValue(contentUri);
-            }
         }
 
         private static Blob CreateBlob(string name)
