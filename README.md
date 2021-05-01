@@ -32,8 +32,8 @@ unreferenced files can be deleted using the `chunkyard gc` command.
 - Key management
 - Asymmetric encryption
 - Compression
-- File meta data preservation (e.g. creation time, flags, ...)
-- Extended features such as branching or tagging
+- Extended file system features such as OS specific flags or link
+- Extended version control features such as branching or tagging
 - Obfuscating/Hiding chunk sizes to prevent [CDC fingerprint attacks][borg]
 - Concurrent operations on a single repository using more than one Chunkyard
   process (e.g. creating a new backup while garbage collecting unused data)
