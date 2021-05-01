@@ -57,43 +57,5 @@ namespace Chunkyard.Core
                 contentUri,
                 repository.RetrieveValue(contentUri));
         }
-
-        public static void KeepLatestValues(
-            this IRepository<int> repository,
-            int count)
-        {
-            repository.EnsureNotNull(nameof(repository));
-
-            var keys = repository.ListKeys();
-
-            Array.Sort(keys);
-
-            var keysToKeep = keys.TakeLast(count);
-            var keysToDelete = keys.Except(keysToKeep);
-
-            foreach (var key in keysToDelete)
-            {
-                repository.RemoveValue(key);
-            }
-        }
-
-        public static void Copy<T>(
-            this IRepository<T> repository,
-            IRepository<T> otherRepository)
-        {
-            repository.EnsureNotNull(nameof(repository));
-            otherRepository.EnsureNotNull(nameof(otherRepository));
-
-            var keysToCopy = repository.ListKeys()
-                .Except(otherRepository.ListKeys())
-                .ToArray();
-
-            foreach (var key in keysToCopy)
-            {
-                otherRepository.StoreValue(
-                    key,
-                    repository.RetrieveValue(key));
-            }
-        }
     }
 }

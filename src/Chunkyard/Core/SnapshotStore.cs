@@ -16,6 +16,7 @@ namespace Chunkyard.Core
         private readonly ContentStore _contentStore;
         private readonly IRepository<int> _repository;
         private readonly IPrompt _prompt;
+        private readonly IProbe _probe;
         private readonly byte[] _salt;
         private readonly int _iterations;
 
@@ -25,11 +26,13 @@ namespace Chunkyard.Core
         public SnapshotStore(
             ContentStore contentStore,
             IRepository<int> repository,
-            IPrompt prompt)
+            IPrompt prompt,
+            IProbe probe)
         {
             _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
             _repository = repository.EnsureNotNull(nameof(repository));
             _prompt = prompt.EnsureNotNull(nameof(prompt));
+            _probe = probe.EnsureNotNull(nameof(probe));
 
             var snapshotIds = _repository.ListKeys();
 
@@ -120,11 +123,15 @@ namespace Chunkyard.Core
 
                     using var stream = openRead(blob.Name);
 
-                    return _contentStore.StoreBlob(
+                    var blobReference = _contentStore.StoreBlob(
                         blob,
                         Key,
                         nonce,
                         stream);
+
+                    _probe.StoredBlob(blobReference.Name);
+
+                    return blobReference;
                 })
                 .ToArray();
 
@@ -149,6 +156,8 @@ namespace Chunkyard.Core
                 newSnapshot.SnapshotId,
                 DataConvert.ToBytes(newSnapshotReference));
 
+            _probe.StoredSnapshot(newSnapshot.SnapshotId);
+
             return newSnapshot;
         }
 
@@ -158,7 +167,21 @@ namespace Chunkyard.Core
         {
             return ShowSnapshot(snapshotId, includeFuzzy)
                 .AsParallel()
-                .Select(br => _contentStore.ContentExists(br))
+                .Select(br =>
+                {
+                    var exists = _contentStore.ContentExists(br);
+
+                    if (exists)
+                    {
+                        _probe.BlobExists(br.Name);
+                    }
+                    else
+                    {
+                        _probe.BlobMissing(br.Name);
+                    }
+
+                    return exists;
+                })
                 .Aggregate(true, (total, next) => total & next);
         }
 
@@ -168,7 +191,21 @@ namespace Chunkyard.Core
         {
             return ShowSnapshot(snapshotId, includeFuzzy)
                 .AsParallel()
-                .Select(br => _contentStore.ContentValid(br))
+                .Select(br =>
+                {
+                    var valid = _contentStore.ContentValid(br);
+
+                    if (valid)
+                    {
+                        _probe.BlobValid(br.Name);
+                    }
+                    else
+                    {
+                        _probe.BlobInvalid(br.Name);
+                    }
+
+                    return valid;
+                })
                 .Aggregate(true, (total, next) => total & next);
         }
 
@@ -196,6 +233,8 @@ namespace Chunkyard.Core
                         blobReference,
                         Key,
                         stream);
+
+                    _probe.RestoredBlob(blobReference.Name);
 
                     return new Blob(
                         blobReference.Name,
@@ -257,6 +296,8 @@ namespace Chunkyard.Core
             foreach (var contentUri in unusedUris)
             {
                 _contentStore.Repository.RemoveValue(contentUri);
+
+                _probe.RemovedContent(contentUri);
             }
         }
 
@@ -264,19 +305,57 @@ namespace Chunkyard.Core
         {
             _repository.RemoveValue(
                 ResolveSnapshotId(snapshotId));
+
+            _probe.RemovedSnapshot(snapshotId);
         }
 
         public void KeepSnapshots(int latestCount)
         {
-            _repository.KeepLatestValues(latestCount);
+            var snapshotIds = _repository.ListKeys();
+
+            Array.Sort(snapshotIds);
+
+            var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
+            var snapshotIdsToDelete = snapshotIds.Except(snapshotIdsToKeep);
+
+            foreach (var snapshotId in snapshotIdsToDelete)
+            {
+                RemoveSnapshot(snapshotId);
+            }
         }
 
         public void Copy(
             IRepository<Uri> contentRepository,
             IRepository<int> snapshotRepository)
         {
-            _contentStore.Repository.Copy(contentRepository);
-            _repository.Copy(snapshotRepository);
+            contentRepository.EnsureNotNull(nameof(contentRepository));
+            snapshotRepository.EnsureNotNull(nameof(snapshotRepository));
+
+            var contentUrisToCopy = _contentStore.Repository.ListKeys()
+                .Except(contentRepository.ListKeys())
+                .ToArray();
+
+            foreach (var contentUri in contentUrisToCopy)
+            {
+                contentRepository.StoreValue(
+                    contentUri,
+                    _contentStore.Repository.RetrieveValue(contentUri));
+
+                _probe.CopiedContent(contentUri);
+            }
+
+            var snapshotIdsToCopy = _repository.ListKeys()
+                .Except(snapshotRepository.ListKeys())
+                .ToArray();
+
+            foreach (var snapshotId in snapshotIdsToCopy)
+            {
+                snapshotRepository.StoreValue(
+                    snapshotId,
+                    _repository.RetrieveValue(snapshotId));
+
+                _probe.CopiedSnapshot(snapshotId);
+            }
         }
 
         private Uri[] ListUris()

@@ -450,7 +450,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void KeepSnapshots_Deletes_Other_Snapshots()
+        public static void KeepSnapshots_Deletes_Previous_Snapshots()
         {
             var snapshotStore = CreateSnapshotStore();
 
@@ -471,6 +471,42 @@ namespace Chunkyard.Tests.Core
             Assert.Equal(
                 new[] { secondSnapshot },
                 snapshotStore.GetSnapshots());
+        }
+
+        [Fact]
+        public static void KeepSnapshots_Does_Nothing_If_Equals_Or_Greater_Than_Current()
+        {
+            var snapshotStore = CreateSnapshotStore();
+
+            var snapshot = snapshotStore.AppendSnapshot(
+                CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
+                CreationTimeUtc,
+                OpenRead);
+
+            snapshotStore.KeepSnapshots(1);
+            snapshotStore.KeepSnapshots(2);
+
+            Assert.Equal(
+                new[] { snapshot },
+                snapshotStore.GetSnapshots());
+        }
+
+        [Fact]
+        public static void KeepSnapshots_Can_Empty_Store()
+        {
+            var snapshotStore = CreateSnapshotStore();
+
+            snapshotStore.AppendSnapshot(
+                CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
+                CreationTimeUtc,
+                OpenRead);
+
+            snapshotStore.KeepSnapshots(0);
+            snapshotStore.KeepSnapshots(2);
+
+            Assert.Empty(snapshotStore.GetSnapshots());
         }
 
         [Fact]
@@ -535,7 +571,8 @@ namespace Chunkyard.Tests.Core
                     new FastCdc(),
                     HashAlgorithmName.SHA256),
                 intRepository,
-                new StaticPrompt());
+                new StaticPrompt(),
+                new DummyProbe());
         }
 
         private static IRepository<Uri> CreateUriRepository()

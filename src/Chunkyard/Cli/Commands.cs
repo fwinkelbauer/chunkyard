@@ -202,7 +202,8 @@ namespace Chunkyard.Cli
                     HashAlgorithmName.SHA256),
                 CreateIntRepository(repositoryPath),
                 new EnvironmentPrompt(
-                    new ConsolePrompt()));
+                    new ConsolePrompt()),
+                new ConsoleProbe());
         }
 
         private static IRepository<int> CreateIntRepository(
