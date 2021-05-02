@@ -570,7 +570,7 @@ namespace Chunkyard.Tests.Core
                     new FastCdc(),
                     HashAlgorithmName.SHA256),
                 intRepository,
-                new StaticPrompt(),
+                new DummyPrompt(),
                 new DummyProbe());
         }
 

@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Tests.Infrastructure
 {
-    internal class StaticPrompt : IPrompt
+    internal class DummyPrompt : IPrompt
     {
         public string NewPassword()
         {
