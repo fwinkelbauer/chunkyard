@@ -412,6 +412,10 @@ namespace Chunkyard.Core
                     documentReference,
                     Key);
             }
+            catch (ChunkyardException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new ChunkyardException(
