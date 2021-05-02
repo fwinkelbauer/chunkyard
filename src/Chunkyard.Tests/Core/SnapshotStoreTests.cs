@@ -504,7 +504,6 @@ namespace Chunkyard.Tests.Core
                 OpenRead);
 
             snapshotStore.KeepSnapshots(0);
-            snapshotStore.KeepSnapshots(2);
 
             Assert.Empty(snapshotStore.GetSnapshots());
         }
