@@ -51,9 +51,19 @@ namespace Chunkyard.Core
             HashAlgorithmName hashAlgorithmName,
             byte[] content)
         {
-            using var algorithm = HashAlgorithm.Create(hashAlgorithmName.Name!);
+            // We are publishing Chunkyard using the "-p:TrimMode=Link" compiler
+            // option. This option cuts the binary size in half, but throws null
+            // pointer Exceptions when running Chunkyard if we create the
+            // algorithm dynamically using
+            // "HashAlgorithm.Create(hashAlgorithmName.Name!)"
+            if (hashAlgorithmName != HashAlgorithmName.SHA256)
+            {
+                throw new NotSupportedException();
+            }
 
-            return ToHexString(algorithm!.ComputeHash(content));
+            using var algorithm = new SHA256Managed();
+
+            return ToHexString(algorithm.ComputeHash(content));
         }
 
         private static string ToHexString(byte[] hash)

@@ -60,7 +60,8 @@ namespace Chunkyard.Build.Cli
                 $"-o {ArtifactsDirectory}",
                 $"-p:Version={Version}",
                 "-p:PublishSingleFile=true",
-                "-p:PublishTrimmed=true");
+                "-p:PublishTrimmed=true",
+                "-p:TrimMode=Link");
         });
 
         public static void Fmt() => Once(() =>
