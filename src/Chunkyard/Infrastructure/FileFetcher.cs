@@ -16,8 +16,11 @@ namespace Chunkyard.Infrastructure
             IEnumerable<string> files,
             Fuzzy excludeFuzzy)
         {
-            var foundFiles = FindFiles(files, excludeFuzzy);
-            var parent = FindCommonParent(foundFiles);
+            var resolvedFiles = files.Select(Path.GetFullPath)
+                .ToArray();
+
+            var foundFiles = FindFiles(resolvedFiles, excludeFuzzy);
+            var parent = FindCommonParent(resolvedFiles);
 
             var blobs = foundFiles
                 .Select(file =>
@@ -48,10 +51,10 @@ namespace Chunkyard.Infrastructure
         }
 
         private static string[] FindFiles(
-            IEnumerable<string> files,
+            string[] files,
             Fuzzy excludeFuzzy)
         {
-            return files.Select(Path.GetFullPath)
+            return files
                 .SelectMany(f => Find(f, excludeFuzzy))
                 .Distinct()
                 .ToArray();
@@ -91,7 +94,9 @@ namespace Chunkyard.Infrastructure
             }
             else if (files.Length == 1)
             {
-                return DirectoryUtil.GetParent(files[0]);
+                return Directory.Exists(files[0])
+                    ? files[0]
+                    : DirectoryUtil.GetParent(files[0]);
             }
 
             var parent = "";
