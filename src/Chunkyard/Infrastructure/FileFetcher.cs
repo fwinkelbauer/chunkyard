@@ -38,12 +38,10 @@ namespace Chunkyard.Infrastructure
                         .Replace('\\', '/')
                         .Replace(":", "");
 
-                    var path = Path.Combine(parent, blobName);
-
                     return new Blob(
                         blobName,
-                        File.GetCreationTimeUtc(path),
-                        File.GetLastWriteTimeUtc(path));
+                        File.GetCreationTimeUtc(file),
+                        File.GetLastWriteTimeUtc(file));
                 })
                 .ToArray();
 
