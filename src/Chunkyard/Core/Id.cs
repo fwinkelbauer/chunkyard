@@ -61,7 +61,7 @@ namespace Chunkyard.Core
                 throw new NotSupportedException();
             }
 
-            using var algorithm = new SHA256Managed();
+            using var algorithm = SHA256.Create();
 
             return ToHexString(algorithm.ComputeHash(content));
         }
