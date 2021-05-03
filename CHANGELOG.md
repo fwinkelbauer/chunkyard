@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 9.2.0 - 2021-05-03
+
 ### Changed
 
 - A compiler option when publishing Chunkyard to cut the binary size in half
