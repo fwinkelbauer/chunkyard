@@ -10,12 +10,16 @@ namespace Chunkyard.Core
     /// </summary>
     public static class Id
     {
+        public const string AlgorithmSHA256 = "SHA256";
+
         public static Uri ComputeContentUri(
-            HashAlgorithmName hashAlgorithmName,
+            string hashAlgorithmName,
             byte[] content)
         {
+            hashAlgorithmName.EnsureNotNull(nameof(hashAlgorithmName));
+
             return ToContentUri(
-                hashAlgorithmName.Name!,
+                hashAlgorithmName,
                 ComputeHash(hashAlgorithmName, content));
         }
 
@@ -23,19 +27,18 @@ namespace Chunkyard.Core
             Uri contentUri,
             byte[] content)
         {
-            var (algorithm, hash) = DeconstructContentUri(contentUri);
-            var computedHash = ComputeHash(algorithm, content);
+            var (hashAlgorithmName, hash) = DeconstructContentUri(contentUri);
+            var computedHash = ComputeHash(hashAlgorithmName, content);
 
             return hash.Equals(computedHash);
         }
 
-        public static (HashAlgorithmName HashAlgorithmName, string Hash) DeconstructContentUri(
+        public static (string HashAlgorithmName, string Hash) DeconstructContentUri(
             Uri contentUri)
         {
             contentUri.EnsureNotNull(nameof(contentUri));
 
-            return (new HashAlgorithmName(contentUri.Scheme.ToUpper()),
-                contentUri.Host);
+            return (contentUri.Scheme.ToUpper(), contentUri.Host);
         }
 
         public static Uri ToContentUri(
@@ -48,15 +51,15 @@ namespace Chunkyard.Core
         }
 
         private static string ComputeHash(
-            HashAlgorithmName hashAlgorithmName,
+            string hashAlgorithmName,
             byte[] content)
         {
             // We are publishing Chunkyard using the "-p:TrimMode=Link" compiler
             // option. This option cuts the binary size in half, but throws null
             // pointer Exceptions when running Chunkyard if we create the
             // algorithm dynamically using
-            // "HashAlgorithm.Create(hashAlgorithmName.Name!)"
-            if (hashAlgorithmName != HashAlgorithmName.SHA256)
+            // "HashAlgorithm.Create(hashAlgorithmName)"
+            if (!hashAlgorithmName.Equals(AlgorithmSHA256))
             {
                 throw new NotSupportedException();
             }

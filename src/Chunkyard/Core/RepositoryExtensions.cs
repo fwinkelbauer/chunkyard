@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Security.Cryptography;
 
 namespace Chunkyard.Core
 {
@@ -11,7 +9,7 @@ namespace Chunkyard.Core
     {
         public static Uri StoreValue(
             this IRepository<Uri> repository,
-            HashAlgorithmName hashAlgorithmName,
+            string hashAlgorithmName,
             byte[] value)
         {
             repository.EnsureNotNull(nameof(repository));

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography;
 using Chunkyard.Core;
 using Chunkyard.Tests.Infrastructure;
 using Xunit;
@@ -12,7 +11,7 @@ namespace Chunkyard.Tests.Core
         public static void StoreValue_Calculates_Same_Hash_For_Same_Input()
         {
             var repository = CreateUriRepository();
-            var hashAlgorithmName = HashAlgorithmName.SHA256;
+            var hashAlgorithmName = Id.AlgorithmSHA256;
             var value = new byte[] { 0xFF };
             var expectedContentUri = new Uri("sha256://a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89/");
 
@@ -34,7 +33,9 @@ namespace Chunkyard.Tests.Core
             var repository = CreateUriRepository();
             var expectedValue = new byte[] { 0xFF };
 
-            var contentUri = repository.StoreValue(HashAlgorithmName.SHA256, expectedValue);
+            var contentUri = repository.StoreValue(
+                Id.AlgorithmSHA256,
+                expectedValue);
 
             Assert.Equal(
                 expectedValue,

@@ -109,7 +109,7 @@ namespace Chunkyard.Infrastructure
                     var (algorithm, hash) = Id.DeconstructContentUri(contentUri);
 
                     return Path.Combine(
-                        algorithm.Name!.ToLower(),
+                        algorithm.ToLower(),
                         hash.Substring(0, 2),
                         hash);
                 },

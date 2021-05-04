@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
 using Chunkyard.Core;
 using Chunkyard.Tests.Infrastructure;
 using Xunit;
@@ -104,7 +102,7 @@ namespace Chunkyard.Tests.Core
             return new ContentStore(
                 uriRepository ?? CreateUriRepository(),
                 new FastCdc(),
-                HashAlgorithmName.SHA256);
+                Id.AlgorithmSHA256);
         }
 
         private static IRepository<Uri> CreateUriRepository()

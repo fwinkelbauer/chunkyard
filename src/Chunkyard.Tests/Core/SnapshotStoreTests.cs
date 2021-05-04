@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using Chunkyard.Core;
 using Chunkyard.Tests.Infrastructure;
@@ -568,7 +567,7 @@ namespace Chunkyard.Tests.Core
                 new ContentStore(
                     uriRepository,
                     new FastCdc(),
-                    HashAlgorithmName.SHA256),
+                    Id.AlgorithmSHA256),
                 intRepository,
                 new DummyPrompt(),
                 new DummyProbe());

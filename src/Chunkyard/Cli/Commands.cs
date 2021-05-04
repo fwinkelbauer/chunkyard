@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
 using Chunkyard.Core;
 using Chunkyard.Infrastructure;
 
@@ -199,7 +197,7 @@ namespace Chunkyard.Cli
                 new ContentStore(
                     CreateUriRepository(repositoryPath),
                     new FastCdc(),
-                    HashAlgorithmName.SHA256),
+                    Id.AlgorithmSHA256),
                 CreateIntRepository(repositoryPath),
                 new EnvironmentPrompt(
                     new ConsolePrompt()),

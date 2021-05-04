@@ -12,12 +12,12 @@ namespace Chunkyard.Core
     public class ContentStore
     {
         private readonly FastCdc _fastCdc;
-        private readonly HashAlgorithmName _hashAlgorithmName;
+        private readonly string _hashAlgorithmName;
 
         public ContentStore(
             IRepository<Uri> repository,
             FastCdc fastCdc,
-            HashAlgorithmName hashAlgorithmName)
+            string hashAlgorithmName)
         {
             Repository = repository.EnsureNotNull(nameof(repository));
 
