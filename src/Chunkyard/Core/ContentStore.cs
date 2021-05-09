@@ -131,33 +131,21 @@ namespace Chunkyard.Core
             Stream stream,
             byte[] key)
         {
-            Uri WriteChunk(byte[] chunk)
-            {
-                var encryptedData = AesGcmCrypto.Encrypt(
-                    nonce,
-                    chunk,
-                    key);
+            return _fastCdc.SplitIntoChunks(stream)
+                .Select(chunk =>
+                {
+                    var encryptedData = AesGcmCrypto.Encrypt(
+                        nonce,
+                        chunk,
+                        key);
 
-                var contentUri = Repository.StoreValue(
-                    _hashAlgorithmName,
-                    encryptedData);
+                    var contentUri = Repository.StoreValue(
+                        _hashAlgorithmName,
+                        encryptedData);
 
-                return contentUri;
-            }
-
-            if (_fastCdc.ExpectedChunkCount(stream.Length) > 100)
-            {
-                return _fastCdc.SplitIntoChunks(stream)
-                    .AsParallel()
-                    .Select(WriteChunk)
-                    .ToArray();
-            }
-            else
-            {
-                return _fastCdc.SplitIntoChunks(stream)
-                    .Select(WriteChunk)
-                    .ToArray();
-            }
+                    return contentUri;
+                })
+                .ToArray();
         }
     }
 }

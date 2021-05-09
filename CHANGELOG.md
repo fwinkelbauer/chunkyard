@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Fixed
+
+- A problem when restoring large files
+
 ## 9.2.0 - 2021-05-03
 
 ### Changed
