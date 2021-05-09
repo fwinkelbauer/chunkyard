@@ -11,9 +11,10 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void Store_And_RetrieveBlob_Return_Data()
         {
-            var contentStore = CreateContentStore();
+            var contentStore = CreateContentStore(
+                fastCdc: new FastCdc(64, 256, 1024));
 
-            var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+            var expectedBytes = AesGcmCrypto.GenerateRandomNumber(1025);
             using var inputStream = new MemoryStream(expectedBytes);
             var blob = CreateBlob("some data");
             var key = CreateKey();
@@ -36,6 +37,7 @@ namespace Chunkyard.Tests.Core
             Assert.Equal(blob.Name, blobReference.Name);
             Assert.Equal(blob.CreationTimeUtc, blobReference.CreationTimeUtc);
             Assert.Equal(blob.LastWriteTimeUtc, blobReference.LastWriteTimeUtc);
+            Assert.True(blobReference.ContentUris.Count > 1);
             Assert.True(contentStore.ContentExists(blobReference));
             Assert.True(contentStore.ContentValid(blobReference));
         }
@@ -97,11 +99,12 @@ namespace Chunkyard.Tests.Core
         }
 
         private static ContentStore CreateContentStore(
-            IRepository<Uri>? uriRepository = null)
+            IRepository<Uri>? uriRepository = null,
+            FastCdc? fastCdc = null)
         {
             return new ContentStore(
                 uriRepository ?? CreateUriRepository(),
-                new FastCdc(),
+                fastCdc ?? new FastCdc(),
                 Id.AlgorithmSHA256);
         }
 
