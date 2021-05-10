@@ -84,20 +84,33 @@ namespace Chunkyard.Build.Cli
             Git($"tag -a \"{tag}\" -m \"{message}\"");
         });
 
-        private static string Dotnet(params string[] arguments)
+        private static void Dotnet(params string[] arguments)
         {
-            return Exec("dotnet", arguments, new[] { 0 });
+            Exec(
+                "dotnet",
+                arguments,
+                new[] { 0 },
+                Console.WriteLine);
         }
 
         private static string Git(params string[] arguments)
         {
-            return Exec("git", arguments, new[] { 0 });
+            var builder = new StringBuilder();
+
+            Exec(
+                "git",
+                arguments,
+                new[] { 0 },
+                line => builder.AppendLine(line));
+
+            return builder.ToString();
         }
 
-        private static string Exec(
+        private static void Exec(
             string fileName,
             string[] arguments,
-            int[] validExitCodes)
+            int[] validExitCodes,
+            Action<string> processOutput)
         {
             var startInfo = new ProcessStartInfo(
                 fileName,
@@ -115,12 +128,10 @@ namespace Chunkyard.Build.Cli
             }
 
             string? line;
-            var builder = new StringBuilder();
 
             while ((line = process.StandardOutput.ReadLine()) != null)
             {
-                Console.WriteLine(line);
-                builder.AppendLine(line);
+                processOutput(line);
             }
 
             process.WaitForExit();
@@ -130,8 +141,6 @@ namespace Chunkyard.Build.Cli
                 throw new BuildException(
                     $"Exit code of {fileName} was {process.ExitCode}");
             }
-
-            return builder.ToString();
         }
 
         private static string FetchVersion()
