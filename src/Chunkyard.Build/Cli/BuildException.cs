@@ -7,23 +7,23 @@ namespace Chunkyard.Build.Cli
     /// A custom exception type.
     /// </summary>
     [Serializable]
-    public class ExecuteException : Exception
+    public class BuildException : Exception
     {
-        public ExecuteException()
+        public BuildException()
         {
         }
 
-        public ExecuteException(string message)
+        public BuildException(string message)
             : base(message)
         {
         }
 
-        public ExecuteException(string message, Exception innerException)
+        public BuildException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
-        protected ExecuteException(
+        protected BuildException(
             SerializationInfo info,
             StreamingContext context)
             : base(info, context)

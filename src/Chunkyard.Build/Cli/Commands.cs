@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Chunkyard.Build.Cli
@@ -14,7 +15,6 @@ namespace Chunkyard.Build.Cli
         private const string Solution = "src/Chunkyard.sln";
         private const string Changelog = "CHANGELOG.md";
 
-        private static readonly string Version = FetchVersion();
         private static readonly List<string> Executed = new List<string>();
 
         public static void Setup() => Once(() =>
@@ -53,12 +53,16 @@ namespace Chunkyard.Build.Cli
             Clean(o);
             Build(o);
 
+            var version = FetchVersion();
+            var commitId = Git("rev-parse --short HEAD");
+
             Dotnet(
                 "publish src/Chunkyard",
                 $"-c {o.Configuration}",
                 $"-r {o.Runtime}",
                 $"-o {ArtifactsDirectory}",
-                $"-p:Version={Version}",
+                $"-p:Version={version}",
+                $"-p:SourceRevisionId={commitId}",
                 "-p:PublishSingleFile=true",
                 "-p:PublishTrimmed=true",
                 "-p:TrimMode=Link");
@@ -71,25 +75,26 @@ namespace Chunkyard.Build.Cli
 
         public static void Release() => Once(() =>
         {
-            var message = $"Prepare Chunkyard release v{Version}";
-            var tag = $"v{Version}";
+            var version = FetchVersion();
+            var message = $"Prepare Chunkyard release v{version}";
+            var tag = $"v{version}";
 
             Git("add -A");
             Git($"commit -m \"{message}\"");
             Git($"tag -a \"{tag}\" -m \"{message}\"");
         });
 
-        private static void Dotnet(params string[] arguments)
+        private static string Dotnet(params string[] arguments)
         {
-            Exec("dotnet", arguments, new[] { 0 });
+            return Exec("dotnet", arguments, new[] { 0 });
         }
 
-        private static void Git(params string[] arguments)
+        private static string Git(params string[] arguments)
         {
-            Exec("git", arguments, new[] { 0 });
+            return Exec("git", arguments, new[] { 0 });
         }
 
-        private static void Exec(
+        private static string Exec(
             string fileName,
             string[] arguments,
             int[] validExitCodes)
@@ -105,24 +110,28 @@ namespace Chunkyard.Build.Cli
 
             if (process == null)
             {
-                throw new ExecuteException(
+                throw new BuildException(
                     $"Could not start process '{fileName}'");
             }
 
             string? line;
+            var builder = new StringBuilder();
 
             while ((line = process.StandardOutput.ReadLine()) != null)
             {
                 Console.WriteLine(line);
+                builder.AppendLine(line);
             }
 
             process.WaitForExit();
 
             if (!validExitCodes.Contains(process.ExitCode))
             {
-                throw new ExecuteException(
+                throw new BuildException(
                     $"Exit code of {fileName} was {process.ExitCode}");
             }
+
+            return builder.ToString();
         }
 
         private static string FetchVersion()
@@ -131,9 +140,13 @@ namespace Chunkyard.Build.Cli
                 File.ReadAllText(Changelog),
                 @"##\s+(\d+\.\d+\.\d+)");
 
-            return match.Groups.Count > 1
-                ? match.Groups[1].Value
-                : "0.0.0";
+            if (match.Groups.Count < 2)
+            {
+                throw new BuildException(
+                    "Could not fetch version from changelog");
+            }
+
+            return match.Groups[1].Value;
         }
 
         private static void Once(
