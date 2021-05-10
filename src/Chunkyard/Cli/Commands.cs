@@ -239,15 +239,23 @@ namespace Chunkyard.Cli
         private static IRepository<Uri> CreateUriRepository(
             string repositoryPath)
         {
-            return FileRepository.CreateUriRepository(
-                Path.Combine(repositoryPath, "blobs"));
+            return repositoryPath.EndsWith(".chy")
+                ? ZipRepository.CreateUriRepository(
+                    repositoryPath,
+                    "blobs")
+                : FileRepository.CreateUriRepository(
+                    Path.Combine(repositoryPath, "blobs"));
         }
 
         private static IRepository<int> CreateIntRepository(
             string repositoryPath)
         {
-            return FileRepository.CreateIntRepository(
-                Path.Combine(repositoryPath, "snapshots"));
+            return repositoryPath.EndsWith(".chy")
+                ? ZipRepository.CreateIntRepository(
+                    repositoryPath,
+                    "snapshots")
+                : FileRepository.CreateIntRepository(
+                    Path.Combine(repositoryPath, "snapshots"));
         }
     }
 }
