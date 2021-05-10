@@ -106,7 +106,8 @@ namespace Chunkyard.Infrastructure
                 directory,
                 contentUri =>
                 {
-                    var (algorithm, hash) = Id.DeconstructContentUri(contentUri);
+                    var (algorithm, hash) = Id.DeconstructContentUri(
+                        contentUri);
 
                     return Path.Combine(
                         algorithm.ToLower(),
