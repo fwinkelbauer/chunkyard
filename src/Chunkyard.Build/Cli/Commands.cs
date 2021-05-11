@@ -17,72 +17,90 @@ namespace Chunkyard.Build.Cli
 
         private static readonly List<string> Executed = new List<string>();
 
-        public static void Setup() => Once(() =>
+        public static void Setup()
         {
-            Dotnet("tool update -g dotnet-format");
-        });
+            Once(() =>
+            {
+                Dotnet("tool update -g dotnet-format");
+            });
+        }
 
-        public static void Clean(DotnetOptions o) => Once(() =>
+        public static void Clean(DotnetOptions o)
         {
-            Dotnet(
-                $"clean {Solution}",
-                $"-c {o.Configuration}");
+            Once(() =>
+            {
+                Dotnet(
+                    $"clean {Solution}",
+                    $"-c {o.Configuration}");
 
-            CleanDirectory(ArtifactsDirectory);
-        });
+                CleanDirectory(ArtifactsDirectory);
+            });
+        }
 
-        public static void Build(DotnetOptions o) => Once(() =>
+        public static void Build(DotnetOptions o)
         {
-            Dotnet(
-                $"format {Solution}",
-                "--check");
+            Once(() =>
+            {
+                Dotnet(
+                    $"format {Solution}",
+                    "--check");
 
-            Dotnet(
-                $"build {Solution}",
-                $"-c {o.Configuration}",
-                "-warnaserror");
+                Dotnet(
+                    $"build {Solution}",
+                    $"-c {o.Configuration}",
+                    "-warnaserror");
 
-            Dotnet(
-                $"test {Solution}",
-                "--no-build",
-                $"-c {o.Configuration}");
-        });
+                Dotnet(
+                    $"test {Solution}",
+                    "--no-build",
+                    $"-c {o.Configuration}");
+            });
+        }
 
-        public static void Publish(DotnetOptions o) => Once(() =>
+        public static void Publish(DotnetOptions o)
         {
-            Clean(o);
-            Build(o);
+            Once(() =>
+            {
+                Clean(o);
+                Build(o);
 
-            var version = FetchVersion();
-            var commitId = Git("rev-parse --short HEAD");
+                var version = FetchVersion();
+                var commitId = Git("rev-parse --short HEAD");
 
-            Dotnet(
-                "publish src/Chunkyard",
-                $"-c {o.Configuration}",
-                $"-r {o.Runtime}",
-                $"-o {ArtifactsDirectory}",
-                $"-p:Version={version}",
-                $"-p:SourceRevisionId={commitId}",
-                "-p:PublishSingleFile=true",
-                "-p:PublishTrimmed=true",
-                "-p:TrimMode=Link");
-        });
+                Dotnet(
+                    "publish src/Chunkyard",
+                    $"-c {o.Configuration}",
+                    $"-r {o.Runtime}",
+                    $"-o {ArtifactsDirectory}",
+                    $"-p:Version={version}",
+                    $"-p:SourceRevisionId={commitId}",
+                    "-p:PublishSingleFile=true",
+                    "-p:PublishTrimmed=true",
+                    "-p:TrimMode=Link");
+            });
+        }
 
-        public static void Fmt() => Once(() =>
+        public static void Fmt()
         {
-            Dotnet($"format {Solution}");
-        });
+            Once(() =>
+            {
+                Dotnet($"format {Solution}");
+            });
+        }
 
-        public static void Release() => Once(() =>
+        public static void Release()
         {
-            var version = FetchVersion();
-            var message = $"Prepare Chunkyard release v{version}";
-            var tag = $"v{version}";
+            Once(() =>
+            {
+                var version = FetchVersion();
+                var message = $"Prepare Chunkyard release v{version}";
+                var tag = $"v{version}";
 
-            Git($"add {Changelog}");
-            Git($"commit -m \"{message}\"");
-            Git($"tag -a \"{tag}\" -m \"{message}\"");
-        });
+                Git($"add {Changelog}");
+                Git($"commit -m \"{message}\"");
+                Git($"tag -a \"{tag}\" -m \"{message}\"");
+            });
+        }
 
         private static void Dotnet(params string[] arguments)
         {
