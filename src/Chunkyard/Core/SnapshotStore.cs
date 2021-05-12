@@ -133,6 +133,7 @@ namespace Chunkyard.Core
 
                     return blobReference;
                 })
+                .OrderBy(blobReference => blobReference.Name)
                 .ToArray();
 
             _currentSnapshotId = _currentSnapshotId == null
