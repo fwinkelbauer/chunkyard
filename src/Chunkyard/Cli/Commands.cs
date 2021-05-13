@@ -101,7 +101,7 @@ namespace Chunkyard.Cli
                 DirectoryUtil.CreateParent(file);
 
                 var mode = o.Overwrite
-                    ? FileMode.OpenOrCreate
+                    ? FileMode.Create
                     : FileMode.CreateNew;
 
                 return new FileStream(file, mode, FileAccess.Write);

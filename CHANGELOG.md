@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The order of blob references in a snapshot by sorting them by name
 
+### Fixed
+
+- The behavior of the `restore` command when using `--overwrite`
+
 ## 9.2.1 - 2021-05-09
 
 ### Fixed
