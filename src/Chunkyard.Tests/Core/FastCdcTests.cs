@@ -22,7 +22,7 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(
                 new[] { 22366, 8282, 16303, 18696, 32768, 11051 },
-                chunks.Select(c => c.Length));
+                chunks.Select(c => c.Value.Length));
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(
                 new[] { 32857, 16408, 60201 },
-                chunks.Select(c => c.Length));
+                chunks.Select(c => c.Value.Length));
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(
                 new[] { 32857, 76609 },
-                chunks.Select(c => c.Length));
+                chunks.Select(c => c.Value.Length));
         }
     }
 }
