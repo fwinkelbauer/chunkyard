@@ -46,10 +46,11 @@ Run `./csake build` to build the solution.
 
 ## Publish
 
-- Update `CHANGELOG.md` and add a new version header
-- Run `./csake release` to create a tagged commit containing the latest
+- Commit all your work
+- Update `CHANGELOG.md` and add a new version header. You do not have to create
+  a commit for this change
+- Run `./csake release` to create and push a tagged commit containing the latest
   version found in `CHANGELOG.md`
-- Run `git push --follow-tags`
 - Run `./csake publish` to create a binary in the `./artifacts` directory
 
 ## Usage

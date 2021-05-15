@@ -96,9 +96,11 @@ namespace Chunkyard.Build.Cli
                 var message = $"Prepare Chunkyard release v{version}";
                 var tag = $"v{version}";
 
+                Git("reset");
                 Git($"add {Changelog}");
                 Git($"commit -m \"{message}\"");
                 Git($"tag -a \"{tag}\" -m \"{message}\"");
+                Git("push --follow-tags");
             });
         }
 
