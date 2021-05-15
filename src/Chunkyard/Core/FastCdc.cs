@@ -309,6 +309,12 @@ namespace Chunkyard.Core
                 MaximumMax,
                 nameof(maxSize));
 
+            if ((_maxSize - _minSize) <= _avgSize)
+            {
+                throw new ArgumentException(
+                    "Invariant violation: maxSize - minSize > avgSize");
+            }
+
             var bits = Logarithm2(_avgSize);
             _maskS = Mask(bits + 1);
             _maskL = Mask(bits - 1);
