@@ -6,8 +6,8 @@ using System.Security.Cryptography;
 namespace Chunkyard.Core
 {
     /// <summary>
-    /// A store which splits and encrypts files before storing them in an <see
-    /// cref="IRepository{Uri}"/>.
+    /// A store which splits and encrypts files before storing them in an
+    /// <see cref="IRepository{Uri}"/>.
     /// </summary>
     public class ContentStore
     {
@@ -64,11 +64,17 @@ namespace Chunkyard.Core
             {
                 foreach (var contentUri in contentReference.ContentUris)
                 {
-                    var decryptedData = AesGcmCrypto.Decrypt(
-                        Repository.RetrieveValueValid(contentUri),
-                        key);
+                    var content = Repository.RetrieveValue(contentUri);
 
-                    outputStream.Write(decryptedData);
+                    if (!Id.ContentUriValid(contentUri, content))
+                    {
+                        throw new ChunkyardException(
+                            $"Invalid content: {contentUri}");
+                    }
+
+                    var decrypted = AesGcmCrypto.Decrypt(content, key);
+
+                    outputStream.Write(decrypted);
                 }
             }
             catch (CryptographicException e)
@@ -122,7 +128,13 @@ namespace Chunkyard.Core
             contentReference.EnsureNotNull(nameof(contentReference));
 
             return contentReference.ContentUris
-                .Select(contentUri => Repository.ValueValid(contentUri))
+                .Select(contentUri =>
+                {
+                    return Repository.ValueExists(contentUri)
+                        && Id.ContentUriValid(
+                            contentUri,
+                            Repository.RetrieveValue(contentUri));
+                })
                 .Aggregate(true, (total, next) => total & next);
         }
 
@@ -139,9 +151,11 @@ namespace Chunkyard.Core
                         chunk.Value,
                         key);
 
-                    var contentUri = Repository.StoreValue(
+                    var contentUri = Id.ComputeContentUri(
                         _hashAlgorithmName,
                         encryptedData);
+
+                    Repository.StoreValue(contentUri, encryptedData);
 
                     return contentUri;
                 })

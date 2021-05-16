@@ -84,18 +84,55 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ContentValid_Detects_Corrupted_Content()
         {
-            var uriRrepository = CreateUriRepository();
-            var contentStore = CreateContentStore(uriRrepository);
+            var uriRepository = CreateUriRepository();
+            var contentStore = CreateContentStore(uriRepository);
 
             var documentReference = contentStore.StoreDocument(
                 "some text",
                 CreateKey(),
                 AesGcmCrypto.GenerateNonce());
 
-            uriRrepository.CorruptValues(uriRrepository.ListKeys());
+            uriRepository.CorruptValues(uriRepository.ListKeys());
 
             Assert.True(contentStore.ContentExists(documentReference));
             Assert.False(contentStore.ContentValid(documentReference));
+        }
+
+        [Fact]
+        public static void RetrieveDocument_Throws_On_Invalid_Content()
+        {
+            var uriRepository = CreateUriRepository();
+            var contentStore = CreateContentStore(uriRepository);
+            var key = CreateKey();
+
+            var documentReference = contentStore.StoreDocument(
+                "some text",
+                key,
+                AesGcmCrypto.GenerateNonce());
+
+            uriRepository.CorruptValues(uriRepository.ListKeys());
+
+            Assert.Throws<ChunkyardException>(
+                () => contentStore.RetrieveDocument<string>(
+                    documentReference,
+                    key));
+        }
+
+        [Fact]
+        public static void RetrieveDocument_Throws_Given_Wrong_Key()
+        {
+            var uriRepository = CreateUriRepository();
+            var contentStore = CreateContentStore(uriRepository);
+
+            var documentReference = contentStore.StoreDocument(
+                "some text",
+                CreateKey(),
+                AesGcmCrypto.GenerateNonce());
+
+            Assert.Throws<ChunkyardException>(
+                () => contentStore.RetrieveDocument<string>(
+                    documentReference,
+                    CreateKey()));
         }
 
         private static ContentStore CreateContentStore(
