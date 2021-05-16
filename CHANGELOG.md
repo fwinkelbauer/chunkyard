@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The behavior of the `restore` command when using `--overwrite`
 
+### Removed
+
+- Setting the LastWriteTimeUtc and CreationTimeUtc fields of restored files when
+  using the `restore` command
+
 ## 9.2.1 - 2021-05-09
 
 ### Fixed
