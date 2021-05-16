@@ -15,7 +15,7 @@ namespace Chunkyard.Infrastructure
 
         public static void CreateParent(string file)
         {
-            var parent = GetParent(file);
+            var parent = Path.GetDirectoryName(file);
 
             if (!string.IsNullOrEmpty(parent))
             {
