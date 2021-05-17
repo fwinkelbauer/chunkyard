@@ -382,7 +382,7 @@ namespace Chunkyard.Core
             catch (Exception e)
             {
                 throw new ChunkyardException(
-                    $"Invalid snapshot reference: {snapshotId}",
+                    $"Invalid snapshot reference: #{snapshotId}",
                     e);
             }
         }
