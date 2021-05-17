@@ -9,7 +9,7 @@ namespace Chunkyard.Tests.Infrastructure
         {
         }
 
-        public void RestoredBlob(string name)
+        public void RetrievedBlob(string name)
         {
         }
 

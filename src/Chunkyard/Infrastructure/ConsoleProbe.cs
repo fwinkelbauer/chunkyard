@@ -13,7 +13,7 @@ namespace Chunkyard.Infrastructure
             Console.WriteLine($"Stored blob: {name}");
         }
 
-        public void RestoredBlob(string name)
+        public void RetrievedBlob(string name)
         {
             Console.WriteLine($"Restored blob: {name}");
         }

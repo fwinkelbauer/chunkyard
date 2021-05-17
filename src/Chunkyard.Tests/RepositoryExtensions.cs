@@ -6,26 +6,26 @@ namespace Chunkyard.Tests
 {
     internal static class RepositoryExtensions
     {
-        public static void CorruptValues(
-            this IRepository<Uri> repository,
-            IEnumerable<Uri> contentUris)
+        public static void CorruptValues<T>(
+            this IRepository<T> repository,
+            IEnumerable<T> keys)
         {
-            foreach (var contentUri in contentUris)
+            foreach (var key in keys)
             {
-                repository.RemoveValue(contentUri);
+                repository.RemoveValue(key);
                 repository.StoreValue(
-                    contentUri,
+                    key,
                     new byte[] { 0xFF, 0xBA, 0xDD, 0xFF });
             }
         }
 
-        public static void RemoveValues(
-            this IRepository<Uri> repository,
-            IEnumerable<Uri> contentUris)
+        public static void RemoveValues<T>(
+            this IRepository<T> repository,
+            IEnumerable<T> keys)
         {
-            foreach (var contentUri in contentUris)
+            foreach (var key in keys)
             {
-                repository.RemoveValue(contentUri);
+                repository.RemoveValue(key);
             }
         }
     }

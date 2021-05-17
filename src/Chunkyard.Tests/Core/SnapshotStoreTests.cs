@@ -539,6 +539,50 @@ namespace Chunkyard.Tests.Core
                 destinationIntRepository.ListKeys());
         }
 
+        [Fact]
+        public static void Copy_Throws_On_Invalid_Content()
+        {
+            var uriRepository = CreateUriRepository();
+            var snapshotStore = CreateSnapshotStore(
+                uriRepository,
+                CreateIntRepository());
+
+            snapshotStore.AppendSnapshot(
+                CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
+                CreationTimeUtc,
+                OpenRead);
+
+            uriRepository.CorruptValues(uriRepository.ListKeys());
+
+            Assert.Throws<ChunkyardException>(
+                () => snapshotStore.Copy(
+                    CreateUriRepository(),
+                    CreateIntRepository()));
+        }
+
+        [Fact]
+        public static void Copy_Throws_On_Invalid_References()
+        {
+            var intRepository = CreateIntRepository();
+            var snapshotStore = CreateSnapshotStore(
+                CreateUriRepository(),
+                intRepository);
+
+            snapshotStore.AppendSnapshot(
+                CreateBlobs(new[] { "some content" }),
+                Fuzzy.MatchNothing,
+                CreationTimeUtc,
+                OpenRead);
+
+            intRepository.CorruptValues(intRepository.ListKeys());
+
+            Assert.Throws<ChunkyardException>(
+                () => snapshotStore.Copy(
+                    CreateUriRepository(),
+                    CreateIntRepository()));
+        }
+
         private static Blob[] CreateBlobs(IEnumerable<string> names)
         {
             return names
@@ -563,14 +607,17 @@ namespace Chunkyard.Tests.Core
             uriRepository ??= CreateUriRepository();
             intRepository ??= CreateIntRepository();
 
+            var probe = new DummyProbe();
+
             return new SnapshotStore(
                 new ContentStore(
                     uriRepository,
                     new FastCdc(),
-                    Id.AlgorithmSHA256),
+                    Id.AlgorithmSHA256,
+                    probe),
                 intRepository,
                 new DummyPrompt(),
-                new DummyProbe());
+                probe);
         }
 
         private static IRepository<Uri> CreateUriRepository()

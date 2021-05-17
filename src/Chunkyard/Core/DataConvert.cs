@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 
 namespace Chunkyard.Core
 {
@@ -14,7 +15,16 @@ namespace Chunkyard.Core
 
         public static T ToObject<T>(byte[] value) where T : notnull
         {
-            return JsonSerializer.Deserialize<T>(value)!;
+            try
+            {
+                return JsonSerializer.Deserialize<T>(value)!;
+            }
+            catch (Exception e)
+            {
+                throw new ChunkyardException(
+                    $"Could not deserialize data to {typeof(T).Name}",
+                    e);
+            }
         }
     }
 }

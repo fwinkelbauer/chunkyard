@@ -10,7 +10,7 @@ namespace Chunkyard.Core
     {
         void StoredBlob(string name);
 
-        void RestoredBlob(string name);
+        void RetrievedBlob(string name);
 
         void BlobExists(string name);
 

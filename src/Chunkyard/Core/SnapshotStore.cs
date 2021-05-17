@@ -123,15 +123,11 @@ namespace Chunkyard.Core
 
                     using var stream = openRead(blob.Name);
 
-                    var blobReference = _contentStore.StoreBlob(
+                    return _contentStore.StoreBlob(
                         blob,
                         Key,
                         nonce,
                         stream);
-
-                    _probe.StoredBlob(blobReference.Name);
-
-                    return blobReference;
                 })
                 .OrderBy(blobReference => blobReference.Name)
                 .ToArray();
@@ -168,21 +164,7 @@ namespace Chunkyard.Core
         {
             return ShowSnapshot(snapshotId, includeFuzzy)
                 .AsParallel()
-                .Select(br =>
-                {
-                    var exists = _contentStore.ContentExists(br);
-
-                    if (exists)
-                    {
-                        _probe.BlobExists(br.Name);
-                    }
-                    else
-                    {
-                        _probe.BlobMissing(br.Name);
-                    }
-
-                    return exists;
-                })
+                .Select(br => _contentStore.ContentExists(br))
                 .Aggregate(true, (total, next) => total & next);
         }
 
@@ -192,21 +174,7 @@ namespace Chunkyard.Core
         {
             return ShowSnapshot(snapshotId, includeFuzzy)
                 .AsParallel()
-                .Select(br =>
-                {
-                    var valid = _contentStore.ContentValid(br);
-
-                    if (valid)
-                    {
-                        _probe.BlobValid(br.Name);
-                    }
-                    else
-                    {
-                        _probe.BlobInvalid(br.Name);
-                    }
-
-                    return valid;
-                })
+                .Select(br => _contentStore.ContentValid(br))
                 .Aggregate(true, (total, next) => total & next);
         }
 
@@ -234,8 +202,6 @@ namespace Chunkyard.Core
                         blobReference,
                         Key,
                         stream);
-
-                    _probe.RestoredBlob(blobReference.Name);
 
                     return new Blob(
                         blobReference.Name,
@@ -290,16 +256,8 @@ namespace Chunkyard.Core
 
         public void GarbageCollect()
         {
-            var allContentUris = _contentStore.Repository.ListKeys();
-            var usedUris = ListUris();
-            var unusedUris = allContentUris.Except(usedUris).ToArray();
-
-            foreach (var contentUri in unusedUris)
-            {
-                _contentStore.Repository.RemoveValue(contentUri);
-
-                _probe.RemovedContent(contentUri);
-            }
+            _contentStore.RemoveExcept(
+                ListUris());
         }
 
         public void RemoveSnapshot(int snapshotId)
@@ -329,21 +287,9 @@ namespace Chunkyard.Core
             IRepository<Uri> contentRepository,
             IRepository<int> snapshotRepository)
         {
-            contentRepository.EnsureNotNull(nameof(contentRepository));
             snapshotRepository.EnsureNotNull(nameof(snapshotRepository));
 
-            var contentUrisToCopy = _contentStore.Repository.ListKeys()
-                .Except(contentRepository.ListKeys())
-                .ToArray();
-
-            foreach (var contentUri in contentUrisToCopy)
-            {
-                contentRepository.StoreValue(
-                    contentUri,
-                    _contentStore.Repository.RetrieveValue(contentUri));
-
-                _probe.CopiedContent(contentUri);
-            }
+            _contentStore.Copy(contentRepository);
 
             var snapshotIdsToCopy = _repository.ListKeys()
                 .Except(snapshotRepository.ListKeys())
@@ -351,9 +297,12 @@ namespace Chunkyard.Core
 
             foreach (var snapshotId in snapshotIdsToCopy)
             {
+                // We convert a SnapshotReference from/to bytes to check if
+                // these bytes are valid
                 snapshotRepository.StoreValue(
                     snapshotId,
-                    _repository.RetrieveValue(snapshotId));
+                    DataConvert.ToBytes(
+                        GetSnapshotReference(snapshotId)));
 
                 _probe.CopiedSnapshot(snapshotId);
             }

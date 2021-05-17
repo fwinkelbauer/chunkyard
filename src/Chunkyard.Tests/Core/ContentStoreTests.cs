@@ -67,15 +67,15 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ContentExists_Detects_Missing_Content()
         {
-            var uriRepository = CreateUriRepository();
-            var contentStore = CreateContentStore(uriRepository);
+            var repository = CreateUriRepository();
+            var contentStore = CreateContentStore(repository);
 
             var documentReference = contentStore.StoreDocument(
                 "some text",
                 CreateKey(),
                 AesGcmCrypto.GenerateNonce());
 
-            uriRepository.RemoveValues(uriRepository.ListKeys());
+            repository.RemoveValues(repository.ListKeys());
 
             Assert.False(contentStore.ContentExists(documentReference));
             Assert.False(contentStore.ContentValid(documentReference));
@@ -84,15 +84,15 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void ContentValid_Detects_Corrupted_Content()
         {
-            var uriRepository = CreateUriRepository();
-            var contentStore = CreateContentStore(uriRepository);
+            var repository = CreateUriRepository();
+            var contentStore = CreateContentStore(repository);
 
             var documentReference = contentStore.StoreDocument(
                 "some text",
                 CreateKey(),
                 AesGcmCrypto.GenerateNonce());
 
-            uriRepository.CorruptValues(uriRepository.ListKeys());
+            repository.CorruptValues(repository.ListKeys());
 
             Assert.True(contentStore.ContentExists(documentReference));
             Assert.False(contentStore.ContentValid(documentReference));
@@ -101,8 +101,8 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void RetrieveDocument_Throws_On_Invalid_Content()
         {
-            var uriRepository = CreateUriRepository();
-            var contentStore = CreateContentStore(uriRepository);
+            var repository = CreateUriRepository();
+            var contentStore = CreateContentStore(repository);
             var key = CreateKey();
 
             var documentReference = contentStore.StoreDocument(
@@ -110,7 +110,7 @@ namespace Chunkyard.Tests.Core
                 key,
                 AesGcmCrypto.GenerateNonce());
 
-            uriRepository.CorruptValues(uriRepository.ListKeys());
+            repository.CorruptValues(repository.ListKeys());
 
             Assert.Throws<ChunkyardException>(
                 () => contentStore.RetrieveDocument<string>(
@@ -121,8 +121,8 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void RetrieveDocument_Throws_Given_Wrong_Key()
         {
-            var uriRepository = CreateUriRepository();
-            var contentStore = CreateContentStore(uriRepository);
+            var repository = CreateUriRepository();
+            var contentStore = CreateContentStore(repository);
 
             var documentReference = contentStore.StoreDocument(
                 "some text",
@@ -135,14 +135,75 @@ namespace Chunkyard.Tests.Core
                     CreateKey()));
         }
 
+        [Fact]
+        public static void Copy_Copies_Everything()
+        {
+            var sourceRepository = CreateUriRepository();
+            var destinationRepository = CreateUriRepository();
+            var contentStore = CreateContentStore(sourceRepository);
+
+            contentStore.StoreDocument(
+                "some text",
+                CreateKey(),
+                AesGcmCrypto.GenerateNonce());
+
+            contentStore.Copy(destinationRepository);
+
+            Assert.Equal(
+                sourceRepository.ListKeys(),
+                destinationRepository.ListKeys());
+        }
+
+        [Fact]
+        public static void Copy_Throws_On_Invalid_Content()
+        {
+            var sourceRepository = CreateUriRepository();
+            var destinationRepository = CreateUriRepository();
+            var contentStore = CreateContentStore(sourceRepository);
+
+            contentStore.StoreDocument(
+                "some text",
+                CreateKey(),
+                AesGcmCrypto.GenerateNonce());
+
+            sourceRepository.CorruptValues(sourceRepository.ListKeys());
+
+            Assert.Throws<ChunkyardException>(
+                () => contentStore.Copy(CreateUriRepository()));
+        }
+
+        [Fact]
+        public static void RemoveExcept_Removes_Uris()
+        {
+            var repository = CreateUriRepository();
+            var contentStore = CreateContentStore(repository);
+
+            var documentReference = contentStore.StoreDocument(
+                "some text",
+                CreateKey(),
+                AesGcmCrypto.GenerateNonce());
+
+            contentStore.StoreDocument(
+                "some text",
+                CreateKey(),
+                AesGcmCrypto.GenerateNonce());
+
+            contentStore.RemoveExcept(documentReference.ContentUris);
+
+            Assert.Equal(
+                documentReference.ContentUris,
+                repository.ListKeys());
+        }
+
         private static ContentStore CreateContentStore(
-            IRepository<Uri>? uriRepository = null,
+            IRepository<Uri>? repository = null,
             FastCdc? fastCdc = null)
         {
             return new ContentStore(
-                uriRepository ?? CreateUriRepository(),
+                repository ?? CreateUriRepository(),
                 fastCdc ?? new FastCdc(),
-                Id.AlgorithmSHA256);
+                Id.AlgorithmSHA256,
+                new DummyProbe());
         }
 
         private static IRepository<Uri> CreateUriRepository()

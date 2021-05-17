@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -11,21 +12,22 @@ namespace Chunkyard.Core
     /// </summary>
     public class ContentStore
     {
+        private readonly IRepository<Uri> _repository;
         private readonly FastCdc _fastCdc;
         private readonly string _hashAlgorithmName;
+        private readonly IProbe _probe;
 
         public ContentStore(
             IRepository<Uri> repository,
             FastCdc fastCdc,
-            string hashAlgorithmName)
+            string hashAlgorithmName,
+            IProbe probe)
         {
-            Repository = repository.EnsureNotNull(nameof(repository));
-
+            _repository = repository.EnsureNotNull(nameof(repository));
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
+            _probe = probe;
         }
-
-        public IRepository<Uri> Repository { get; }
 
         public void RetrieveBlob(
             BlobReference blobReference,
@@ -36,6 +38,8 @@ namespace Chunkyard.Core
             outputStream.EnsureNotNull(nameof(outputStream));
 
             RetrieveContent(blobReference, key, outputStream);
+
+            _probe.RetrievedBlob(blobReference.Name);
         }
 
         public T RetrieveDocument<T>(
@@ -64,15 +68,9 @@ namespace Chunkyard.Core
             {
                 foreach (var contentUri in contentReference.ContentUris)
                 {
-                    var content = Repository.RetrieveValue(contentUri);
-
-                    if (!Id.ContentUriValid(contentUri, content))
-                    {
-                        throw new ChunkyardException(
-                            $"Invalid content: {contentUri}");
-                    }
-
-                    var decrypted = AesGcmCrypto.Decrypt(content, key);
+                    var decrypted = AesGcmCrypto.Decrypt(
+                        RetrieveValid(contentUri),
+                        key);
 
                     outputStream.Write(decrypted);
                 }
@@ -92,12 +90,16 @@ namespace Chunkyard.Core
             blob.EnsureNotNull(nameof(blob));
             inputStream.EnsureNotNull(nameof(inputStream));
 
-            return new BlobReference(
+            var blobReference = new BlobReference(
                 blob.Name,
                 blob.CreationTimeUtc,
                 blob.LastWriteTimeUtc,
                 nonce,
                 WriteChunks(nonce, inputStream, key));
+
+            _probe.StoredBlob(blobReference.Name);
+
+            return blobReference;
         }
 
         public DocumentReference StoreDocument<T>(
@@ -118,24 +120,97 @@ namespace Chunkyard.Core
         {
             contentReference.EnsureNotNull(nameof(contentReference));
 
-            return contentReference.ContentUris
-                .Select(contentUri => Repository.ValueExists(contentUri))
+            var exists = contentReference.ContentUris
+                .Select(contentUri => _repository.ValueExists(contentUri))
                 .Aggregate(true, (total, next) => total & next);
+
+            if (contentReference is BlobReference blobReference)
+            {
+                if (exists)
+                {
+                    _probe.BlobExists(blobReference.Name);
+                }
+                else
+                {
+                    _probe.BlobMissing(blobReference.Name);
+                }
+            }
+
+            return exists;
         }
 
         public bool ContentValid(IContentReference contentReference)
         {
             contentReference.EnsureNotNull(nameof(contentReference));
 
-            return contentReference.ContentUris
+            var valid = contentReference.ContentUris
                 .Select(contentUri =>
                 {
-                    return Repository.ValueExists(contentUri)
+                    return _repository.ValueExists(contentUri)
                         && Id.ContentUriValid(
                             contentUri,
-                            Repository.RetrieveValue(contentUri));
+                            _repository.RetrieveValue(contentUri));
                 })
                 .Aggregate(true, (total, next) => total & next);
+
+            if (contentReference is BlobReference blobReference)
+            {
+                if (valid)
+                {
+                    _probe.BlobValid(blobReference.Name);
+                }
+                else
+                {
+                    _probe.BlobInvalid(blobReference.Name);
+                }
+            }
+
+            return valid;
+        }
+
+        public void RemoveExcept(IEnumerable<Uri> usedContentUris)
+        {
+            var unusedContentUris = _repository.ListKeys()
+                .Except(usedContentUris)
+                .ToArray();
+
+            foreach (var contentUri in unusedContentUris)
+            {
+                _repository.RemoveValue(contentUri);
+
+                _probe.RemovedContent(contentUri);
+            }
+        }
+
+        public void Copy(IRepository<Uri> repository)
+        {
+            repository.EnsureNotNull(nameof(repository));
+
+            var contentUrisToCopy = _repository.ListKeys()
+                .Except(repository.ListKeys())
+                .ToArray();
+
+            foreach (var contentUri in contentUrisToCopy)
+            {
+                repository.StoreValue(
+                    contentUri,
+                    RetrieveValid(contentUri));
+
+                _probe.CopiedContent(contentUri);
+            }
+        }
+
+        private byte[] RetrieveValid(Uri contentUri)
+        {
+            var value = _repository.RetrieveValue(contentUri);
+
+            if (!Id.ContentUriValid(contentUri, value))
+            {
+                throw new ChunkyardException(
+                    $"Invalid content: {contentUri}");
+            }
+
+            return value;
         }
 
         private Uri[] WriteChunks(
@@ -155,7 +230,7 @@ namespace Chunkyard.Core
                         _hashAlgorithmName,
                         encryptedData);
 
-                    Repository.StoreValue(contentUri, encryptedData);
+                    _repository.StoreValue(contentUri, encryptedData);
 
                     return contentUri;
                 })
