@@ -40,19 +40,19 @@ unreferenced files can be deleted using the `chunkyard gc` command.
 
 ## Build
 
-Run `./csake setup` to install all necessary dotnet tools globally.
+Run `./csake setup` to install all necessary dotnet tools globally. You might
+need to restart your shell so that these tools are accessible.
 
 Run `./csake build` to build the solution.
 
 ## Publish
 
 - Commit all your work
-- Update `CHANGELOG.md` and add a new version header. You do not have to create
-  a commit for this change
-- Run `./csake release` to create a tagged commit containing the latest version
-  found in `CHANGELOG.md`
+- Update `CHANGELOG.md` and add a new version header. Run `./csake release` to
+  create a tagged commit containing the latest version found in `CHANGELOG.md`
 - Run `git push --follow-tags`
-- Run `./csake publish` to create a binary in the `./artifacts` directory
+- Run `./csake publish` to create Linux and Windows binaries in the
+  `./artifacts` directory
 
 ## Usage
 
