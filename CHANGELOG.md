@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 9.3.0 - 2021-05-17
+
 ### Changed
 
 - The order of blob references in a snapshot by sorting them by name
