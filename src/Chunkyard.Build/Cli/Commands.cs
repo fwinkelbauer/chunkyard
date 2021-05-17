@@ -100,7 +100,6 @@ namespace Chunkyard.Build.Cli
                 Git($"add {Changelog}");
                 Git($"commit -m \"{message}\"");
                 Git($"tag -a \"{tag}\" -m \"{message}\"");
-                Git("push --follow-tags");
             });
         }
 
