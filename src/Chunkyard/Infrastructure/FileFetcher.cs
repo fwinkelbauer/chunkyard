@@ -44,7 +44,6 @@ namespace Chunkyard.Infrastructure
 
                     return new Blob(
                         blobName,
-                        File.GetCreationTimeUtc(file),
                         File.GetLastWriteTimeUtc(file));
                 })
                 .ToArray();

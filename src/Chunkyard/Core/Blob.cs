@@ -9,17 +9,13 @@ namespace Chunkyard.Core
     {
         public Blob(
             string name,
-            DateTime creationTimeUtc,
             DateTime lastWriteTimeUtc)
         {
             Name = name;
-            CreationTimeUtc = creationTimeUtc;
             LastWriteTimeUtc = lastWriteTimeUtc;
         }
 
         public string Name { get; }
-
-        public DateTime CreationTimeUtc { get; }
 
         public DateTime LastWriteTimeUtc { get; }
 
@@ -27,7 +23,6 @@ namespace Chunkyard.Core
         {
             return obj is Blob other
                 && Name == other.Name
-                && CreationTimeUtc.Equals(other.CreationTimeUtc)
                 && LastWriteTimeUtc.Equals(other.LastWriteTimeUtc);
         }
 
@@ -35,7 +30,6 @@ namespace Chunkyard.Core
         {
             return HashCode.Combine(
                 Name,
-                CreationTimeUtc,
                 LastWriteTimeUtc);
         }
     }

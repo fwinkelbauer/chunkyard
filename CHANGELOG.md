@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 ### Changed
 
 - The order of blob references in a snapshot by sorting them by name
+- The storage format by removing the CreationTimeUtc property
 
 ### Fixed
 

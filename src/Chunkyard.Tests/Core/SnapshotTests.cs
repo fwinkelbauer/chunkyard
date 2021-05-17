@@ -20,18 +20,15 @@ namespace Chunkyard.Tests.Core
                     new BlobReference(
                         "some blob",
                         date,
-                        date,
                         nonce,
                         new[] { new Uri("some://uri") }),
                     new BlobReference(
                         "changed blob",
                         date,
-                        date,
                         nonce,
                         new[] { new Uri("some://uri") }),
                     new BlobReference(
                         "removed blob",
-                        date,
                         date,
                         nonce,
                         new[] { new Uri("some://uri") })
@@ -45,18 +42,15 @@ namespace Chunkyard.Tests.Core
                     new BlobReference(
                         "some blob",
                         date,
-                        date,
                         nonce,
                         new[] { new Uri("some://uri") }),
                     new BlobReference(
                         "changed blob",
                         date,
-                        date,
                         nonce,
                         new[] { new Uri("some://new.uri") }),
                     new BlobReference(
                         "new blob",
-                        date,
                         date,
                         nonce,
                         new[] { new Uri("some://uri") })

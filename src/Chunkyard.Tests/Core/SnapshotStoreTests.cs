@@ -317,7 +317,7 @@ namespace Chunkyard.Tests.Core
 
             var expectedBlobs = new[]
             {
-                new Blob("some content", CreationTimeUtc, LastWriteTimeUtc)
+                new Blob("some content", LastWriteTimeUtc)
             };
 
             Assert.Equal(expectedBlobs, actualBlobs);
@@ -586,7 +586,7 @@ namespace Chunkyard.Tests.Core
         private static Blob[] CreateBlobs(IEnumerable<string> names)
         {
             return names
-                .Select(n => new Blob(n, CreationTimeUtc, LastWriteTimeUtc))
+                .Select(n => new Blob(n, LastWriteTimeUtc))
                 .ToArray();
         }
 

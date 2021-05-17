@@ -12,21 +12,17 @@ namespace Chunkyard.Core
     {
         public BlobReference(
             string name,
-            DateTime creationTimeUtc,
             DateTime lastWriteTimeUtc,
             byte[] nonce,
             IReadOnlyCollection<Uri> contentUris)
         {
             Name = name;
-            CreationTimeUtc = creationTimeUtc;
             LastWriteTimeUtc = lastWriteTimeUtc;
             Nonce = nonce;
             ContentUris = contentUris;
         }
 
         public string Name { get; }
-
-        public DateTime CreationTimeUtc { get; }
 
         public DateTime LastWriteTimeUtc { get; }
 
@@ -38,7 +34,6 @@ namespace Chunkyard.Core
         {
             return obj is BlobReference other
                 && Name == other.Name
-                && CreationTimeUtc.Equals(other.CreationTimeUtc)
                 && LastWriteTimeUtc.Equals(other.LastWriteTimeUtc)
                 && Nonce.SequenceEqual(other.Nonce)
                 && ContentUris.SequenceEqual(other.ContentUris);
@@ -48,7 +43,6 @@ namespace Chunkyard.Core
         {
             return HashCode.Combine(
                 Name,
-                CreationTimeUtc,
                 LastWriteTimeUtc,
                 Nonce,
                 ContentUris);

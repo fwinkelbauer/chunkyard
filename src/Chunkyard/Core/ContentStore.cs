@@ -92,7 +92,6 @@ namespace Chunkyard.Core
 
             var blobReference = new BlobReference(
                 blob.Name,
-                blob.CreationTimeUtc,
                 blob.LastWriteTimeUtc,
                 nonce,
                 WriteChunks(nonce, inputStream, key));

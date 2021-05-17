@@ -111,7 +111,6 @@ namespace Chunkyard.Core
 
                     if (!scanFuzzy.IsMatch(blob.Name)
                         && previous != null
-                        && previous.CreationTimeUtc.Equals(blob.CreationTimeUtc)
                         && previous.LastWriteTimeUtc.Equals(blob.LastWriteTimeUtc))
                     {
                         return previous;
@@ -205,7 +204,6 @@ namespace Chunkyard.Core
 
                     return new Blob(
                         blobReference.Name,
-                        blobReference.CreationTimeUtc,
                         blobReference.LastWriteTimeUtc);
                 })
                 .ToArray();

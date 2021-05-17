@@ -35,7 +35,6 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(expectedBytes, actualBytes);
             Assert.Equal(blob.Name, blobReference.Name);
-            Assert.Equal(blob.CreationTimeUtc, blobReference.CreationTimeUtc);
             Assert.Equal(blob.LastWriteTimeUtc, blobReference.LastWriteTimeUtc);
             Assert.True(blobReference.ContentUris.Count > 1);
             Assert.True(contentStore.ContentExists(blobReference));
@@ -223,7 +222,6 @@ namespace Chunkyard.Tests.Core
         {
             return new Blob(
                 name,
-                DateTime.UtcNow,
                 DateTime.UtcNow);
         }
     }
