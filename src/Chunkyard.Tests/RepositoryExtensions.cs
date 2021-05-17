@@ -6,7 +6,7 @@ namespace Chunkyard.Tests
 {
     internal static class RepositoryExtensions
     {
-        public static void CorruptValues<T>(
+        public static void InvalidateValues<T>(
             this IRepository<T> repository,
             IEnumerable<T> keys)
         {

@@ -212,7 +212,7 @@ namespace Chunkyard.Tests.Core
                 CreationTimeUtc,
                 OpenRead);
 
-            uriRepository.CorruptValues(uriRepository.ListKeys());
+            uriRepository.InvalidateValues(uriRepository.ListKeys());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotExists(
@@ -266,7 +266,7 @@ namespace Chunkyard.Tests.Core
             var contentUris = snapshot.BlobReferences
                 .SelectMany(b => b.ContentUris);
 
-            uriRepository.CorruptValues(contentUris);
+            uriRepository.InvalidateValues(contentUris);
 
             Assert.True(
                snapshotStore.CheckSnapshotExists(snapshot.SnapshotId, fuzzy));
@@ -553,7 +553,7 @@ namespace Chunkyard.Tests.Core
                 CreationTimeUtc,
                 OpenRead);
 
-            uriRepository.CorruptValues(uriRepository.ListKeys());
+            uriRepository.InvalidateValues(uriRepository.ListKeys());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.Copy(
@@ -575,7 +575,7 @@ namespace Chunkyard.Tests.Core
                 CreationTimeUtc,
                 OpenRead);
 
-            intRepository.CorruptValues(intRepository.ListKeys());
+            intRepository.InvalidateValues(intRepository.ListKeys());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.Copy(
