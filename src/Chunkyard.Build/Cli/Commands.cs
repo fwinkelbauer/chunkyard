@@ -67,16 +67,24 @@ namespace Chunkyard.Build.Cli
                 var version = FetchVersion();
                 var commitId = Git("rev-parse --short HEAD");
 
-                Dotnet(
-                    "publish src/Chunkyard",
-                    $"-c {o.Configuration}",
-                    $"-r {o.Runtime}",
-                    $"-o {ArtifactsDirectory}",
-                    $"-p:Version={version}",
-                    $"-p:SourceRevisionId={commitId}",
-                    "-p:PublishSingleFile=true",
-                    "-p:PublishTrimmed=true",
-                    "-p:TrimMode=Link");
+                foreach (var runtime in new[] { "win-x64", "linux-x64" })
+                {
+                    var directory = Path.Combine(
+                        ArtifactsDirectory,
+                        version,
+                        runtime);
+
+                    Dotnet(
+                        "publish src/Chunkyard",
+                        $"-c {o.Configuration}",
+                        $"-r {runtime}",
+                        $"-o {directory}",
+                        $"-p:Version={version}",
+                        $"-p:SourceRevisionId={commitId}",
+                        "-p:PublishSingleFile=true",
+                        "-p:PublishTrimmed=true",
+                        "-p:TrimMode=Link");
+                }
             });
         }
 
