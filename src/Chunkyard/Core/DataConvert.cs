@@ -15,16 +15,7 @@ namespace Chunkyard.Core
 
         public static T ToObject<T>(byte[] value) where T : notnull
         {
-            try
-            {
-                return JsonSerializer.Deserialize<T>(value)!;
-            }
-            catch (Exception e)
-            {
-                throw new ChunkyardException(
-                    $"Could not deserialize data to {typeof(T).Name}",
-                    e);
-            }
+            return JsonSerializer.Deserialize<T>(value)!;
         }
     }
 }

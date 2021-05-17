@@ -374,8 +374,17 @@ namespace Chunkyard.Core
 
         private SnapshotReference GetSnapshotReference(int snapshotId)
         {
-            return DataConvert.ToObject<SnapshotReference>(
-                _repository.RetrieveValue(snapshotId));
+            try
+            {
+                return DataConvert.ToObject<SnapshotReference>(
+                    _repository.RetrieveValue(snapshotId));
+            }
+            catch (Exception e)
+            {
+                throw new ChunkyardException(
+                    $"Invalid snapshot reference: {snapshotId}",
+                    e);
+            }
         }
     }
 }
