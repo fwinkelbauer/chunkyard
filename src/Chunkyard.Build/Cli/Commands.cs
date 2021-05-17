@@ -15,100 +15,80 @@ namespace Chunkyard.Build.Cli
         private const string Solution = "src/Chunkyard.sln";
         private const string Changelog = "CHANGELOG.md";
 
-        private static readonly List<string> Executed = new List<string>();
-
         public static void Setup()
         {
-            Once(() =>
-            {
-                Dotnet("tool update -g dotnet-format");
-            });
+            Dotnet("tool update -g dotnet-format");
         }
 
         public static void Clean(DotnetOptions o)
         {
-            Once(() =>
-            {
-                Dotnet(
-                    $"clean {Solution}",
-                    $"-c {o.Configuration}");
+            Dotnet(
+                $"clean {Solution}",
+                $"-c {o.Configuration}");
 
-                CleanDirectory(ArtifactsDirectory);
-            });
+            CleanDirectory(ArtifactsDirectory);
         }
 
         public static void Build(DotnetOptions o)
         {
-            Once(() =>
-            {
-                Dotnet(
-                    $"format {Solution}",
-                    "--check");
+            Dotnet(
+                $"format {Solution}",
+                "--check");
 
-                Dotnet(
-                    $"build {Solution}",
-                    $"-c {o.Configuration}",
-                    "-warnaserror");
+            Dotnet(
+                $"build {Solution}",
+                $"-c {o.Configuration}",
+                "-warnaserror");
 
-                Dotnet(
-                    $"test {Solution}",
-                    "--no-build",
-                    $"-c {o.Configuration}");
-            });
+            Dotnet(
+                $"test {Solution}",
+                "--no-build",
+                $"-c {o.Configuration}");
         }
 
         public static void Publish(DotnetOptions o)
         {
-            Once(() =>
+            Clean(o);
+            Build(o);
+
+            var version = FetchVersion();
+            var commitId = Git("rev-parse --short HEAD");
+
+            foreach (var runtime in new[] { "win-x64", "linux-x64" })
             {
-                Clean(o);
-                Build(o);
+                var directory = Path.Combine(
+                    ArtifactsDirectory,
+                    version,
+                    runtime);
 
-                var version = FetchVersion();
-                var commitId = Git("rev-parse --short HEAD");
-
-                foreach (var runtime in new[] { "win-x64", "linux-x64" })
-                {
-                    var directory = Path.Combine(
-                        ArtifactsDirectory,
-                        version,
-                        runtime);
-
-                    Dotnet(
-                        "publish src/Chunkyard",
-                        $"-c {o.Configuration}",
-                        $"-r {runtime}",
-                        $"-o {directory}",
-                        $"-p:Version={version}",
-                        $"-p:SourceRevisionId={commitId}",
-                        "-p:PublishSingleFile=true",
-                        "-p:PublishTrimmed=true",
-                        "-p:TrimMode=Link");
-                }
-            });
+                Dotnet(
+                    "publish src/Chunkyard",
+                    $"-c {o.Configuration}",
+                    $"-r {runtime}",
+                    $"-o {directory}",
+                    $"-p:Version={version}",
+                    $"-p:SourceRevisionId={commitId}",
+                    "-p:PublishSingleFile=true",
+                    "-p:PublishTrimmed=true",
+                    "-p:TrimMode=Link");
+            }
         }
 
         public static void Fmt()
         {
-            Once(() =>
-            {
-                Dotnet($"format {Solution}");
-            });
+            Dotnet($"format {Solution}");
         }
 
         public static void Release()
         {
-            Once(() =>
-            {
-                var version = FetchVersion();
-                var message = $"Prepare Chunkyard release v{version}";
-                var tag = $"v{version}";
+            var version = FetchVersion();
+            var message = $"Prepare Chunkyard release v{version}";
+            var tag = $"v{version}";
 
-                Git("reset");
-                Git($"add {Changelog}");
-                Git($"commit -m \"{message}\"");
-                Git($"tag -a \"{tag}\" -m \"{message}\"");
-            });
+            Git("reset");
+            Git($"add {Changelog}");
+            Git($"commit -m \"{message}\"");
+            Git($"tag -a \"{tag}\" -m \"{message}\"");
         }
 
         private static void Dotnet(params string[] arguments)
@@ -183,20 +163,6 @@ namespace Chunkyard.Build.Cli
             }
 
             return match.Groups[1].Value;
-        }
-
-        private static void Once(
-            Action action,
-            [CallerMemberName] string memberName = "")
-        {
-            if (Executed.Contains(memberName))
-            {
-                return;
-            }
-
-            action();
-
-            Executed.Add(memberName);
         }
 
         private static void CleanDirectory(string directory)
