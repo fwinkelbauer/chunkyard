@@ -8,44 +8,62 @@ namespace Chunkyard.Infrastructure
     /// </summary>
     internal class ConsoleProbe : IProbe
     {
-        public void StoredBlob(string name)
+        public void StoredContent(IContentReference contentReference)
         {
-            Console.WriteLine($"Stored blob: {name}");
+            if (contentReference is BlobReference blobReference)
+            {
+                Console.WriteLine($"Stored blob: {blobReference.Name}");
+            }
         }
 
-        public void RetrievedBlob(string name)
+        public void RetrievedContent(IContentReference contentReference)
         {
-            Console.WriteLine($"Restored blob: {name}");
+            if (contentReference is BlobReference blobReference)
+            {
+                Console.WriteLine($"Restored blob: {blobReference.Name}");
+            }
         }
 
-        public void BlobExists(string name)
+        public void ContentExists(IContentReference contentReference)
         {
-            Console.WriteLine($"Existing blob: {name}");
+            if (contentReference is BlobReference blobReference)
+            {
+                Console.WriteLine($"Existing blob: {blobReference.Name}");
+            }
         }
 
-        public void BlobMissing(string name)
+        public void ContentMissing(IContentReference contentReference)
         {
-            Console.WriteLine($"Missing blob: {name}");
+            if (contentReference is BlobReference blobReference)
+            {
+                Console.WriteLine($"Missing blob: {blobReference.Name}");
+            }
         }
 
-        public void BlobValid(string name)
+        public void ContentValid(IContentReference contentReference)
         {
-            Console.WriteLine($"Valid blob: {name}");
+            if (contentReference is BlobReference blobReference)
+            {
+                Console.WriteLine($"Valid blob: {blobReference.Name}");
+            }
         }
 
-        public void BlobInvalid(string name)
+        public void ContentInvalid(IContentReference contentReference)
         {
-            Console.WriteLine($"Invalid blob: {name}");
+            if (contentReference is BlobReference blobReference)
+            {
+                Console.WriteLine($"Invalid blob: {blobReference.Name}");
+            }
         }
 
-        public void CopiedContent(Uri contentUri)
+        public void CopiedChunk(Uri contentUri)
         {
-            Console.WriteLine($"Copied content: {contentUri}");
+            Console.WriteLine($"Copied chunk: {contentUri}");
         }
 
-        public void RemovedContent(Uri contentUri)
+        public void RemovedChunk(Uri contentUri)
         {
-            Console.WriteLine($"Removed content: {contentUri}");
+            Console.WriteLine($"Removed chunk: {contentUri}");
         }
 
         public void CopiedSnapshot(int snapshotId)

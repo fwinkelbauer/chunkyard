@@ -5,35 +5,35 @@ namespace Chunkyard.Tests.Infrastructure
 {
     internal class DummyProbe : IProbe
     {
-        public void StoredBlob(string name)
+        public void StoredContent(IContentReference contentReference)
         {
         }
 
-        public void RetrievedBlob(string name)
+        public void RetrievedContent(IContentReference contentReference)
         {
         }
 
-        public void BlobExists(string name)
+        public void ContentExists(IContentReference contentReference)
         {
         }
 
-        public void BlobMissing(string name)
+        public void ContentMissing(IContentReference contentReference)
         {
         }
 
-        public void BlobValid(string name)
+        public void ContentValid(IContentReference contentReference)
         {
         }
 
-        public void BlobInvalid(string name)
+        public void ContentInvalid(IContentReference contentReference)
         {
         }
 
-        public void CopiedContent(Uri contentUri)
+        public void CopiedChunk(Uri contentUri)
         {
         }
 
-        public void RemovedContent(Uri contentUri)
+        public void RemovedChunk(Uri contentUri)
         {
         }
 

@@ -4,10 +4,11 @@ This document should provide an overview of how Chunkyard is built.
 
 ## Concepts
 
-- **Content:** A piece of data
+- **Content:** Some data
   - **Blob:** Binary data (e.g. the content of a file)
   - **Document:** A serialized C# object
 - **Repository:** A key/value store which Chunkyard uses to persists data
+- **Chunk:** A Content piece
 - **ContentReference:** A reference which can be used to retrieve content from a
   ContentStore
   - **BlobReference:** Contains additional meta data such as a file name
@@ -21,18 +22,18 @@ This document should provide an overview of how Chunkyard is built.
 
 These classes contain the most important logic:
 
-- **IRepository.cs:** Provides a key/value store
-- **Commands.cs:** Defines all verbs of the command line interface
+- **IRepository.cs:** Provides a persistent key/value store
+- **ContentStore.cs:** Chunks, encrypts, deduplicates and stores Content in an
+  IRepository using a set of URI keys
 - **SnapshotStore.cs:** Provides a set of operations to work with snapshots
   (e.g. create new snapshots, validate a snapshot or restore files from a
   snapshot). Snapshots are stored in an IRepository using an int key
-- **ContentStore.cs:** Encrypts, deduplicates and stores Content in an
-  IRepository using a URI key
+- **Commands.cs:** Defines all verbs of the command line interface
 
 ## Backup Workflow
 
 - Take a set of files
-- Split files into encrypted chunks, store them as Blobs and return a list of
+- Split files into encrypted chunks, store them and return a list of
   BlobReferences
 - Bundle all BlobReferences into a Snapshot and store this Snapshot as a
   document (which creates a DocumentReference)
@@ -43,5 +44,5 @@ These classes contain the most important logic:
 
 - Read a SnapshotReference
 - Retrieve a Snapshot using the DocumentReference found in the SnapshotReference
-- Retrieve Blobs using the BlobReferences of the given Snapshot
-- Decrypt and assemble all files using their BlobReferences
+- Retrieve, decrypt and assemble all files using their BlobReferences of the
+  given Snapshot

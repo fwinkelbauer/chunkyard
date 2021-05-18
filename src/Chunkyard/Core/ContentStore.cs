@@ -38,8 +38,6 @@ namespace Chunkyard.Core
             outputStream.EnsureNotNull(nameof(outputStream));
 
             RetrieveContent(blobReference, key, outputStream);
-
-            _probe.RetrievedBlob(blobReference.Name);
         }
 
         public T RetrieveDocument<T>(
@@ -59,28 +57,6 @@ namespace Chunkyard.Core
             return DataConvert.ToObject<T>(memoryStream.ToArray());
         }
 
-        private void RetrieveContent(
-            IContentReference contentReference,
-            byte[] key,
-            Stream outputStream)
-        {
-            try
-            {
-                foreach (var contentUri in contentReference.ContentUris)
-                {
-                    var decrypted = AesGcmCrypto.Decrypt(
-                        RetrieveValid(contentUri),
-                        key);
-
-                    outputStream.Write(decrypted);
-                }
-            }
-            catch (CryptographicException e)
-            {
-                throw new ChunkyardException("Could not decrypt data", e);
-            }
-        }
-
         public BlobReference StoreBlob(
             Blob blob,
             byte[] key,
@@ -96,7 +72,7 @@ namespace Chunkyard.Core
                 nonce,
                 WriteChunks(nonce, inputStream, key));
 
-            _probe.StoredBlob(blobReference.Name);
+            _probe.StoredContent(blobReference);
 
             return blobReference;
         }
@@ -110,9 +86,13 @@ namespace Chunkyard.Core
             using var memoryStream = new MemoryStream(
                 DataConvert.ToBytes(value));
 
-            return new DocumentReference(
+            var documentReference = new DocumentReference(
                 nonce,
                 WriteChunks(nonce, memoryStream, key));
+
+            _probe.StoredContent(documentReference);
+
+            return documentReference;
         }
 
         public bool ContentExists(IContentReference contentReference)
@@ -123,16 +103,13 @@ namespace Chunkyard.Core
                 .Select(contentUri => _repository.ValueExists(contentUri))
                 .Aggregate(true, (total, next) => total & next);
 
-            if (contentReference is BlobReference blobReference)
+            if (exists)
             {
-                if (exists)
-                {
-                    _probe.BlobExists(blobReference.Name);
-                }
-                else
-                {
-                    _probe.BlobMissing(blobReference.Name);
-                }
+                _probe.ContentExists(contentReference);
+            }
+            else
+            {
+                _probe.ContentMissing(contentReference);
             }
 
             return exists;
@@ -152,16 +129,13 @@ namespace Chunkyard.Core
                 })
                 .Aggregate(true, (total, next) => total & next);
 
-            if (contentReference is BlobReference blobReference)
+            if (valid)
             {
-                if (valid)
-                {
-                    _probe.BlobValid(blobReference.Name);
-                }
-                else
-                {
-                    _probe.BlobInvalid(blobReference.Name);
-                }
+                _probe.ContentValid(contentReference);
+            }
+            else
+            {
+                _probe.ContentInvalid(contentReference);
             }
 
             return valid;
@@ -177,7 +151,7 @@ namespace Chunkyard.Core
             {
                 _repository.RemoveValue(contentUri);
 
-                _probe.RemovedContent(contentUri);
+                _probe.RemovedChunk(contentUri);
             }
         }
 
@@ -195,7 +169,31 @@ namespace Chunkyard.Core
                     contentUri,
                     RetrieveValid(contentUri));
 
-                _probe.CopiedContent(contentUri);
+                _probe.CopiedChunk(contentUri);
+            }
+        }
+
+        private void RetrieveContent(
+            IContentReference contentReference,
+            byte[] key,
+            Stream outputStream)
+        {
+            try
+            {
+                foreach (var contentUri in contentReference.ContentUris)
+                {
+                    var decrypted = AesGcmCrypto.Decrypt(
+                        RetrieveValid(contentUri),
+                        key);
+
+                    outputStream.Write(decrypted);
+                }
+
+                _probe.RetrievedContent(contentReference);
+            }
+            catch (CryptographicException e)
+            {
+                throw new ChunkyardException("Could not decrypt data", e);
             }
         }
 
