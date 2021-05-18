@@ -87,58 +87,12 @@ namespace Chunkyard.Core
             DateTime creationTimeUtc,
             Func<string, Stream> openRead)
         {
-            blobs.EnsureNotNull(nameof(blobs));
-
-            // Load Key here so that it does not happen in the parallel loop
-            _ = Key;
-
-            Snapshot? currentSnapshot = null;
-
-            if (_currentSnapshotId != null)
-            {
-                var currentSnapshotReference = GetSnapshotReference(
-                    _currentSnapshotId.Value);
-
-                currentSnapshot = GetSnapshot(
-                    currentSnapshotReference.DocumentReference);
-            }
-
-            var blobReferences = blobs
-                .AsParallel()
-                .Select(blob =>
-                {
-                    var previous = currentSnapshot?.Find(blob.Name);
-
-                    if (!scanFuzzy.IsMatch(blob.Name)
-                        && previous != null
-                        && previous.LastWriteTimeUtc.Equals(blob.LastWriteTimeUtc))
-                    {
-                        return previous;
-                    }
-
-                    // Known files should be encrypted using the same nonce
-                    var nonce = previous?.Nonce
-                        ?? AesGcmCrypto.GenerateNonce();
-
-                    using var stream = openRead(blob.Name);
-
-                    return _contentStore.StoreBlob(
-                        blob,
-                        Key,
-                        nonce,
-                        stream);
-                })
-                .OrderBy(blobReference => blobReference.Name)
-                .ToArray();
-
-            _currentSnapshotId = _currentSnapshotId == null
-                ? 0
-                : _currentSnapshotId.Value + 1;
-
             var newSnapshot = new Snapshot(
-                _currentSnapshotId.Value,
+                _currentSnapshotId == null
+                    ? 0
+                    : _currentSnapshotId.Value + 1,
                 creationTimeUtc,
-                blobReferences);
+                WriteBlobs(blobs, scanFuzzy, openRead));
 
             var newSnapshotReference = new SnapshotReference(
                 _contentStore.StoreDocument(
@@ -151,6 +105,8 @@ namespace Chunkyard.Core
             _repository.StoreValue(
                 newSnapshot.SnapshotId,
                 DataConvert.ToBytes(newSnapshotReference));
+
+            _currentSnapshotId = newSnapshot.SnapshotId;
 
             _probe.StoredSnapshot(newSnapshot.SnapshotId);
 
@@ -183,9 +139,6 @@ namespace Chunkyard.Core
             Func<string, Stream> openWrite)
         {
             openWrite.EnsureNotNull(nameof(openWrite));
-
-            // Load Key here so that it does not happen in the parallel loop
-            _ = Key;
 
             var blobReferences = ShowSnapshot(
                 snapshotId,
@@ -304,6 +257,54 @@ namespace Chunkyard.Core
 
                 _probe.CopiedSnapshot(snapshotId);
             }
+        }
+
+        private BlobReference[] WriteBlobs(
+            Blob[] blobs,
+            Fuzzy scanFuzzy,
+            Func<string, Stream> openRead)
+        {
+            // Load Key here so that it does not happen in the parallel loop
+            _ = Key;
+
+            Snapshot? currentSnapshot = null;
+
+            if (_currentSnapshotId != null)
+            {
+                var currentSnapshotReference = GetSnapshotReference(
+                    _currentSnapshotId.Value);
+
+                currentSnapshot = GetSnapshot(
+                    currentSnapshotReference.DocumentReference);
+            }
+
+            return blobs
+                .AsParallel()
+                .Select(blob =>
+                {
+                    var previous = currentSnapshot?.Find(blob.Name);
+
+                    if (!scanFuzzy.IsMatch(blob.Name)
+                        && previous != null
+                        && previous.LastWriteTimeUtc.Equals(blob.LastWriteTimeUtc))
+                    {
+                        return previous;
+                    }
+
+                    // Known files should be encrypted using the same nonce
+                    var nonce = previous?.Nonce
+                        ?? AesGcmCrypto.GenerateNonce();
+
+                    using var stream = openRead(blob.Name);
+
+                    return _contentStore.StoreBlob(
+                        blob,
+                        Key,
+                        nonce,
+                        stream);
+                })
+                .OrderBy(blobReference => blobReference.Name)
+                .ToArray();
         }
 
         private Uri[] ListUris()
