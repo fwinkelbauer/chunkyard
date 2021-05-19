@@ -204,7 +204,7 @@ namespace Chunkyard.Core
             if (!Id.ContentUriValid(contentUri, value))
             {
                 throw new ChunkyardException(
-                    $"Invalid content: {contentUri}");
+                    $"Invalid chunk: {contentUri}");
             }
 
             return value;

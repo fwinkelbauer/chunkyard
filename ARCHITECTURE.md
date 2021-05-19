@@ -10,8 +10,8 @@ This document should provide an overview of how Chunkyard is built.
 - **Repository:** A key/value store which Chunkyard uses to persists data
 - **Chunk:** A Content piece
 - **ContentReference:** A reference which can be used to retrieve content from a
-  ContentStore
-  - **BlobReference:** Contains additional meta data such as a file name
+  ContentStore using a set of hashes which point to Chunks
+  - **BlobReference:** Contains meta data such as a file name
   - **DocumentReference:** Contains no additional meta data
 - **Snapshot:** A set of BlobReferences. This can be seen as a snapshot of the
   file system at a given point in time
@@ -22,7 +22,7 @@ This document should provide an overview of how Chunkyard is built.
 
 These classes contain the most important logic:
 
-- **IRepository.cs:** Provides a persistent key/value store
+- **IRepository.cs:** Provides a key/value store
 - **ContentStore.cs:** Chunks, encrypts, deduplicates and stores Content in an
   IRepository using a set of URI keys
 - **SnapshotStore.cs:** Provides a set of operations to work with snapshots
