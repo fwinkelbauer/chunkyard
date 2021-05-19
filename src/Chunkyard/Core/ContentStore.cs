@@ -29,7 +29,7 @@ namespace Chunkyard.Core
             _probe = probe;
         }
 
-        public void RetrieveBlob(
+        public Blob RetrieveBlob(
             BlobReference blobReference,
             byte[] key,
             Stream outputStream)
@@ -38,6 +38,10 @@ namespace Chunkyard.Core
             outputStream.EnsureNotNull(nameof(outputStream));
 
             RetrieveContent(blobReference, key, outputStream);
+
+            return new Blob(
+                blobReference.Name,
+                blobReference.LastWriteTimeUtc);
         }
 
         public T RetrieveDocument<T>(

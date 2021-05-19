@@ -26,12 +26,13 @@ namespace Chunkyard.Tests.Core
                 inputStream);
 
             using var outputStream = new MemoryStream();
-            contentStore.RetrieveBlob(
+            var retrievedBlob = contentStore.RetrieveBlob(
                 blobReference,
                 key,
                 outputStream);
 
             Assert.Equal(expectedBytes, outputStream.ToArray());
+            Assert.Equal(blob, retrievedBlob);
             Assert.Equal(blob.Name, blobReference.Name);
             Assert.Equal(blob.LastWriteTimeUtc, blobReference.LastWriteTimeUtc);
             Assert.True(blobReference.ContentUris.Count > 1);

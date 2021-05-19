@@ -150,14 +150,10 @@ namespace Chunkyard.Core
                 {
                     using var stream = openWrite(blobReference.Name);
 
-                    _contentStore.RetrieveBlob(
+                    return _contentStore.RetrieveBlob(
                         blobReference,
                         Key,
                         stream);
-
-                    return new Blob(
-                        blobReference.Name,
-                        blobReference.LastWriteTimeUtc);
                 })
                 .ToArray();
         }

@@ -5,13 +5,14 @@ This document should provide an overview of how Chunkyard is built.
 ## Concepts
 
 - **Content:** Some data
-  - **Blob:** Binary data (e.g. the content of a file)
+  - **Blob:** Binary data (e.g. the content of a file) with a name and a "last
+    changed" date
   - **Document:** A serialized C# object
 - **Repository:** A key/value store which Chunkyard uses to persists data
 - **Chunk:** A Content piece
 - **ContentReference:** A reference which can be used to retrieve content from a
   ContentStore using a set of hashes which point to Chunks
-  - **BlobReference:** Contains meta data such as a file name
+  - **BlobReference:** Contains Blob meta data
   - **DocumentReference:** Contains no additional meta data
 - **Snapshot:** A set of BlobReferences. This can be seen as a snapshot of the
   file system at a given point in time
