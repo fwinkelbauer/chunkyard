@@ -291,7 +291,7 @@ namespace Chunkyard.Core
                         return previous;
                     }
 
-                    // Known files should be encrypted using the same nonce
+                    // Known blobs should be encrypted using the same nonce
                     var nonce = previous?.Nonce
                         ?? AesGcmCrypto.GenerateNonce();
 
