@@ -37,13 +37,6 @@ namespace Chunkyard.Core
         public IReadOnlyCollection<BlobReference> BlobReferences
             => _blobReferences.Values;
 
-        public BlobReference? Find(string blobName)
-        {
-            return _blobReferences.TryGetValue(blobName, out var blob)
-                ? blob
-                : null;
-        }
-
         public override bool Equals(object? obj)
         {
             return obj is Snapshot other
@@ -58,6 +51,13 @@ namespace Chunkyard.Core
                 SnapshotId,
                 CreationTimeUtc,
                 BlobReferences);
+        }
+
+        internal BlobReference? Find(string blobName)
+        {
+            return _blobReferences.TryGetValue(blobName, out var blob)
+                ? blob
+                : null;
         }
 
         public static DiffSet Diff(Snapshot snapshot1, Snapshot snapshot2)
