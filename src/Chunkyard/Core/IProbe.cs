@@ -8,17 +8,17 @@ namespace Chunkyard.Core
     /// </summary>
     public interface IProbe
     {
-        void StoredContent(IContentReference contentReference);
+        void StoredBlob(BlobReference blobReference);
 
-        void RetrievedContent(IContentReference contentReference);
+        void RetrievedBlob(BlobReference blobReference);
 
-        void ContentExists(IContentReference contentReference);
+        void BlobExists(BlobReference blobReference);
 
-        void ContentMissing(IContentReference contentReference);
+        void BlobMissing(BlobReference blobReference);
 
-        void ContentValid(IContentReference contentReference);
+        void BlobValid(BlobReference blobReference);
 
-        void ContentInvalid(IContentReference contentReference);
+        void BlobInvalid(BlobReference blobReference);
 
         void CopiedChunk(Uri contentUri);
 

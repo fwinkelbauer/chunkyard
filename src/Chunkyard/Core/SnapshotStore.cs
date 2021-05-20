@@ -2,19 +2,23 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace Chunkyard.Core
 {
     /// <summary>
-    /// A class which uses <see cref="ContentStore"/> and
-    /// <see cref="IRepository{int}"/> to store snapshots of a set of files.
+    /// A class which uses <see cref="IRepository{int}"/> and
+    /// <see cref="IRepository{Uri}"/> to store snapshots of a set
+    /// of files.
     /// </summary>
     public class SnapshotStore
     {
         public const int LatestSnapshotId = -1;
 
-        private readonly ContentStore _contentStore;
-        private readonly IRepository<int> _repository;
+        private readonly IRepository<int> _intRepository;
+        private readonly IRepository<Uri> _uriRepository;
+        private readonly FastCdc _fastCdc;
+        private readonly string _hashAlgorithmName;
         private readonly IPrompt _prompt;
         private readonly IProbe _probe;
         private readonly byte[] _salt;
@@ -24,17 +28,21 @@ namespace Chunkyard.Core
         private byte[]? _key;
 
         public SnapshotStore(
-            ContentStore contentStore,
-            IRepository<int> repository,
+            IRepository<int> intRepository,
+            IRepository<Uri> uriRepository,
+            FastCdc fastCdc,
+            string hashAlgorithmName,
             IPrompt prompt,
             IProbe probe)
         {
-            _contentStore = contentStore.EnsureNotNull(nameof(contentStore));
-            _repository = repository.EnsureNotNull(nameof(repository));
+            _intRepository = intRepository.EnsureNotNull(nameof(intRepository));
+            _uriRepository = uriRepository.EnsureNotNull(nameof(uriRepository));
+            _fastCdc = fastCdc;
+            _hashAlgorithmName = hashAlgorithmName;
             _prompt = prompt.EnsureNotNull(nameof(prompt));
             _probe = probe.EnsureNotNull(nameof(probe));
 
-            var snapshotIds = _repository.ListKeys();
+            var snapshotIds = _intRepository.ListKeys();
 
             Array.Sort(snapshotIds);
 
@@ -81,7 +89,7 @@ namespace Chunkyard.Core
             }
         }
 
-        public Snapshot AppendSnapshot(
+        public int AppendSnapshot(
             Blob[] blobs,
             Fuzzy scanFuzzy,
             DateTime creationTimeUtc,
@@ -94,15 +102,17 @@ namespace Chunkyard.Core
                 creationTimeUtc,
                 WriteBlobs(blobs, scanFuzzy, openRead));
 
+            var nonce = AesGcmCrypto.GenerateNonce();
+            using var memoryStream = new MemoryStream(
+                DataConvert.ToBytes(newSnapshot));
+
             var newSnapshotReference = new SnapshotReference(
-                _contentStore.StoreDocument(
-                    newSnapshot,
-                    Key,
-                    AesGcmCrypto.GenerateNonce()),
+                nonce,
+                WriteChunks(nonce, memoryStream),
                 _salt,
                 _iterations);
 
-            _repository.StoreValue(
+            _intRepository.StoreValue(
                 newSnapshot.SnapshotId,
                 DataConvert.ToBytes(newSnapshotReference));
 
@@ -110,7 +120,7 @@ namespace Chunkyard.Core
 
             _probe.StoredSnapshot(newSnapshot.SnapshotId);
 
-            return newSnapshot;
+            return newSnapshot.SnapshotId;
         }
 
         public bool CheckSnapshotExists(
@@ -119,7 +129,24 @@ namespace Chunkyard.Core
         {
             return ShowSnapshot(snapshotId, includeFuzzy)
                 .AsParallel()
-                .Select(br => _contentStore.ContentExists(br))
+                .Select(blobReference =>
+                {
+                    var exists = blobReference.ContentUris
+                        .Select(contentUri => _uriRepository.ValueExists(
+                            contentUri))
+                        .Aggregate(true, (total, next) => total & next);
+
+                    if (exists)
+                    {
+                        _probe.BlobExists(blobReference);
+                    }
+                    else
+                    {
+                        _probe.BlobMissing(blobReference);
+                    }
+
+                    return exists;
+                })
                 .Aggregate(true, (total, next) => total & next);
         }
 
@@ -129,7 +156,29 @@ namespace Chunkyard.Core
         {
             return ShowSnapshot(snapshotId, includeFuzzy)
                 .AsParallel()
-                .Select(br => _contentStore.ContentValid(br))
+                .Select(blobReference =>
+                {
+                    var valid = blobReference.ContentUris
+                        .Select(contentUri =>
+                        {
+                            return _uriRepository.ValueExists(contentUri)
+                                && Id.ContentUriValid(
+                                    contentUri,
+                                    _uriRepository.RetrieveValue(contentUri));
+                        })
+                        .Aggregate(true, (total, next) => total & next);
+
+                    if (valid)
+                    {
+                        _probe.BlobValid(blobReference);
+                    }
+                    else
+                    {
+                        _probe.BlobInvalid(blobReference);
+                    }
+
+                    return valid;
+                })
                 .Aggregate(true, (total, next) => total & next);
         }
 
@@ -150,10 +199,11 @@ namespace Chunkyard.Core
                 {
                     using var stream = openWrite(blobReference.Name);
 
-                    return _contentStore.RetrieveBlob(
-                        blobReference,
-                        Key,
-                        stream);
+                    RetrieveContent(blobReference, stream);
+
+                    _probe.RetrievedBlob(blobReference);
+
+                    return blobReference.ToBlob();
                 })
                 .ToArray();
         }
@@ -167,7 +217,7 @@ namespace Chunkyard.Core
                 var snapshotReference = GetSnapshotReference(
                     resolvedSnapshotId);
 
-                return GetSnapshot(snapshotReference.DocumentReference);
+                return GetSnapshot(snapshotReference);
             }
             catch (ChunkyardException)
             {
@@ -183,7 +233,7 @@ namespace Chunkyard.Core
 
         public Snapshot[] GetSnapshots()
         {
-            var snapshotIds = _repository.ListKeys();
+            var snapshotIds = _intRepository.ListKeys();
 
             Array.Sort(snapshotIds);
 
@@ -203,13 +253,21 @@ namespace Chunkyard.Core
 
         public void GarbageCollect()
         {
-            _contentStore.RemoveExcept(
-                ListUris());
+            var unusedContentUris = _uriRepository.ListKeys()
+                .Except(ListUris())
+                .ToArray();
+
+            foreach (var contentUri in unusedContentUris)
+            {
+                _uriRepository.RemoveValue(contentUri);
+
+                _probe.RemovedChunk(contentUri);
+            }
         }
 
         public void RemoveSnapshot(int snapshotId)
         {
-            _repository.RemoveValue(
+            _intRepository.RemoveValue(
                 ResolveSnapshotId(snapshotId));
 
             _probe.RemovedSnapshot(snapshotId);
@@ -217,7 +275,7 @@ namespace Chunkyard.Core
 
         public void KeepSnapshots(int latestCount)
         {
-            var snapshotIds = _repository.ListKeys();
+            var snapshotIds = _intRepository.ListKeys();
 
             Array.Sort(snapshotIds);
 
@@ -234,11 +292,23 @@ namespace Chunkyard.Core
             IRepository<Uri> contentRepository,
             IRepository<int> snapshotRepository)
         {
+            contentRepository.EnsureNotNull(nameof(contentRepository));
             snapshotRepository.EnsureNotNull(nameof(snapshotRepository));
 
-            _contentStore.Copy(contentRepository);
+            var contentUrisToCopy = _uriRepository.ListKeys()
+                .Except(contentRepository.ListKeys())
+                .ToArray();
 
-            var snapshotIdsToCopy = _repository.ListKeys()
+            foreach (var contentUri in contentUrisToCopy)
+            {
+                contentRepository.StoreValue(
+                    contentUri,
+                    RetrieveValidChunk(contentUri));
+
+                _probe.CopiedChunk(contentUri);
+            }
+
+            var snapshotIdsToCopy = _intRepository.ListKeys()
                 .Except(snapshotRepository.ListKeys())
                 .ToArray();
 
@@ -255,6 +325,61 @@ namespace Chunkyard.Core
             }
         }
 
+        private void RetrieveContent(
+            IContentReference contentReference,
+            Stream outputStream)
+        {
+            try
+            {
+                foreach (var contentUri in contentReference.ContentUris)
+                {
+                    var decrypted = AesGcmCrypto.Decrypt(
+                        RetrieveValidChunk(contentUri),
+                        Key);
+
+                    outputStream.Write(decrypted);
+                }
+            }
+            catch (CryptographicException e)
+            {
+                throw new ChunkyardException("Could not decrypt data", e);
+            }
+        }
+
+        private byte[] RetrieveValidChunk(Uri contentUri)
+        {
+            var value = _uriRepository.RetrieveValue(contentUri);
+
+            if (!Id.ContentUriValid(contentUri, value))
+            {
+                throw new ChunkyardException(
+                    $"Invalid chunk: {contentUri}");
+            }
+
+            return value;
+        }
+
+        private Uri[] WriteChunks(byte[] nonce, Stream stream)
+        {
+            return _fastCdc.SplitIntoChunks(stream)
+                .Select(chunk =>
+                {
+                    var encryptedData = AesGcmCrypto.Encrypt(
+                        nonce,
+                        chunk.Value,
+                        Key);
+
+                    var contentUri = Id.ComputeContentUri(
+                        _hashAlgorithmName,
+                        encryptedData);
+
+                    _uriRepository.StoreValue(contentUri, encryptedData);
+
+                    return contentUri;
+                })
+                .ToArray();
+        }
+
         private BlobReference[] WriteBlobs(
             Blob[] blobs,
             Fuzzy scanFuzzy,
@@ -263,16 +388,9 @@ namespace Chunkyard.Core
             // Load Key here so that it does not happen in the parallel loop
             _ = Key;
 
-            Snapshot? currentSnapshot = null;
-
-            if (_currentSnapshotId != null)
-            {
-                var currentSnapshotReference = GetSnapshotReference(
-                    _currentSnapshotId.Value);
-
-                currentSnapshot = GetSnapshot(
-                    currentSnapshotReference.DocumentReference);
-            }
+            var currentSnapshot = _currentSnapshotId == null
+                ? null
+                : GetSnapshot(_currentSnapshotId.Value);
 
             return blobs
                 .AsParallel()
@@ -293,11 +411,15 @@ namespace Chunkyard.Core
 
                     using var stream = openRead(blob.Name);
 
-                    return _contentStore.StoreBlob(
-                        blob,
-                        Key,
+                    var blobReference = new BlobReference(
+                        blob.Name,
+                        blob.LastWriteTimeUtc,
                         nonce,
-                        stream);
+                        WriteChunks(nonce, stream));
+
+                    _probe.StoredBlob(blobReference);
+
+                    return blobReference;
                 })
                 .OrderBy(blobReference => blobReference.Name)
                 .ToArray();
@@ -307,15 +429,14 @@ namespace Chunkyard.Core
         {
             IEnumerable<Uri> ListUris(int snapshotId)
             {
-                var documentReference = GetSnapshotReference(snapshotId)
-                    .DocumentReference;
+                var snapshotReference = GetSnapshotReference(snapshotId);
 
-                foreach (var contentUri in documentReference.ContentUris)
+                foreach (var contentUri in snapshotReference.ContentUris)
                 {
                     yield return contentUri;
                 }
 
-                var snapshot = GetSnapshot(documentReference);
+                var snapshot = GetSnapshot(snapshotReference);
 
                 foreach (var blobReference in snapshot.BlobReferences)
                 {
@@ -326,7 +447,7 @@ namespace Chunkyard.Core
                 }
             }
 
-            return _repository.ListKeys()
+            return _intRepository.ListKeys()
                 .SelectMany(ListUris)
                 .Distinct()
                 .ToArray();
@@ -349,13 +470,17 @@ namespace Chunkyard.Core
                 : _currentSnapshotId.Value + snapshotId + 1;
         }
 
-        private Snapshot GetSnapshot(DocumentReference documentReference)
+        private Snapshot GetSnapshot(SnapshotReference snapshotReference)
         {
             try
             {
-                return _contentStore.RetrieveDocument<Snapshot>(
-                    documentReference,
-                    Key);
+                using var memoryStream = new MemoryStream();
+
+                RetrieveContent(
+                    snapshotReference,
+                    memoryStream);
+
+                return DataConvert.ToObject<Snapshot>(memoryStream.ToArray());
             }
             catch (ChunkyardException)
             {
@@ -374,7 +499,7 @@ namespace Chunkyard.Core
             try
             {
                 return DataConvert.ToObject<SnapshotReference>(
-                    _repository.RetrieveValue(snapshotId));
+                    _intRepository.RetrieveValue(snapshotId));
             }
             catch (Exception e)
             {

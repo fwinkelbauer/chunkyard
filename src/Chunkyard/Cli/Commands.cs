@@ -188,12 +188,10 @@ namespace Chunkyard.Cli
             var probe = new ConsoleProbe();
 
             return new SnapshotStore(
-                new ContentStore(
-                    CreateUriRepository(repositoryPath),
-                    new FastCdc(),
-                    Id.AlgorithmSHA256,
-                    probe),
                 CreateIntRepository(repositoryPath),
+                CreateUriRepository(repositoryPath),
+                new FastCdc(),
+                Id.AlgorithmSHA256,
                 new EnvironmentPrompt(
                     new ConsolePrompt()),
                 probe);

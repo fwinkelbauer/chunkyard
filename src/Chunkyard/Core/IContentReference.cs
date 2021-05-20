@@ -5,7 +5,7 @@ namespace Chunkyard.Core
 {
     /// <summary>
     /// A reference which describes how to retrieve encrypted and chunked data
-    /// from a <see cref="ContentStore"/>.
+    /// from a <see cref="SnapshotStore"/>.
     /// </summary>
     public interface IContentReference
     {

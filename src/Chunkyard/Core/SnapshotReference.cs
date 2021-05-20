@@ -1,25 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Chunkyard.Core
 {
     /// <summary>
     /// A reference which can be used to retrieve a <see cref="Snapshot"/> from
-    /// a <see cref="ContentStore"/> based on a password based encryption key.
+    /// a <see cref="SnapshotStore"/> based on a password based encryption key.
     /// </summary>
-    public class SnapshotReference
+    internal class SnapshotReference : IContentReference
     {
         public SnapshotReference(
-            DocumentReference documentReference,
+            byte[] nonce,
+            IReadOnlyCollection<Uri> contentUris,
             byte[] salt,
             int iterations)
         {
-            DocumentReference = documentReference;
+            Nonce = nonce;
+            ContentUris = contentUris;
             Salt = salt;
             Iterations = iterations;
         }
 
-        public DocumentReference DocumentReference { get; }
+        public byte[] Nonce { get; }
+
+        public IReadOnlyCollection<Uri> ContentUris { get; }
 
         public byte[] Salt { get; }
 
@@ -28,14 +33,15 @@ namespace Chunkyard.Core
         public override bool Equals(object? obj)
         {
             return obj is SnapshotReference other
-                && DocumentReference.Equals(other.DocumentReference)
+                && Nonce.SequenceEqual(other.Nonce)
+                && ContentUris.SequenceEqual(other.ContentUris)
                 && Salt.SequenceEqual(other.Salt)
                 && Iterations == other.Iterations;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(DocumentReference, Salt, Iterations);
+            return HashCode.Combine(Nonce, ContentUris, Salt, Iterations);
         }
     }
 }

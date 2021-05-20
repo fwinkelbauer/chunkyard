@@ -5,8 +5,8 @@ using System.Linq;
 namespace Chunkyard.Core
 {
     /// <summary>
-    /// An implementation of <see cref="IContentReference"/> to store binary
-    /// data in an <see cref="ContentStore"/>.
+    /// A reference which can be used to store binary data in a
+    /// <see cref="SnapshotStore"/>.
     /// </summary>
     public class BlobReference : IContentReference
     {

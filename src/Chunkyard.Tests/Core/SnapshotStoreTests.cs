@@ -15,19 +15,17 @@ namespace Chunkyard.Tests.Core
         public static void AppendSnapshot_Creates_Snapshot()
         {
             var snapshotStore = CreateSnapshotStore();
-            var expectedNames = new[] { "some content" };
+            var expectedNames = new[] { "some blob" };
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 CreateBlobs(expectedNames),
                 Fuzzy.MatchAll,
                 DateTime.UtcNow,
                 OpenRead);
 
-            Assert.Equal(0, snapshot.SnapshotId);
+            var snapshot = snapshotStore.GetSnapshot(snapshotId);
 
-            Assert.Equal(
-                snapshot,
-                snapshotStore.GetSnapshot(snapshot.SnapshotId));
+            Assert.Equal(0, snapshotId);
 
             Assert.Equal(
                 new[] { snapshot },
@@ -42,19 +40,22 @@ namespace Chunkyard.Tests.Core
         public static void AppendSnapshot_Reuses_Nonce_For_Known_Blobs()
         {
             var snapshotStore = CreateSnapshotStore();
-            var names = new[] { "some content" };
+            var names = new[] { "some blob" };
 
-            var snapshot1 = snapshotStore.AppendSnapshot(
+            var snapshotId1 = snapshotStore.AppendSnapshot(
                 CreateBlobs(names),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 blobName => OpenRead($"old {blobName}"));
 
-            var snapshot2 = snapshotStore.AppendSnapshot(
+            var snapshotId2 = snapshotStore.AppendSnapshot(
                 CreateBlobs(names),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 blobName => OpenRead($"new {blobName}"));
+
+            var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
+            var snapshot2 = snapshotStore.GetSnapshot(snapshotId2);
 
             Assert.NotEqual(
                 snapshot1.BlobReferences,
@@ -70,22 +71,25 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void AppendSnapshot_Does_Not_Read_Unchanged_Content()
+        public static void AppendSnapshot_Does_Not_Read_Unchanged_Blob()
         {
             var snapshotStore = CreateSnapshotStore();
             var blobs = CreateBlobs();
 
-            var snapshot1 = snapshotStore.AppendSnapshot(
+            var snapshotId1 = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 OpenRead);
 
-            var snapshot2 = snapshotStore.AppendSnapshot(
+            var snapshotId2 = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 _ => throw new NotImplementedException());
+
+            var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
+            var snapshot2 = snapshotStore.GetSnapshot(snapshotId2);
 
             Assert.Equal(
                 snapshot1.BlobReferences,
@@ -93,22 +97,25 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void AppendSnapshot_Does_Read_Unchanged_Content_When_Asked_To()
+        public static void AppendSnapshot_Does_Read_Unchanged_Blob_When_Asked_To()
         {
             var snapshotStore = CreateSnapshotStore();
             var blobs = CreateBlobs();
 
-            var snapshot1 = snapshotStore.AppendSnapshot(
+            var snapshotId1 = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 blobName => OpenRead($"old {blobName}"));
 
-            var snapshot2 = snapshotStore.AppendSnapshot(
+            var snapshotId2 = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchAll,
                 DateTime.UtcNow,
                 blobName => OpenRead($"new {blobName}"));
+
+            var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
+            var snapshot2 = snapshotStore.GetSnapshot(snapshotId2);
 
             Assert.NotEqual(
                 snapshot1.BlobReferences,
@@ -116,38 +123,17 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void AppendSnapshot_Creates_Snapshot_Even_If_Empty()
+        public static void AppendSnapshot_Creates_Snapshot_Without_Any_Data()
         {
             var snapshotStore = CreateSnapshotStore();
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 CreateBlobs(Array.Empty<string>()),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 OpenRead);
 
-            Assert.Equal(0, snapshot.SnapshotId);
-        }
-
-        [Fact]
-        public static void AppendSnapshot_Creates_Snapshot_Without_New_Data()
-        {
-            var snapshotStore = CreateSnapshotStore();
-            var blobs = CreateBlobs();
-
-            snapshotStore.AppendSnapshot(
-                blobs,
-                Fuzzy.MatchNothing,
-                DateTime.UtcNow,
-                OpenRead);
-
-            var snapshot = snapshotStore.AppendSnapshot(
-                blobs,
-                Fuzzy.MatchNothing,
-                DateTime.UtcNow,
-                OpenRead);
-
-            Assert.Equal(1, snapshot.SnapshotId);
+            Assert.Equal(0, snapshotId);
         }
 
         [Fact]
@@ -156,15 +142,14 @@ namespace Chunkyard.Tests.Core
             var uriRepository = CreateRepository<Uri>();
             var intRepository = CreateRepository<int>();
 
-            var expectedNames = new[] { "some content" };
+            var expectedNames = new[] { "some blob" };
 
             var snapshotId = CreateSnapshotStore(uriRepository, intRepository)
                 .AppendSnapshot(
                     CreateBlobs(expectedNames),
                     Fuzzy.MatchNothing,
                     DateTime.UtcNow,
-                    OpenRead)
-                .SnapshotId;
+                    OpenRead);
 
             var actualNames = CreateSnapshotStore(uriRepository, intRepository)
                 .GetSnapshot(snapshotId).BlobReferences
@@ -180,14 +165,14 @@ namespace Chunkyard.Tests.Core
         {
             var snapshotStore = CreateSnapshotStore();
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 CreateBlobs(),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 OpenRead);
 
             Assert.Equal(
-                snapshot,
+                snapshotStore.GetSnapshot(snapshotId),
                 snapshotStore.GetSnapshot(SnapshotStore.LatestSnapshotId));
         }
 
@@ -207,7 +192,7 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore();
             var checkFuzzy = Fuzzy.MatchAll;
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 CreateBlobs(),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
@@ -215,12 +200,12 @@ namespace Chunkyard.Tests.Core
 
             Assert.True(
                 snapshotStore.CheckSnapshotExists(
-                    snapshot.SnapshotId,
+                    snapshotId,
                     checkFuzzy));
 
             Assert.True(
                 snapshotStore.CheckSnapshotValid(
-                    snapshot.SnapshotId,
+                    snapshotId,
                     checkFuzzy));
         }
 
@@ -231,22 +216,25 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore(uriRepository);
             var checkFuzzy = Fuzzy.MatchAll;
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 CreateBlobs(),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 OpenRead);
 
-            uriRepository.RemoveValues(uriRepository.ListKeys());
+            foreach (var contentUri in uriRepository.ListKeys())
+            {
+                uriRepository.RemoveValue(contentUri);
+            }
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotExists(
-                    snapshot.SnapshotId,
+                    snapshotId,
                     checkFuzzy));
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotValid(
-                    snapshot.SnapshotId,
+                    snapshotId,
                     checkFuzzy));
         }
 
@@ -257,80 +245,85 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore(uriRepository);
             var checkFuzzy = Fuzzy.MatchAll;
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 CreateBlobs(),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 OpenRead);
 
-            uriRepository.InvalidateValues(uriRepository.ListKeys());
+            Invalidate(uriRepository, uriRepository.ListKeys());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotExists(
-                    snapshot.SnapshotId,
+                    snapshotId,
                     checkFuzzy));
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.CheckSnapshotValid(
-                    snapshot.SnapshotId,
+                    snapshotId,
                     checkFuzzy));
         }
 
         [Fact]
-        public static void CheckSnapshot_Detects_Missing_Content()
+        public static void CheckSnapshot_Detects_Missing_Blob()
         {
             var uriRepository = CreateRepository<Uri>();
             var snapshotStore = CreateSnapshotStore(uriRepository);
             var checkFuzzy = Fuzzy.MatchAll;
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 CreateBlobs(),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 OpenRead);
 
-            var contentUris = snapshot.BlobReferences
+            var contentUris = snapshotStore.GetSnapshot(snapshotId)
+                .BlobReferences
                 .SelectMany(b => b.ContentUris);
 
-            uriRepository.RemoveValues(contentUris);
+            foreach (var contentUri in contentUris)
+            {
+                uriRepository.RemoveValue(contentUri);
+            }
 
             Assert.False(
                 snapshotStore.CheckSnapshotExists(
-                    snapshot.SnapshotId,
+                    snapshotId,
                     checkFuzzy));
 
             Assert.False(
                 snapshotStore.CheckSnapshotValid(
-                    snapshot.SnapshotId,
+                    snapshotId,
                     checkFuzzy));
         }
 
         [Fact]
-        public static void CheckSnapshot_Detects_Invalid_Content()
+        public static void CheckSnapshot_Detects_Invalid_Blob()
         {
             var uriRepository = CreateRepository<Uri>();
             var snapshotStore = CreateSnapshotStore(uriRepository);
             var checkFuzzy = Fuzzy.MatchAll;
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 CreateBlobs(),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 OpenRead);
 
-            var contentUris = snapshot.BlobReferences
-                .SelectMany(br => br.ContentUris);
+            var contentUris = snapshotStore.GetSnapshot(snapshotId)
+                .BlobReferences
+                .SelectMany(b => b.ContentUris);
 
-            uriRepository.InvalidateValues(contentUris);
+            Invalidate(uriRepository, contentUris);
 
             Assert.True(
                snapshotStore.CheckSnapshotExists(
-                   snapshot.SnapshotId,
+                   snapshotId,
                    checkFuzzy));
 
             Assert.False(
                 snapshotStore.CheckSnapshotValid(
-                    snapshot.SnapshotId,
+                    snapshotId,
                     checkFuzzy));
         }
 
@@ -352,12 +345,12 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void RestoreSnapshot_Writes_Content_To_Streams()
+        public static void RestoreSnapshot_Writes_Blob_To_Stream()
         {
             var snapshotStore = CreateSnapshotStore();
-            var blobs = CreateBlobs(new[] { "some content" });
+            var blobs = CreateBlobs(new[] { "some blob" });
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
@@ -366,7 +359,7 @@ namespace Chunkyard.Tests.Core
             using var writeStream = new MemoryStream();
 
             var restoredBlobs = snapshotStore.RestoreSnapshot(
-                snapshot.SnapshotId,
+                snapshotId,
                 Fuzzy.MatchAll,
                 _ => writeStream);
 
@@ -390,19 +383,35 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void ShowSnapshot_Lists_Content()
+        public static void RestoreSnapshot_Throws_Given_Wrong_Key()
+        {
+            var snapshotId = CreateSnapshotStore(password: "a").AppendSnapshot(
+                CreateBlobs(new[] { "some blob" }),
+                Fuzzy.MatchNothing,
+                DateTime.UtcNow,
+                OpenRead);
+
+            Assert.Throws<ChunkyardException>(
+                () => CreateSnapshotStore(password: "b").RestoreSnapshot(
+                    snapshotId,
+                    Fuzzy.MatchAll,
+                    _ => new MemoryStream()));
+        }
+
+        [Fact]
+        public static void ShowSnapshot_Lists_Blobs()
         {
             var snapshotStore = CreateSnapshotStore();
             var blobs = CreateBlobs();
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 OpenRead);
 
             var blobReferences = snapshotStore.ShowSnapshot(
-                snapshot.SnapshotId,
+                snapshotId,
                 Fuzzy.MatchAll);
 
             Assert.Equal(
@@ -426,7 +435,7 @@ namespace Chunkyard.Tests.Core
         {
             var snapshotStore = CreateSnapshotStore();
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 CreateBlobs(),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
@@ -436,7 +445,7 @@ namespace Chunkyard.Tests.Core
 
             Assert.True(
                 snapshotStore.CheckSnapshotValid(
-                    snapshot.SnapshotId,
+                    snapshotId,
                     Fuzzy.MatchAll));
         }
 
@@ -447,13 +456,13 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore(
                 intRepository: intRepository);
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 CreateBlobs(),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 OpenRead);
 
-            intRepository.RemoveValue(snapshot.SnapshotId);
+            intRepository.RemoveValue(snapshotId);
 
             snapshotStore.GarbageCollect();
 
@@ -466,7 +475,7 @@ namespace Chunkyard.Tests.Core
             var snapshotStore = CreateSnapshotStore();
             var blobs = CreateBlobs();
 
-            var firstSnapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
@@ -478,7 +487,7 @@ namespace Chunkyard.Tests.Core
                 DateTime.UtcNow,
                 OpenRead);
 
-            snapshotStore.RemoveSnapshot(firstSnapshot.SnapshotId);
+            snapshotStore.RemoveSnapshot(snapshotId);
             snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
 
             Assert.Empty(snapshotStore.GetSnapshots());
@@ -506,7 +515,7 @@ namespace Chunkyard.Tests.Core
                 DateTime.UtcNow,
                 OpenRead);
 
-            var secondSnapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
@@ -515,8 +524,8 @@ namespace Chunkyard.Tests.Core
             snapshotStore.KeepSnapshots(1);
 
             Assert.Equal(
-                new[] { secondSnapshot },
-                snapshotStore.GetSnapshots());
+                new[] { snapshotId },
+                snapshotStore.GetSnapshots().Select(s => s.SnapshotId));
         }
 
         [Fact]
@@ -524,7 +533,7 @@ namespace Chunkyard.Tests.Core
         {
             var snapshotStore = CreateSnapshotStore();
 
-            var snapshot = snapshotStore.AppendSnapshot(
+            var snapshotId = snapshotStore.AppendSnapshot(
                 CreateBlobs(),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
@@ -534,8 +543,8 @@ namespace Chunkyard.Tests.Core
             snapshotStore.KeepSnapshots(2);
 
             Assert.Equal(
-                new[] { snapshot },
-                snapshotStore.GetSnapshots());
+                new[] { snapshotId },
+                snapshotStore.GetSnapshots().Select(s => s.SnapshotId));
         }
 
         [Fact]
@@ -599,7 +608,7 @@ namespace Chunkyard.Tests.Core
                 DateTime.UtcNow,
                 OpenRead);
 
-            uriRepository.InvalidateValues(uriRepository.ListKeys());
+            Invalidate(uriRepository, uriRepository.ListKeys());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.Copy(
@@ -621,7 +630,7 @@ namespace Chunkyard.Tests.Core
                 DateTime.UtcNow,
                 OpenRead);
 
-            intRepository.InvalidateValues(intRepository.ListKeys());
+            Invalidate(intRepository, intRepository.ListKeys());
 
             Assert.Throws<ChunkyardException>(
                 () => snapshotStore.Copy(
@@ -642,29 +651,50 @@ namespace Chunkyard.Tests.Core
             return new MemoryStream(ToBytes(blobName));
         }
 
-        private static byte[] ToBytes(string content)
+        private static byte[] ToBytes(string blobName)
         {
-            return Encoding.UTF8.GetBytes(content);
+            // Create data that is large enough to create at least two chunks
+            var bytes = new byte[1025];
+
+            Encoding.UTF8.GetBytes(blobName)
+                .CopyTo(bytes, 0);
+
+            return bytes;
+        }
+
+        private static void Invalidate<T>(
+            IRepository<T> repository,
+            IEnumerable<T> keys)
+        {
+            foreach (var key in keys)
+            {
+                var value = repository.RetrieveValue(key);
+
+                for (var i = 0; i < value.Length; i++)
+                {
+                    value[i]++;
+                }
+
+                repository.RemoveValue(key);
+                repository.StoreValue(key, value);
+            }
         }
 
         private static SnapshotStore CreateSnapshotStore(
             IRepository<Uri>? uriRepository = null,
-            IRepository<int>? intRepository = null)
+            IRepository<int>? intRepository = null,
+            string password = "secret")
         {
             uriRepository ??= CreateRepository<Uri>();
             intRepository ??= CreateRepository<int>();
 
-            var probe = new DummyProbe();
-
             return new SnapshotStore(
-                new ContentStore(
-                    uriRepository,
-                    new FastCdc(),
-                    Id.AlgorithmSHA256,
-                    probe),
                 intRepository,
-                new DummyPrompt(),
-                probe);
+                uriRepository,
+                new FastCdc(64, 256, 1024),
+                Id.AlgorithmSHA256,
+                new DummyPrompt(password),
+                new DummyProbe());
         }
 
         private static IRepository<T> CreateRepository<T>()

@@ -33,7 +33,7 @@ namespace Chunkyard.Infrastructure
                         ? file
                         : Path.GetRelativePath(parent, file);
 
-                    // Using a content name with backslashes will not create
+                    // Using a blob name with backslashes will not create
                     // sub-directories when restoring a file on Linux.
                     //
                     // Also we don't want to include any ":" so that Windows
