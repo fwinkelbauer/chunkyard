@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 10.0.0 - 2021-05-20
+
 ### Changed
 
 - The storage format by simplifying snapshot references
