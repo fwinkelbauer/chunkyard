@@ -188,8 +188,8 @@ namespace Chunkyard.Cli
             var probe = new ConsoleProbe();
 
             return new SnapshotStore(
-                CreateIntRepository(repositoryPath),
                 CreateUriRepository(repositoryPath),
+                CreateIntRepository(repositoryPath),
                 new FastCdc(),
                 Id.AlgorithmSHA256,
                 new EnvironmentPrompt(
@@ -197,18 +197,18 @@ namespace Chunkyard.Cli
                 probe);
         }
 
-        private static IRepository<int> CreateIntRepository(
-            string repositoryPath)
-        {
-            return FileRepository.CreateIntRepository(
-                Path.Combine(repositoryPath, "snapshots"));
-        }
-
         private static IRepository<Uri> CreateUriRepository(
             string repositoryPath)
         {
             return FileRepository.CreateUriRepository(
                 Path.Combine(repositoryPath, "blobs"));
+        }
+
+        private static IRepository<int> CreateIntRepository(
+            string repositoryPath)
+        {
+            return FileRepository.CreateIntRepository(
+                Path.Combine(repositoryPath, "snapshots"));
         }
     }
 }

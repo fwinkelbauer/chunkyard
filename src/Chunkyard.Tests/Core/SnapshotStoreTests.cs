@@ -347,14 +347,19 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void RestoreSnapshot_Writes_Blob_To_Stream()
         {
-            var snapshotStore = CreateSnapshotStore();
+            var snapshotStore = CreateSnapshotStore(
+                fastCdc: new FastCdc(64, 256, 1024));
+
             var blobs = CreateBlobs(new[] { "some blob" });
+
+            // Create data that is large enough to create at least two chunks
+            var expectedBytes = AesGcmCrypto.GenerateRandomNumber(1025);
 
             var snapshotId = snapshotStore.AppendSnapshot(
                 blobs,
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
-                OpenRead);
+                _ => new MemoryStream(expectedBytes));
 
             using var writeStream = new MemoryStream();
 
@@ -363,11 +368,12 @@ namespace Chunkyard.Tests.Core
                 Fuzzy.MatchAll,
                 _ => writeStream);
 
-            Assert.Equal(blobs, restoredBlobs);
+            var chunkCount = snapshotStore.GetSnapshot(snapshotId)
+                .BlobReferences.First().ContentUris.Count;
 
-            Assert.Equal(
-                ToBytes(blobs[0].Name),
-                writeStream.ToArray());
+            Assert.True(chunkCount > 1);
+            Assert.Equal(blobs, restoredBlobs);
+            Assert.Equal(expectedBytes, writeStream.ToArray());
         }
 
         [Fact]
@@ -386,7 +392,7 @@ namespace Chunkyard.Tests.Core
         public static void RestoreSnapshot_Throws_Given_Wrong_Key()
         {
             var snapshotId = CreateSnapshotStore(password: "a").AppendSnapshot(
-                CreateBlobs(new[] { "some blob" }),
+                CreateBlobs(),
                 Fuzzy.MatchNothing,
                 DateTime.UtcNow,
                 OpenRead);
@@ -648,18 +654,8 @@ namespace Chunkyard.Tests.Core
 
         private static Stream OpenRead(string blobName)
         {
-            return new MemoryStream(ToBytes(blobName));
-        }
-
-        private static byte[] ToBytes(string blobName)
-        {
-            // Create data that is large enough to create at least two chunks
-            var bytes = new byte[1025];
-
-            Encoding.UTF8.GetBytes(blobName)
-                .CopyTo(bytes, 0);
-
-            return bytes;
+            return new MemoryStream(
+                Encoding.UTF8.GetBytes(blobName));
         }
 
         private static void Invalidate<T>(
@@ -683,15 +679,13 @@ namespace Chunkyard.Tests.Core
         private static SnapshotStore CreateSnapshotStore(
             IRepository<Uri>? uriRepository = null,
             IRepository<int>? intRepository = null,
+            FastCdc? fastCdc = null,
             string password = "secret")
         {
-            uriRepository ??= CreateRepository<Uri>();
-            intRepository ??= CreateRepository<int>();
-
             return new SnapshotStore(
-                intRepository,
-                uriRepository,
-                new FastCdc(64, 256, 1024),
+                uriRepository ?? CreateRepository<Uri>(),
+                intRepository ?? CreateRepository<int>(),
+                fastCdc ?? new FastCdc(),
                 Id.AlgorithmSHA256,
                 new DummyPrompt(password),
                 new DummyProbe());

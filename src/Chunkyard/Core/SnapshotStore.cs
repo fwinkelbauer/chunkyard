@@ -15,8 +15,8 @@ namespace Chunkyard.Core
     {
         public const int LatestSnapshotId = -1;
 
-        private readonly IRepository<int> _intRepository;
         private readonly IRepository<Uri> _uriRepository;
+        private readonly IRepository<int> _intRepository;
         private readonly FastCdc _fastCdc;
         private readonly string _hashAlgorithmName;
         private readonly IPrompt _prompt;
@@ -28,15 +28,15 @@ namespace Chunkyard.Core
         private byte[]? _key;
 
         public SnapshotStore(
-            IRepository<int> intRepository,
             IRepository<Uri> uriRepository,
+            IRepository<int> intRepository,
             FastCdc fastCdc,
             string hashAlgorithmName,
             IPrompt prompt,
             IProbe probe)
         {
-            _intRepository = intRepository.EnsureNotNull(nameof(intRepository));
             _uriRepository = uriRepository.EnsureNotNull(nameof(uriRepository));
+            _intRepository = intRepository.EnsureNotNull(nameof(intRepository));
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
             _prompt = prompt.EnsureNotNull(nameof(prompt));
