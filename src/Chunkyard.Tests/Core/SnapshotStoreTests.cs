@@ -35,7 +35,7 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(
                 expectedNames,
-                snapshot.BlobReferences.Select(c => c.Name));
+                snapshot.BlobReferences.Select(br => br.Name));
         }
 
         [Fact]
@@ -61,12 +61,12 @@ namespace Chunkyard.Tests.Core
                 snapshot2.BlobReferences);
 
             Assert.Equal(
-                snapshot1.BlobReferences.Select(b => b.Name),
-                snapshot2.BlobReferences.Select(b => b.Name));
+                snapshot1.BlobReferences.Select(br => br.Name),
+                snapshot2.BlobReferences.Select(br => br.Name));
 
             Assert.Equal(
-                snapshot1.BlobReferences.Select(b => b.Nonce),
-                snapshot2.BlobReferences.Select(b => b.Nonce));
+                snapshot1.BlobReferences.Select(br => br.Nonce),
+                snapshot2.BlobReferences.Select(br => br.Nonce));
         }
 
         [Fact]
@@ -168,7 +168,7 @@ namespace Chunkyard.Tests.Core
 
             var actualNames = CreateSnapshotStore(uriRepository, intRepository)
                 .GetSnapshot(snapshotId).BlobReferences
-                .Select(c => c.Name);
+                .Select(br => br.Name);
 
             Assert.Equal(
                 expectedNames,
@@ -319,7 +319,7 @@ namespace Chunkyard.Tests.Core
                 OpenRead);
 
             var contentUris = snapshot.BlobReferences
-                .SelectMany(b => b.ContentUris);
+                .SelectMany(br => br.ContentUris);
 
             uriRepository.InvalidateValues(contentUris);
 
@@ -407,7 +407,7 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(
                 blobs.Select(b => b.Name),
-                blobReferences.Select(c => c.Name));
+                blobReferences.Select(br => br.Name));
         }
 
         [Fact]

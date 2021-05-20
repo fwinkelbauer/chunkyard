@@ -33,8 +33,7 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(expectedBytes, outputStream.ToArray());
             Assert.Equal(blob, retrievedBlob);
-            Assert.Equal(blob.Name, blobReference.Name);
-            Assert.Equal(blob.LastWriteTimeUtc, blobReference.LastWriteTimeUtc);
+            Assert.Equal(blob, blobReference.ToBlob());
             Assert.True(blobReference.ContentUris.Count > 1);
             Assert.True(contentStore.ContentExists(blobReference));
             Assert.True(contentStore.ContentValid(blobReference));

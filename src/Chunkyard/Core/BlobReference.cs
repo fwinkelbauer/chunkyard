@@ -30,6 +30,11 @@ namespace Chunkyard.Core
 
         public IReadOnlyCollection<Uri> ContentUris { get; }
 
+        public Blob ToBlob()
+        {
+            return new Blob(Name, LastWriteTimeUtc);
+        }
+
         public override bool Equals(object? obj)
         {
             return obj is BlobReference other

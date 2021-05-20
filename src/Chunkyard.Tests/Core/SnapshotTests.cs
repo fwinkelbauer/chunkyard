@@ -23,7 +23,12 @@ namespace Chunkyard.Tests.Core
                         nonce,
                         new[] { new Uri("some://uri") }),
                     new BlobReference(
-                        "changed blob",
+                        "changed uri blob",
+                        date,
+                        nonce,
+                        new[] { new Uri("some://uri") }),
+                    new BlobReference(
+                        "changed date blob",
                         date,
                         nonce,
                         new[] { new Uri("some://uri") }),
@@ -45,10 +50,15 @@ namespace Chunkyard.Tests.Core
                         nonce,
                         new[] { new Uri("some://uri") }),
                     new BlobReference(
-                        "changed blob",
+                        "changed uri blob",
                         date,
                         nonce,
                         new[] { new Uri("some://new.uri") }),
+                    new BlobReference(
+                        "changed date blob",
+                        date.AddSeconds(1),
+                        nonce,
+                        new[] { new Uri("some://uri") }),
                     new BlobReference(
                         "new blob",
                         date,
@@ -58,7 +68,7 @@ namespace Chunkyard.Tests.Core
 
             var expectedDiff = new DiffSet(
                 new[] { "new blob" },
-                new[] { "changed blob" },
+                new[] { "changed uri blob", "changed date blob" },
                 new[] { "removed blob" });
 
             Assert.Equal(

@@ -197,7 +197,7 @@ namespace Chunkyard.Core
             Fuzzy includeFuzzy)
         {
             return GetSnapshot(snapshotId).BlobReferences
-                .Where(c => includeFuzzy.IsMatch(c.Name))
+                .Where(br => includeFuzzy.IsMatch(br.Name))
                 .ToArray();
         }
 
@@ -282,7 +282,7 @@ namespace Chunkyard.Core
 
                     if (!scanFuzzy.IsMatch(blob.Name)
                         && previous != null
-                        && previous.LastWriteTimeUtc.Equals(blob.LastWriteTimeUtc))
+                        && previous.ToBlob().Equals(blob))
                     {
                         return previous;
                     }
