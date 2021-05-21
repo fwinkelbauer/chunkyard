@@ -361,19 +361,25 @@ namespace Chunkyard.Tests.Core
                 DateTime.UtcNow,
                 _ => new MemoryStream(expectedBytes));
 
-            using var writeStream = new MemoryStream();
+            using var restoreStream = new MemoryStream();
 
             var restoredBlobs = snapshotStore.RestoreSnapshot(
                 snapshotId,
                 Fuzzy.MatchAll,
-                _ => writeStream);
+                _ => restoreStream);
 
-            var chunkCount = snapshotStore.GetSnapshot(snapshotId)
-                .BlobReferences.First().ContentUris.Count;
+            var blobReference = snapshotStore.GetSnapshot(snapshotId)
+                .BlobReferences.First();
 
-            Assert.True(chunkCount > 1);
+            using var decryptStream = new MemoryStream();
+            snapshotStore.RetrieveContent(
+                blobReference.ContentUris,
+                decryptStream);
+
+            Assert.True(blobReference.ContentUris.Count > 1);
             Assert.Equal(blobs, restoredBlobs);
-            Assert.Equal(expectedBytes, writeStream.ToArray());
+            Assert.Equal(expectedBytes, restoreStream.ToArray());
+            Assert.Equal(expectedBytes, decryptStream.ToArray());
         }
 
         [Fact]

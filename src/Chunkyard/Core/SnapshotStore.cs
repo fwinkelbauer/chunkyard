@@ -199,7 +199,9 @@ namespace Chunkyard.Core
                 {
                     using var stream = openWrite(blobReference.Name);
 
-                    RetrieveContent(blobReference, stream);
+                    RetrieveContent(
+                        blobReference.ContentUris,
+                        stream);
 
                     _probe.RetrievedBlob(blobReference);
 
@@ -325,16 +327,19 @@ namespace Chunkyard.Core
             }
         }
 
-        private void RetrieveContent(
-            IContentReference contentReference,
+        public void RetrieveContent(
+            IEnumerable<Uri> contentUris,
             Stream outputStream)
         {
+            contentUris.EnsureNotNull(nameof(contentUris));
+            outputStream.EnsureNotNull(nameof(outputStream));
+
             try
             {
-                foreach (var contentUri in contentReference.ContentUris)
+                foreach (var contentUri in contentUris)
                 {
                     var decrypted = AesGcmCrypto.Decrypt(
-                        RetrieveValidChunk(contentUri),
+                        _uriRepository.RetrieveValue(contentUri),
                         Key);
 
                     outputStream.Write(decrypted);
@@ -477,7 +482,7 @@ namespace Chunkyard.Core
                 using var memoryStream = new MemoryStream();
 
                 RetrieveContent(
-                    snapshotReference,
+                    snapshotReference.ContentUris,
                     memoryStream);
 
                 return DataConvert.ToObject<Snapshot>(memoryStream.ToArray());

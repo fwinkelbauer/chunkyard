@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- The `cat` command to decrypt and print a particular set of content URIs
+
 ## 10.0.0 - 2021-05-20
 
 ### Changed
@@ -232,7 +236,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 ### Added
 
 - The commands `push` and `pull` to transmit snapshots
-- The `keep`command to remove snapshots
+- The `keep` command to remove snapshots
 
 ### Changed
 

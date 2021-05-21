@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using Chunkyard.Core;
 using Chunkyard.Infrastructure;
 
@@ -180,6 +181,29 @@ namespace Chunkyard.Cli
             snapshotStore.Copy(
                 CreateUriRepository(o.DestinationRepository),
                 CreateIntRepository(o.DestinationRepository));
+        }
+
+        public static void Cat(CatOptions o)
+        {
+            var snapshotStore = CreateSnapshotStore(o.Repository);
+
+            if (string.IsNullOrEmpty(o.Export))
+            {
+                using var stream = new MemoryStream();
+                snapshotStore.RetrieveContent(o.ContentUris, stream);
+
+                var text = Encoding.UTF8.GetString(stream.ToArray());
+                Console.WriteLine(text);
+            }
+            else
+            {
+                using var stream = new FileStream(
+                    o.Export,
+                    FileMode.CreateNew,
+                    FileAccess.Write);
+
+                snapshotStore.RetrieveContent(o.ContentUris, stream);
+            }
         }
 
         private static SnapshotStore CreateSnapshotStore(
