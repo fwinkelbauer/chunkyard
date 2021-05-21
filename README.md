@@ -11,11 +11,6 @@ The FastCdc chunking algorithm is a C# port of these libraries:
 I built Chunkyard for myself. You might want to consider more sophisticated
 tools. Here's a list of [options][backup-tools].
 
-**Note:** A backup operation will fail if the target backup medium runs out of
-space. The repository might contain unreferenced files as the snapshot
-information will only be written after a successful backup operation. These
-unreferenced files can be deleted using the `chunkyard gc` command.
-
 ## Goals
 
 - Cross platform support
@@ -108,22 +103,6 @@ chunkyard gc -r "$repo"
 And here is the same script written in PowerShell:
 
 ``` powershell
-function exec {
-    param(
-        [Parameter(Mandatory = $true)]
-        [scriptblock]$ScriptBlock,
-        [int[]]$ValidExitCodes = @(0)
-    )
-
-    $global:LASTEXITCODE = 0
-
-    & $ScriptBlock
-
-    if (-not ($global:LASTEXITCODE -in $ValidExitCodes)) {
-        throw "Invalid exit code: $($global:LASTEXITCODE)"
-    }
-}
-
 $repo = 'D:\backup\location'
 
 $directories = @(
@@ -136,11 +115,15 @@ $directories = @(
 # $env:CHUNKYARD_PASSWORD = 'my secret password'
 
 # Create backup
-exec { chunkyard create --repository $repo --files $directories }
+chunkyard create --repository $repo --files $directories
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # Keep the latest four backups
-exec { chunkyard keep --repository $repo --latest 4 }
-exec { chunkyard gc --repository $repo }
+chunkyard keep --repository $repo --latest 4
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+chunkyard gc --repository $repo
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 ```
 
 [fastcdc-rs]: https://github.com/nlfiedler/fastcdc-rs
