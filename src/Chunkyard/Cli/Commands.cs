@@ -43,7 +43,7 @@ namespace Chunkyard.Cli
 
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            snapshotStore.AppendSnapshot(
+            snapshotStore.StoreSnapshot(
                 blobs,
                 new Fuzzy(o.ScanPatterns, emptyMatches: false),
                 DateTime.UtcNow,
@@ -108,7 +108,7 @@ namespace Chunkyard.Cli
                 return new FileStream(file, mode, FileAccess.Write);
             }
 
-            snapshotStore.RestoreSnapshot(
+            snapshotStore.RetrieveSnapshot(
                 o.SnapshotId,
                 new Fuzzy(o.IncludePatterns, emptyMatches: true),
                 OpenWrite);

@@ -89,7 +89,7 @@ namespace Chunkyard.Core
             }
         }
 
-        public int AppendSnapshot(
+        public int StoreSnapshot(
             Blob[] blobs,
             Fuzzy scanFuzzy,
             DateTime creationTimeUtc,
@@ -182,7 +182,7 @@ namespace Chunkyard.Core
                 .Aggregate(true, (total, next) => total & next);
         }
 
-        public Blob[] RestoreSnapshot(
+        public Blob[] RetrieveSnapshot(
             int snapshotId,
             Fuzzy includeFuzzy,
             Func<string, Stream> openWrite)
