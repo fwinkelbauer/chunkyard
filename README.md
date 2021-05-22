@@ -22,7 +22,7 @@ tools. Here's a list of [options][backup-tools].
   [commandlineparser][commandlineparser] package to create its command line
   interface
 
-## Not Goals
+## Non-Goals
 
 - Key management
 - Asymmetric encryption
