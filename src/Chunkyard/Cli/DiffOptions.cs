@@ -3,7 +3,7 @@ using CommandLine;
 
 namespace Chunkyard.Cli
 {
-    [Verb("diff", HelpText = "Shows the difference between two snapshots.")]
+    [Verb("diff", HelpText = "Show the difference between two snapshots.")]
     public class DiffOptions
     {
         public DiffOptions(
