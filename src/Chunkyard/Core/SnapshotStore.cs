@@ -127,38 +127,37 @@ namespace Chunkyard.Core
             int snapshotId,
             Fuzzy includeFuzzy)
         {
-            return ShowSnapshot(snapshotId, includeFuzzy)
+            var snapshotExists = ShowSnapshot(snapshotId, includeFuzzy)
                 .AsParallel()
                 .Select(blobReference =>
                 {
-                    var exists = blobReference.ContentUris
+                    var blobExists = blobReference.ContentUris
                         .Select(contentUri => _uriRepository.ValueExists(
                             contentUri))
                         .Aggregate(true, (total, next) => total & next);
 
-                    if (exists)
-                    {
-                        _probe.BlobExists(blobReference);
-                    }
-                    else
-                    {
-                        _probe.BlobMissing(blobReference);
-                    }
+                    _probe.BlobValid(blobReference, blobExists);
 
-                    return exists;
+                    return blobExists;
                 })
                 .Aggregate(true, (total, next) => total & next);
+
+            _probe.SnapshotValid(
+                ResolveSnapshotId(snapshotId),
+                snapshotExists);
+
+            return snapshotExists;
         }
 
         public bool CheckSnapshotValid(
             int snapshotId,
             Fuzzy includeFuzzy)
         {
-            return ShowSnapshot(snapshotId, includeFuzzy)
+            var snapshotValid = ShowSnapshot(snapshotId, includeFuzzy)
                 .AsParallel()
                 .Select(blobReference =>
                 {
-                    var valid = blobReference.ContentUris
+                    var blobValid = blobReference.ContentUris
                         .Select(contentUri =>
                         {
                             return _uriRepository.ValueExists(contentUri)
@@ -168,18 +167,17 @@ namespace Chunkyard.Core
                         })
                         .Aggregate(true, (total, next) => total & next);
 
-                    if (valid)
-                    {
-                        _probe.BlobValid(blobReference);
-                    }
-                    else
-                    {
-                        _probe.BlobInvalid(blobReference);
-                    }
+                    _probe.BlobValid(blobReference, blobValid);
 
-                    return valid;
+                    return blobValid;
                 })
                 .Aggregate(true, (total, next) => total & next);
+
+            _probe.SnapshotValid(
+                ResolveSnapshotId(snapshotId),
+                snapshotValid);
+
+            return snapshotValid;
         }
 
         public Blob[] RetrieveSnapshot(

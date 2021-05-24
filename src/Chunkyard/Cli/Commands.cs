@@ -64,13 +64,7 @@ namespace Chunkyard.Cli
                     o.SnapshotId,
                     fuzzy);
 
-            if (ok)
-            {
-                Console.WriteLine(o.Shallow
-                    ? "Snapshot is complete"
-                    : "Snapshot is valid");
-            }
-            else
+            if (!ok)
             {
                 throw new ChunkyardException(
                     "Found errors while checking snapshot");

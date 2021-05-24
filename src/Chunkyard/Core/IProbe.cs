@@ -12,13 +12,7 @@ namespace Chunkyard.Core
 
         void RetrievedBlob(BlobReference blobReference);
 
-        void BlobExists(BlobReference blobReference);
-
-        void BlobMissing(BlobReference blobReference);
-
-        void BlobValid(BlobReference blobReference);
-
-        void BlobInvalid(BlobReference blobReference);
+        void BlobValid(BlobReference blobReference, bool valid);
 
         void CopiedChunk(Uri contentUri);
 
@@ -29,5 +23,7 @@ namespace Chunkyard.Core
         void StoredSnapshot(int snapshotId);
 
         void RemovedSnapshot(int snapshotId);
+
+        void SnapshotValid(int snapshotId, bool valid);
     }
 }

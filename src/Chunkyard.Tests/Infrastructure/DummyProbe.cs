@@ -13,19 +13,7 @@ namespace Chunkyard.Tests.Infrastructure
         {
         }
 
-        public void BlobExists(BlobReference blobReference)
-        {
-        }
-
-        public void BlobMissing(BlobReference blobReference)
-        {
-        }
-
-        public void BlobValid(BlobReference blobReference)
-        {
-        }
-
-        public void BlobInvalid(BlobReference blobReference)
+        public void BlobValid(BlobReference blobReference, bool valid)
         {
         }
 
@@ -46,6 +34,10 @@ namespace Chunkyard.Tests.Infrastructure
         }
 
         public void RemovedSnapshot(int snapshotId)
+        {
+        }
+
+        public void SnapshotValid(int snapshotId, bool valid)
         {
         }
     }

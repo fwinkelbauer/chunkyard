@@ -18,24 +18,11 @@ namespace Chunkyard.Infrastructure
             Console.WriteLine($"Restored blob: {blobReference.Name}");
         }
 
-        public void BlobExists(BlobReference blobReference)
+        public void BlobValid(BlobReference blobReference, bool valid)
         {
-            Console.WriteLine($"Existing blob: {blobReference.Name}");
-        }
-
-        public void BlobMissing(BlobReference blobReference)
-        {
-            Console.WriteLine($"Missing blob: {blobReference.Name}");
-        }
-
-        public void BlobValid(BlobReference blobReference)
-        {
-            Console.WriteLine($"Valid blob: {blobReference.Name}");
-        }
-
-        public void BlobInvalid(BlobReference blobReference)
-        {
-            Console.WriteLine($"Invalid blob: {blobReference.Name}");
+            Console.WriteLine(valid
+                ? $"Valid blob: {blobReference.Name}"
+                : $"Invalid blob: {blobReference.Name}");
         }
 
         public void CopiedChunk(Uri contentUri)
@@ -61,6 +48,13 @@ namespace Chunkyard.Infrastructure
         public void RemovedSnapshot(int snapshotId)
         {
             Console.WriteLine($"Removed snapshot: #{snapshotId}");
+        }
+
+        public void SnapshotValid(int snapshotId, bool valid)
+        {
+            Console.WriteLine(valid
+                ? $"Valid snapshot: #{snapshotId}"
+                : $"Invalid snapshot: #{snapshotId}");
         }
     }
 }
