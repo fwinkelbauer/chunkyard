@@ -5,8 +5,8 @@ using System.Linq;
 namespace Chunkyard.Core
 {
     /// <summary>
-    /// Describes the difference between two instances of <see
-    /// cref="Snapshot"/>.
+    /// Describes the difference between two instances of
+    /// <see cref="IReadOnlyCollection{T}"/>.
     /// </summary>
     public class DiffSet
     {
@@ -40,6 +40,28 @@ namespace Chunkyard.Core
                 Added,
                 Changed,
                 Removed);
+        }
+
+        public static DiffSet Create<T>(
+            IReadOnlyCollection<T> first,
+            IReadOnlyCollection<T> second,
+            Func<T, string> toKey)
+            where T : notnull
+        {
+            first.EnsureNotNull(nameof(first));
+            second.EnsureNotNull(nameof(second));
+
+            var dict1 = first.ToDictionary(toKey, f => f);
+            var dict2 = second.ToDictionary(toKey, s => s);
+
+            var changed = dict1.Keys.Intersect(dict2.Keys)
+                .Where(key => !dict1[key].Equals(dict2[key]))
+                .ToArray();
+
+            return new DiffSet(
+                dict2.Keys.Except(dict1.Keys).ToArray(),
+                changed,
+                dict1.Keys.Except(dict2.Keys).ToArray());
         }
     }
 }

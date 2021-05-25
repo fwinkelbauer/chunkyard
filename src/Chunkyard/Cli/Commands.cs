@@ -127,9 +127,10 @@ namespace Chunkyard.Cli
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            var diff = Snapshot.Diff(
-                snapshotStore.GetSnapshot(o.FirstSnapshotId),
-                snapshotStore.GetSnapshot(o.SecondSnapshotId));
+            var diff = DiffSet.Create(
+                snapshotStore.GetSnapshot(o.FirstSnapshotId).BlobReferences,
+                snapshotStore.GetSnapshot(o.SecondSnapshotId).BlobReferences,
+                blobReference => blobReference.Name);
 
             foreach (var added in diff.Added)
             {
