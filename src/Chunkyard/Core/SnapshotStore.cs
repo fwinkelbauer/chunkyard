@@ -42,14 +42,7 @@ namespace Chunkyard.Core
             _prompt = prompt.EnsureNotNull(nameof(prompt));
             _probe = probe.EnsureNotNull(nameof(probe));
 
-            var snapshotIds = _intRepository.ListKeys();
-
-            Array.Sort(snapshotIds);
-
-            _currentSnapshotId = snapshotIds.Length == 0
-                ? null
-                : snapshotIds[^1];
-
+            _currentSnapshotId = FetchCurrentSnapshotId();
             _key = null;
 
             if (_currentSnapshotId == null)
@@ -269,10 +262,16 @@ namespace Chunkyard.Core
 
         public void RemoveSnapshot(int snapshotId)
         {
-            _intRepository.RemoveValue(
-                ResolveSnapshotId(snapshotId));
+            var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
 
-            _probe.RemovedSnapshot(snapshotId);
+            _intRepository.RemoveValue(resolvedSnapshotId);
+            _probe.RemovedSnapshot(resolvedSnapshotId);
+
+            if (_currentSnapshotId.HasValue
+                && _currentSnapshotId == resolvedSnapshotId)
+            {
+                _currentSnapshotId = FetchCurrentSnapshotId();
+            }
         }
 
         public void KeepSnapshots(int latestCount)
@@ -349,6 +348,17 @@ namespace Chunkyard.Core
             {
                 throw new ChunkyardException("Could not decrypt data", e);
             }
+        }
+
+        private int? FetchCurrentSnapshotId()
+        {
+            var snapshotIds = _intRepository.ListKeys();
+
+            Array.Sort(snapshotIds);
+
+            return snapshotIds.Length == 0
+                ? null
+                : snapshotIds[^1];
         }
 
         private byte[] RetrieveValidChunk(Uri contentUri)

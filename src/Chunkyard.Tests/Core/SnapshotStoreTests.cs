@@ -345,6 +345,36 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
+        public static void IsEmpty_Detects_Create_And_Remove()
+        {
+            var snapshotStore = CreateSnapshotStore();
+
+            Assert.True(snapshotStore.IsEmpty);
+
+            snapshotStore.StoreSnapshot(
+                CreateBlobs(),
+                Fuzzy.MatchAll,
+                DateTime.UtcNow,
+                OpenRead);
+
+            snapshotStore.StoreSnapshot(
+                CreateBlobs(),
+                Fuzzy.MatchAll,
+                DateTime.UtcNow,
+                OpenRead);
+
+            Assert.False(snapshotStore.IsEmpty);
+
+            snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
+
+            Assert.False(snapshotStore.IsEmpty);
+
+            snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
+
+            Assert.True(snapshotStore.IsEmpty);
+        }
+
+        [Fact]
         public static void RetrieveSnapshot_Writes_Blob_To_Stream()
         {
             var snapshotStore = CreateSnapshotStore(
