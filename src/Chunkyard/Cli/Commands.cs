@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Chunkyard.Core;
 using Chunkyard.Infrastructure;
@@ -11,7 +12,7 @@ namespace Chunkyard.Cli
     /// </summary>
     internal static class Commands
     {
-        public static void PreviewFiles(PreviewOptions o)
+        public static void PreviewSnapshot(PreviewOptions o)
         {
             var (_, blobs) = FileFetcher.FindBlobs(
                 o.Files,
@@ -23,10 +24,22 @@ namespace Chunkyard.Cli
                 return;
             }
 
-            foreach (var blob in blobs)
-            {
-                Console.WriteLine(blob.Name);
-            }
+            var snapshotStore = CreateSnapshotStore(o.Repository);
+
+            var snapshotBlobs = snapshotStore.IsEmpty
+                ? Array.Empty<Blob>()
+                : snapshotStore.ShowSnapshot(
+                    SnapshotStore.LatestSnapshotId,
+                    Fuzzy.MatchAll)
+                    .Select(blobReference => blobReference.ToBlob())
+                    .ToArray();
+
+            var diff = DiffSet.Create(
+                snapshotBlobs,
+                blobs,
+                blob => blob.Name);
+
+            PrintDiff(diff);
         }
 
         public static void CreateSnapshot(CreateOptions o)
@@ -132,20 +145,7 @@ namespace Chunkyard.Cli
                 snapshotStore.GetSnapshot(o.SecondSnapshotId).BlobReferences,
                 blobReference => blobReference.Name);
 
-            foreach (var added in diff.Added)
-            {
-                Console.WriteLine($"+ {added}");
-            }
-
-            foreach (var changed in diff.Changed)
-            {
-                Console.WriteLine($"~ {changed}");
-            }
-
-            foreach (var removed in diff.Removed)
-            {
-                Console.WriteLine($"- {removed}");
-            }
+            PrintDiff(diff);
         }
 
         public static void RemoveSnapshot(RemoveOptions o)
@@ -198,6 +198,24 @@ namespace Chunkyard.Cli
                     FileAccess.Write);
 
                 snapshotStore.RetrieveContent(o.ContentUris, stream);
+            }
+        }
+
+        private static void PrintDiff(DiffSet diff)
+        {
+            foreach (var added in diff.Added)
+            {
+                Console.WriteLine($"+ {added}");
+            }
+
+            foreach (var changed in diff.Changed)
+            {
+                Console.WriteLine($"~ {changed}");
+            }
+
+            foreach (var removed in diff.Removed)
+            {
+                Console.WriteLine($"- {removed}");
             }
         }
 

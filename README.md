@@ -64,7 +64,7 @@ chunkyard --help
 chunkyard preview --help
 
 # See which files chunkyard would backup
-chunkyard preview -f "Music" -e "Desktop\.ini" "thumbs\.db"
+chunkyard preview -r "../repository" -f "Music" -e "Desktop\.ini" "thumbs\.db"
 
 # Create a backup
 chunkyard create -r "../repository" -f "Music" -e "Desktop\.ini" "thumbs\.db"

@@ -42,7 +42,7 @@ namespace Chunkyard
                 .ToArray();
 
             Parser.Default.ParseArguments(args, optionTypes)
-                .WithParsed<PreviewOptions>(Commands.PreviewFiles)
+                .WithParsed<PreviewOptions>(Commands.PreviewSnapshot)
                 .WithParsed<RestoreOptions>(Commands.RestoreSnapshot)
                 .WithParsed<CreateOptions>(Commands.CreateSnapshot)
                 .WithParsed<CheckOptions>(Commands.CheckSnapshot)

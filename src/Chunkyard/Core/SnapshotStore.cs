@@ -67,6 +67,8 @@ namespace Chunkyard.Core
             }
         }
 
+        public bool IsEmpty => !_currentSnapshotId.HasValue;
+
         private byte[] Key
         {
             get
