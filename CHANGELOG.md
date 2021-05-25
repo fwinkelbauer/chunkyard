@@ -7,13 +7,16 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.0.0 - 2021-05-25
+
 ### Added
 
 - The `cat` command to decrypt and print a particular set of content URIs
 
 ### Changed
 
-- The `preview` command to show what a `create` would do
+- The `preview` command to show what a `create` would do by adding a
+  `--repository` parameter
 
 ## 10.0.0 - 2021-05-20
 
