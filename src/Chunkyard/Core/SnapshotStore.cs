@@ -236,8 +236,25 @@ namespace Chunkyard.Core
 
         public void GarbageCollect()
         {
+            var allContentUris = new HashSet<Uri>();
+
+            foreach (var snapshotId in _intRepository.ListKeys())
+            {
+                var snapshotReference = GetSnapshotReference(snapshotId);
+
+                allContentUris.UnionWith(snapshotReference.ContentUris);
+
+                var snapshot = GetSnapshot(
+                    snapshotId,
+                    snapshotReference);
+
+                allContentUris.UnionWith(
+                    snapshot.BlobReferences.SelectMany(
+                        blobReference => blobReference.ContentUris));
+            }
+
             var unusedContentUris = _uriRepository.ListKeys()
-                .Except(ListUris())
+                .Except(allContentUris)
                 .ToArray();
 
             foreach (var contentUri in unusedContentUris)
@@ -290,9 +307,15 @@ namespace Chunkyard.Core
 
             foreach (var contentUri in contentUrisToCopy)
             {
-                contentRepository.StoreValue(
-                    contentUri,
-                    RetrieveValidChunk(contentUri));
+                var chunk = _uriRepository.RetrieveValue(contentUri);
+
+                if (!Id.ContentUriValid(contentUri, chunk))
+                {
+                    throw new ChunkyardException(
+                        $"Invalid chunk: {contentUri}");
+                }
+
+                contentRepository.StoreValue(contentUri, chunk);
 
                 _probe.CopiedChunk(contentUri);
             }
@@ -347,19 +370,6 @@ namespace Chunkyard.Core
             return snapshotIds.Length == 0
                 ? null
                 : snapshotIds[^1];
-        }
-
-        private byte[] RetrieveValidChunk(Uri contentUri)
-        {
-            var value = _uriRepository.RetrieveValue(contentUri);
-
-            if (!Id.ContentUriValid(contentUri, value))
-            {
-                throw new ChunkyardException(
-                    $"Invalid chunk: {contentUri}");
-            }
-
-            return value;
         }
 
         private Uri[] WriteChunks(byte[] nonce, Stream stream)
@@ -426,36 +436,6 @@ namespace Chunkyard.Core
                     return blobReference;
                 })
                 .OrderBy(blobReference => blobReference.Name)
-                .ToArray();
-        }
-
-        private Uri[] ListUris()
-        {
-            IEnumerable<Uri> ListUris(int snapshotId)
-            {
-                var snapshotReference = GetSnapshotReference(snapshotId);
-
-                foreach (var contentUri in snapshotReference.ContentUris)
-                {
-                    yield return contentUri;
-                }
-
-                var snapshot = GetSnapshot(
-                    snapshotId,
-                    snapshotReference);
-
-                foreach (var blobReference in snapshot.BlobReferences)
-                {
-                    foreach (var contentUri in blobReference.ContentUris)
-                    {
-                        yield return contentUri;
-                    }
-                }
-            }
-
-            return _intRepository.ListKeys()
-                .SelectMany(ListUris)
-                .Distinct()
                 .ToArray();
         }
 

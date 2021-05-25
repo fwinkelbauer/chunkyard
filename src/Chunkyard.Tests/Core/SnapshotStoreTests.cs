@@ -345,7 +345,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void IsEmpty_Detects_Create_And_Remove()
+        public static void IsEmpty_Detects_Store_And_Remove()
         {
             var snapshotStore = CreateSnapshotStore();
 
@@ -457,8 +457,8 @@ namespace Chunkyard.Tests.Core
                 Fuzzy.MatchAll);
 
             Assert.Equal(
-                blobs.Select(b => b.Name),
-                blobReferences.Select(br => br.Name));
+                blobs,
+                blobReferences.Select(br => br.ToBlob()));
         }
 
         [Fact]
@@ -494,9 +494,9 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void GarbageCollect_Removes_Unused_Uris()
         {
-            var intRepository = CreateRepository<int>();
+            var uriRepository = CreateRepository<Uri>();
             var snapshotStore = CreateSnapshotStore(
-                intRepository: intRepository);
+                uriRepository);
 
             var snapshotId = snapshotStore.StoreSnapshot(
                 CreateBlobs(),
@@ -504,11 +504,10 @@ namespace Chunkyard.Tests.Core
                 DateTime.UtcNow,
                 OpenRead);
 
-            intRepository.RemoveValue(snapshotId);
-
+            snapshotStore.RemoveSnapshot(snapshotId);
             snapshotStore.GarbageCollect();
 
-            Assert.Empty(intRepository.ListKeys());
+            Assert.Empty(uriRepository.ListKeys());
         }
 
         [Fact]
