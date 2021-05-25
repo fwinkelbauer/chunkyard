@@ -10,8 +10,6 @@ namespace Chunkyard.Core
     /// </summary>
     public class Snapshot
     {
-        private readonly Dictionary<string, BlobReference> _blobReferences;
-
         public Snapshot(
             int snapshotId,
             DateTime creationTimeUtc,
@@ -21,21 +19,14 @@ namespace Chunkyard.Core
 
             SnapshotId = snapshotId;
             CreationTimeUtc = creationTimeUtc;
-
-            _blobReferences = new Dictionary<string, BlobReference>();
-
-            foreach (var blobReference in blobReferences)
-            {
-                _blobReferences[blobReference.Name] = blobReference;
-            }
+            BlobReferences = blobReferences;
         }
 
         public int SnapshotId { get; }
 
         public DateTime CreationTimeUtc { get; }
 
-        public IReadOnlyCollection<BlobReference> BlobReferences
-            => _blobReferences.Values;
+        public IReadOnlyCollection<BlobReference> BlobReferences { get; }
 
         public override bool Equals(object? obj)
         {
@@ -51,13 +42,6 @@ namespace Chunkyard.Core
                 SnapshotId,
                 CreationTimeUtc,
                 BlobReferences);
-        }
-
-        internal BlobReference? Find(string blobName)
-        {
-            return _blobReferences.TryGetValue(blobName, out var blob)
-                ? blob
-                : null;
         }
     }
 }

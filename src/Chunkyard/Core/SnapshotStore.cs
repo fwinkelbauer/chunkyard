@@ -391,25 +391,26 @@ namespace Chunkyard.Core
             // Load Key here so that it does not happen in the parallel loop
             _ = Key;
 
-            var currentSnapshot = _currentSnapshotId == null
-                ? null
-                : GetSnapshot(_currentSnapshotId.Value);
+            var currentBlobReferences = _currentSnapshotId == null
+                ? new Dictionary<string, BlobReference>()
+                : GetSnapshot(_currentSnapshotId.Value).BlobReferences
+                    .ToDictionary(br => br.Name, br => br);
 
             return blobs
                 .AsParallel()
                 .Select(blob =>
                 {
-                    var previous = currentSnapshot?.Find(blob.Name);
+                    currentBlobReferences.TryGetValue(blob.Name, out var current);
 
                     if (!scanFuzzy.IsMatch(blob.Name)
-                        && previous != null
-                        && previous.ToBlob().Equals(blob))
+                        && current != null
+                        && current.ToBlob().Equals(blob))
                     {
-                        return previous;
+                        return current;
                     }
 
                     // Known blobs should be encrypted using the same nonce
-                    var nonce = previous?.Nonce
+                    var nonce = current?.Nonce
                         ?? AesGcmCrypto.GenerateNonce();
 
                     using var stream = openRead(blob.Name);
