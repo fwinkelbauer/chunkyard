@@ -206,24 +206,12 @@ namespace Chunkyard.Core
         public Snapshot GetSnapshot(int snapshotId)
         {
             var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
+            var snapshotReference = GetSnapshotReference(
+                resolvedSnapshotId);
 
-            try
-            {
-                var snapshotReference = GetSnapshotReference(
-                    resolvedSnapshotId);
-
-                return GetSnapshot(snapshotReference);
-            }
-            catch (ChunkyardException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                throw new ChunkyardException(
-                    $"Snapshot #{resolvedSnapshotId} does not exist",
-                    e);
-            }
+            return GetSnapshot(
+                resolvedSnapshotId,
+                snapshotReference);
         }
 
         public Snapshot[] GetSnapshots()
@@ -452,7 +440,9 @@ namespace Chunkyard.Core
                     yield return contentUri;
                 }
 
-                var snapshot = GetSnapshot(snapshotReference);
+                var snapshot = GetSnapshot(
+                    snapshotId,
+                    snapshotReference);
 
                 foreach (var blobReference in snapshot.BlobReferences)
                 {
@@ -486,7 +476,9 @@ namespace Chunkyard.Core
                 : _currentSnapshotId.Value + snapshotId + 1;
         }
 
-        private Snapshot GetSnapshot(SnapshotReference snapshotReference)
+        private Snapshot GetSnapshot(
+            int snapshotId,
+            SnapshotReference snapshotReference)
         {
             try
             {
@@ -505,7 +497,7 @@ namespace Chunkyard.Core
             catch (Exception e)
             {
                 throw new ChunkyardException(
-                    "Could not retrieve snapshot",
+                    $"Could not read snapshot: #{snapshotId}",
                     e);
             }
         }
@@ -520,7 +512,7 @@ namespace Chunkyard.Core
             catch (Exception e)
             {
                 throw new ChunkyardException(
-                    $"Invalid snapshot reference: #{snapshotId}",
+                    $"Could not read snapshot reference: #{snapshotId}",
                     e);
             }
         }
