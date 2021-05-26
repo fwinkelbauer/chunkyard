@@ -28,7 +28,7 @@ namespace Chunkyard.Cli
         [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
         public IEnumerable<string> IncludePatterns { get; }
 
-        [Option("shallow", Required = false, HelpText = "Check if chunks exist without further validation", Default = false)]
+        [Option("shallow", Required = false, HelpText = "Check if content exists without further validation", Default = false)]
         public bool Shallow { get; }
     }
 }

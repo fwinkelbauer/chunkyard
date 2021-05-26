@@ -187,7 +187,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void CheckSnapshot_Detects_Ok()
+        public static void CheckSnapshot_Detects_Valid_Snapshot()
         {
             var snapshotStore = CreateSnapshotStore();
             var checkFuzzy = Fuzzy.MatchAll;

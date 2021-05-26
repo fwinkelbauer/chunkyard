@@ -5,12 +5,12 @@ This document should provide an overview of how Chunkyard is built.
 ## Concepts
 
 - **Blob:** Binary data (e.g. the content of a file) with some meta data
-- **Snapshot:** A set of BlobReferences. This can be seen as a snapshot of the
-  file system at a given point in time
+- **Snapshot:** A set of BlobReferences. This can be seen as a snapshot of a set
+  of Blobs at a given point in time
 - **Repository:** A key/value store which Chunkyard uses to persist data
-- **Chunk:** A piece of a Blob or a Snapshot
-- **IContentReference:** A reference which can be used to retrieve content from a
-  ContentStore using a set of hashes which point to Chunks
+- **Content:** An encrypted piece (chunk) of a Blob or a Snapshot
+- **IContentReference:** A reference which can be used to retrieve content from
+  an IRepository using a set of hashes
   - **BlobReference:** Contains meta data which can be used to restore a Blob
   - **SnapshotReference:** Contains meta data which can be used to restore a Snapshot
 
@@ -20,7 +20,7 @@ These classes contain the most important logic:
 
 - **IRepository.cs:** Provides a key/value store
 - **SnapshotStore.cs:** Chunks, encrypts and deduplicates Blobs and their meta
-  data in an IRepository using a set of URI keys
+  data in an IRepository using a set of URI hash keys
 - **Commands.cs:** Defines all verbs of the command line interface
 
 ## Backup Workflow

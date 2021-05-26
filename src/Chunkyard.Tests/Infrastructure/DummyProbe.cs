@@ -17,11 +17,11 @@ namespace Chunkyard.Tests.Infrastructure
         {
         }
 
-        public void CopiedChunk(Uri contentUri)
+        public void CopiedContent(Uri contentUri)
         {
         }
 
-        public void RemovedChunk(Uri contentUri)
+        public void RemovedContent(Uri contentUri)
         {
         }
 

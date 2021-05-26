@@ -14,9 +14,9 @@ namespace Chunkyard.Core
 
         void BlobValid(BlobReference blobReference, bool valid);
 
-        void CopiedChunk(Uri contentUri);
+        void CopiedContent(Uri contentUri);
 
-        void RemovedChunk(Uri contentUri);
+        void RemovedContent(Uri contentUri);
 
         void CopiedSnapshot(int snapshotId);
 

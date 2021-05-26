@@ -3,7 +3,7 @@ using CommandLine;
 
 namespace Chunkyard.Cli
 {
-    [Verb("create", HelpText = "Create a new snapshot and perform a shallow check.")]
+    [Verb("create", HelpText = "Create a new snapshot.")]
     public class CreateOptions
     {
         public CreateOptions(

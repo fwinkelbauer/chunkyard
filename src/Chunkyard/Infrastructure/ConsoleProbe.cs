@@ -25,14 +25,14 @@ namespace Chunkyard.Infrastructure
                 : $"Invalid blob: {blobReference.Name}");
         }
 
-        public void CopiedChunk(Uri contentUri)
+        public void CopiedContent(Uri contentUri)
         {
-            Console.WriteLine($"Copied chunk: {contentUri}");
+            Console.WriteLine($"Copied content: {contentUri}");
         }
 
-        public void RemovedChunk(Uri contentUri)
+        public void RemovedContent(Uri contentUri)
         {
-            Console.WriteLine($"Removed chunk: {contentUri}");
+            Console.WriteLine($"Removed content: {contentUri}");
         }
 
         public void CopiedSnapshot(int snapshotId)

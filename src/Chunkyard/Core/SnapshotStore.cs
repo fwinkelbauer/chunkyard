@@ -103,7 +103,7 @@ namespace Chunkyard.Core
 
             var newSnapshotReference = new SnapshotReference(
                 nonce,
-                WriteChunks(nonce, memoryStream),
+                WriteContent(nonce, memoryStream),
                 _salt,
                 _iterations);
 
@@ -127,8 +127,7 @@ namespace Chunkyard.Core
                 .Select(blobReference =>
                 {
                     var blobExists = blobReference.ContentUris
-                        .Select(contentUri => _uriRepository.ValueExists(
-                            contentUri))
+                        .Select(_uriRepository.ValueExists)
                         .Aggregate(true, (total, next) => total & next);
 
                     _probe.BlobValid(blobReference, blobExists);
@@ -261,7 +260,7 @@ namespace Chunkyard.Core
             {
                 _uriRepository.RemoveValue(contentUri);
 
-                _probe.RemovedChunk(contentUri);
+                _probe.RemovedContent(contentUri);
             }
         }
 
@@ -307,17 +306,17 @@ namespace Chunkyard.Core
 
             foreach (var contentUri in contentUrisToCopy)
             {
-                var chunk = _uriRepository.RetrieveValue(contentUri);
+                var content = _uriRepository.RetrieveValue(contentUri);
 
-                if (!Id.ContentUriValid(contentUri, chunk))
+                if (!Id.ContentUriValid(contentUri, content))
                 {
                     throw new ChunkyardException(
-                        $"Invalid chunk: {contentUri}");
+                        $"Invalid content: {contentUri}");
                 }
 
-                contentRepository.StoreValue(contentUri, chunk);
+                contentRepository.StoreValue(contentUri, content);
 
-                _probe.CopiedChunk(contentUri);
+                _probe.CopiedContent(contentUri);
             }
 
             var snapshotIdsToCopy = _intRepository.ListKeys()
@@ -344,9 +343,9 @@ namespace Chunkyard.Core
             contentUris.EnsureNotNull(nameof(contentUris));
             outputStream.EnsureNotNull(nameof(outputStream));
 
-            try
+            foreach (var contentUri in contentUris)
             {
-                foreach (var contentUri in contentUris)
+                try
                 {
                     var decrypted = AesGcmCrypto.Decrypt(
                         _uriRepository.RetrieveValue(contentUri),
@@ -354,10 +353,12 @@ namespace Chunkyard.Core
 
                     outputStream.Write(decrypted);
                 }
-            }
-            catch (CryptographicException e)
-            {
-                throw new ChunkyardException("Could not decrypt data", e);
+                catch (CryptographicException e)
+                {
+                    throw new ChunkyardException(
+                        $"Could not decrypt content: {contentUri}",
+                        e);
+                }
             }
         }
 
@@ -372,7 +373,7 @@ namespace Chunkyard.Core
                 : snapshotIds[^1];
         }
 
-        private Uri[] WriteChunks(byte[] nonce, Stream stream)
+        private Uri[] WriteContent(byte[] nonce, Stream stream)
         {
             return _fastCdc.SplitIntoChunks(stream)
                 .Select(chunk =>
@@ -429,7 +430,7 @@ namespace Chunkyard.Core
                         blob.Name,
                         blob.LastWriteTimeUtc,
                         nonce,
-                        WriteChunks(nonce, stream));
+                        WriteContent(nonce, stream));
 
                     _probe.StoredBlob(blobReference);
 
