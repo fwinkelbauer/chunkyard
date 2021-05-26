@@ -222,8 +222,6 @@ namespace Chunkyard.Cli
         private static SnapshotStore CreateSnapshotStore(
             string repositoryPath)
         {
-            var probe = new ConsoleProbe();
-
             return new SnapshotStore(
                 CreateUriRepository(repositoryPath),
                 CreateIntRepository(repositoryPath),
@@ -231,7 +229,7 @@ namespace Chunkyard.Cli
                 Id.AlgorithmSHA256,
                 new EnvironmentPrompt(
                     new ConsolePrompt()),
-                probe);
+                new ConsoleProbe());
         }
 
         private static IRepository<Uri> CreateUriRepository(

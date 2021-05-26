@@ -43,8 +43,8 @@ namespace Chunkyard.Core
         }
 
         public static DiffSet Create<T>(
-            IReadOnlyCollection<T> first,
-            IReadOnlyCollection<T> second,
+            IEnumerable<T> first,
+            IEnumerable<T> second,
             Func<T, string> toKey)
             where T : notnull
         {

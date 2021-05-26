@@ -85,7 +85,7 @@ namespace Chunkyard.Core
         }
 
         public int StoreSnapshot(
-            Blob[] blobs,
+            IReadOnlyCollection<Blob> blobs,
             Fuzzy scanFuzzy,
             DateTime creationTimeUtc,
             Func<string, Stream> openRead)
@@ -174,7 +174,7 @@ namespace Chunkyard.Core
             return snapshotValid;
         }
 
-        public Blob[] RetrieveSnapshot(
+        public IEnumerable<Blob> RetrieveSnapshot(
             int snapshotId,
             Fuzzy includeFuzzy,
             Func<string, Stream> openWrite)
@@ -213,7 +213,7 @@ namespace Chunkyard.Core
                 snapshotReference);
         }
 
-        public Snapshot[] GetSnapshots()
+        public IEnumerable<Snapshot> GetSnapshots()
         {
             var snapshotIds = _intRepository.ListKeys();
 
@@ -224,7 +224,7 @@ namespace Chunkyard.Core
                 .ToArray();
         }
 
-        public BlobReference[] ShowSnapshot(
+        public IEnumerable<BlobReference> ShowSnapshot(
             int snapshotId,
             Fuzzy includeFuzzy)
         {
@@ -373,7 +373,9 @@ namespace Chunkyard.Core
                 : snapshotIds[^1];
         }
 
-        private Uri[] WriteContent(byte[] nonce, Stream stream)
+        private IReadOnlyCollection<Uri> WriteContent(
+            byte[] nonce,
+            Stream stream)
         {
             return _fastCdc.SplitIntoChunks(stream)
                 .Select(chunk =>
@@ -395,7 +397,7 @@ namespace Chunkyard.Core
         }
 
         private BlobReference[] WriteBlobs(
-            Blob[] blobs,
+            IReadOnlyCollection<Blob> blobs,
             Fuzzy scanFuzzy,
             Func<string, Stream> openRead)
         {
