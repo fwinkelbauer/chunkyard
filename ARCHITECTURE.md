@@ -9,7 +9,7 @@ This document should provide an overview of how Chunkyard is built.
   of Blobs at a specific point in time
 - **Repository:** A key/value store which Chunkyard uses to persist data
 - **Content:** An encrypted piece (chunk) of a Blob or a Snapshot
-- **Content URI:** A hash address which can be used to retrieve content from an
+- **Content URI:** A hash address which can be used to retrieve Content from an
   IRepository
 - **IContentReference:** A set of Content URIs
   - **BlobReference:** Contains meta data which can be used to restore a Blob
