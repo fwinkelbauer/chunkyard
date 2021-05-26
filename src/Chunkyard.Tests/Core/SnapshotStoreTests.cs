@@ -589,7 +589,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void KeepSnapshots_Can_Empty_Store()
+        public static void KeepSnapshots_Zero_Input_Empties_Store()
         {
             var snapshotStore = CreateSnapshotStore();
 
@@ -600,6 +600,22 @@ namespace Chunkyard.Tests.Core
                 OpenRead);
 
             snapshotStore.KeepSnapshots(0);
+
+            Assert.Empty(snapshotStore.GetSnapshots());
+        }
+
+        [Fact]
+        public static void KeepSnapshots_Negative_Input_Empties_Store()
+        {
+            var snapshotStore = CreateSnapshotStore();
+
+            var snapshotId = snapshotStore.StoreSnapshot(
+                CreateBlobs(),
+                Fuzzy.MatchNothing,
+                DateTime.UtcNow,
+                OpenRead);
+
+            snapshotStore.KeepSnapshots(-1);
 
             Assert.Empty(snapshotStore.GetSnapshots());
         }
