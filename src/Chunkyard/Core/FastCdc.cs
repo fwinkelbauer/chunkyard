@@ -345,7 +345,7 @@ namespace Chunkyard.Core
                 sourceStream.Position = bytesProcessed;
 
                 yield return new Chunk(
-                    index++,
+                    checked(index++),
                     new Span<byte>(buffer, 0, chunkSize).ToArray());
             }
         }
