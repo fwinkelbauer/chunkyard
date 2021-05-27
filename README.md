@@ -35,10 +35,10 @@ tools. Here's a list of [options][backup-tools].
 
 ## Build
 
-Run `./csake setup` to install all necessary dotnet tools globally. You might
-need to restart your shell so that these tools are accessible.
-
-Run `./csake build` to build the solution.
+- Install the .NET 5 SDK
+- Run `./csake setup` to install all necessary dotnet tools globally. You might
+  need to restart your shell so that these tools are accessible
+- Run `./csake build` to build the solution
 
 ## Publish
 
