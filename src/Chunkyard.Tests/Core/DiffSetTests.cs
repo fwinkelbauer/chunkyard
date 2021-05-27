@@ -67,7 +67,11 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(
                 expectedDiff,
-                DiffSet.Create(first, second, br => br.Name));
+                DiffSet.Create(
+                    first,
+                    second,
+                    br => br.Name,
+                    (br1, br2) => br1.Equals(br2)));
         }
     }
 }

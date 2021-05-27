@@ -45,7 +45,8 @@ namespace Chunkyard.Core
         public static DiffSet Create<T>(
             IEnumerable<T> first,
             IEnumerable<T> second,
-            Func<T, string> toKey)
+            Func<T, string> toKey,
+            Func<T, T, bool> equals)
             where T : notnull
         {
             first.EnsureNotNull(nameof(first));
@@ -55,7 +56,7 @@ namespace Chunkyard.Core
             var dict2 = second.ToDictionary(toKey, s => s);
 
             var changed = dict1.Keys.Intersect(dict2.Keys)
-                .Where(key => !dict1[key].Equals(dict2[key]))
+                .Where(key => !equals(dict1[key], dict2[key]))
                 .ToArray();
 
             return new DiffSet(

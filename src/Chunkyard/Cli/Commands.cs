@@ -37,7 +37,8 @@ namespace Chunkyard.Cli
             var diff = DiffSet.Create(
                 snapshotBlobs,
                 blobs,
-                blob => blob.Name);
+                blob => blob.Name,
+                (b1, b2) => b1.Equals(b2));
 
             PrintDiff(diff);
         }
@@ -143,7 +144,10 @@ namespace Chunkyard.Cli
             var diff = DiffSet.Create(
                 snapshotStore.GetSnapshot(o.FirstSnapshotId).BlobReferences,
                 snapshotStore.GetSnapshot(o.SecondSnapshotId).BlobReferences,
-                blobReference => blobReference.Name);
+                blobReference => blobReference.Name,
+                (br1, br2) => o.ContentOnly
+                    ? br1.ContentUris.SequenceEqual(br2.ContentUris)
+                    : br1.Equals(br2));
 
             PrintDiff(diff);
         }

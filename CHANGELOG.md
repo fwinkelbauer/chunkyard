@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- The optional argument `--content-only` to the `diff` command to compare the
+  content of two snapshots without their meta data
+
 ## 11.0.0 - 2021-05-25
 
 ### Added

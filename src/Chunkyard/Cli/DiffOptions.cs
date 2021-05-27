@@ -9,11 +9,13 @@ namespace Chunkyard.Cli
         public DiffOptions(
             string repository,
             int firstSnapshotId,
-            int secondSnapshotId)
+            int secondSnapshotId,
+            bool contentOnly)
         {
             Repository = repository;
             FirstSnapshotId = firstSnapshotId;
             SecondSnapshotId = secondSnapshotId;
+            ContentOnly = contentOnly;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
@@ -24,5 +26,8 @@ namespace Chunkyard.Cli
 
         [Option('s', "second", Required = false, HelpText = "The second snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
         public int SecondSnapshotId { get; }
+
+        [Option('c', "content-only", Required = false, HelpText = "The second snapshot ID", Default = false)]
+        public bool ContentOnly { get; }
     }
 }
