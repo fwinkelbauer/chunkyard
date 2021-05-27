@@ -123,7 +123,8 @@ namespace Chunkyard.Core
             int snapshotId,
             Fuzzy includeFuzzy)
         {
-            var snapshotExists = ShowSnapshot(snapshotId, includeFuzzy)
+            var snapshot = GetSnapshot(snapshotId);
+            var snapshotExists = Filter(snapshot, includeFuzzy)
                 .AsParallel()
                 .Select(blobReference =>
                 {
@@ -138,7 +139,7 @@ namespace Chunkyard.Core
                 .Aggregate(true, (total, next) => total & next);
 
             _probe.SnapshotValid(
-                ResolveSnapshotId(snapshotId),
+                snapshot.SnapshotId,
                 snapshotExists);
 
             return snapshotExists;
@@ -148,7 +149,8 @@ namespace Chunkyard.Core
             int snapshotId,
             Fuzzy includeFuzzy)
         {
-            var snapshotValid = ShowSnapshot(snapshotId, includeFuzzy)
+            var snapshot = GetSnapshot(snapshotId);
+            var snapshotValid = Filter(snapshot, includeFuzzy)
                 .AsParallel()
                 .Select(blobReference =>
                 {
@@ -169,7 +171,7 @@ namespace Chunkyard.Core
                 .Aggregate(true, (total, next) => total & next);
 
             _probe.SnapshotValid(
-                ResolveSnapshotId(snapshotId),
+                snapshot.SnapshotId,
                 snapshotValid);
 
             return snapshotValid;
@@ -182,11 +184,8 @@ namespace Chunkyard.Core
         {
             openWrite.EnsureNotNull(nameof(openWrite));
 
-            var blobReferences = ShowSnapshot(
-                snapshotId,
-                includeFuzzy);
-
-            return blobReferences
+            var snapshot = GetSnapshot(snapshotId);
+            var blobs = Filter(snapshot, includeFuzzy)
                 .AsParallel()
                 .Select(blobReference =>
                 {
@@ -201,6 +200,10 @@ namespace Chunkyard.Core
                     return blobReference.ToBlob();
                 })
                 .ToArray();
+
+            _probe.RetrievedSnapshot(snapshot.SnapshotId);
+
+            return blobs;
         }
 
         public Snapshot GetSnapshot(int snapshotId)
@@ -227,9 +230,7 @@ namespace Chunkyard.Core
             int snapshotId,
             Fuzzy includeFuzzy)
         {
-            return GetSnapshot(snapshotId).BlobReferences
-                .Where(br => includeFuzzy.IsMatch(br.Name))
-                .ToArray();
+            return Filter(GetSnapshot(snapshotId), includeFuzzy);
         }
 
         public void GarbageCollect()
@@ -358,6 +359,15 @@ namespace Chunkyard.Core
                         e);
                 }
             }
+        }
+
+        private static BlobReference[] Filter(
+            Snapshot snapshot,
+            Fuzzy includeFuzzy)
+        {
+            return snapshot.BlobReferences
+                .Where(br => includeFuzzy.IsMatch(br.Name))
+                .ToArray();
         }
 
         private int? FetchCurrentSnapshotId()

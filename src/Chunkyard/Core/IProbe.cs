@@ -22,6 +22,8 @@ namespace Chunkyard.Core
 
         void StoredSnapshot(int snapshotId);
 
+        void RetrievedSnapshot(int snapshotId);
+
         void RemovedSnapshot(int snapshotId);
 
         void SnapshotValid(int snapshotId, bool valid);

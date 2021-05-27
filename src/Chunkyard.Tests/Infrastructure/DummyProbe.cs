@@ -33,6 +33,10 @@ namespace Chunkyard.Tests.Infrastructure
         {
         }
 
+        public void RetrievedSnapshot(int snapshotId)
+        {
+        }
+
         public void RemovedSnapshot(int snapshotId)
         {
         }

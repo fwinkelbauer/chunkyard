@@ -42,7 +42,12 @@ namespace Chunkyard.Infrastructure
 
         public void StoredSnapshot(int snapshotId)
         {
-            Console.WriteLine($"Created snapshot: #{snapshotId}");
+            Console.WriteLine($"Stored snapshot: #{snapshotId}");
+        }
+
+        public void RetrievedSnapshot(int snapshotId)
+        {
+            Console.WriteLine($"Restored snapshot: #{snapshotId}");
         }
 
         public void RemovedSnapshot(int snapshotId)
