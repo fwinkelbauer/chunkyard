@@ -177,6 +177,56 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
+        public static void GetSnapshot_Throws_If_Version_Does_Not_Exist()
+        {
+            var snapshotStore = CreateSnapshotStore();
+
+            var snapshotId = snapshotStore.StoreSnapshot(
+                CreateBlobs(),
+                Fuzzy.MatchNothing,
+                DateTime.UtcNow,
+                OpenRead);
+
+            Assert.Throws<ChunkyardException>(
+                () => snapshotStore.GetSnapshot(snapshotId + 1));
+
+            Assert.Throws<ChunkyardException>(
+                () => snapshotStore.GetSnapshot(
+                    SnapshotStore.SecondLatestSnapshotId));
+        }
+
+        [Fact]
+        public static void GetSnapshot_Accepts_Negative_SnapshotIds_With_Gaps()
+        {
+            var snapshotStore = CreateSnapshotStore();
+
+            var snapshotId = snapshotStore.StoreSnapshot(
+                CreateBlobs(),
+                Fuzzy.MatchNothing,
+                DateTime.UtcNow,
+                OpenRead);
+
+            var snapshotIdToRemove = snapshotStore.StoreSnapshot(
+                CreateBlobs(),
+                Fuzzy.MatchNothing,
+                DateTime.UtcNow,
+                OpenRead);
+
+            snapshotStore.StoreSnapshot(
+                CreateBlobs(),
+                Fuzzy.MatchNothing,
+                DateTime.UtcNow,
+                OpenRead);
+
+            snapshotStore.RemoveSnapshot(snapshotIdToRemove);
+
+            Assert.Equal(
+                snapshotStore.GetSnapshot(snapshotId),
+                snapshotStore.GetSnapshot(
+                    SnapshotStore.SecondLatestSnapshotId));
+        }
+
+        [Fact]
         public static void GetSnapshot_Throws_On_Empty_SnapshotStore()
         {
             var snapshotStore = CreateSnapshotStore();

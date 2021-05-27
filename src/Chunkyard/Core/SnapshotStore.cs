@@ -14,6 +14,7 @@ namespace Chunkyard.Core
     public class SnapshotStore
     {
         public const int LatestSnapshotId = -1;
+        public const int SecondLatestSnapshotId = -2;
 
         private readonly IRepository<Uri> _uriRepository;
         private readonly IRepository<int> _intRepository;
@@ -60,7 +61,7 @@ namespace Chunkyard.Core
             }
         }
 
-        public bool IsEmpty => !_currentSnapshotId.HasValue;
+        public bool IsEmpty => _currentSnapshotId == null;
 
         private byte[] Key
         {
@@ -205,12 +206,10 @@ namespace Chunkyard.Core
         public Snapshot GetSnapshot(int snapshotId)
         {
             var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
-            var snapshotReference = GetSnapshotReference(
-                resolvedSnapshotId);
 
             return GetSnapshot(
                 resolvedSnapshotId,
-                snapshotReference);
+                GetSnapshotReference(resolvedSnapshotId));
         }
 
         public IEnumerable<Snapshot> GetSnapshots()
@@ -271,8 +270,7 @@ namespace Chunkyard.Core
             _intRepository.RemoveValue(resolvedSnapshotId);
             _probe.RemovedSnapshot(resolvedSnapshotId);
 
-            if (_currentSnapshotId.HasValue
-                && _currentSnapshotId == resolvedSnapshotId)
+            if (_currentSnapshotId == resolvedSnapshotId)
             {
                 _currentSnapshotId = FetchCurrentSnapshotId();
             }
@@ -444,19 +442,28 @@ namespace Chunkyard.Core
 
         private int ResolveSnapshotId(int snapshotId)
         {
-            if (_currentSnapshotId == null)
-            {
-                throw new ChunkyardException(
-                    "Cannot operate on an empty repository");
-            }
-
             //  0: the first element
             //  1: the second element
             // -1: the last element
             // -2: the second-last element
-            return snapshotId >= 0
-                ? snapshotId
-                : _currentSnapshotId.Value + snapshotId + 1;
+            if (snapshotId >= 0)
+            {
+                return snapshotId;
+            }
+
+            var snapshotIds = _intRepository.ListKeys();
+
+            Array.Sort(snapshotIds);
+
+            var index = snapshotIds.Length + snapshotId;
+
+            if (index < 0)
+            {
+                throw new ChunkyardException(
+                    $"Could not resolve snapshot: #{snapshotId}");
+            }
+
+            return snapshotIds[index];
         }
 
         private Snapshot GetSnapshot(
