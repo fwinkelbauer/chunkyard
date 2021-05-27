@@ -15,8 +15,6 @@ namespace Chunkyard.Core
             DateTime creationTimeUtc,
             IReadOnlyCollection<BlobReference> blobReferences)
         {
-            blobReferences.EnsureNotNull(nameof(blobReferences));
-
             SnapshotId = snapshotId;
             CreationTimeUtc = creationTimeUtc;
             BlobReferences = blobReferences;

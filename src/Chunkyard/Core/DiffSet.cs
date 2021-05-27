@@ -49,9 +49,6 @@ namespace Chunkyard.Core
             Func<T, T, bool> equals)
             where T : notnull
         {
-            first.EnsureNotNull(nameof(first));
-            second.EnsureNotNull(nameof(second));
-
             var dict1 = first.ToDictionary(toKey, f => f);
             var dict2 = second.ToDictionary(toKey, s => s);
 

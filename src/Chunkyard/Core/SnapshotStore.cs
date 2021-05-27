@@ -36,12 +36,12 @@ namespace Chunkyard.Core
             IPrompt prompt,
             IProbe probe)
         {
-            _uriRepository = uriRepository.EnsureNotNull(nameof(uriRepository));
-            _intRepository = intRepository.EnsureNotNull(nameof(intRepository));
+            _uriRepository = uriRepository;
+            _intRepository = intRepository;
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
-            _prompt = prompt.EnsureNotNull(nameof(prompt));
-            _probe = probe.EnsureNotNull(nameof(probe));
+            _prompt = prompt;
+            _probe = probe;
 
             _currentSnapshotId = FetchCurrentSnapshotId();
             _key = null;
