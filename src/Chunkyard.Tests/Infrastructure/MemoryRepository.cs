@@ -25,7 +25,7 @@ namespace Chunkyard.Tests.Infrastructure
                     return;
                 }
 
-                _valuesPerKey[key] = value;
+                _valuesPerKey[key] = value.ToArray();
             }
         }
 
@@ -33,7 +33,8 @@ namespace Chunkyard.Tests.Infrastructure
         {
             lock (_lock)
             {
-                return _valuesPerKey[key];
+                return _valuesPerKey[key]
+                    .ToArray();
             }
         }
 
@@ -45,7 +46,7 @@ namespace Chunkyard.Tests.Infrastructure
             }
         }
 
-        public T[] ListKeys()
+        public IReadOnlyCollection<T> ListKeys()
         {
             lock (_lock)
             {

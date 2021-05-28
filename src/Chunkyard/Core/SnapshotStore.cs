@@ -215,11 +215,8 @@ namespace Chunkyard.Core
 
         public IEnumerable<Snapshot> GetSnapshots()
         {
-            var snapshotIds = _intRepository.ListKeys();
-
-            Array.Sort(snapshotIds);
-
-            return snapshotIds
+            return _intRepository.ListKeys()
+                .OrderBy(i => i)
                 .Select(GetSnapshot)
                 .ToArray();
         }
@@ -277,9 +274,9 @@ namespace Chunkyard.Core
 
         public void KeepSnapshots(int latestCount)
         {
-            var snapshotIds = _intRepository.ListKeys();
-
-            Array.Sort(snapshotIds);
+            var snapshotIds = _intRepository.ListKeys()
+                .OrderBy(i => i)
+                .ToArray();
 
             var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
             var snapshotIdsToDelete = snapshotIds.Except(snapshotIdsToKeep);
@@ -370,9 +367,9 @@ namespace Chunkyard.Core
 
         private int? FetchCurrentSnapshotId()
         {
-            var snapshotIds = _intRepository.ListKeys();
-
-            Array.Sort(snapshotIds);
+            var snapshotIds = _intRepository.ListKeys()
+                .OrderBy(i => i)
+                .ToArray();
 
             return snapshotIds.Length == 0
                 ? null
@@ -459,9 +456,9 @@ namespace Chunkyard.Core
                 return snapshotId;
             }
 
-            var snapshotIds = _intRepository.ListKeys();
-
-            Array.Sort(snapshotIds);
+            var snapshotIds = _intRepository.ListKeys()
+                .OrderBy(i => i)
+                .ToArray();
 
             var index = snapshotIds.Length + snapshotId;
 

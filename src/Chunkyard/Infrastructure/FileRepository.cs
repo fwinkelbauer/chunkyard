@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Chunkyard.Core;
@@ -61,7 +62,7 @@ namespace Chunkyard.Infrastructure
                 ToFile(key));
         }
 
-        public T[] ListKeys()
+        public IReadOnlyCollection<T> ListKeys()
         {
             if (!Directory.Exists(_directory))
             {

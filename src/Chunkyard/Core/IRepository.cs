@@ -1,4 +1,6 @@
-﻿namespace Chunkyard.Core
+﻿using System.Collections.Generic;
+
+namespace Chunkyard.Core
 {
     /// <summary>
     /// Defines a basic contract to store and retrieve bytes. Stored data can be
@@ -12,7 +14,7 @@
 
         bool ValueExists(T key);
 
-        T[] ListKeys();
+        IReadOnlyCollection<T> ListKeys();
 
         void RemoveValue(T key);
     }
