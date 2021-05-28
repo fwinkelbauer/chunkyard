@@ -11,13 +11,13 @@ namespace Chunkyard.Core
     internal class SnapshotReference
     {
         public SnapshotReference(
-            IReadOnlyCollection<Uri> contentUris,
             byte[] salt,
-            int iterations)
+            int iterations,
+            IReadOnlyCollection<Uri> contentUris)
         {
-            ContentUris = contentUris;
             Salt = salt;
             Iterations = iterations;
+            ContentUris = contentUris;
         }
 
         public IReadOnlyCollection<Uri> ContentUris { get; }
@@ -29,14 +29,14 @@ namespace Chunkyard.Core
         public override bool Equals(object? obj)
         {
             return obj is SnapshotReference other
-                && ContentUris.SequenceEqual(other.ContentUris)
                 && Salt.SequenceEqual(other.Salt)
-                && Iterations == other.Iterations;
+                && Iterations == other.Iterations
+                && ContentUris.SequenceEqual(other.ContentUris);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ContentUris, Salt, Iterations);
+            return HashCode.Combine(Salt, Iterations, ContentUris);
         }
     }
 }

@@ -102,9 +102,9 @@ namespace Chunkyard.Core
                 DataConvert.ToBytes(newSnapshot));
 
             var newSnapshotReference = new SnapshotReference(
-                WriteContent(AesGcmCrypto.GenerateNonce(), memoryStream),
                 _salt,
-                _iterations);
+                _iterations,
+                WriteContent(AesGcmCrypto.GenerateNonce(), memoryStream));
 
             _intRepository.StoreValue(
                 newSnapshot.SnapshotId,
