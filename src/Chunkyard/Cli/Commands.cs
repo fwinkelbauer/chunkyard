@@ -29,7 +29,7 @@ namespace Chunkyard.Cli
             var snapshotBlobs = snapshotStore.IsEmpty
                 ? Array.Empty<Blob>()
                 : snapshotStore.ShowSnapshot(
-                    SnapshotStore.LatestSnapshotId,
+                    o.SnapshotId,
                     Fuzzy.MatchAll)
                     .Select(blobReference => blobReference.ToBlob())
                     .ToArray();

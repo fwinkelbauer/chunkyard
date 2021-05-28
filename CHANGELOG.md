@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- An optional `--snapshot` parameter to the `preview` command
+
 ## 11.1.0 - 2021-05-28
 
 ### Added
