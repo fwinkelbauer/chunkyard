@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.1.0 - 2021-05-28
+
 ### Added
 
 - The optional argument `--content-only` to the `diff` command to compare the
