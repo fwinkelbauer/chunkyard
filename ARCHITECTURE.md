@@ -11,9 +11,10 @@ This document should provide an overview of how Chunkyard is built.
 - **Content:** An encrypted piece (chunk) of a Blob or a Snapshot
 - **Content URI:** A hash address which can be used to retrieve Content from an
   IRepository
-- **IContentReference:** A set of Content URIs
-  - **BlobReference:** Contains meta data which can be used to restore a Blob
-  - **SnapshotReference:** Contains meta data which can be used to restore a Snapshot
+- **BlobReference:** Contains Content URIs and meta data which can be used to
+  restore a Blob
+- **SnapshotReference:** Contains Content URIs and meta data which can be used
+  to restore a Snapshot
 
 ## Main Components
 

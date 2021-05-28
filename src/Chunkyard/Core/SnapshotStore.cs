@@ -98,13 +98,11 @@ namespace Chunkyard.Core
                 creationTimeUtc,
                 WriteBlobs(blobs, scanFuzzy, openRead));
 
-            var nonce = AesGcmCrypto.GenerateNonce();
             using var memoryStream = new MemoryStream(
                 DataConvert.ToBytes(newSnapshot));
 
             var newSnapshotReference = new SnapshotReference(
-                nonce,
-                WriteContent(nonce, memoryStream),
+                WriteContent(AesGcmCrypto.GenerateNonce(), memoryStream),
                 _salt,
                 _iterations);
 

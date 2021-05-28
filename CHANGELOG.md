@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 - The optional argument `--content-only` to the `diff` command to compare the
   content of two snapshots without their meta data
 
+### Changed
+
+- The storage format by removing an unused field from all snapshot references
+
 ## 11.0.0 - 2021-05-25
 
 ### Added
