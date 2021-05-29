@@ -283,9 +283,6 @@ namespace Chunkyard.Core
             0x32E8EA7E
         };
 
-        private readonly int _minSize;
-        private readonly int _avgSize;
-        private readonly int _maxSize;
         private readonly uint _maskS;
         private readonly uint _maskL;
 
@@ -294,28 +291,28 @@ namespace Chunkyard.Core
             int avgSize,
             int maxSize)
         {
-            _minSize = minSize.EnsureBetween(
+            MinSize = minSize.EnsureBetween(
                 MinimumMin,
                 MinimumMax,
                 nameof(minSize));
 
-            _avgSize = avgSize.EnsureBetween(
+            AvgSize = avgSize.EnsureBetween(
                 AverageMin,
                 AverageMax,
                 nameof(avgSize));
 
-            _maxSize = maxSize.EnsureBetween(
+            MaxSize = maxSize.EnsureBetween(
                 MaximumMin,
                 MaximumMax,
                 nameof(maxSize));
 
-            if ((_maxSize - _minSize) <= _avgSize)
+            if ((MaxSize - MinSize) <= AvgSize)
             {
                 throw new ArgumentException(
                     "Invariant violation: maxSize - minSize > avgSize");
             }
 
-            var bits = Logarithm2(_avgSize);
+            var bits = Logarithm2(AvgSize);
             _maskS = Mask(bits + 1);
             _maskL = Mask(bits - 1);
         }
@@ -325,13 +322,19 @@ namespace Chunkyard.Core
         {
         }
 
+        public int MinSize { get; }
+
+        public int AvgSize { get; }
+
+        public int MaxSize { get; }
+
         public IEnumerable<byte[]> SplitIntoChunks(Stream sourceStream)
         {
             sourceStream.EnsureNotNull(nameof(sourceStream));
 
             long bytesProcessed = 0;
             var bytesRemaining = sourceStream.Length;
-            var buffer = new byte[_maxSize];
+            var buffer = new byte[MaxSize];
 
             while (bytesRemaining > 0)
             {
@@ -350,14 +353,14 @@ namespace Chunkyard.Core
 
         private int Cut(byte[] buffer, int bytesRead)
         {
-            if (bytesRead <= _minSize)
+            if (bytesRead <= MinSize)
             {
                 return bytesRead;
             }
 
-            var center = CenterSize(_avgSize, _minSize, bytesRead);
+            var center = CenterSize(AvgSize, MinSize, bytesRead);
             uint hash = 0;
-            var offset = _minSize;
+            var offset = MinSize;
 
             while (offset < center)
             {

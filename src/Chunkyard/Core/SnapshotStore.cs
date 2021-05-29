@@ -22,6 +22,7 @@ namespace Chunkyard.Core
         private readonly string _hashAlgorithmName;
         private readonly IPrompt _prompt;
         private readonly IProbe _probe;
+        private readonly int _parallelizeChunkThreshold;
         private readonly byte[] _salt;
         private readonly int _iterations;
         private readonly Lazy<byte[]> _key;
@@ -34,7 +35,8 @@ namespace Chunkyard.Core
             FastCdc fastCdc,
             string hashAlgorithmName,
             IPrompt prompt,
-            IProbe probe)
+            IProbe probe,
+            int parallelizeChunkThreshold)
         {
             _uriRepository = uriRepository;
             _intRepository = intRepository;
@@ -42,6 +44,14 @@ namespace Chunkyard.Core
             _hashAlgorithmName = hashAlgorithmName;
             _prompt = prompt;
             _probe = probe;
+            _parallelizeChunkThreshold = parallelizeChunkThreshold;
+
+            if (parallelizeChunkThreshold <= 0)
+            {
+                throw new ArgumentException(
+                    "Value must be larger than zero",
+                    nameof(parallelizeChunkThreshold));
+            }
 
             _currentSnapshotId = FetchCurrentSnapshotId();
 
@@ -363,23 +373,38 @@ namespace Chunkyard.Core
             byte[] nonce,
             Stream stream)
         {
-            return _fastCdc.SplitIntoChunks(stream)
-                .Select(chunk =>
-                {
-                    var encryptedData = AesGcmCrypto.Encrypt(
-                        nonce,
-                        chunk,
-                        _key.Value);
+            Uri WriteChunk(byte[] chunk)
+            {
+                var encryptedData = AesGcmCrypto.Encrypt(
+                    nonce,
+                    chunk,
+                    _key.Value);
 
-                    var contentUri = Id.ComputeContentUri(
-                        _hashAlgorithmName,
-                        encryptedData);
+                var contentUri = Id.ComputeContentUri(
+                    _hashAlgorithmName,
+                    encryptedData);
 
-                    _uriRepository.StoreValue(contentUri, encryptedData);
+                _uriRepository.StoreValue(contentUri, encryptedData);
 
-                    return contentUri;
-                })
-                .ToArray();
+                return contentUri;
+            }
+
+            var expectedChunks = stream.Length / _fastCdc.AvgSize;
+
+            if (expectedChunks < _parallelizeChunkThreshold)
+            {
+                return _fastCdc.SplitIntoChunks(stream)
+                    .Select(WriteChunk)
+                    .ToArray();
+            }
+            else
+            {
+                return _fastCdc.SplitIntoChunks(stream)
+                    .AsParallel()
+                    .AsOrdered()
+                    .Select(WriteChunk)
+                    .ToArray();
+            }
         }
 
         private BlobReference[] WriteBlobs(

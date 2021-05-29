@@ -424,11 +424,15 @@ namespace Chunkyard.Tests.Core
             Assert.True(snapshotStore.IsEmpty);
         }
 
-        [Fact]
-        public static void RetrieveSnapshot_Writes_Blob_To_Stream()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(100)]
+        public static void RetrieveSnapshot_Writes_Ordered_Blob_Chunks_To_Stream(
+            int chunkCount)
         {
             var snapshotStore = CreateSnapshotStore(
-                fastCdc: new FastCdc(64, 256, 1024));
+                fastCdc: new FastCdc(64, 256, 1024),
+                parallelizeChunkThreshold: chunkCount);
 
             var blobs = CreateBlobs(new[] { "some blob" });
 
@@ -781,7 +785,8 @@ namespace Chunkyard.Tests.Core
             IRepository<Uri>? uriRepository = null,
             IRepository<int>? intRepository = null,
             FastCdc? fastCdc = null,
-            string password = "secret")
+            string password = "secret",
+            int parallelizeChunkThreshold = 100)
         {
             return new SnapshotStore(
                 uriRepository ?? CreateRepository<Uri>(),
@@ -789,7 +794,8 @@ namespace Chunkyard.Tests.Core
                 fastCdc ?? new FastCdc(),
                 Id.AlgorithmSHA256,
                 new DummyPrompt(password),
-                new DummyProbe());
+                new DummyProbe(),
+                parallelizeChunkThreshold);
         }
 
         private static IRepository<T> CreateRepository<T>()

@@ -233,7 +233,8 @@ namespace Chunkyard.Cli
                 Id.AlgorithmSHA256,
                 new EnvironmentPrompt(
                     new ConsolePrompt()),
-                new ConsoleProbe());
+                new ConsoleProbe(),
+                100);
         }
 
         private static IRepository<Uri> CreateUriRepository(
