@@ -325,14 +325,13 @@ namespace Chunkyard.Core
         {
         }
 
-        public IEnumerable<Chunk> SplitIntoChunks(Stream sourceStream)
+        public IEnumerable<byte[]> SplitIntoChunks(Stream sourceStream)
         {
             sourceStream.EnsureNotNull(nameof(sourceStream));
 
             long bytesProcessed = 0;
             var bytesRemaining = sourceStream.Length;
             var buffer = new byte[_maxSize];
-            var index = 0;
 
             while (bytesRemaining > 0)
             {
@@ -344,9 +343,8 @@ namespace Chunkyard.Core
 
                 sourceStream.Position = bytesProcessed;
 
-                yield return new Chunk(
-                    checked(index++),
-                    new Span<byte>(buffer, 0, chunkSize).ToArray());
+                yield return new Span<byte>(buffer, 0, chunkSize)
+                    .ToArray();
             }
         }
 

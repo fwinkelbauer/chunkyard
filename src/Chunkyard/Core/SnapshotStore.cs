@@ -368,7 +368,7 @@ namespace Chunkyard.Core
                 {
                     var encryptedData = AesGcmCrypto.Encrypt(
                         nonce,
-                        chunk.Value,
+                        chunk,
                         _key.Value);
 
                     var contentUri = Id.ComputeContentUri(
