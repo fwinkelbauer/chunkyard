@@ -367,13 +367,10 @@ namespace Chunkyard.Core
 
         private int? FetchCurrentSnapshotId()
         {
-            var snapshotIds = _intRepository.ListKeys()
+            return _intRepository.ListKeys()
                 .OrderBy(i => i)
-                .ToArray();
-
-            return snapshotIds.Length == 0
-                ? null
-                : snapshotIds[^1];
+                .Select(i => i as int?)
+                .LastOrDefault();
         }
 
         private IReadOnlyCollection<Uri> WriteContent(
