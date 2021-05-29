@@ -24,9 +24,9 @@ namespace Chunkyard.Core
         private readonly IProbe _probe;
         private readonly byte[] _salt;
         private readonly int _iterations;
+        private readonly Lazy<byte[]> _key;
 
         private int? _currentSnapshotId;
-        private byte[]? _key;
 
         public SnapshotStore(
             IRepository<Uri> uriRepository,
@@ -44,7 +44,6 @@ namespace Chunkyard.Core
             _probe = probe;
 
             _currentSnapshotId = FetchCurrentSnapshotId();
-            _key = null;
 
             if (_currentSnapshotId == null)
             {
@@ -59,31 +58,18 @@ namespace Chunkyard.Core
                 _salt = snapshotReference.Salt;
                 _iterations = snapshotReference.Iterations;
             }
-        }
 
-        public bool IsEmpty => _currentSnapshotId == null;
-
-        private byte[] Key
-        {
-            get
+            _key = new Lazy<byte[]>(() =>
             {
-                if (_key != null)
-                {
-                    return _key;
-                }
-
                 var password = _currentSnapshotId == null
                     ? _prompt.NewPassword()
                     : _prompt.ExistingPassword();
 
-                _key = AesGcmCrypto.PasswordToKey(
-                    password,
-                    _salt,
-                    _iterations);
-
-                return _key;
-            }
+                return AesGcmCrypto.PasswordToKey(password, _salt, _iterations);
+            });
         }
+
+        public bool IsEmpty => _currentSnapshotId == null;
 
         public int StoreSnapshot(
             IReadOnlyCollection<Blob> blobs,
@@ -343,7 +329,7 @@ namespace Chunkyard.Core
                 {
                     var decrypted = AesGcmCrypto.Decrypt(
                         _uriRepository.RetrieveValue(contentUri),
-                        Key);
+                        _key.Value);
 
                     outputStream.Write(decrypted);
                 }
@@ -383,7 +369,7 @@ namespace Chunkyard.Core
                     var encryptedData = AesGcmCrypto.Encrypt(
                         nonce,
                         chunk.Value,
-                        Key);
+                        _key.Value);
 
                     var contentUri = Id.ComputeContentUri(
                         _hashAlgorithmName,
@@ -401,9 +387,6 @@ namespace Chunkyard.Core
             Fuzzy scanFuzzy,
             Func<string, Stream> openRead)
         {
-            // Load Key here so that it does not happen in the parallel loop
-            _ = Key;
-
             var currentBlobReferences = _currentSnapshotId == null
                 ? new Dictionary<string, BlobReference>()
                 : GetSnapshot(_currentSnapshotId.Value).BlobReferences
@@ -413,7 +396,9 @@ namespace Chunkyard.Core
                 .AsParallel()
                 .Select(blob =>
                 {
-                    currentBlobReferences.TryGetValue(blob.Name, out var current);
+                    currentBlobReferences.TryGetValue(
+                        blob.Name,
+                        out var current);
 
                     if (!scanFuzzy.IsMatch(blob.Name)
                         && current != null
