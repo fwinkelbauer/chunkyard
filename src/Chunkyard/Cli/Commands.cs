@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Chunkyard.Core;
 using Chunkyard.Infrastructure;
 
@@ -191,8 +190,8 @@ namespace Chunkyard.Cli
                 using var stream = new MemoryStream();
                 snapshotStore.RetrieveContent(o.ContentUris, stream);
 
-                var text = Encoding.UTF8.GetString(stream.ToArray());
-                Console.WriteLine(text);
+                Console.WriteLine(
+                    DataConvert.BytesToText(stream.ToArray()));
             }
             else
             {

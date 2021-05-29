@@ -95,7 +95,7 @@ namespace Chunkyard.Core
                 WriteBlobs(blobs, scanFuzzy, openRead));
 
             using var memoryStream = new MemoryStream(
-                DataConvert.ToBytes(newSnapshot));
+                DataConvert.ObjectToBytes(newSnapshot));
 
             var newSnapshotReference = new SnapshotReference(
                 _salt,
@@ -104,7 +104,7 @@ namespace Chunkyard.Core
 
             _intRepository.StoreValue(
                 newSnapshot.SnapshotId,
-                DataConvert.ToBytes(newSnapshotReference));
+                DataConvert.ObjectToBytes(newSnapshotReference));
 
             _currentSnapshotId = newSnapshot.SnapshotId;
 
@@ -319,7 +319,7 @@ namespace Chunkyard.Core
                 // these bytes are valid
                 snapshotRepository.StoreValue(
                     snapshotId,
-                    DataConvert.ToBytes(
+                    DataConvert.ObjectToBytes(
                         GetSnapshotReference(snapshotId)));
 
                 _probe.CopiedSnapshot(snapshotId);
@@ -490,7 +490,8 @@ namespace Chunkyard.Core
                     snapshotReference.ContentUris,
                     memoryStream);
 
-                return DataConvert.ToObject<Snapshot>(memoryStream.ToArray());
+                return DataConvert.BytesToObject<Snapshot>(
+                    memoryStream.ToArray());
             }
             catch (ChunkyardException)
             {
@@ -508,7 +509,7 @@ namespace Chunkyard.Core
         {
             try
             {
-                return DataConvert.ToObject<SnapshotReference>(
+                return DataConvert.BytesToObject<SnapshotReference>(
                     _intRepository.RetrieveValue(snapshotId));
             }
             catch (Exception e)
