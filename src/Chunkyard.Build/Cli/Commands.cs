@@ -46,6 +46,14 @@ namespace Chunkyard.Build.Cli
 
         public static void Publish(DotnetOptions o)
         {
+            var dirty = Git("status --porcelain").Length > 0;
+
+            if (dirty)
+            {
+                throw new BuildException(
+                    "Publishing uncommited changes is not allowed");
+            }
+
             Clean(o);
             Build(o);
 
