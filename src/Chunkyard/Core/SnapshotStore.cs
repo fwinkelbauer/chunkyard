@@ -467,6 +467,12 @@ namespace Chunkyard.Core
                 .OrderBy(i => i)
                 .ToArray();
 
+            if (snapshotIds.Length == 0)
+            {
+                throw new ChunkyardException(
+                    "Cannot operate on an empty repository");
+            }
+
             var index = snapshotIds.Length + snapshotId;
 
             if (index < 0)
