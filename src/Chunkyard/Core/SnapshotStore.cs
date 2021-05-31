@@ -20,7 +20,6 @@ namespace Chunkyard.Core
         private readonly IRepository<int> _intRepository;
         private readonly FastCdc _fastCdc;
         private readonly string _hashAlgorithmName;
-        private readonly IPrompt _prompt;
         private readonly IProbe _probe;
         private readonly int _parallelizeChunkThreshold;
         private readonly byte[] _salt;
@@ -42,7 +41,6 @@ namespace Chunkyard.Core
             _intRepository = intRepository;
             _fastCdc = fastCdc;
             _hashAlgorithmName = hashAlgorithmName;
-            _prompt = prompt;
             _probe = probe;
             _parallelizeChunkThreshold = parallelizeChunkThreshold;
 
@@ -72,8 +70,8 @@ namespace Chunkyard.Core
             _key = new Lazy<byte[]>(() =>
             {
                 var password = _currentSnapshotId == null
-                    ? _prompt.NewPassword()
-                    : _prompt.ExistingPassword();
+                    ? prompt.NewPassword()
+                    : prompt.ExistingPassword();
 
                 return AesGcmCrypto.PasswordToKey(password, _salt, _iterations);
             });
