@@ -1,16 +1,19 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Text;
 using Chunkyard.Core;
 
 namespace Chunkyard.Infrastructure
 {
     /// <summary>
-    /// A decorator of <see cref="IPrompt"/> which retrieves a password from an
-    /// environment variable. If the environment variable does not exist, the
-    /// decorated <see cref="IPrompt"/> is called.
+    /// A decorator of <see cref="IPrompt"/> which retrieves a password from a
+    /// set of environment variables. If these environment variables do not
+    /// exist, the decorated <see cref="IPrompt"/> is called.
     /// </summary>
     internal class EnvironmentPrompt : IPrompt
     {
         private const string PasswordVariable = "CHUNKYARD_PASSWORD";
+        private const string ProcessVariable = "CHUNKYARD_PASSCMD";
 
         private readonly IPrompt _prompt;
 
@@ -21,24 +24,68 @@ namespace Chunkyard.Infrastructure
 
         public string NewPassword()
         {
-            return TryGetPassword(out var password)
-                ? password
-                : _prompt.NewPassword();
+            return GetEnvironmentPassword()
+                ?? GetProcessPassword()
+                ?? _prompt.NewPassword();
         }
 
         public string ExistingPassword()
         {
-            return TryGetPassword(out var password)
-                ? password
-                : _prompt.ExistingPassword();
+            return GetEnvironmentPassword()
+                ?? GetProcessPassword()
+                ?? _prompt.ExistingPassword();
         }
 
-        private static bool TryGetPassword(out string password)
+        private static string? GetEnvironmentPassword()
         {
-            var env = Environment.GetEnvironmentVariable(PasswordVariable);
-            password = env ?? "";
+            return Environment.GetEnvironmentVariable(PasswordVariable);
+        }
 
-            return !string.IsNullOrEmpty(env);
+        private static string? GetProcessPassword()
+        {
+            var command = Environment.GetEnvironmentVariable(ProcessVariable);
+
+            if (string.IsNullOrEmpty(command))
+            {
+                return null;
+            }
+
+            var split = command.Split(" ", 2);
+            var fileName = split[0];
+            var arguments = split.Length > 1
+                ? split[1]
+                : "";
+
+            var startInfo = new ProcessStartInfo(fileName, arguments)
+            {
+                RedirectStandardOutput = true
+            };
+
+            using var process = Process.Start(startInfo);
+
+            if (process == null)
+            {
+                throw new ChunkyardException(
+                    $"Could not run '{command}'");
+            }
+
+            var builder = new StringBuilder();
+            string? line;
+
+            while ((line = process.StandardOutput.ReadLine()) != null)
+            {
+                builder.Append(line);
+            }
+
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+            {
+                throw new ChunkyardException(
+                    $"Exit code of '{command}' was {process.ExitCode}");
+            }
+
+            return builder.ToString();
         }
     }
 }
