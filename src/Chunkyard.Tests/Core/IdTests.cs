@@ -13,7 +13,7 @@ namespace Chunkyard.Tests.Core
             var expectedUri = new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e");
 
             var actualUri = Id.ComputeContentUri(
-                Id.AlgorithmSHA256,
+                Id.AlgorithmSha256,
                 content);
 
             Assert.Equal(expectedUri, actualUri);
@@ -41,7 +41,7 @@ namespace Chunkyard.Tests.Core
         public static void DeconstructContentUri_Can_Split_Uri()
         {
             var contentUri = new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e");
-            var expectedAlgorithm = Id.AlgorithmSHA256;
+            var expectedAlgorithm = Id.AlgorithmSha256;
             var expectedHash = "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e";
 
             var (actualAlgorithm, actualHash) = Id.DeconstructContentUri(

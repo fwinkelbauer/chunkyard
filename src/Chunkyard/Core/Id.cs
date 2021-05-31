@@ -10,7 +10,7 @@ namespace Chunkyard.Core
     /// </summary>
     public static class Id
     {
-        public const string AlgorithmSHA256 = "SHA256";
+        public const string AlgorithmSha256 = "SHA256";
 
         public static Uri ComputeContentUri(
             string hashAlgorithmName,
@@ -59,7 +59,7 @@ namespace Chunkyard.Core
             // pointer Exceptions when running Chunkyard if we create the
             // algorithm dynamically using
             // "HashAlgorithm.Create(hashAlgorithmName)"
-            if (!hashAlgorithmName.Equals(AlgorithmSHA256))
+            if (!hashAlgorithmName.Equals(AlgorithmSha256))
             {
                 throw new NotSupportedException();
             }

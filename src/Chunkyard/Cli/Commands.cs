@@ -229,7 +229,7 @@ namespace Chunkyard.Cli
                 CreateUriRepository(repositoryPath),
                 CreateIntRepository(repositoryPath),
                 new FastCdc(),
-                Id.AlgorithmSHA256,
+                Id.AlgorithmSha256,
                 new EnvironmentPrompt(
                     new ConsolePrompt()),
                 new ConsoleProbe(),
