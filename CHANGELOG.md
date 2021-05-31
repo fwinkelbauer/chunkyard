@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- A feature to retrieve a password from a shell command using the environment
+  variable `CHUNKYARD_PASSCMD`
+
 ## 11.2.0 - 2021-05-30
 
 ### Added
