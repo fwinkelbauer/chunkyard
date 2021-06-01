@@ -15,7 +15,9 @@ namespace Chunkyard.Cli
         {
             var (_, blobs) = FileFetcher.FindBlobs(
                 o.Files,
-                new Fuzzy(o.ExcludePatterns, emptyMatches: false));
+                new Fuzzy(
+                    o.ExcludePatterns,
+                    FuzzyOption.EmptyMatchesNothing));
 
             if (blobs.Length == 0)
             {
@@ -46,7 +48,9 @@ namespace Chunkyard.Cli
         {
             var (parent, blobs) = FileFetcher.FindBlobs(
                 o.Files,
-                new Fuzzy(o.ExcludePatterns, emptyMatches: false));
+                new Fuzzy(
+                    o.ExcludePatterns,
+                    FuzzyOption.EmptyMatchesNothing));
 
             if (blobs.Length == 0)
             {
@@ -58,7 +62,9 @@ namespace Chunkyard.Cli
 
             snapshotStore.StoreSnapshot(
                 blobs,
-                new Fuzzy(o.ScanPatterns, emptyMatches: false),
+                new Fuzzy(
+                    o.ScanPatterns,
+                    FuzzyOption.EmptyMatchesNothing),
                 DateTime.UtcNow,
                 blobName => File.OpenRead(
                     Path.Combine(parent, blobName)));
@@ -67,7 +73,9 @@ namespace Chunkyard.Cli
         public static void CheckSnapshot(CheckOptions o)
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
-            var fuzzy = new Fuzzy(o.IncludePatterns, emptyMatches: true);
+            var fuzzy = new Fuzzy(
+                o.IncludePatterns,
+                FuzzyOption.EmptyMatchesAll);
 
             var ok = o.Shallow
                 ? snapshotStore.CheckSnapshotExists(
@@ -90,7 +98,9 @@ namespace Chunkyard.Cli
 
             var blobReferences = snapshotStore.ShowSnapshot(
                 o.SnapshotId,
-                new Fuzzy(o.IncludePatterns, emptyMatches: true));
+                new Fuzzy(
+                    o.IncludePatterns,
+                    FuzzyOption.EmptyMatchesAll));
 
             foreach (var blobReference in blobReferences)
             {
@@ -117,7 +127,9 @@ namespace Chunkyard.Cli
 
             snapshotStore.RetrieveSnapshot(
                 o.SnapshotId,
-                new Fuzzy(o.IncludePatterns, emptyMatches: true),
+                new Fuzzy(
+                    o.IncludePatterns,
+                    FuzzyOption.EmptyMatchesAll),
                 OpenWrite);
         }
 

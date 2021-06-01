@@ -12,18 +12,18 @@ namespace Chunkyard.Core
     {
         public static readonly Fuzzy MatchAll = new Fuzzy(
             Array.Empty<string>(),
-            emptyMatches: true);
+            FuzzyOption.EmptyMatchesAll);
 
         public static readonly Fuzzy MatchNothing = new Fuzzy(
             Array.Empty<string>(),
-            emptyMatches: false);
+            FuzzyOption.EmptyMatchesNothing);
 
         private readonly Regex[] _compiledRegex;
         private readonly bool _initial;
 
         public Fuzzy(
             IEnumerable<string> patterns,
-            bool emptyMatches)
+            FuzzyOption option)
         {
             _compiledRegex = patterns
                 .Select(p => new Regex(string.IsNullOrEmpty(p)
@@ -31,7 +31,20 @@ namespace Chunkyard.Core
                     : p.Replace(" ", ".*")))
                 .ToArray();
 
-            _initial = _compiledRegex.Length == 0 && emptyMatches;
+            switch (option)
+            {
+                case FuzzyOption.EmptyMatchesAll:
+                    _initial = _compiledRegex.Length == 0;
+                    break;
+                case FuzzyOption.EmptyMatchesNothing:
+                    _initial = false;
+                    break;
+                default:
+                    var name = Enum.GetName(typeof(FuzzyOption), option);
+
+                    throw new NotSupportedException(
+                        $"Unknown FuzzyOption: {name}");
+            }
         }
 
         public bool IsMatch(string input)
