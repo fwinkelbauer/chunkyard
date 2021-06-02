@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using Chunkyard.Core;
 using Chunkyard.Tests.Infrastructure;
@@ -437,7 +438,7 @@ namespace Chunkyard.Tests.Core
             var blobs = CreateBlobs(new[] { "some blob" });
 
             // Create data that is large enough to create at least two chunks
-            var expectedBytes = AesGcmCrypto.GenerateRandomNumber(1025);
+            var expectedBytes = GenerateRandomNumber(1025);
 
             var snapshotId = snapshotStore.StoreSnapshot(
                 blobs,
@@ -747,6 +748,15 @@ namespace Chunkyard.Tests.Core
                 () => snapshotStore.Copy(
                     CreateRepository<Uri>(),
                     CreateRepository<int>()));
+        }
+
+        private static byte[] GenerateRandomNumber(int length)
+        {
+            using var randomGenerator = new RNGCryptoServiceProvider();
+            var randomNumber = new byte[length];
+            randomGenerator.GetBytes(randomNumber);
+
+            return randomNumber;
         }
 
         private static Blob[] CreateBlobs(
