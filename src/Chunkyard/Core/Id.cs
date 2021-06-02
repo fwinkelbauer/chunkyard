@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Chunkyard.Core
 {
@@ -71,9 +72,14 @@ namespace Chunkyard.Core
 
         private static string ToHexString(byte[] hash)
         {
-            return BitConverter.ToString(hash)
-                .Replace("-", "")
-                .ToLower();
+            var builder = new StringBuilder();
+
+            foreach (var h in hash)
+            {
+                builder.Append(h.ToString("x2"));
+            }
+
+            return builder.ToString();
         }
     }
 }
