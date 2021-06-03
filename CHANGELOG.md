@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.3.0 - 2021-06-03
+
 ### Added
 
 - A feature to retrieve a password from a shell command using the environment
