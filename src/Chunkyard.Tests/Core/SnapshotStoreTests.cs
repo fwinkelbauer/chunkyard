@@ -468,6 +468,33 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
+        public static void RetrieveSnapshot_Can_Write_Empty_Files()
+        {
+            var snapshotStore = CreateSnapshotStore();
+
+            var snapshotId = snapshotStore.StoreSnapshot(
+                CreateBlobs(new[] { "some empty blob" }),
+                Fuzzy.MatchNothing,
+                DateTime.UtcNow,
+                _ => new MemoryStream());
+
+            using var retrieveStream = new MemoryStream();
+            var restoreCalled = false;
+
+            snapshotStore.RetrieveSnapshot(
+                snapshotId,
+                Fuzzy.MatchAll,
+                _ =>
+                {
+                    restoreCalled = true;
+                    return retrieveStream;
+                });
+
+            Assert.True(restoreCalled);
+            Assert.Empty(retrieveStream.ToArray());
+        }
+
+        [Fact]
         public static void RetrieveSnapshot_Throws_On_Empty_SnapshotStore()
         {
             var snapshotStore = CreateSnapshotStore();
