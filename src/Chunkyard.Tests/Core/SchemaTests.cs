@@ -4,8 +4,14 @@ using Xunit;
 
 namespace Chunkyard.Tests.Core
 {
+    /// <summary>
+    // Breaking any of these tests indicate a breaking change in the persisted
+    // repository format.
+    /// </summary>
     public static class SchemaTests
     {
+
+
         [Fact]
         public static void Can_Read_Serialized_Snapshot()
         {
@@ -46,7 +52,7 @@ namespace Chunkyard.Tests.Core
             Assert.Equal(expectedSnapshot, actualSnapshot);
         }
 
-                [Fact]
+        [Fact]
         public static void Can_Read_Serialized_SnapshotReference()
         {
             var serialized = @"
