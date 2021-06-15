@@ -8,7 +8,7 @@ namespace Chunkyard.Core
     /// A reference which can be used to retrieve a <see cref="Snapshot"/> from
     /// a <see cref="SnapshotStore"/> based on a password based encryption key.
     /// </summary>
-    internal class SnapshotReference
+    public class SnapshotReference
     {
         public SnapshotReference(
             byte[] salt,
