@@ -333,16 +333,14 @@ namespace Chunkyard.Core
             sourceStream.EnsureNotNull(nameof(sourceStream));
 
             long bytesProcessed = 0;
-            var bytesRemaining = sourceStream.Length;
             var buffer = new byte[MaxSize];
 
-            while (bytesRemaining > 0)
+            while (bytesProcessed < sourceStream.Length)
             {
                 var bytesRead = sourceStream.Read(buffer, 0, buffer.Length);
 
                 var chunkSize = Cut(buffer, bytesRead);
                 bytesProcessed += chunkSize;
-                bytesRemaining -= chunkSize;
 
                 sourceStream.Position = bytesProcessed;
 
