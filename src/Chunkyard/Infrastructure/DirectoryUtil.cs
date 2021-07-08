@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Chunkyard.Core;
 
 namespace Chunkyard.Infrastructure
 {
@@ -10,7 +11,8 @@ namespace Chunkyard.Infrastructure
         public static string GetParent(string file)
         {
             return Path.GetDirectoryName(file)
-                ?? file;
+                ?? throw new ChunkyardException(
+                    $"File '{file}' does not have a parent directory");
         }
 
         public static void CreateParent(string file)
