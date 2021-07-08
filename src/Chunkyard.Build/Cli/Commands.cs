@@ -9,9 +9,11 @@ namespace Chunkyard.Build.Cli
 {
     internal static class Commands
     {
-        private const string ArtifactsDirectory = "artifacts";
-        private const string Solution = "src/Chunkyard.sln";
-        private const string Changelog = "CHANGELOG.md";
+        private static readonly string Root = Git("rev-parse --show-toplevel");
+        private static readonly string Artifacts = Path.Combine(Root, "artifacts");
+        private static readonly string Solution = Path.Combine(Root, "src/Chunkyard.sln");
+        private static readonly string MainProject = Path.Combine(Root, "src/Chunkyard");
+        private static readonly string Changelog = Path.Combine(Root, "CHANGELOG.md");
 
         public static void Setup()
         {
@@ -24,7 +26,7 @@ namespace Chunkyard.Build.Cli
                 $"clean {Solution}",
                 $"-c {o.Configuration}");
 
-            CleanDirectory(ArtifactsDirectory);
+            CleanDirectory(Artifacts);
         }
 
         public static void Build(DotnetOptions o)
@@ -40,8 +42,8 @@ namespace Chunkyard.Build.Cli
 
             Dotnet(
                 $"test {Solution}",
-                "--no-build",
-                $"-c {o.Configuration}");
+                $"-c {o.Configuration}",
+                "--no-build");
         }
 
         public static void Publish(DotnetOptions o)
@@ -63,12 +65,12 @@ namespace Chunkyard.Build.Cli
             foreach (var runtime in new[] { "win-x64", "linux-x64" })
             {
                 var directory = Path.Combine(
-                    ArtifactsDirectory,
+                    Artifacts,
                     version,
                     runtime);
 
                 Dotnet(
-                    "publish src/Chunkyard",
+                    $"publish {MainProject}",
                     $"-c {o.Configuration}",
                     $"-r {runtime}",
                     $"-o {directory}",
@@ -116,7 +118,7 @@ namespace Chunkyard.Build.Cli
                 new[] { 0 },
                 line => builder.AppendLine(line));
 
-            return builder.ToString();
+            return builder.ToString().Trim();
         }
 
         private static void Exec(
