@@ -15,11 +15,6 @@ namespace Chunkyard.Build.Cli
         private static readonly string MainProject = Path.Combine(Root, "src/Chunkyard");
         private static readonly string Changelog = Path.Combine(Root, "CHANGELOG.md");
 
-        public static void Setup()
-        {
-            Dotnet("tool update -g dotnet-format");
-        }
-
         public static void Clean(DotnetOptions o)
         {
             Dotnet(
@@ -31,6 +26,8 @@ namespace Chunkyard.Build.Cli
 
         public static void Build(DotnetOptions o)
         {
+            Tool();
+
             Dotnet(
                 $"format {Solution}",
                 "--check");
@@ -84,6 +81,8 @@ namespace Chunkyard.Build.Cli
 
         public static void Fmt()
         {
+            Tool();
+
             Dotnet($"format {Solution}");
         }
 
@@ -97,6 +96,11 @@ namespace Chunkyard.Build.Cli
             Git($"add {Changelog}");
             Git($"commit -m \"{message}\"");
             Git($"tag -a \"{tag}\" -m \"{message}\"");
+        }
+
+        private static void Tool()
+        {
+            Dotnet("tool restore");
         }
 
         private static void Dotnet(params string[] arguments)
