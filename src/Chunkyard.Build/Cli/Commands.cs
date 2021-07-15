@@ -11,14 +11,14 @@ namespace Chunkyard.Build.Cli
     {
         private static readonly string Root = Git("rev-parse --show-toplevel");
         private static readonly string Artifacts = Path.Combine(Root, "artifacts");
-        private static readonly string Solution = Path.Combine(Root, "src/Chunkyard.sln");
-        private static readonly string MainProject = Path.Combine(Root, "src/Chunkyard");
+        private static readonly string Source = Path.Combine(Root, "src");
+        private static readonly string MainProject = Path.Combine(Source, "Chunkyard");
         private static readonly string Changelog = Path.Combine(Root, "CHANGELOG.md");
 
         public static void Clean(DotnetOptions o)
         {
             Dotnet(
-                $"clean {Solution}",
+                $"clean {Source}",
                 $"-c {o.Configuration}");
 
             CleanDirectory(Artifacts);
@@ -29,16 +29,16 @@ namespace Chunkyard.Build.Cli
             Tool();
 
             Dotnet(
-                $"format {Solution}",
+                $"format {Source}",
                 "--check");
 
             Dotnet(
-                $"build {Solution}",
+                $"build {Source}",
                 $"-c {o.Configuration}",
                 "-warnaserror");
 
             Dotnet(
-                $"test {Solution}",
+                $"test {Source}",
                 $"-c {o.Configuration}",
                 "--no-build");
         }
@@ -83,7 +83,7 @@ namespace Chunkyard.Build.Cli
         {
             Tool();
 
-            Dotnet($"format {Solution}");
+            Dotnet($"format {Source}");
         }
 
         public static void Release()
