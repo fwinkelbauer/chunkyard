@@ -89,8 +89,8 @@ namespace Chunkyard.Build.Cli
         public static void Release()
         {
             var version = FetchVersion();
-            var message = $"Prepare Chunkyard release v{version}";
             var tag = $"v{version}";
+            var message = $"Prepare Chunkyard release {tag}";
 
             Git("reset");
             Git($"add {Changelog}");
