@@ -9,11 +9,16 @@ namespace Chunkyard.Build.Cli
 {
     internal static class Commands
     {
-        private static readonly string Root = Git("rev-parse --show-toplevel");
-        private static readonly string Artifacts = Path.Combine(Root, "artifacts");
-        private static readonly string Source = Path.Combine(Root, "src");
-        private static readonly string MainProject = Path.Combine(Source, "Chunkyard");
-        private static readonly string Changelog = Path.Combine(Root, "CHANGELOG.md");
+        private const string Artifacts = "artifacts";
+        private const string Source = "src";
+        private const string MainProject = "src/Chunkyard";
+        private const string Changelog = "CHANGELOG.md";
+
+        static Commands()
+        {
+            Directory.SetCurrentDirectory(
+                Git("rev-parse --show-toplevel"));
+        }
 
         public static void Clean(DotnetOptions o)
         {
