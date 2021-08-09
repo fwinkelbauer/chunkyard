@@ -324,6 +324,77 @@ namespace Chunkyard.Core
             }
         }
 
+        public void Mirror(
+            IRepository<Uri> contentRepository,
+            IRepository<int> snapshotRepository)
+        {
+            contentRepository.EnsureNotNull(nameof(contentRepository));
+            snapshotRepository.EnsureNotNull(nameof(snapshotRepository));
+
+            var localContentUris = _uriRepository.ListKeys();
+            var remoteContentUris = contentRepository.ListKeys();
+
+            var contentUrisToCopy = localContentUris
+                .Except(remoteContentUris)
+                .ToArray();
+
+            foreach (var contentUri in contentUrisToCopy)
+            {
+                var content = _uriRepository.RetrieveValue(contentUri);
+
+                if (!Id.ContentUriValid(contentUri, content))
+                {
+                    throw new ChunkyardException(
+                        $"Invalid content: {contentUri}");
+                }
+
+                contentRepository.StoreValue(contentUri, content);
+
+                _probe.CopiedContent(contentUri);
+            }
+
+            var contentUrisToDelete = remoteContentUris
+                .Except(localContentUris)
+                .ToArray();
+
+            foreach (var contentUri in contentUrisToDelete)
+            {
+                contentRepository.RemoveValue(contentUri);
+
+                _probe.RemovedContent(contentUri);
+            }
+
+            var localSnapshotIds = _intRepository.ListKeys();
+            var remoteSnapshotIds = snapshotRepository.ListKeys();
+
+            var snapshotIdsToCopy = localSnapshotIds
+                .Except(remoteSnapshotIds)
+                .ToArray();
+
+            foreach (var snapshotId in snapshotIdsToCopy)
+            {
+                // We convert a SnapshotReference from/to bytes to check if
+                // these bytes are valid
+                snapshotRepository.StoreValue(
+                    snapshotId,
+                    DataConvert.ObjectToBytes(
+                        GetSnapshotReference(snapshotId)));
+
+                _probe.CopiedSnapshot(snapshotId);
+            }
+
+            var snapshotIdsToDelete = remoteSnapshotIds
+                .Except(localSnapshotIds)
+                .ToArray();
+
+            foreach (var snapshotId in snapshotIdsToDelete)
+            {
+                snapshotRepository.RemoveValue(snapshotId);
+
+                _probe.RemovedSnapshot(snapshotId);
+            }
+        }
+
         public void RetrieveContent(
             IEnumerable<Uri> contentUris,
             Stream outputStream)

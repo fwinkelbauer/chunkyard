@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- A `--mirror` flag to the `copy` command. This flag will copy newer data from a
+  source repository to a destination while also deleting any files that do not
+  exist in the source repository
+
 ## 11.3.0 - 2021-06-03
 
 ### Added

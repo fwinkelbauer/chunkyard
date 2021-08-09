@@ -734,6 +734,50 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
+        public static void Mirror_Copies_New_Data_And_Deletes_Old_Data()
+        {
+            var sourceUriRepository = CreateRepository<Uri>();
+            var sourceIntRepository = CreateRepository<int>();
+            var snapshotStore = CreateSnapshotStore(
+                sourceUriRepository,
+                sourceIntRepository);
+
+            var firstSnapshotId = snapshotStore.StoreSnapshot(
+                CreateBlobs(new[] { "some blob" }),
+                Fuzzy.MatchNothing,
+                DateTime.UtcNow,
+                OpenRead);
+
+            snapshotStore.StoreSnapshot(
+                CreateBlobs(new[] { "some new blob" }),
+                Fuzzy.MatchNothing,
+                DateTime.UtcNow,
+                OpenRead);
+
+            var destinationUriRepository = CreateRepository<Uri>();
+            var destinationIntRepository = CreateRepository<int>();
+
+            snapshotStore.Mirror(
+                destinationUriRepository,
+                destinationIntRepository);
+
+            snapshotStore.RemoveSnapshot(firstSnapshotId);
+            snapshotStore.GarbageCollect();
+
+            snapshotStore.Mirror(
+                destinationUriRepository,
+                destinationIntRepository);
+
+            Assert.Equal(
+                sourceUriRepository.ListKeys(),
+                destinationUriRepository.ListKeys());
+
+            Assert.Equal(
+                sourceIntRepository.ListKeys(),
+                destinationIntRepository.ListKeys());
+        }
+
+        [Fact]
         public static void Copy_Throws_On_Invalid_Content()
         {
             var uriRepository = CreateRepository<Uri>();

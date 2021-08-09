@@ -187,10 +187,17 @@ namespace Chunkyard.Cli
         public static void Copy(CopyOptions o)
         {
             var snapshotStore = CreateSnapshotStore(o.SourceRepository);
+            var uriRepository = CreateUriRepository(o.DestinationRepository);
+            var intRepository = CreateIntRepository(o.DestinationRepository);
 
-            snapshotStore.Copy(
-                CreateUriRepository(o.DestinationRepository),
-                CreateIntRepository(o.DestinationRepository));
+            if (o.Mirror)
+            {
+                snapshotStore.Mirror(uriRepository, intRepository);
+            }
+            else
+            {
+                snapshotStore.Copy(uriRepository, intRepository);
+            }
         }
 
         public static void Cat(CatOptions o)
