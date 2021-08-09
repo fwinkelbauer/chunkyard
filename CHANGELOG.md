@@ -7,6 +7,13 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.4.1 - 2021-08-09
+
+### Fixed
+
+- The order of operations when performing a `copy --mirror` command to avoid
+  snapshot corruption if the operation is cancelled
+
 ## 11.4.0 - 2021-08-09
 
 ### Added
