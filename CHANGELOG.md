@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.4.0 - 2021-08-09
+
 ### Added
 
 - A `--mirror` flag to the `copy` command. This flag will copy newer data from a
