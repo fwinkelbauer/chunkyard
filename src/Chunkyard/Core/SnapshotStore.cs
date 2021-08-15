@@ -149,10 +149,16 @@ namespace Chunkyard.Core
                     var blobValid = blobReference.ContentUris
                         .Select(contentUri =>
                         {
-                            return _uriRepository.ValueExists(contentUri)
-                                && Id.ContentUriValid(
+                            try
+                            {
+                                return Id.ContentUriValid(
                                     contentUri,
                                     _uriRepository.RetrieveValue(contentUri));
+                            }
+                            catch (Exception)
+                            {
+                                return false;
+                            }
                         })
                         .Aggregate(true, (total, next) => total & next);
 
