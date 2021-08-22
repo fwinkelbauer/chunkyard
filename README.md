@@ -33,6 +33,11 @@ tools. Here's a list of [options][backup-tools].
 - Concurrent operations on a single repository using more than one Chunkyard
   process (e.g. creating a new backup while garbage collecting unused data)
 
+## Development
+
+- You can learn more about a few basic Chunkyard topics by reading the
+  `ARCHITECTURE.md` file
+
 ## Build
 
 - Install the .NET 5 SDK
