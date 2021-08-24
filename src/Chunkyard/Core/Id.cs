@@ -17,7 +17,7 @@ namespace Chunkyard.Core
             string hashAlgorithmName,
             byte[] content)
         {
-            hashAlgorithmName.EnsureNotNullOrEmpty(nameof(hashAlgorithmName));
+            hashAlgorithmName.EnsureNotNull(nameof(hashAlgorithmName));
 
             return ToContentUri(
                 hashAlgorithmName,
@@ -46,7 +46,7 @@ namespace Chunkyard.Core
             string hashAlgorithmName,
             string hash)
         {
-            hashAlgorithmName.EnsureNotNullOrEmpty(nameof(hashAlgorithmName));
+            hashAlgorithmName.EnsureNotNull(nameof(hashAlgorithmName));
 
             return new Uri($"{hashAlgorithmName.ToLower()}://{hash}");
         }

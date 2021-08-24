@@ -25,5 +25,18 @@ namespace Chunkyard.Tests.Core
 
             Assert.Equal(expectedText, actualText);
         }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public static void PasswordToKey_Throws_On_EmptyPassword(
+            string password)
+        {
+            Assert.Throws<ChunkyardException>(
+                () => AesGcmCrypto.PasswordToKey(
+                    password,
+                    AesGcmCrypto.GenerateSalt(),
+                    AesGcmCrypto.Iterations));
+        }
     }
 }

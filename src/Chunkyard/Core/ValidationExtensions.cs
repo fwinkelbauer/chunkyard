@@ -14,15 +14,6 @@ namespace Chunkyard.Core
             return value ?? throw new ArgumentNullException(paramName);
         }
 
-        public static string EnsureNotNullOrEmpty(
-            this string? value,
-            string paramName)
-        {
-            return string.IsNullOrEmpty(value)
-                ? throw new ArgumentNullException(paramName)
-                : value;
-        }
-
         public static int EnsureBetween(
             this int value,
             int min,

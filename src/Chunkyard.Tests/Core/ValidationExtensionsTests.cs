@@ -29,29 +29,6 @@ namespace Chunkyard.Tests.Core
         }
 
         [Theory]
-        [InlineData("")]
-        [InlineData(null)]
-        public static void EnsureNotNullOrEmpty_Throws_If_Null_Or_Empty(
-            string? value)
-        {
-            var ex = Assert.Throws<ArgumentNullException>(
-                () => value!.EnsureNotNullOrEmpty(nameof(value)));
-
-            Assert.Equal(nameof(value), ex.ParamName);
-        }
-
-        [Fact]
-        public static void EnsureNotNull_Returns_Non_Null_Or_Empty_Value()
-        {
-            var expectedValue = "hello!";
-
-            var actualValue = expectedValue.EnsureNotNullOrEmpty(
-                nameof(expectedValue));
-
-            Assert.Equal(expectedValue, actualValue);
-        }
-
-        [Theory]
         [InlineData(-1)]
         [InlineData(11)]
         public static void EnsureBetween_Throws_If_Value_Is_Not_In_Range(

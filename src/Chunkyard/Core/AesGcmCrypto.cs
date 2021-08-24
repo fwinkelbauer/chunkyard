@@ -77,7 +77,11 @@ namespace Chunkyard.Core
             byte[] salt,
             int iterations)
         {
-            password.EnsureNotNullOrEmpty(nameof(password));
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ChunkyardException(
+                    "Password cannot be empty");
+            }
 
             using var rfc2898 = new Rfc2898DeriveBytes(
                 password,
