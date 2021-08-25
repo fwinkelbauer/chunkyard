@@ -189,9 +189,18 @@ namespace Chunkyard.Core
                 {
                     using var stream = openWrite(blobReference.Name);
 
-                    RetrieveContent(
-                        blobReference.ContentUris,
+                    try
+                    {
+                        RetrieveContent(
+                            blobReference.ContentUris,
                         stream);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ChunkyardException(
+                            $"Could not restore file {blobReference.Name}",
+                            e);
+                    }
 
                     _probe.RetrievedBlob(blobReference);
 
