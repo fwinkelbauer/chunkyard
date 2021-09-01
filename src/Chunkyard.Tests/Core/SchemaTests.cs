@@ -10,8 +10,6 @@ namespace Chunkyard.Tests.Core
     /// </summary>
     public static class SchemaTests
     {
-
-
         [Fact]
         public static void Can_Read_Serialized_Snapshot()
         {
