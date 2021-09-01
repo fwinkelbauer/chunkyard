@@ -239,25 +239,11 @@ namespace Chunkyard.Core
 
         public void GarbageCollect()
         {
-            var allContentUris = new HashSet<Uri>();
-
-            foreach (var snapshotId in _intRepository.ListKeys())
-            {
-                var snapshotReference = GetSnapshotReference(snapshotId);
-
-                allContentUris.UnionWith(snapshotReference.ContentUris);
-
-                var snapshot = GetSnapshot(
-                    snapshotId,
-                    snapshotReference);
-
-                allContentUris.UnionWith(
-                    snapshot.BlobReferences.SelectMany(
-                        blobReference => blobReference.ContentUris));
-            }
+            var usedContentUris = FetchContentUris(
+                _intRepository.ListKeys());
 
             var unusedContentUris = _uriRepository.ListKeys()
-                .Except(allContentUris)
+                .Except(usedContentUris)
                 .ToArray();
 
             foreach (var contentUri in unusedContentUris)
@@ -266,6 +252,29 @@ namespace Chunkyard.Core
 
                 _probe.RemovedContent(contentUri);
             }
+        }
+
+        private IEnumerable<Uri> FetchContentUris(IEnumerable<int> snapshotIds)
+        {
+            var contentUris = new HashSet<Uri>();
+
+            foreach (var snapshotId in snapshotIds)
+            {
+                var snapshotReference = GetSnapshotReference(snapshotId);
+
+                contentUris.UnionWith(
+                    snapshotReference.ContentUris);
+
+                var snapshot = GetSnapshot(
+                    snapshotId,
+                    snapshotReference);
+
+                contentUris.UnionWith(
+                    snapshot.BlobReferences.SelectMany(
+                        blobReference => blobReference.ContentUris));
+            }
+
+            return contentUris;
         }
 
         public void RemoveSnapshot(int snapshotId)
