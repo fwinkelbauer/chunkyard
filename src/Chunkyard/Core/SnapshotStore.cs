@@ -303,40 +303,10 @@ namespace Chunkyard.Core
             contentRepository.EnsureNotNull(nameof(contentRepository));
             snapshotRepository.EnsureNotNull(nameof(snapshotRepository));
 
-            var contentUrisToCopy = _uriRepository.ListKeys()
-                .Except(contentRepository.ListKeys())
-                .ToArray();
-
-            foreach (var contentUri in contentUrisToCopy)
-            {
-                var content = _uriRepository.RetrieveValue(contentUri);
-
-                if (!Id.ContentUriValid(contentUri, content))
-                {
-                    throw new ChunkyardException(
-                        $"Invalid content: {contentUri}");
-                }
-
-                contentRepository.StoreValue(contentUri, content);
-
-                _probe.CopiedContent(contentUri);
-            }
-
-            var snapshotIdsToCopy = _intRepository.ListKeys()
-                .Except(snapshotRepository.ListKeys())
-                .ToArray();
-
-            foreach (var snapshotId in snapshotIdsToCopy)
-            {
-                // We convert a SnapshotReference from/to bytes to check if
-                // these bytes are valid
-                snapshotRepository.StoreValue(
-                    snapshotId,
-                    DataConvert.ObjectToBytes(
-                        GetSnapshotReference(snapshotId)));
-
-                _probe.CopiedSnapshot(snapshotId);
-            }
+            Copy(
+                contentRepository,
+                snapshotRepository,
+                mirror: false);
         }
 
         public void Mirror(
@@ -346,6 +316,17 @@ namespace Chunkyard.Core
             contentRepository.EnsureNotNull(nameof(contentRepository));
             snapshotRepository.EnsureNotNull(nameof(snapshotRepository));
 
+            Copy(
+                contentRepository,
+                snapshotRepository,
+                mirror: true);
+        }
+
+        private void Copy(
+            IRepository<Uri> contentRepository,
+            IRepository<int> snapshotRepository,
+            bool mirror)
+        {
             var localContentUris = _uriRepository.ListKeys();
             var remoteContentUris = contentRepository.ListKeys();
 
@@ -387,28 +368,32 @@ namespace Chunkyard.Core
                 _probe.CopiedSnapshot(snapshotId);
             }
 
-            // We need to delete snapshotIds prior to deleting contentUris so
-            // that a cancelled mirror operation does not corrupt any snapshots
-            var snapshotIdsToDelete = remoteSnapshotIds
-                .Except(localSnapshotIds)
-                .ToArray();
-
-            foreach (var snapshotId in snapshotIdsToDelete)
+            if (mirror)
             {
-                snapshotRepository.RemoveValue(snapshotId);
+                // We need to delete snapshotIds prior to deleting contentUris
+                // so that a cancelled mirror operation does not corrupt any
+                // snapshots
+                var snapshotIdsToDelete = remoteSnapshotIds
+                    .Except(localSnapshotIds)
+                    .ToArray();
 
-                _probe.RemovedSnapshot(snapshotId);
-            }
+                foreach (var snapshotId in snapshotIdsToDelete)
+                {
+                    snapshotRepository.RemoveValue(snapshotId);
 
-            var contentUrisToDelete = remoteContentUris
-                .Except(localContentUris)
-                .ToArray();
+                    _probe.RemovedSnapshot(snapshotId);
+                }
 
-            foreach (var contentUri in contentUrisToDelete)
-            {
-                contentRepository.RemoveValue(contentUri);
+                var contentUrisToDelete = remoteContentUris
+                    .Except(localContentUris)
+                    .ToArray();
 
-                _probe.RemovedContent(contentUri);
+                foreach (var contentUri in contentUrisToDelete)
+                {
+                    contentRepository.RemoveValue(contentUri);
+
+                    _probe.RemovedContent(contentUri);
+                }
             }
         }
 
