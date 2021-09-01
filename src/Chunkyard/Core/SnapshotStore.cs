@@ -254,29 +254,6 @@ namespace Chunkyard.Core
             }
         }
 
-        private IEnumerable<Uri> FetchContentUris(IEnumerable<int> snapshotIds)
-        {
-            var contentUris = new HashSet<Uri>();
-
-            foreach (var snapshotId in snapshotIds)
-            {
-                var snapshotReference = GetSnapshotReference(snapshotId);
-
-                contentUris.UnionWith(
-                    snapshotReference.ContentUris);
-
-                var snapshot = GetSnapshot(
-                    snapshotId,
-                    snapshotReference);
-
-                contentUris.UnionWith(
-                    snapshot.BlobReferences.SelectMany(
-                        blobReference => blobReference.ContentUris));
-            }
-
-            return contentUris;
-        }
-
         public void RemoveSnapshot(int snapshotId)
         {
             var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
@@ -430,6 +407,29 @@ namespace Chunkyard.Core
                         e);
                 }
             }
+        }
+
+        private IEnumerable<Uri> FetchContentUris(IEnumerable<int> snapshotIds)
+        {
+            var contentUris = new HashSet<Uri>();
+
+            foreach (var snapshotId in snapshotIds)
+            {
+                var snapshotReference = GetSnapshotReference(snapshotId);
+
+                contentUris.UnionWith(
+                    snapshotReference.ContentUris);
+
+                var snapshot = GetSnapshot(
+                    snapshotId,
+                    snapshotReference);
+
+                contentUris.UnionWith(
+                    snapshot.BlobReferences.SelectMany(
+                        blobReference => blobReference.ContentUris));
+            }
+
+            return contentUris;
         }
 
         private static BlobReference[] Filter(
