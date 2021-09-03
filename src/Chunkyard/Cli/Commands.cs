@@ -62,9 +62,6 @@ namespace Chunkyard.Cli
 
             snapshotStore.StoreSnapshot(
                 blobs,
-                new Fuzzy(
-                    o.ScanPatterns,
-                    FuzzyOption.EmptyMatchesNothing),
                 DateTime.UtcNow,
                 blobName => File.OpenRead(
                     Path.Combine(parent, blobName)));

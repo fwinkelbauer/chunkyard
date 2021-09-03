@@ -9,13 +9,11 @@ namespace Chunkyard.Cli
         public CreateOptions(
             string repository,
             IEnumerable<string> files,
-            IEnumerable<string> excludePatterns,
-            IEnumerable<string> scanPatterns)
+            IEnumerable<string> excludePatterns)
         {
             Repository = repository;
             Files = files;
             ExcludePatterns = excludePatterns;
-            ScanPatterns = scanPatterns;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
@@ -26,8 +24,5 @@ namespace Chunkyard.Cli
 
         [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude")]
         public IEnumerable<string> ExcludePatterns { get; }
-
-        [Option("scan", Required = false, HelpText = "The fuzzy patterns for files to always inspect for changes")]
-        public IEnumerable<string> ScanPatterns { get; }
     }
 }

@@ -81,7 +81,6 @@ namespace Chunkyard.Core
 
         public int StoreSnapshot(
             IReadOnlyCollection<Blob> blobs,
-            Fuzzy scanFuzzy,
             DateTime creationTimeUtc,
             Func<string, Stream> openRead)
         {
@@ -90,7 +89,7 @@ namespace Chunkyard.Core
                     ? 0
                     : _currentSnapshotId.Value + 1,
                 creationTimeUtc,
-                WriteBlobs(blobs, scanFuzzy, openRead));
+                WriteBlobs(blobs, openRead));
 
             using var memoryStream = new MemoryStream(
                 DataConvert.ObjectToBytes(newSnapshot));
@@ -489,7 +488,6 @@ namespace Chunkyard.Core
 
         private BlobReference[] WriteBlobs(
             IReadOnlyCollection<Blob> blobs,
-            Fuzzy scanFuzzy,
             Func<string, Stream> openRead)
         {
             var currentBlobReferences = _currentSnapshotId == null
@@ -505,8 +503,7 @@ namespace Chunkyard.Core
                         blob.Name,
                         out var current);
 
-                    if (!scanFuzzy.IsMatch(blob.Name)
-                        && current != null
+                    if (current != null
                         && current.ToBlob().Equals(blob))
                     {
                         return current;
