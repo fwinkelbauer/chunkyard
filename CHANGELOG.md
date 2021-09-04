@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The error message when failing to restore parts of a snapshot
 
+### Removed
+
+- The `--scan` option when using `create`
+
 ## 11.4.1 - 2021-08-09
 
 ### Fixed
