@@ -192,7 +192,7 @@ namespace Chunkyard.Core
                     {
                         RetrieveContent(
                             blobReference.ContentUris,
-                        stream);
+                            stream);
                     }
                     catch (Exception e)
                     {
