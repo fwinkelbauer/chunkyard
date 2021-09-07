@@ -17,7 +17,7 @@ namespace Chunkyard.Build.Cli
         static Commands()
         {
             Directory.SetCurrentDirectory(
-                Git("rev-parse --show-toplevel"));
+                GitOutput("rev-parse --show-toplevel"));
         }
 
         public static void Clean(DotnetOptions o)
@@ -50,7 +50,7 @@ namespace Chunkyard.Build.Cli
 
         public static void Publish(DotnetOptions o)
         {
-            var dirty = Git("status --porcelain").Length > 0;
+            var dirty = GitOutput("status --porcelain").Length > 0;
 
             if (dirty)
             {
@@ -62,7 +62,7 @@ namespace Chunkyard.Build.Cli
             Build(o);
 
             var version = FetchVersion();
-            var commitId = Git("rev-parse --short HEAD");
+            var commitId = GitOutput("rev-parse --short HEAD");
 
             foreach (var runtime in new[] { "win-x64", "linux-x64" })
             {
@@ -110,14 +110,15 @@ namespace Chunkyard.Build.Cli
 
         private static void Dotnet(params string[] arguments)
         {
-            Exec(
-                "dotnet",
-                arguments,
-                new[] { 0 },
-                Console.WriteLine);
+            Exec("dotnet", arguments, new[] { 0 });
         }
 
-        private static string Git(params string[] arguments)
+        private static void Git(params string[] arguments)
+        {
+            Exec("git", arguments, new[] { 0 });
+        }
+
+        private static string GitOutput(params string[] arguments)
         {
             var builder = new StringBuilder();
 
@@ -134,13 +135,13 @@ namespace Chunkyard.Build.Cli
             string fileName,
             string[] arguments,
             int[] validExitCodes,
-            Action<string> processOutput)
+            Action<string>? processOutput = null)
         {
             var startInfo = new ProcessStartInfo(
                 fileName,
                 string.Join(' ', arguments))
             {
-                RedirectStandardOutput = true
+                RedirectStandardOutput = processOutput != null
             };
 
             using var process = Process.Start(startInfo);
@@ -153,9 +154,12 @@ namespace Chunkyard.Build.Cli
 
             string? line;
 
-            while ((line = process.StandardOutput.ReadLine()) != null)
+            if (processOutput != null)
             {
-                processOutput(line);
+                while ((line = process.StandardOutput.ReadLine()) != null)
+                {
+                    processOutput(line);
+                }
             }
 
             process.WaitForExit();
