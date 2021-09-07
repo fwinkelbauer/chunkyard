@@ -50,7 +50,7 @@ namespace Chunkyard.Core
         {
             cipherText.EnsureNotNull(nameof(cipherText));
 
-            byte[] plainText = new byte[
+            var plainText = new byte[
                 cipherText.Length - NonceBytes - TagBytes];
 
             var nonce = new Span<byte>(cipherText, 0, NonceBytes);
