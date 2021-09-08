@@ -411,6 +411,44 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
+        public static void RetrieveSnapshot_Overwrites_Blobs_If_Necessary()
+        {
+            var snapshotStore = CreateSnapshotStore();
+            var blobs = CreateBlobs(
+                new[]
+                {
+                    "new blob",
+                    "unchanged blob",
+                    "changed blob"
+                });
+
+            var snapshotId = snapshotStore.StoreSnapshot(
+                new DummyBlobReader(blobs),
+                DateTime.UtcNow);
+
+            var blobWriter = new DummyBlobWriter(
+                new[]
+                {
+                    blobs[1],
+                    new Blob(blobs[2].Name, DateTime.UtcNow)
+                });
+
+            snapshotStore.RetrieveSnapshot(
+                blobWriter,
+                snapshotId,
+                Fuzzy.MatchAll);
+
+            foreach (var blob in blobs)
+            {
+                Assert.Equal(blob, blobWriter.FindBlob(blob.Name));
+            }
+
+            Assert.NotEmpty(blobWriter.ShowContent(blobs[0].Name));
+            Assert.Null(blobWriter.ShowContent(blobs[1].Name));
+            Assert.NotEmpty(blobWriter.ShowContent(blobs[2].Name));
+        }
+
+        [Fact]
         public static void RetrieveSnapshot_Can_Write_Empty_Blobs()
         {
             var snapshotStore = CreateSnapshotStore();

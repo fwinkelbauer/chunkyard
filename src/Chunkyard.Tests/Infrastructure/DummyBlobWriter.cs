@@ -12,13 +12,13 @@ namespace Chunkyard.Tests.Infrastructure
         private readonly Dictionary<string, MemoryStream> _streams;
 
         public DummyBlobWriter(
-            string[]? blobNames = null)
+            Blob[]? blobs = null)
         {
-            _blobs = blobNames == null
+            _blobs = blobs == null
                 ? new Dictionary<string, Blob>()
-                : blobNames.ToDictionary(
-                    b => b,
-                    b => new Blob(b, DateTime.UtcNow));
+                : blobs.ToDictionary(
+                    b => b.Name,
+                    b => b);
 
             _streams = new Dictionary<string, MemoryStream>();
         }
@@ -47,9 +47,14 @@ namespace Chunkyard.Tests.Infrastructure
             _blobs[blob.Name] = blob;
         }
 
-        public byte[] ShowContent(string blobName)
+        public byte[]? ShowContent(string blobName)
         {
-            return _streams[blobName].ToArray();
+            if (_streams.TryGetValue(blobName, out var stream))
+            {
+                return stream.ToArray();
+            }
+
+            return null;
         }
     }
 }
