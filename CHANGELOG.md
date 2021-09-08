@@ -10,10 +10,15 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 ### Changed
 
 - The error message when failing to restore parts of a snapshot
+- The `restore` command to also update the file meta data (last write time). A
+  file will be overwritten, if its meta data does not match the data found in a
+  snapshot
 
 ### Removed
 
 - The `--scan` option when using `create`
+- The `--overwrite` option when using `restore` as this option is now always
+  active
 
 ## 11.4.1 - 2021-08-09
 

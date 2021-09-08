@@ -10,15 +10,13 @@ namespace Chunkyard.Cli
         public RestoreOptions(
             string repository,
             string directory,
-            IEnumerable<string> includePatterns,
             int snapshotId,
-            bool overwrite)
+            IEnumerable<string> includePatterns)
         {
             Repository = repository;
             Directory = directory;
-            IncludePatterns = includePatterns;
             SnapshotId = snapshotId;
-            Overwrite = overwrite;
+            IncludePatterns = includePatterns;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
@@ -27,13 +25,10 @@ namespace Chunkyard.Cli
         [Option('d', "directory", Required = false, HelpText = "The directory to restore into", Default = ".")]
         public string Directory { get; }
 
-        [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
-        public IEnumerable<string> IncludePatterns { get; }
-
         [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
         public int SnapshotId { get; }
 
-        [Option("overwrite", Required = false, HelpText = "If files should be overwritten", Default = false)]
-        public bool Overwrite { get; }
+        [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
+        public IEnumerable<string> IncludePatterns { get; }
     }
 }

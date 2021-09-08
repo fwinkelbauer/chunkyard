@@ -13,18 +13,13 @@ namespace Chunkyard.Cli
     {
         public static void PreviewSnapshot(PreviewOptions o)
         {
-            var (_, blobs) = FileFetcher.FindBlobs(
+            var blobReader = new FileBlobReader(
                 o.Files,
                 new Fuzzy(
                     o.ExcludePatterns,
                     FuzzyOption.EmptyMatchesNothing));
 
-            if (blobs.Length == 0)
-            {
-                Console.WriteLine("Empty file list. Nothing to do!");
-                return;
-            }
-
+            var blobs = blobReader.FetchBlobs();
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
             var snapshotBlobs = snapshotStore.IsEmpty
@@ -46,25 +41,17 @@ namespace Chunkyard.Cli
 
         public static void CreateSnapshot(CreateOptions o)
         {
-            var (parent, blobs) = FileFetcher.FindBlobs(
+            var snapshotStore = CreateSnapshotStore(o.Repository);
+
+            var blobReader = new FileBlobReader(
                 o.Files,
                 new Fuzzy(
                     o.ExcludePatterns,
                     FuzzyOption.EmptyMatchesNothing));
 
-            if (blobs.Length == 0)
-            {
-                Console.WriteLine("Empty file list. Nothing to do!");
-                return;
-            }
-
-            var snapshotStore = CreateSnapshotStore(o.Repository);
-
             snapshotStore.StoreSnapshot(
-                blobs,
-                DateTime.UtcNow,
-                blobName => File.OpenRead(
-                    Path.Combine(parent, blobName)));
+                blobReader,
+                DateTime.UtcNow);
         }
 
         public static void CheckSnapshot(CheckOptions o)
@@ -109,25 +96,12 @@ namespace Chunkyard.Cli
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            Stream OpenWrite(string blobName)
-            {
-                var file = Path.Combine(o.Directory, blobName);
-
-                DirectoryUtil.CreateParent(file);
-
-                var mode = o.Overwrite
-                    ? FileMode.Create
-                    : FileMode.CreateNew;
-
-                return new FileStream(file, mode, FileAccess.Write);
-            }
-
             snapshotStore.RetrieveSnapshot(
+                new FileBlobWriter(o.Directory),
                 o.SnapshotId,
                 new Fuzzy(
                     o.IncludePatterns,
-                    FuzzyOption.EmptyMatchesAll),
-                OpenWrite);
+                    FuzzyOption.EmptyMatchesAll));
         }
 
         public static void ListSnapshots(ListOptions o)

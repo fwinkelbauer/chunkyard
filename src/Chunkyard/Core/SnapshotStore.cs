@@ -80,16 +80,17 @@ namespace Chunkyard.Core
         public bool IsEmpty => _currentSnapshotId == null;
 
         public int StoreSnapshot(
-            IReadOnlyCollection<Blob> blobs,
-            DateTime creationTimeUtc,
-            Func<string, Stream> openRead)
+            IBlobReader blobReader,
+            DateTime creationTimeUtc)
         {
+            blobReader.EnsureNotNull(nameof(blobReader));
+
             var newSnapshot = new Snapshot(
                 _currentSnapshotId == null
                     ? 0
                     : _currentSnapshotId.Value + 1,
                 creationTimeUtc,
-                WriteBlobs(blobs, openRead));
+                WriteBlobs(blobReader));
 
             using var memoryStream = new MemoryStream(
                 DataConvert.ObjectToBytes(newSnapshot));
@@ -175,24 +176,38 @@ namespace Chunkyard.Core
         }
 
         public IEnumerable<Blob> RetrieveSnapshot(
+            IBlobWriter blobWriter,
             int snapshotId,
-            Fuzzy includeFuzzy,
-            Func<string, Stream> openWrite)
+            Fuzzy includeFuzzy)
         {
-            openWrite.EnsureNotNull(nameof(openWrite));
-
             var snapshot = GetSnapshot(snapshotId);
             var blobs = Filter(snapshot, includeFuzzy)
                 .AsParallel()
                 .Select(blobReference =>
                 {
-                    using var stream = openWrite(blobReference.Name);
+                    var existingBlob = blobWriter.FindBlob(blobReference.Name);
+                    var snapshotBlob = blobReference.ToBlob();
+
+                    if (existingBlob != null
+                        && existingBlob.Equals(snapshotBlob))
+                    {
+                        return existingBlob;
+                    }
 
                     try
                     {
-                        RetrieveContent(
-                            blobReference.ContentUris,
-                            stream);
+                        using (var stream = blobWriter.OpenWrite(
+                            blobReference.Name))
+                        {
+                            RetrieveContent(
+                                blobReference.ContentUris,
+                                stream);
+                        }
+
+                        // We want to call this method after disposing the
+                        // stream, which is why we are using a dedicated using
+                        // block above
+                        blobWriter.UpdateBlobMetadata(snapshotBlob);
                     }
                     catch (Exception e)
                     {
@@ -203,7 +218,7 @@ namespace Chunkyard.Core
 
                     _probe.RetrievedBlob(blobReference);
 
-                    return blobReference.ToBlob();
+                    return snapshotBlob;
                 })
                 .ToArray();
 
@@ -487,15 +502,14 @@ namespace Chunkyard.Core
         }
 
         private BlobReference[] WriteBlobs(
-            IReadOnlyCollection<Blob> blobs,
-            Func<string, Stream> openRead)
+            IBlobReader blobReader)
         {
             var currentBlobReferences = _currentSnapshotId == null
                 ? new Dictionary<string, BlobReference>()
                 : GetSnapshot(_currentSnapshotId.Value).BlobReferences
                     .ToDictionary(br => br.Name, br => br);
 
-            return blobs
+            return blobReader.FetchBlobs()
                 .AsParallel()
                 .Select(blob =>
                 {
@@ -513,7 +527,7 @@ namespace Chunkyard.Core
                     var nonce = current?.Nonce
                         ?? AesGcmCrypto.GenerateNonce();
 
-                    using var stream = openRead(blob.Name);
+                    using var stream = blobReader.OpenRead(blob.Name);
 
                     var blobReference = new BlobReference(
                         blob.Name,

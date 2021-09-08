@@ -7,31 +7,38 @@ using Chunkyard.Core;
 namespace Chunkyard.Infrastructure
 {
     /// <summary>
-    /// A class to retrieve file names based on a set of directories/files and
-    /// exclude patterns.
+    /// An implementation of <see cref="IBlobReader"/> using the file system.
     /// </summary>
-    internal static class FileFetcher
+    internal class FileBlobReader : IBlobReader
     {
-        public static (string Parent, Blob[] Blobs) FindBlobs(
+        private readonly string[] _files;
+        private readonly Fuzzy _excludeFuzzy;
+        private readonly string _parent;
+
+        public FileBlobReader(
             IEnumerable<string> files,
             Fuzzy excludeFuzzy)
         {
-            var resolvedFiles = files.Select(Path.GetFullPath)
+            _files = files.Select(Path.GetFullPath)
                 .ToArray();
 
-            var foundFiles = resolvedFiles
-                .SelectMany(f => Find(f, excludeFuzzy))
+            _excludeFuzzy = excludeFuzzy;
+            _parent = FindCommonParent(_files);
+        }
+
+        public IReadOnlyCollection<Blob> FetchBlobs()
+        {
+            var foundFiles = _files
+                .SelectMany(f => Find(f, _excludeFuzzy))
                 .Distinct()
                 .ToArray();
-
-            var parent = FindCommonParent(resolvedFiles);
 
             var blobs = foundFiles
                 .Select(file =>
                 {
-                    var blobName = string.IsNullOrEmpty(parent)
+                    var blobName = string.IsNullOrEmpty(_parent)
                         ? file
-                        : Path.GetRelativePath(parent, file);
+                        : Path.GetRelativePath(_parent, file);
 
                     // Using a blob name with backslashes will not create
                     // sub-directories when restoring a file on Linux.
@@ -48,7 +55,13 @@ namespace Chunkyard.Infrastructure
                 })
                 .ToArray();
 
-            return (parent, blobs);
+            return blobs;
+        }
+
+        public Stream OpenRead(string blobName)
+        {
+            return File.OpenRead(
+                Path.Combine(_parent, blobName));
         }
 
         private static IEnumerable<string> Find(
