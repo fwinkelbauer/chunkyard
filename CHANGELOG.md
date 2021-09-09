@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.5.0 - 2021-09-09
+
 ### Changed
 
 - The error message when failing to restore parts of a snapshot
