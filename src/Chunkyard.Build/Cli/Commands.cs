@@ -31,7 +31,7 @@ namespace Chunkyard.Build.Cli
 
         public static void Build(DotnetOptions o)
         {
-            Tool();
+            Dotnet("tool restore");
 
             Dotnet(
                 $"format {Source}",
@@ -86,7 +86,7 @@ namespace Chunkyard.Build.Cli
 
         public static void Fmt()
         {
-            Tool();
+            Dotnet("tool restore");
 
             Dotnet($"format {Source}");
         }
@@ -101,11 +101,6 @@ namespace Chunkyard.Build.Cli
             Git($"add {Changelog}");
             Git($"commit -m \"{message}\"");
             Git($"tag -a \"{tag}\" -m \"{message}\"");
-        }
-
-        private static void Tool()
-        {
-            Dotnet("tool restore");
         }
 
         private static void Dotnet(params string[] arguments)
