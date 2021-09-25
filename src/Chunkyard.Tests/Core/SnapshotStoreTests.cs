@@ -803,7 +803,6 @@ namespace Chunkyard.Tests.Core
                 uriRepository ?? CreateRepository<Uri>(),
                 intRepository ?? CreateRepository<int>(),
                 fastCdc ?? new FastCdc(),
-                Id.AlgorithmSha256,
                 new DummyPrompt(password),
                 new DummyProbe(),
                 parallelizeChunkThreshold);

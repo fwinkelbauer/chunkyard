@@ -19,7 +19,6 @@ namespace Chunkyard.Core
         private readonly IRepository<Uri> _uriRepository;
         private readonly IRepository<int> _intRepository;
         private readonly FastCdc _fastCdc;
-        private readonly string _hashAlgorithmName;
         private readonly IProbe _probe;
         private readonly int _parallelizeChunkThreshold;
         private readonly byte[] _salt;
@@ -32,7 +31,6 @@ namespace Chunkyard.Core
             IRepository<Uri> uriRepository,
             IRepository<int> intRepository,
             FastCdc fastCdc,
-            string hashAlgorithmName,
             IPrompt prompt,
             IProbe probe,
             int parallelizeChunkThreshold)
@@ -40,7 +38,6 @@ namespace Chunkyard.Core
             _uriRepository = uriRepository;
             _intRepository = intRepository;
             _fastCdc = fastCdc;
-            _hashAlgorithmName = hashAlgorithmName;
             _probe = probe;
             _parallelizeChunkThreshold = parallelizeChunkThreshold;
 
@@ -474,9 +471,7 @@ namespace Chunkyard.Core
                     chunk,
                     _key.Value);
 
-                var contentUri = Id.ComputeContentUri(
-                    _hashAlgorithmName,
-                    encryptedData);
+                var contentUri = Id.ComputeContentUri(encryptedData);
 
                 _uriRepository.StoreValue(contentUri, encryptedData);
 

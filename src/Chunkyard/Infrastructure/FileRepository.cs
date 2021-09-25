@@ -111,7 +111,7 @@ namespace Chunkyard.Infrastructure
                         contentUri);
 
                     return Path.Combine(
-                        algorithm.ToLower(),
+                        algorithm,
                         hash.Substring(0, 2),
                         hash);
                 },

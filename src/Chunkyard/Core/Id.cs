@@ -11,17 +11,14 @@ namespace Chunkyard.Core
     /// </summary>
     public static class Id
     {
-        public const string AlgorithmSha256 = "SHA256";
+        private const string AlgorithmSha256 = "sha256";
 
         public static Uri ComputeContentUri(
-            string hashAlgorithmName,
             byte[] content)
         {
-            hashAlgorithmName.EnsureNotNull(nameof(hashAlgorithmName));
-
             return ToContentUri(
-                hashAlgorithmName,
-                ComputeHash(hashAlgorithmName, content));
+                AlgorithmSha256,
+                ComputeHash(AlgorithmSha256, content));
         }
 
         public static bool ContentUriValid(
@@ -39,7 +36,7 @@ namespace Chunkyard.Core
         {
             contentUri.EnsureNotNull(nameof(contentUri));
 
-            return (contentUri.Scheme.ToUpper(), contentUri.Host);
+            return (contentUri.Scheme, contentUri.Host);
         }
 
         public static Uri ToContentUri(
@@ -48,7 +45,7 @@ namespace Chunkyard.Core
         {
             hashAlgorithmName.EnsureNotNull(nameof(hashAlgorithmName));
 
-            return new Uri($"{hashAlgorithmName.ToLower()}://{hash}");
+            return new Uri($"{hashAlgorithmName}://{hash}");
         }
 
         private static string ComputeHash(
