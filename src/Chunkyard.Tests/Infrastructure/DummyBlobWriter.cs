@@ -10,6 +10,7 @@ namespace Chunkyard.Tests.Infrastructure
     {
         private readonly Dictionary<string, Blob> _blobs;
         private readonly Dictionary<string, MemoryStream> _streams;
+        private readonly object _lock;
 
         public DummyBlobWriter(
             Blob[]? blobs = null)
@@ -21,6 +22,7 @@ namespace Chunkyard.Tests.Infrastructure
                     b => b);
 
             _streams = new Dictionary<string, MemoryStream>();
+            _lock = new object();
         }
 
         public Blob? FindBlob(string blobName)
@@ -37,7 +39,10 @@ namespace Chunkyard.Tests.Infrastructure
         {
             var stream = new MemoryStream();
 
-            _streams[blobName] = stream;
+            lock (_lock)
+            {
+                _streams[blobName] = stream;
+            }
 
             return stream;
         }
@@ -49,9 +54,12 @@ namespace Chunkyard.Tests.Infrastructure
 
         public byte[]? ShowContent(string blobName)
         {
-            if (_streams.TryGetValue(blobName, out var stream))
+            lock (_lock)
             {
-                return stream.ToArray();
+                if (_streams.TryGetValue(blobName, out var stream))
+                {
+                    return stream.ToArray();
+                }
             }
 
             return null;
