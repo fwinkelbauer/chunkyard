@@ -43,6 +43,10 @@ tools. Here's a list of [options][backup-tools].
 - Install the .NET 5 SDK
 - Run `./csake build` to build the solution
 
+The `./csake` script runs the project `./build/Chunkyard.Build`, a CLI tool
+which can be used to build, test and release Chunkyard. You can type commands
+such as `./csake help` or `./csake build --help` to learn more.
+
 ## Publish
 
 - Commit all your work
