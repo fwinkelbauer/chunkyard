@@ -2,7 +2,7 @@
 
 namespace Chunkyard.Build.Cli
 {
-    [Verb("build", HelpText = "Build the solution.")]
+    [Verb("build", isDefault: true, HelpText = "Build the solution.")]
     public class BuildOptions : DotnetOptions
     {
         public BuildOptions(bool liveTest, string configuration)
