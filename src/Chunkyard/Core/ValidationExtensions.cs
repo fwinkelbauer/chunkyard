@@ -13,18 +13,5 @@ namespace Chunkyard.Core
         {
             return value ?? throw new ArgumentNullException(paramName);
         }
-
-        public static int EnsureBetween(
-            this int value,
-            int min,
-            int max,
-            string paramName)
-        {
-            return value < min || value > max
-                ? throw new ArgumentOutOfRangeException(
-                    paramName,
-                    $"Value must be between {min} and {max}")
-                : value;
-        }
     }
 }

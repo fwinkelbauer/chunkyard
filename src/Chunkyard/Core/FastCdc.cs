@@ -291,17 +291,20 @@ namespace Chunkyard.Core
             int avgSize,
             int maxSize)
         {
-            MinSize = minSize.EnsureBetween(
+            MinSize = EnsureBetween(
+                minSize,
                 MinimumMin,
                 MinimumMax,
                 nameof(minSize));
 
-            AvgSize = avgSize.EnsureBetween(
+            AvgSize = EnsureBetween(
+                avgSize,
                 AverageMin,
                 AverageMax,
                 nameof(avgSize));
 
-            MaxSize = maxSize.EnsureBetween(
+            MaxSize = EnsureBetween(
+                maxSize,
                 MaximumMin,
                 MaximumMax,
                 nameof(maxSize));
@@ -415,9 +418,22 @@ namespace Chunkyard.Core
 
         private static uint Mask(int bits)
         {
-            bits.EnsureBetween(1, 31, nameof(bits));
+            EnsureBetween(bits, 1, 31, nameof(bits));
 
             return (uint)Math.Pow(2, bits) - 1;
+        }
+
+        private static int EnsureBetween(
+            int value,
+            int min,
+            int max,
+            string paramName)
+        {
+            return value < min || value > max
+                ? throw new ArgumentOutOfRangeException(
+                    paramName,
+                    $"Value must be between {min} and {max}")
+                : value;
         }
     }
 }
