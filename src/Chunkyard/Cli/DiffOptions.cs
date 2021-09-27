@@ -27,7 +27,7 @@ namespace Chunkyard.Cli
         [Option('s', "second", Required = false, HelpText = "The second snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
         public int SecondSnapshotId { get; }
 
-        [Option('c', "content-only", Required = false, HelpText = "Ignore meta data", Default = false)]
+        [Option("content-only", Required = false, HelpText = "Ignore meta data", Default = false)]
         public bool ContentOnly { get; }
     }
 }
