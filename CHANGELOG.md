@@ -7,6 +7,13 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.6.0 - 2021-09-27
+
+### Removed
+
+- The `-c` option when using the `diff` command. `--content-only` should be used
+  instead
+
 ## 11.5.0 - 2021-09-09
 
 ### Changed
