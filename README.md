@@ -44,7 +44,7 @@ tools. Here's a list of [options][backup-tools].
 - Run `./csake` to build the solution
 
 The `./csake` script runs the project `./build/Chunkyard.Build`, a CLI tool
-which can be used to build, test and release Chunkyard. You can type commands
+which can be used to build, test and publish Chunkyard. You can type commands
 such as `./csake help` or `./csake build --help` to learn more.
 
 ## Publish
