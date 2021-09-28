@@ -10,7 +10,8 @@ namespace Chunkyard.Build.Cli
     internal static class Commands
     {
         private const string Artifacts = "artifacts";
-        private const string Solution = "src/Chunkyard.sln";
+        private const string BuildSolution = "build/Chunkyard.Build.sln";
+        private const string SourceSolution = "src/Chunkyard.sln";
         private const string MainProject = "src/Chunkyard/Chunkyard.csproj";
         private const string Changelog = "CHANGELOG.md";
 
@@ -23,7 +24,7 @@ namespace Chunkyard.Build.Cli
         public static void Clean(DotnetOptions o)
         {
             Dotnet(
-                $"clean {Solution}",
+                $"clean {SourceSolution}",
                 $"-c {o.Configuration}");
 
             CleanDirectory(Artifacts);
@@ -34,16 +35,22 @@ namespace Chunkyard.Build.Cli
             Dotnet("tool restore");
 
             Dotnet(
-                $"format {Solution}",
+                $"format {BuildSolution}",
                 "--check");
 
             Dotnet(
-                $"build {Solution}",
+                $"format {SourceSolution}",
+                "--check");
+
+            Dotnet(
+                $"build {SourceSolution}",
                 $"-c {o.Configuration}",
                 "-warnaserror");
 
             Dotnet(
-                liveTest ? $"watch test --project {Solution}" : $"test {Solution}",
+                liveTest
+                    ? $"watch test --project {SourceSolution}"
+                    : $"test {SourceSolution}",
                 $"-c {o.Configuration}",
                 "--no-build");
         }
@@ -88,7 +95,8 @@ namespace Chunkyard.Build.Cli
         {
             Dotnet("tool restore");
 
-            Dotnet($"format {Solution}");
+            Dotnet($"format {BuildSolution}");
+            Dotnet($"format {SourceSolution}");
         }
 
         public static void Release()
