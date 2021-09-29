@@ -57,13 +57,7 @@ namespace Chunkyard.Build.Cli
 
         public static void Publish(DotnetOptions o)
         {
-            var dirty = GitOutput("status --porcelain").Length > 0;
-
-            if (dirty)
-            {
-                throw new BuildException(
-                    "Publishing uncommited changes is not allowed");
-            }
+            ThrowOnUncommittedChanges();
 
             Clean(o);
             Build(o);
@@ -109,6 +103,15 @@ namespace Chunkyard.Build.Cli
             Git($"add {Changelog}");
             Git($"commit -m \"{message}\"");
             Git($"tag -a \"{tag}\" -m \"{message}\"");
+        }
+
+        private static void ThrowOnUncommittedChanges()
+        {
+            if (GitOutput("status --porcelain").Length > 0)
+            {
+                throw new BuildException(
+                    "Publishing uncommitted changes is not allowed");
+            }
         }
 
         private static void Dotnet(params string[] arguments)
