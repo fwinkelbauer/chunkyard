@@ -331,21 +331,19 @@ namespace Chunkyard.Core
 
         public int MaxSize { get; }
 
-        public IEnumerable<byte[]> SplitIntoChunks(Stream sourceStream)
+        public IEnumerable<byte[]> SplitIntoChunks(Stream stream)
         {
-            sourceStream.EnsureNotNull(nameof(sourceStream));
+            stream.EnsureNotNull(nameof(stream));
 
-            long bytesProcessed = 0;
             var buffer = new byte[MaxSize];
 
-            while (bytesProcessed < sourceStream.Length)
+            while (stream.Position < stream.Length)
             {
-                var bytesRead = sourceStream.Read(buffer, 0, buffer.Length);
-
+                var previousPosition = stream.Position;
+                var bytesRead = stream.Read(buffer, 0, buffer.Length);
                 var chunkSize = Cut(buffer, bytesRead);
-                bytesProcessed += chunkSize;
 
-                sourceStream.Position = bytesProcessed;
+                stream.Position = previousPosition + chunkSize;
 
                 yield return new Span<byte>(buffer, 0, chunkSize)
                     .ToArray();
