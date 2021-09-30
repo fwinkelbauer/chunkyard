@@ -7,7 +7,8 @@ namespace Chunkyard.Tests.Core
 {
     public static class FastCdcTests
     {
-        private const string Image = "Assets/SekienAkashita.jpg";
+        private static byte[] _sekienBytes = File.ReadAllBytes(
+            "Assets/SekienAkashita.jpg");
 
         [Fact]
         public static void SplitIntoChunks_Sekien_16k_Chunks()
@@ -17,12 +18,16 @@ namespace Chunkyard.Tests.Core
                 16 * 1024,
                 32 * 1024);
 
-            using var stream = File.OpenRead(Image);
-            var chunks = fastCdc.SplitIntoChunks(stream);
+            using var stream = new MemoryStream(_sekienBytes);
+            var chunks = fastCdc.SplitIntoChunks(stream).ToArray();
 
             Assert.Equal(
                 new[] { 22366, 8282, 16303, 18696, 32768, 11051 },
                 chunks.Select(c => c.Length));
+
+            Assert.Equal(
+                _sekienBytes,
+                chunks.SelectMany(c => c));
         }
 
         [Fact]
@@ -33,12 +38,16 @@ namespace Chunkyard.Tests.Core
                 32 * 1024,
                 64 * 1024);
 
-            using var stream = File.OpenRead(Image);
-            var chunks = fastCdc.SplitIntoChunks(stream);
+            using var stream = new MemoryStream(_sekienBytes);
+            var chunks = fastCdc.SplitIntoChunks(stream).ToArray();
 
             Assert.Equal(
                 new[] { 32857, 16408, 60201 },
                 chunks.Select(c => c.Length));
+
+            Assert.Equal(
+                _sekienBytes,
+                chunks.SelectMany(c => c));
         }
 
         [Fact]
@@ -49,12 +58,16 @@ namespace Chunkyard.Tests.Core
                 64 * 1024,
                 128 * 1024);
 
-            using var stream = File.OpenRead(Image);
-            var chunks = fastCdc.SplitIntoChunks(stream);
+            using var stream = new MemoryStream(_sekienBytes);
+            var chunks = fastCdc.SplitIntoChunks(stream).ToArray();
 
             Assert.Equal(
                 new[] { 32857, 76609 },
                 chunks.Select(c => c.Length));
+
+            Assert.Equal(
+                _sekienBytes,
+                chunks.SelectMany(c => c));
         }
     }
 }
