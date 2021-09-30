@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Fixed
+
+- A scenario in which an empty blob could be stored before a password prompt
+
 ## 11.6.0 - 2021-09-27
 
 ### Removed

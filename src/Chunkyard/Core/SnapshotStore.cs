@@ -464,12 +464,18 @@ namespace Chunkyard.Core
             byte[] nonce,
             Stream stream)
         {
+            // Let's create the key here instead of inside the WriteChunk
+            // method. This ensures that a key is generated as soon as possible,
+            // even if we ingest an empty file (in which case WriteChunk would
+            // not be called)
+            var key = _key.Value;
+
             Uri WriteChunk(byte[] chunk)
             {
                 var encryptedData = AesGcmCrypto.Encrypt(
                     nonce,
                     chunk,
-                    _key.Value);
+                    key);
 
                 var contentUri = Id.ComputeContentUri(encryptedData);
 
