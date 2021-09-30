@@ -7,7 +7,7 @@ namespace Chunkyard.Tests.Core
     public static class DiffSetTests
     {
         [Fact]
-        public static void Create_Shows_Differences_Between_Collections()
+        public static void Create_Finds_Differences_Between_Collections()
         {
             var date = DateTime.UtcNow;
             var nonce = new byte[] { 0xFF };

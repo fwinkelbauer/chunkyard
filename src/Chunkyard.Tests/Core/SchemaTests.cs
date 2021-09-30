@@ -11,7 +11,7 @@ namespace Chunkyard.Tests.Core
     public static class SchemaTests
     {
         [Fact]
-        public static void Can_Read_Serialized_Snapshot()
+        public static void DataConvert_Can_Read_Serialized_Snapshot()
         {
             var serialized = @"
 {
@@ -51,7 +51,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void Can_Read_Serialized_SnapshotReference()
+        public static void DataConvert_Can_Read_Serialized_SnapshotReference()
         {
             var serialized = @"
 {

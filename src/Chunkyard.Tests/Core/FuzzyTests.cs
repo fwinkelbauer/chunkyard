@@ -7,7 +7,7 @@ namespace Chunkyard.Tests.Core
     public static class FuzzyTests
     {
         [Fact]
-        public static void Empty_String_Matches_Everything()
+        public static void IsMatch_Returns_True_For_Empty_String()
         {
             var fuzzy1 = new Fuzzy(
                 new[] { "" },
@@ -22,7 +22,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void Empty_Collection_Matches_Maybe()
+        public static void IsMatch_Matches_Empty_Collection_Based_On_FuzzyOption()
         {
             var fuzzy1 = Fuzzy.MatchAll;
             var fuzzy2 = new Fuzzy(
@@ -42,7 +42,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void Spaces_Are_Treated_As_Wildcards()
+        public static void IsMatch_Treats_Spaces_As_Wildcards()
         {
             var fuzzy = new Fuzzy(
                 new[] { "He ld", "HE LD" },

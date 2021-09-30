@@ -93,7 +93,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void StoreSnapshot_Creates_Snapshot_Without_Any_Data()
+        public static void StoreSnapshot_Can_Create_Snapshot_Without_Any_Data()
         {
             var snapshotStore = CreateSnapshotStore();
 
@@ -342,7 +342,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void IsEmpty_Detects_Store_And_Remove()
+        public static void IsEmpty_Respects_StoreSnapshot_And_RemoveSnapshot()
         {
             var snapshotStore = CreateSnapshotStore();
             var blobReader = new DummyBlobReader(CreateBlobs());
@@ -411,7 +411,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void RetrieveSnapshot_Overwrites_Blobs_If_Necessary()
+        public static void RetrieveSnapshot_Overwrites_Blobs_If_LastWriteTimeUtc_Differs()
         {
             var snapshotStore = CreateSnapshotStore();
             var blobs = CreateBlobs(

@@ -7,7 +7,7 @@ namespace Chunkyard.Tests.Core
     public static class DataConvertTests
     {
         [Fact]
-        public static void Converts_Objects()
+        public static void ObjectToBytes_Converts_Objects_To_Bytes()
         {
             var blob = new Blob("some blob", DateTime.UtcNow);
 
@@ -19,7 +19,7 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
-        public static void Converts_Text()
+        public static void TextToBytes_Converts_Text_To_Bytes()
         {
             var text = "Hello World!";
 
