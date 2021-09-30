@@ -14,7 +14,7 @@ namespace Chunkyard.Tests.Infrastructure
         {
             _directory = Path.Combine(
                 Path.GetTempPath(),
-                "chunkyard-test-repo");
+                $"chunkyard-test-repo-{Path.GetRandomFileName()}");
         }
 
         public void Dispose()
