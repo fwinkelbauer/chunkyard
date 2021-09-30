@@ -30,7 +30,7 @@ namespace Chunkyard.Build.Cli
             CleanDirectory(Artifacts);
         }
 
-        public static void Build(DotnetOptions o, bool liveTest = false)
+        public static void Build(DotnetOptions o)
         {
             Dotnet("tool restore");
 
@@ -46,13 +46,21 @@ namespace Chunkyard.Build.Cli
                 $"build {SourceSolution}",
                 $"-c {o.Configuration}",
                 "-warnaserror");
+        }
 
+        public static void Test(DotnetOptions o, bool live = false)
+        {
             Dotnet(
-                liveTest
+                live
                     ? $"watch test --project {SourceSolution}"
                     : $"test {SourceSolution}",
-                $"-c {o.Configuration}",
-                "--no-build");
+                $"-c {o.Configuration}");
+        }
+
+        public static void Integrate(DotnetOptions o)
+        {
+            Build(o);
+            Test(o);
         }
 
         public static void Publish(DotnetOptions o)
@@ -60,7 +68,7 @@ namespace Chunkyard.Build.Cli
             ThrowOnUncommittedChanges();
 
             Clean(o);
-            Build(o);
+            Integrate(o);
 
             var version = FetchVersion();
             var commitId = GitOutput("rev-parse --short HEAD");

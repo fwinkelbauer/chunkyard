@@ -43,7 +43,9 @@ namespace Chunkyard.Build
 
             Parser.Default.ParseArguments(args, optionTypes)
                 .WithParsed<CleanOptions>(Commands.Clean)
-                .WithParsed<BuildOptions>(o => Commands.Build(o, o.LiveTest))
+                .WithParsed<BuildOptions>(Commands.Build)
+                .WithParsed<TestOptions>(o => Commands.Test(o, o.Live))
+                .WithParsed<IntegrateOptions>(Commands.Integrate)
                 .WithParsed<PublishOptions>(Commands.Publish)
                 .WithParsed<ReleaseOptions>(_ => Commands.Release())
                 .WithParsed<FmtOptions>(_ => Commands.Fmt())
