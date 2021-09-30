@@ -105,6 +105,25 @@ namespace Chunkyard.Tests.Core
         }
 
         [Fact]
+        public static void StoreSnapshot_Stores_Empty_Blob_Without_Chunks()
+        {
+            var snapshotStore = CreateSnapshotStore();
+
+            var snapshotId = snapshotStore.StoreSnapshot(
+                new DummyBlobReader(
+                    CreateBlobs(new[] { "empty file" }),
+                    (blobName => Array.Empty<byte>())),
+                DateTime.UtcNow);
+
+            var contentUris = snapshotStore.GetSnapshot(snapshotId)
+                .BlobReferences
+                .First()
+                .ContentUris;
+
+            Assert.Empty(contentUris);
+        }
+
+        [Fact]
         public static void New_SnapshotStore_Can_Read_Existing_Snapshot()
         {
             var uriRepository = CreateRepository<Uri>();
