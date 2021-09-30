@@ -341,7 +341,8 @@ namespace Chunkyard.Core
             {
                 var previousPosition = stream.Position;
                 var bytesRead = stream.Read(buffer, 0, buffer.Length);
-                var chunkSize = Cut(buffer, bytesRead);
+                var chunkSize = Cut(
+                    new ReadOnlySpan<byte>(buffer, 0, bytesRead));
 
                 stream.Position = previousPosition + chunkSize;
 
@@ -350,14 +351,14 @@ namespace Chunkyard.Core
             }
         }
 
-        private int Cut(byte[] buffer, int bytesRead)
+        private int Cut(ReadOnlySpan<byte> buffer)
         {
-            if (bytesRead <= MinSize)
+            if (buffer.Length <= MinSize)
             {
-                return bytesRead;
+                return buffer.Length;
             }
 
-            var center = CenterSize(AvgSize, MinSize, bytesRead);
+            var center = CenterSize(AvgSize, MinSize, buffer.Length);
             uint hash = 0;
             var offset = MinSize;
 
@@ -373,7 +374,7 @@ namespace Chunkyard.Core
                 }
             }
 
-            while (offset < bytesRead)
+            while (offset < buffer.Length)
             {
                 var index = buffer[offset];
                 offset++;
@@ -385,7 +386,7 @@ namespace Chunkyard.Core
                 }
             }
 
-            return bytesRead;
+            return buffer.Length;
         }
 
         private static int CenterSize(int average, int minimum, int sourceSize)
