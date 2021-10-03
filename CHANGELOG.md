@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.7.0 - 2021-10-03
+
+### Changed
+
+- The chunking algorithm to avoid rereading blobs from disk
+
 ## 11.6.1 - 2021-09-30
 
 ### Fixed
