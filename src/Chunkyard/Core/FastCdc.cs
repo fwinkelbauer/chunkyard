@@ -336,18 +336,28 @@ namespace Chunkyard.Core
             stream.EnsureNotNull(nameof(stream));
 
             var buffer = new byte[MaxSize];
+            var bytesCarryOver = 0;
+            long bytesProcessed = 0;
 
-            while (stream.Position < stream.Length)
+            while (bytesProcessed < stream.Length)
             {
-                var previousPosition = stream.Position;
-                var bytesRead = stream.Read(buffer, 0, buffer.Length);
-                var chunkSize = Cut(
-                    new ReadOnlySpan<byte>(buffer, 0, bytesRead));
+                var bytesRead = stream.Read(
+                    buffer,
+                    bytesCarryOver,
+                    buffer.Length - bytesCarryOver);
 
-                stream.Position = previousPosition + chunkSize;
+                var bytesTotal = bytesCarryOver + bytesRead;
+
+                var chunkSize = Cut(
+                    new ReadOnlySpan<byte>(buffer, 0, bytesTotal));
 
                 yield return new Span<byte>(buffer, 0, chunkSize)
                     .ToArray();
+
+                bytesProcessed += chunkSize;
+                bytesCarryOver = bytesTotal - chunkSize;
+
+                Array.Copy(buffer, chunkSize, buffer, 0, bytesCarryOver);
             }
         }
 
