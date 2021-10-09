@@ -18,7 +18,7 @@ namespace Chunkyard.Build.Cli
         static Commands()
         {
             Directory.SetCurrentDirectory(
-                GitOutput("rev-parse --show-toplevel"));
+                GitQuery("rev-parse --show-toplevel"));
         }
 
         public static void Clean(DotnetOptions o)
@@ -71,7 +71,7 @@ namespace Chunkyard.Build.Cli
             Integrate(o);
 
             var version = FetchVersion();
-            var commitId = GitOutput("rev-parse --short HEAD");
+            var commitId = GitQuery("rev-parse --short HEAD");
 
             foreach (var runtime in new[] { "win-x64", "linux-x64" })
             {
@@ -115,7 +115,7 @@ namespace Chunkyard.Build.Cli
 
         private static void ThrowOnUncommittedChanges()
         {
-            if (GitOutput("status --porcelain").Length > 0)
+            if (GitQuery("status --porcelain").Length > 0)
             {
                 throw new BuildException(
                     "Publishing uncommitted changes is not allowed");
@@ -132,14 +132,22 @@ namespace Chunkyard.Build.Cli
             Exec("git", arguments, new[] { 0 });
         }
 
-        private static string GitOutput(params string[] arguments)
+        private static string GitQuery(params string[] arguments)
+        {
+            return ExecQuery("git", arguments, new[] { 0 });
+        }
+
+        private static string ExecQuery(
+            string fileName,
+            string[] arguments,
+            int[] validExitCodes)
         {
             var builder = new StringBuilder();
 
             Exec(
-                "git",
+                fileName,
                 arguments,
-                new[] { 0 },
+                validExitCodes,
                 line => builder.AppendLine(line));
 
             return builder.ToString().Trim();
