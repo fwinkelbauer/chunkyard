@@ -9,7 +9,7 @@ namespace Chunkyard.Core
     /// <summary>
     /// A class which uses <see cref="IRepository{int}"/> and
     /// <see cref="IRepository{Uri}"/> to store snapshots of a set
-    /// of files.
+    /// of blobs.
     /// </summary>
     public class SnapshotStore
     {
@@ -112,19 +112,21 @@ namespace Chunkyard.Core
             int snapshotId,
             Fuzzy includeFuzzy)
         {
+            bool CheckBlobReferenceExists(BlobReference blobReference)
+            {
+                var blobExists = blobReference.ContentUris
+                    .Select(_uriRepository.ValueExists)
+                    .Aggregate(true, (total, next) => total & next);
+
+                _probe.BlobValid(blobReference, blobExists);
+
+                return blobExists;
+            }
+
             var snapshot = GetSnapshot(snapshotId);
             var snapshotExists = Filter(snapshot, includeFuzzy)
                 .AsParallel()
-                .Select(blobReference =>
-                {
-                    var blobExists = blobReference.ContentUris
-                        .Select(_uriRepository.ValueExists)
-                        .Aggregate(true, (total, next) => total & next);
-
-                    _probe.BlobValid(blobReference, blobExists);
-
-                    return blobExists;
-                })
+                .Select(CheckBlobReferenceExists)
                 .Aggregate(true, (total, next) => total & next);
 
             _probe.SnapshotValid(
@@ -138,31 +140,35 @@ namespace Chunkyard.Core
             int snapshotId,
             Fuzzy includeFuzzy)
         {
+            bool CheckContentUriValid(Uri contentUri)
+            {
+                try
+                {
+                    return Id.ContentUriValid(
+                        contentUri,
+                        _uriRepository.RetrieveValue(contentUri));
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+
+            bool CheckBlobReferenceValid(BlobReference blobReference)
+            {
+                var blobValid = blobReference.ContentUris
+                    .Select(CheckContentUriValid)
+                    .Aggregate(true, (total, next) => total & next);
+
+                _probe.BlobValid(blobReference, blobValid);
+
+                return blobValid;
+            }
+
             var snapshot = GetSnapshot(snapshotId);
             var snapshotValid = Filter(snapshot, includeFuzzy)
                 .AsParallel()
-                .Select(blobReference =>
-                {
-                    var blobValid = blobReference.ContentUris
-                        .Select(contentUri =>
-                        {
-                            try
-                            {
-                                return Id.ContentUriValid(
-                                    contentUri,
-                                    _uriRepository.RetrieveValue(contentUri));
-                            }
-                            catch (Exception)
-                            {
-                                return false;
-                            }
-                        })
-                        .Aggregate(true, (total, next) => total & next);
-
-                    _probe.BlobValid(blobReference, blobValid);
-
-                    return blobValid;
-                })
+                .Select(CheckBlobReferenceValid)
                 .Aggregate(true, (total, next) => total & next);
 
             _probe.SnapshotValid(
@@ -177,46 +183,48 @@ namespace Chunkyard.Core
             int snapshotId,
             Fuzzy includeFuzzy)
         {
+            Blob RetrieveBlobReference(BlobReference blobReference)
+            {
+                var existingBlob = blobWriter.FindBlob(blobReference.Name);
+                var snapshotBlob = blobReference.ToBlob();
+
+                if (existingBlob != null
+                    && existingBlob.Equals(snapshotBlob))
+                {
+                    return existingBlob;
+                }
+
+                try
+                {
+                    using (var stream = blobWriter.OpenWrite(
+                        blobReference.Name))
+                    {
+                        RetrieveContent(
+                            blobReference.ContentUris,
+                            stream);
+                    }
+
+                    // We want to call this method after disposing the
+                    // stream, which is why we are using a dedicated using
+                    // block above
+                    blobWriter.UpdateBlobMetadata(snapshotBlob);
+                }
+                catch (Exception e)
+                {
+                    throw new ChunkyardException(
+                        $"Could not restore blob {blobReference.Name}",
+                        e);
+                }
+
+                _probe.RetrievedBlob(blobReference);
+
+                return snapshotBlob;
+            }
+
             var snapshot = GetSnapshot(snapshotId);
             var blobs = Filter(snapshot, includeFuzzy)
                 .AsParallel()
-                .Select(blobReference =>
-                {
-                    var existingBlob = blobWriter.FindBlob(blobReference.Name);
-                    var snapshotBlob = blobReference.ToBlob();
-
-                    if (existingBlob != null
-                        && existingBlob.Equals(snapshotBlob))
-                    {
-                        return existingBlob;
-                    }
-
-                    try
-                    {
-                        using (var stream = blobWriter.OpenWrite(
-                            blobReference.Name))
-                        {
-                            RetrieveContent(
-                                blobReference.ContentUris,
-                                stream);
-                        }
-
-                        // We want to call this method after disposing the
-                        // stream, which is why we are using a dedicated using
-                        // block above
-                        blobWriter.UpdateBlobMetadata(snapshotBlob);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new ChunkyardException(
-                            $"Could not restore file {blobReference.Name}",
-                            e);
-                    }
-
-                    _probe.RetrievedBlob(blobReference);
-
-                    return snapshotBlob;
-                })
+                .Select(RetrieveBlobReference)
                 .ToArray();
 
             _probe.RetrievedSnapshot(snapshot.SnapshotId);
@@ -466,7 +474,7 @@ namespace Chunkyard.Core
         {
             // Let's create the key here instead of inside the WriteChunk
             // method. This ensures that a key is generated as soon as possible,
-            // even if we ingest an empty file (in which case WriteChunk would
+            // even if we ingest an empty blob (in which case WriteChunk would
             // not be called)
             var key = _key.Value;
 
@@ -510,36 +518,38 @@ namespace Chunkyard.Core
                 : GetSnapshot(_currentSnapshotId.Value).BlobReferences
                     .ToDictionary(br => br.Name, br => br);
 
+            BlobReference WriteBlob(Blob blob)
+            {
+                currentBlobReferences.TryGetValue(
+                    blob.Name,
+                    out var current);
+
+                if (current != null
+                    && current.ToBlob().Equals(blob))
+                {
+                    return current;
+                }
+
+                // Known blobs should be encrypted using the same nonce
+                var nonce = current?.Nonce
+                    ?? AesGcmCrypto.GenerateNonce();
+
+                using var stream = blobReader.OpenRead(blob.Name);
+
+                var blobReference = new BlobReference(
+                    blob.Name,
+                    blob.LastWriteTimeUtc,
+                    nonce,
+                    WriteContent(nonce, stream));
+
+                _probe.StoredBlob(blobReference);
+
+                return blobReference;
+            }
+
             return blobReader.FetchBlobs()
                 .AsParallel()
-                .Select(blob =>
-                {
-                    currentBlobReferences.TryGetValue(
-                        blob.Name,
-                        out var current);
-
-                    if (current != null
-                        && current.ToBlob().Equals(blob))
-                    {
-                        return current;
-                    }
-
-                    // Known blobs should be encrypted using the same nonce
-                    var nonce = current?.Nonce
-                        ?? AesGcmCrypto.GenerateNonce();
-
-                    using var stream = blobReader.OpenRead(blob.Name);
-
-                    var blobReference = new BlobReference(
-                        blob.Name,
-                        blob.LastWriteTimeUtc,
-                        nonce,
-                        WriteContent(nonce, stream));
-
-                    _probe.StoredBlob(blobReference);
-
-                    return blobReference;
-                })
+                .Select(WriteBlob)
                 .OrderBy(blobReference => blobReference.Name)
                 .ToArray();
         }
