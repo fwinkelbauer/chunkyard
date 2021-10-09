@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Chunkyard.Core
 {
@@ -8,7 +9,7 @@ namespace Chunkyard.Core
     /// </summary>
     public interface IRepository<T>
     {
-        void StoreValue(T key, byte[] value);
+        void StoreValue(T key, ReadOnlySpan<byte> value);
 
         byte[] RetrieveValue(T key);
 

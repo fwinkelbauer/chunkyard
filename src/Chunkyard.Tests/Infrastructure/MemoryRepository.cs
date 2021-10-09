@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Chunkyard.Core;
 
@@ -16,7 +17,7 @@ namespace Chunkyard.Tests.Infrastructure
             _valuesPerKey = new Dictionary<T, byte[]>();
         }
 
-        public void StoreValue(T key, byte[] value)
+        public void StoreValue(T key, ReadOnlySpan<byte> value)
         {
             lock (_lock)
             {

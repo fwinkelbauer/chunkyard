@@ -28,7 +28,7 @@ namespace Chunkyard.Infrastructure
             _fromFile = fromFile;
         }
 
-        public void StoreValue(T key, byte[] value)
+        public void StoreValue(T key, ReadOnlySpan<byte> value)
         {
             var file = ToFile(key);
 

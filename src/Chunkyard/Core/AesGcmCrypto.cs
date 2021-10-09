@@ -16,15 +16,15 @@ namespace Chunkyard.Core
         private const int SaltBytes = 12;
 
         public static byte[] Encrypt(
-            byte[] nonce,
-            byte[] plainText,
-            byte[] key)
+            ReadOnlySpan<byte> nonce,
+            ReadOnlySpan<byte> plainText,
+            ReadOnlySpan<byte> key)
         {
-            nonce.EnsureNotNull(nameof(nonce));
-            plainText.EnsureNotNull(nameof(plainText));
-
             var cipherText = new byte[
                 nonce.Length + plainText.Length + TagBytes];
+
+            nonce.CopyTo(
+                new Span<byte>(cipherText, 0, nonce.Length));
 
             var innerCiphertext = new Span<byte>(
                 cipherText,
@@ -39,29 +39,23 @@ namespace Chunkyard.Core
             using var aesGcm = new AesGcm(key);
             aesGcm.Encrypt(nonce, plainText, innerCiphertext, tag);
 
-            Array.Copy(nonce, 0, cipherText, 0, nonce.Length);
-
             return cipherText;
         }
 
         public static byte[] Decrypt(
-            byte[] cipherText,
-            byte[] key)
+            ReadOnlySpan<byte> cipherText,
+            ReadOnlySpan<byte> key)
         {
-            cipherText.EnsureNotNull(nameof(cipherText));
-
             var plainText = new byte[
                 cipherText.Length - NonceBytes - TagBytes];
 
-            var nonce = new Span<byte>(cipherText, 0, NonceBytes);
+            var nonce = cipherText.Slice(0, NonceBytes);
 
-            var innerCipherText = new Span<byte>(
-                cipherText,
+            var innerCipherText = cipherText.Slice(
                 nonce.Length,
                 plainText.Length);
 
-            var tag = new Span<byte>(
-                cipherText,
+            var tag = cipherText.Slice(
                 cipherText.Length - TagBytes,
                 TagBytes);
 
