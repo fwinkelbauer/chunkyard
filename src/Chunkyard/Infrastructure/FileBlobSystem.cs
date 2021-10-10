@@ -7,61 +7,94 @@ using Chunkyard.Core;
 namespace Chunkyard.Infrastructure
 {
     /// <summary>
-    /// An implementation of <see cref="IBlobReader"/> using the file system.
+    /// An implementation of <see cref="IBlobSystem"/> using the file system.
     /// </summary>
-    internal class FileBlobReader : IBlobReader
+    public class FileBlobSystem : IBlobSystem
     {
         private readonly string[] _files;
-        private readonly Fuzzy _excludeFuzzy;
         private readonly string _parent;
 
-        public FileBlobReader(
-            IEnumerable<string> files,
-            Fuzzy excludeFuzzy)
+        public FileBlobSystem(
+            IEnumerable<string> files)
         {
             _files = files.Select(Path.GetFullPath)
                 .ToArray();
 
-            _excludeFuzzy = excludeFuzzy;
             _parent = FindCommonParent(_files);
         }
 
-        public IReadOnlyCollection<Blob> FetchBlobs()
+        public bool BlobExists(string blobName)
+        {
+            return File.Exists(
+                ToFile(blobName));
+        }
+
+        public IReadOnlyCollection<Blob> FetchBlobs(Fuzzy excludeFuzzy)
         {
             var foundFiles = _files
-                .SelectMany(f => Find(f, _excludeFuzzy))
-                .Distinct()
+                .SelectMany(f => Find(f, excludeFuzzy))
+                .Distinct();
+
+            return foundFiles
+                .Select(ToBlob)
                 .ToArray();
-
-            var blobs = foundFiles
-                .Select(file =>
-                {
-                    var blobName = string.IsNullOrEmpty(_parent)
-                        ? file
-                        : Path.GetRelativePath(_parent, file);
-
-                    // Using a blob name with backslashes will not create
-                    // sub-directories when restoring a file on Linux.
-                    //
-                    // Also we don't want to include any ":" so that Windows
-                    // drive letters can be turned into valid paths.
-                    blobName = blobName
-                        .Replace('\\', '/')
-                        .Replace(":", "");
-
-                    return new Blob(
-                        blobName,
-                        File.GetLastWriteTimeUtc(file));
-                })
-                .ToArray();
-
-            return blobs;
         }
 
         public Stream OpenRead(string blobName)
         {
             return File.OpenRead(
-                Path.Combine(_parent, blobName));
+                ToFile(blobName));
+        }
+
+        public Blob FetchMetadata(string blobName)
+        {
+            return new Blob(
+                blobName,
+                File.GetLastWriteTimeUtc(
+                    ToFile(blobName)));
+        }
+
+        public Stream OpenWrite(string blobName)
+        {
+            var file = ToFile(blobName);
+
+            DirectoryUtil.CreateParent(file);
+
+            return new FileStream(file, FileMode.Create, FileAccess.Write);
+        }
+
+        public void UpdateMetadata(Blob blob)
+        {
+            blob.EnsureNotNull(nameof(blob));
+
+            File.SetLastWriteTimeUtc(
+                ToFile(blob.Name),
+                blob.LastWriteTimeUtc);
+        }
+
+        private Blob ToBlob(string file)
+        {
+            var blobName = string.IsNullOrEmpty(_parent)
+                ? file
+                : Path.GetRelativePath(_parent, file);
+
+            // Using a blob name with backslashes will not create
+            // sub-directories when restoring a file on Linux.
+            //
+            // Also we don't want to include any ":" so that Windows
+            // drive letters can be turned into valid paths.
+            blobName = blobName
+                .Replace('\\', '/')
+                .Replace(":", "");
+
+            return new Blob(
+                blobName,
+                File.GetLastWriteTimeUtc(file));
+        }
+
+        private string ToFile(string blobName)
+        {
+            return Path.Combine(_parent, blobName);
         }
 
         private static IEnumerable<string> Find(
@@ -94,13 +127,14 @@ namespace Chunkyard.Infrastructure
         {
             if (files.Length == 0)
             {
-                return "";
+                throw new ChunkyardException(
+                    "Cannot operate on empty file list");
             }
             else if (files.Length == 1)
             {
-                return Directory.Exists(files[0])
-                    ? files[0]
-                    : DirectoryUtil.GetParent(files[0]);
+                return File.Exists(files[0])
+                    ? DirectoryUtil.GetParent(files[0])
+                    : files[0];
             }
 
             var parent = "";

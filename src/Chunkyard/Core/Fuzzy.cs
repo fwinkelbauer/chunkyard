@@ -10,20 +10,18 @@ namespace Chunkyard.Core
     /// </summary>
     public class Fuzzy
     {
-        public static readonly Fuzzy MatchAll = new Fuzzy(
-            Array.Empty<string>(),
-            FuzzyOption.EmptyMatchesAll);
+        public static readonly Fuzzy IncludeAll = Include(
+            Array.Empty<string>());
 
-        public static readonly Fuzzy MatchNothing = new Fuzzy(
-            Array.Empty<string>(),
-            FuzzyOption.EmptyMatchesNothing);
+        public static readonly Fuzzy ExcludeNothing = Exclude(
+            Array.Empty<string>());
 
         private readonly Regex[] _compiledRegex;
         private readonly bool _initial;
 
-        public Fuzzy(
+        private Fuzzy(
             IEnumerable<string> patterns,
-            FuzzyOption option)
+            bool emptyShouldMatch)
         {
             _compiledRegex = patterns
                 .Select(p => new Regex(string.IsNullOrEmpty(p)
@@ -31,20 +29,9 @@ namespace Chunkyard.Core
                     : p.Replace(" ", ".*")))
                 .ToArray();
 
-            switch (option)
-            {
-                case FuzzyOption.EmptyMatchesAll:
-                    _initial = _compiledRegex.Length == 0;
-                    break;
-                case FuzzyOption.EmptyMatchesNothing:
-                    _initial = false;
-                    break;
-                default:
-                    var name = Enum.GetName(typeof(FuzzyOption), option);
-
-                    throw new NotSupportedException(
-                        $"Unknown FuzzyOption: {name}");
-            }
+            _initial = emptyShouldMatch
+                ? _compiledRegex.Length == 0
+                : false;
         }
 
         public bool IsMatch(string input)
@@ -52,6 +39,16 @@ namespace Chunkyard.Core
             return _compiledRegex
                 .Select(r => r.IsMatch(input))
                 .Aggregate(_initial, (total, next) => total | next);
+        }
+
+        public static Fuzzy Include(IEnumerable<string> patterns)
+        {
+            return new Fuzzy(patterns, true);
+        }
+
+        public static Fuzzy Exclude(IEnumerable<string> patterns)
+        {
+            return new Fuzzy(patterns, false);
         }
     }
 }

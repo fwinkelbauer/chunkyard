@@ -77,17 +77,18 @@ namespace Chunkyard.Core
         public bool IsEmpty => _currentSnapshotId == null;
 
         public int StoreSnapshot(
-            IBlobReader blobReader,
+            IBlobSystem blobSystem,
+            Fuzzy excludeFuzzy,
             DateTime creationTimeUtc)
         {
-            blobReader.EnsureNotNull(nameof(blobReader));
+            blobSystem.EnsureNotNull(nameof(blobSystem));
 
             var newSnapshot = new Snapshot(
                 _currentSnapshotId == null
                     ? 0
                     : _currentSnapshotId.Value + 1,
                 creationTimeUtc,
-                WriteBlobs(blobReader));
+                WriteBlobs(blobSystem, excludeFuzzy));
 
             using var memoryStream = new MemoryStream(
                 DataConvert.ObjectToBytes(newSnapshot));
@@ -179,24 +180,23 @@ namespace Chunkyard.Core
         }
 
         public IEnumerable<Blob> RetrieveSnapshot(
-            IBlobWriter blobWriter,
+            IBlobSystem blobSystem,
             int snapshotId,
             Fuzzy includeFuzzy)
         {
             Blob RetrieveBlobReference(BlobReference blobReference)
             {
-                var existingBlob = blobWriter.FindBlob(blobReference.Name);
                 var snapshotBlob = blobReference.ToBlob();
 
-                if (existingBlob != null
-                    && existingBlob.Equals(snapshotBlob))
+                if (blobSystem.BlobExists(snapshotBlob.Name)
+                    && blobSystem.FetchMetadata(snapshotBlob.Name).Equals(snapshotBlob))
                 {
-                    return existingBlob;
+                    return snapshotBlob;
                 }
 
                 try
                 {
-                    using (var stream = blobWriter.OpenWrite(
+                    using (var stream = blobSystem.OpenWrite(
                         blobReference.Name))
                     {
                         RetrieveContent(
@@ -207,7 +207,7 @@ namespace Chunkyard.Core
                     // We want to call this method after disposing the
                     // stream, which is why we are using a dedicated using
                     // block above
-                    blobWriter.UpdateBlobMetadata(snapshotBlob);
+                    blobSystem.UpdateMetadata(snapshotBlob);
                 }
                 catch (Exception e)
                 {
@@ -511,7 +511,8 @@ namespace Chunkyard.Core
         }
 
         private BlobReference[] WriteBlobs(
-            IBlobReader blobReader)
+            IBlobSystem blobSystem,
+            Fuzzy excludeFuzzy)
         {
             var currentBlobReferences = _currentSnapshotId == null
                 ? new Dictionary<string, BlobReference>()
@@ -534,7 +535,7 @@ namespace Chunkyard.Core
                 var nonce = current?.Nonce
                     ?? AesGcmCrypto.GenerateNonce();
 
-                using var stream = blobReader.OpenRead(blob.Name);
+                using var stream = blobSystem.OpenRead(blob.Name);
 
                 var blobReference = new BlobReference(
                     blob.Name,
@@ -547,7 +548,7 @@ namespace Chunkyard.Core
                 return blobReference;
             }
 
-            return blobReader.FetchBlobs()
+            return blobSystem.FetchBlobs(excludeFuzzy)
                 .AsParallel()
                 .Select(WriteBlob)
                 .OrderBy(blobReference => blobReference.Name)

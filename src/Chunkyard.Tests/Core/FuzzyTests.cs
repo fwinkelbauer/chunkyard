@@ -9,44 +9,34 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void IsMatch_Returns_True_For_Empty_String()
         {
-            var fuzzy1 = new Fuzzy(
-                new[] { "" },
-                FuzzyOption.EmptyMatchesAll);
+            var include = Fuzzy.Include(new[] { "" });
+            var exclude = Fuzzy.Exclude(new[] { "" });
 
-            var fuzzy2 = new Fuzzy(
-                new[] { "" },
-                FuzzyOption.EmptyMatchesNothing);
-
-            Assert.True(fuzzy1.IsMatch("some text!"));
-            Assert.True(fuzzy2.IsMatch("some text!"));
+            Assert.True(include.IsMatch("some text!"));
+            Assert.True(exclude.IsMatch("some text!"));
         }
 
         [Fact]
-        public static void IsMatch_Matches_Empty_Collection_Based_On_FuzzyOption()
+        public static void IsMatch_Matches_Empty_Collection_Based_On_Type()
         {
-            var fuzzy1 = Fuzzy.MatchAll;
-            var fuzzy2 = new Fuzzy(
-                Array.Empty<string>(),
-                FuzzyOption.EmptyMatchesAll);
+            var includeAll = Fuzzy.IncludeAll;
+            var include = Fuzzy.Include(Array.Empty<string>());
 
-            var fuzzy3 = Fuzzy.MatchNothing;
-            var fuzzy4 = new Fuzzy(
-                Array.Empty<string>(),
-                FuzzyOption.EmptyMatchesNothing);
+            var excludeNothing = Fuzzy.ExcludeNothing;
+            var exclude = Fuzzy.Exclude(Array.Empty<string>());
 
-            Assert.True(fuzzy1.IsMatch("some text!"));
-            Assert.True(fuzzy2.IsMatch("some text!"));
+            Assert.True(includeAll.IsMatch("some text!"));
+            Assert.True(include.IsMatch("some text!"));
 
-            Assert.False(fuzzy3.IsMatch("some text!"));
-            Assert.False(fuzzy4.IsMatch("some text!"));
+            Assert.False(excludeNothing.IsMatch("some text!"));
+            Assert.False(exclude.IsMatch("some text!"));
         }
 
         [Fact]
         public static void IsMatch_Treats_Spaces_As_Wildcards()
         {
-            var fuzzy = new Fuzzy(
-                new[] { "He ld", "HE LD" },
-                FuzzyOption.EmptyMatchesAll);
+            var fuzzy = Fuzzy.Include(
+                new[] { "He ld", "HE LD" });
 
             Assert.True(fuzzy.IsMatch("Hello World!"));
             Assert.True(fuzzy.IsMatch("Held"));
