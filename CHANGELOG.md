@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.8.0 - 2021-10-10
+
+### Changed
+
+- Internal parts of the architecture to improve test-ability
+
 ## 11.7.0 - 2021-10-03
 
 ### Changed
