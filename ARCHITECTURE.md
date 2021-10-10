@@ -21,6 +21,7 @@ This document should provide an overview of how Chunkyard is built.
 These classes contain the most important logic:
 
 - **IRepository.cs:** Provides a key/value store
+- **IBlobSystem.cs:** Provides an abstraction to read and write Blobs
 - **SnapshotStore.cs:** Chunks, encrypts, deduplicates and stores Blobs in an
   IRepository
 - **Commands.cs:** Defines all verbs of the command line interface
