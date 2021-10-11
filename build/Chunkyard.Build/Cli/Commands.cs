@@ -57,7 +57,7 @@ namespace Chunkyard.Build.Cli
                 $"-c {o.Configuration}");
         }
 
-        public static void Integrate(DotnetOptions o)
+        public static void Ci(DotnetOptions o)
         {
             Build(o);
             Test(o);
@@ -68,7 +68,7 @@ namespace Chunkyard.Build.Cli
             ThrowOnUncommittedChanges();
 
             Clean(o);
-            Integrate(o);
+            Ci(o);
 
             var version = FetchVersion();
             var commitId = GitQuery("rev-parse --short HEAD");

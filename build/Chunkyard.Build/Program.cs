@@ -45,7 +45,7 @@ namespace Chunkyard.Build
                 .WithParsed<CleanOptions>(Commands.Clean)
                 .WithParsed<BuildOptions>(Commands.Build)
                 .WithParsed<TestOptions>(o => Commands.Test(o, o.Live))
-                .WithParsed<IntegrateOptions>(Commands.Integrate)
+                .WithParsed<CiOptions>(Commands.Ci)
                 .WithParsed<PublishOptions>(Commands.Publish)
                 .WithParsed<ReleaseOptions>(_ => Commands.Release())
                 .WithParsed<FmtOptions>(_ => Commands.Fmt())
