@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Chunkyard.Build.Cli;
 
-namespace Chunkyard.Build.Cli
+namespace Chunkyard.Build
 {
     internal static class Commands
     {

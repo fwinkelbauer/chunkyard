@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Chunkyard.Core;
 using Xunit;
 
@@ -32,7 +33,7 @@ namespace Chunkyard.Tests.Core
         public static void PasswordToKey_Throws_On_EmptyPassword(
             string password)
         {
-            Assert.Throws<ChunkyardException>(
+            Assert.Throws<ArgumentException>(
                 () => AesGcmCrypto.PasswordToKey(
                     password,
                     AesGcmCrypto.GenerateSalt(),

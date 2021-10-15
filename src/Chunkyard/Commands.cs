@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Chunkyard.Cli;
 using Chunkyard.Core;
 using Chunkyard.Infrastructure;
 
-namespace Chunkyard.Cli
+namespace Chunkyard
 {
     /// <summary>
     /// Describes every available command line verb of the Chunkyard assembly.

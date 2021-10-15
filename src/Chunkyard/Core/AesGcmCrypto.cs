@@ -73,7 +73,7 @@ namespace Chunkyard.Core
         {
             if (string.IsNullOrEmpty(password))
             {
-                throw new ChunkyardException(
+                throw new ArgumentException(
                     "Password cannot be empty");
             }
 
