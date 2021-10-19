@@ -417,7 +417,7 @@ namespace Chunkyard.Core
 
         private static int CeilDiv(int x, int y)
         {
-            return (x + y - 1) / y;
+            return 1 + ((x - 1) / y);
         }
 
         private static int Logarithm2(int value)
