@@ -302,38 +302,38 @@ namespace Chunkyard.Core
         }
 
         public void Copy(
-            IRepository<Uri> contentRepository,
-            IRepository<int> snapshotRepository)
+            IRepository<Uri> otherUriRepository,
+            IRepository<int> otherIntRepository)
         {
-            contentRepository.EnsureNotNull(nameof(contentRepository));
-            snapshotRepository.EnsureNotNull(nameof(snapshotRepository));
+            otherUriRepository.EnsureNotNull(nameof(otherUriRepository));
+            otherIntRepository.EnsureNotNull(nameof(otherIntRepository));
 
             Copy(
-                contentRepository,
-                snapshotRepository,
+                otherUriRepository,
+                otherIntRepository,
                 mirror: false);
         }
 
         public void Mirror(
-            IRepository<Uri> contentRepository,
-            IRepository<int> snapshotRepository)
+            IRepository<Uri> otherUriRepository,
+            IRepository<int> otherIntRepository)
         {
-            contentRepository.EnsureNotNull(nameof(contentRepository));
-            snapshotRepository.EnsureNotNull(nameof(snapshotRepository));
+            otherUriRepository.EnsureNotNull(nameof(otherUriRepository));
+            otherIntRepository.EnsureNotNull(nameof(otherIntRepository));
 
             Copy(
-                contentRepository,
-                snapshotRepository,
+                otherUriRepository,
+                otherIntRepository,
                 mirror: true);
         }
 
         private void Copy(
-            IRepository<Uri> contentRepository,
-            IRepository<int> snapshotRepository,
+            IRepository<Uri> otherUriRepository,
+            IRepository<int> otherIntRepository,
             bool mirror)
         {
             var localContentUris = _uriRepository.ListKeys();
-            var remoteContentUris = contentRepository.ListKeys();
+            var remoteContentUris = otherUriRepository.ListKeys();
 
             var contentUrisToCopy = localContentUris
                 .Except(remoteContentUris)
@@ -349,13 +349,13 @@ namespace Chunkyard.Core
                         $"Invalid content: {contentUri}");
                 }
 
-                contentRepository.StoreValue(contentUri, content);
+                otherUriRepository.StoreValue(contentUri, content);
 
                 _probe.CopiedContent(contentUri);
             }
 
             var localSnapshotIds = _intRepository.ListKeys();
-            var remoteSnapshotIds = snapshotRepository.ListKeys();
+            var remoteSnapshotIds = otherIntRepository.ListKeys();
 
             var snapshotIdsToCopy = localSnapshotIds
                 .Except(remoteSnapshotIds)
@@ -365,7 +365,7 @@ namespace Chunkyard.Core
             {
                 // We convert a SnapshotReference from/to bytes to check if
                 // these bytes are valid
-                snapshotRepository.StoreValue(
+                otherIntRepository.StoreValue(
                     snapshotId,
                     DataConvert.ObjectToBytes(
                         GetSnapshotReference(snapshotId)));
@@ -384,7 +384,7 @@ namespace Chunkyard.Core
 
                 foreach (var snapshotId in snapshotIdsToDelete)
                 {
-                    snapshotRepository.RemoveValue(snapshotId);
+                    otherIntRepository.RemoveValue(snapshotId);
 
                     _probe.RemovedSnapshot(snapshotId);
                 }
@@ -395,7 +395,7 @@ namespace Chunkyard.Core
 
                 foreach (var contentUri in contentUrisToDelete)
                 {
-                    contentRepository.RemoveValue(contentUri);
+                    otherUriRepository.RemoveValue(contentUri);
 
                     _probe.RemovedContent(contentUri);
                 }

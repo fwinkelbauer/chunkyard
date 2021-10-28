@@ -23,9 +23,7 @@ namespace Chunkyard
 
             var snapshotBlobs = snapshotStore.IsEmpty
                 ? Array.Empty<Blob>()
-                : snapshotStore.ShowSnapshot(
-                    o.SnapshotId,
-                    Fuzzy.IncludeAll)
+                : snapshotStore.ShowSnapshot(o.SnapshotId, Fuzzy.IncludeAll)
                     .Select(blobReference => blobReference.ToBlob())
                     .ToArray();
 
