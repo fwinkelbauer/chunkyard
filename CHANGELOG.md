@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.9.0 - 2021-10-30
+
 ### Changed
 
 - The `diff` command to include an `--include` option. The `--content-only` flag
