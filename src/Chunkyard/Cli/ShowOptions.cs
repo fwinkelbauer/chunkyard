@@ -10,11 +10,13 @@ namespace Chunkyard.Cli
         public ShowOptions(
             string repository,
             int snapshotId,
-            IEnumerable<string> includePatterns)
+            IEnumerable<string> includePatterns,
+            bool contentOnly)
         {
             Repository = repository;
             SnapshotId = snapshotId;
             IncludePatterns = includePatterns;
+            ContentOnly = contentOnly;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
@@ -25,5 +27,8 @@ namespace Chunkyard.Cli
 
         [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
         public IEnumerable<string> IncludePatterns { get; }
+
+        [Option("content-only", Required = false, HelpText = "Show content", Default = false)]
+        public bool ContentOnly { get; }
     }
 }

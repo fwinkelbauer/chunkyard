@@ -1,4 +1,5 @@
-﻿using Chunkyard.Core;
+﻿using System.Collections.Generic;
+using Chunkyard.Core;
 using CommandLine;
 
 namespace Chunkyard.Cli
@@ -10,11 +11,13 @@ namespace Chunkyard.Cli
             string repository,
             int firstSnapshotId,
             int secondSnapshotId,
+            IEnumerable<string> includePatterns,
             bool contentOnly)
         {
             Repository = repository;
             FirstSnapshotId = firstSnapshotId;
             SecondSnapshotId = secondSnapshotId;
+            IncludePatterns = includePatterns;
             ContentOnly = contentOnly;
         }
 
@@ -27,7 +30,10 @@ namespace Chunkyard.Cli
         [Option('s', "second", Required = false, HelpText = "The second snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
         public int SecondSnapshotId { get; }
 
-        [Option("content-only", Required = false, HelpText = "Ignore meta data", Default = false)]
+        [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
+        public IEnumerable<string> IncludePatterns { get; }
+
+        [Option("content-only", Required = false, HelpText = "Show content", Default = false)]
         public bool ContentOnly { get; }
     }
 }

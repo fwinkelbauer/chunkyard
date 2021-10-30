@@ -70,8 +70,7 @@ namespace Chunkyard.Tests.Core
                 DiffSet.Create(
                     first,
                     second,
-                    br => br.Name,
-                    (br1, br2) => br1.Equals(br2)));
+                    br => br.Name));
         }
     }
 }

@@ -30,8 +30,7 @@ namespace Chunkyard
             var diff = DiffSet.Create(
                 snapshotBlobs,
                 blobs,
-                blob => blob.Name,
-                (b1, b2) => b1.Equals(b2));
+                blob => blob.Name);
 
             PrintDiff(diff);
         }
@@ -77,9 +76,21 @@ namespace Chunkyard
                 o.SnapshotId,
                 Fuzzy.Include(o.IncludePatterns));
 
-            foreach (var blobReference in blobReferences)
+            if (o.ContentOnly)
             {
-                Console.WriteLine(blobReference.Name);
+                var contentUris = blobReferences.SelectMany(b => b.ContentUris);
+
+                foreach (var contentUri in contentUris)
+                {
+                    Console.WriteLine(contentUri.AbsoluteUri);
+                }
+            }
+            else
+            {
+                foreach (var blobReference in blobReferences)
+                {
+                    Console.WriteLine(blobReference.Name);
+                }
             }
         }
 
@@ -112,13 +123,19 @@ namespace Chunkyard
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            var diff = DiffSet.Create(
-                snapshotStore.GetSnapshot(o.FirstSnapshotId).BlobReferences,
-                snapshotStore.GetSnapshot(o.SecondSnapshotId).BlobReferences,
-                blobReference => blobReference.Name,
-                (br1, br2) => o.ContentOnly
-                    ? br1.ContentUris.SequenceEqual(br2.ContentUris)
-                    : br1.Equals(br2));
+            var fuzzy = Fuzzy.Include(o.IncludePatterns);
+            var first = snapshotStore.ShowSnapshot(o.FirstSnapshotId, fuzzy);
+            var second = snapshotStore.ShowSnapshot(o.SecondSnapshotId, fuzzy);
+
+            var diff = o.ContentOnly
+                ? DiffSet.Create(
+                    first.SelectMany(b => b.ContentUris),
+                    second.SelectMany(b => b.ContentUris),
+                    contentUri => contentUri.AbsoluteUri)
+                : DiffSet.Create(
+                    first,
+                    second,
+                    blobReference => blobReference.Name);
 
             PrintDiff(diff);
         }

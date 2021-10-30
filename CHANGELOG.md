@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The `diff` command to include an `--include` option. The `--content-only` flag
+  will now print the actual content URIs
+- The `show` command to also include a `--content-only` option
+
 ## 11.8.0 - 2021-10-10
 
 ### Changed
