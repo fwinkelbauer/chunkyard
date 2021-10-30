@@ -14,7 +14,7 @@ namespace Chunkyard.Core
         private const string AlgorithmSha256 = "sha256";
 
         public static Uri ComputeContentUri(
-            byte[] content)
+            ReadOnlySpan<byte> content)
         {
             return ToContentUri(
                 AlgorithmSha256,
@@ -23,7 +23,7 @@ namespace Chunkyard.Core
 
         public static bool ContentUriValid(
             Uri contentUri,
-            byte[] content)
+            ReadOnlySpan<byte> content)
         {
             var (hashAlgorithmName, hash) = DeconstructContentUri(contentUri);
             var computedHash = ComputeHash(hashAlgorithmName, content);
@@ -50,7 +50,7 @@ namespace Chunkyard.Core
 
         private static string ComputeHash(
             string hashAlgorithmName,
-            byte[] content)
+            ReadOnlySpan<byte> content)
         {
             // We are publishing Chunkyard using the "-p:TrimMode=Link" compiler
             // option. This option cuts the binary size in half, but throws null
