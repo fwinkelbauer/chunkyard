@@ -34,7 +34,7 @@ namespace Chunkyard.Core
         public static (string HashAlgorithmName, string Hash) DeconstructContentUri(
             Uri contentUri)
         {
-            contentUri.EnsureNotNull(nameof(contentUri));
+            ArgumentNullException.ThrowIfNull(contentUri);
 
             return (contentUri.Scheme, contentUri.Host);
         }
@@ -43,7 +43,7 @@ namespace Chunkyard.Core
             string hashAlgorithmName,
             string hash)
         {
-            hashAlgorithmName.EnsureNotNull(nameof(hashAlgorithmName));
+            ArgumentNullException.ThrowIfNull(hashAlgorithmName);
 
             return new Uri($"{hashAlgorithmName}://{hash}");
         }

@@ -71,7 +71,7 @@ namespace Chunkyard.Core
             Fuzzy excludeFuzzy,
             DateTime creationTimeUtc)
         {
-            blobSystem.EnsureNotNull(nameof(blobSystem));
+            ArgumentNullException.ThrowIfNull(blobSystem);
 
             var newSnapshot = new Snapshot(
                 _currentSnapshotId == null
@@ -251,8 +251,8 @@ namespace Chunkyard.Core
             IEnumerable<Uri> contentUris,
             Stream outputStream)
         {
-            contentUris.EnsureNotNull(nameof(contentUris));
-            outputStream.EnsureNotNull(nameof(outputStream));
+            ArgumentNullException.ThrowIfNull(contentUris);
+            ArgumentNullException.ThrowIfNull(outputStream);
 
             foreach (var contentUri in contentUris)
             {
@@ -283,8 +283,8 @@ namespace Chunkyard.Core
             IRepository<Uri> otherUriRepository,
             IRepository<int> otherIntRepository)
         {
-            otherUriRepository.EnsureNotNull(nameof(otherUriRepository));
-            otherIntRepository.EnsureNotNull(nameof(otherIntRepository));
+            ArgumentNullException.ThrowIfNull(otherUriRepository);
+            ArgumentNullException.ThrowIfNull(otherIntRepository);
 
             Copy(
                 otherUriRepository,
@@ -296,8 +296,8 @@ namespace Chunkyard.Core
             IRepository<Uri> otherUriRepository,
             IRepository<int> otherIntRepository)
         {
-            otherUriRepository.EnsureNotNull(nameof(otherUriRepository));
-            otherIntRepository.EnsureNotNull(nameof(otherIntRepository));
+            ArgumentNullException.ThrowIfNull(otherUriRepository);
+            ArgumentNullException.ThrowIfNull(otherIntRepository);
 
             Copy(
                 otherUriRepository,

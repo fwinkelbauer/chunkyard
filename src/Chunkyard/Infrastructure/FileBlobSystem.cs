@@ -56,7 +56,7 @@ namespace Chunkyard.Infrastructure
 
         public Stream OpenWrite(Blob blob)
         {
-            blob.EnsureNotNull(nameof(blob));
+            ArgumentNullException.ThrowIfNull(blob);
 
             var file = ToFile(blob.Name);
 

@@ -333,7 +333,7 @@ namespace Chunkyard.Core
 
         public IEnumerable<byte[]> SplitIntoChunks(Stream stream)
         {
-            stream.EnsureNotNull(nameof(stream));
+            ArgumentNullException.ThrowIfNull(stream);
 
             var buffer = new byte[MaxSize];
             var bytesCarryOver = 0;
