@@ -83,12 +83,12 @@ namespace Chunkyard.Build
                     $"publish {MainProject}",
                     $"-c {o.Configuration}",
                     $"-r {runtime}",
+                    "--self-contained",
                     $"-o {directory}",
                     $"-p:Version={version}",
                     $"-p:SourceRevisionId={commitId}",
                     "-p:PublishSingleFile=true",
-                    "-p:PublishTrimmed=true",
-                    "-p:TrimMode=Link");
+                    "-p:PublishTrimmed=true");
             }
         }
 
