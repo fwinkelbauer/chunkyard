@@ -62,12 +62,7 @@ namespace Chunkyard.Core
                 throw new NotSupportedException();
             }
 
-            // It might seem inefficient to create new instances of SHA256 on
-            // every method invocation, but ComputeHash can break when called
-            // from multiple threads
-            using var algorithm = SHA256.Create();
-
-            return ToHexString(algorithm.ComputeHash(content));
+            return ToHexString(SHA256.HashData(content));
         }
 
         private static string ToHexString(byte[] hash)
