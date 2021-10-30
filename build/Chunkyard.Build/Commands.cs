@@ -33,15 +33,13 @@ namespace Chunkyard.Build
 
         public static void Build(DotnetOptions o)
         {
-            Dotnet("tool restore");
-
             Dotnet(
                 $"format {BuildSolution}",
-                "--check");
+                "--verify-no-changes");
 
             Dotnet(
                 $"format {SourceSolution}",
-                "--check");
+                "--verify-no-changes");
 
             Dotnet(
                 $"build {SourceSolution}",
@@ -96,8 +94,6 @@ namespace Chunkyard.Build
 
         public static void Fmt()
         {
-            Dotnet("tool restore");
-
             Dotnet($"format {BuildSolution}");
             Dotnet($"format {SourceSolution}");
         }
