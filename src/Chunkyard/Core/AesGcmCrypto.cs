@@ -98,7 +98,7 @@ namespace Chunkyard.Core
 
         private static byte[] GenerateRandomNumber(int length)
         {
-            using var randomGenerator = new RNGCryptoServiceProvider();
+            using var randomGenerator = RandomNumberGenerator.Create();
             var randomNumber = new byte[length];
             randomGenerator.GetBytes(randomNumber);
 
