@@ -31,12 +31,10 @@ namespace Chunkyard.Tests.Infrastructure
 
             Assert.False(blobSystem.BlobExists(blob.Name));
 
-            using (var writeStream = blobSystem.OpenWrite(blob.Name))
+            using (var writeStream = blobSystem.OpenWrite(blob))
             {
                 writeStream.Write(expectedBytes);
             }
-
-            blobSystem.UpdateMetadata(blob);
 
             Assert.True(blobSystem.BlobExists(blob.Name));
 

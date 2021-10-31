@@ -186,28 +186,21 @@ namespace Chunkyard.Core
         {
             Blob RetrieveBlobReference(BlobReference blobReference)
             {
-                var snapshotBlob = blobReference.ToBlob();
+                var blob = blobReference.ToBlob();
 
-                if (blobSystem.BlobExists(snapshotBlob.Name)
-                    && blobSystem.FetchMetadata(snapshotBlob.Name).Equals(snapshotBlob))
+                if (blobSystem.BlobExists(blob.Name)
+                    && blobSystem.FetchMetadata(blob.Name).Equals(blob))
                 {
-                    return snapshotBlob;
+                    return blob;
                 }
 
                 try
                 {
-                    using (var stream = blobSystem.OpenWrite(
-                        blobReference.Name))
-                    {
-                        RetrieveContent(
-                            blobReference.ContentUris,
-                            stream);
-                    }
+                    using var stream = blobSystem.OpenWrite(blob);
 
-                    // We want to call this method after disposing the
-                    // stream, which is why we are using a dedicated using
-                    // block above
-                    blobSystem.UpdateMetadata(snapshotBlob);
+                    RetrieveContent(
+                        blobReference.ContentUris,
+                        stream);
                 }
                 catch (Exception e)
                 {
@@ -218,7 +211,7 @@ namespace Chunkyard.Core
 
                 _probe.RetrievedBlob(blobReference);
 
-                return snapshotBlob;
+                return blob;
             }
 
             var snapshot = GetSnapshot(snapshotId);

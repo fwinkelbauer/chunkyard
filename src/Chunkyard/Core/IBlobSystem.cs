@@ -16,8 +16,6 @@ namespace Chunkyard.Core
 
         Blob FetchMetadata(string blobName);
 
-        Stream OpenWrite(string blobName);
-
-        void UpdateMetadata(Blob blob);
+        Stream OpenWrite(Blob blob);
     }
 }

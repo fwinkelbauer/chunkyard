@@ -30,12 +30,10 @@ namespace Chunkyard.Tests.Infrastructure
 
             foreach (var blob in _blobs.Values)
             {
-                using var stream = OpenWrite(blob.Name);
+                using var stream = OpenWrite(blob);
 
                 stream.Write(
                     createContent(blob.Name));
-
-                _blobs[blob.Name] = blob;
             }
         }
 
@@ -74,9 +72,9 @@ namespace Chunkyard.Tests.Infrastructure
             }
         }
 
-        public Stream OpenWrite(string blobName)
+        public Stream OpenWrite(Blob blob)
         {
-            return new BlobStream(this, blobName);
+            return new WriteStream(this, blob);
         }
 
         public void UpdateMetadata(Blob blob)
@@ -87,24 +85,25 @@ namespace Chunkyard.Tests.Infrastructure
             }
         }
 
-        private class BlobStream : MemoryStream
+        private class WriteStream : MemoryStream
         {
             private readonly MemoryBlobSystem _blobSystem;
-            private readonly string _blobName;
+            private readonly Blob _blob;
 
-            public BlobStream(
+            public WriteStream(
                 MemoryBlobSystem blobSystem,
-                string blobName)
+                Blob blob)
             {
                 _blobSystem = blobSystem;
-                _blobName = blobName;
+                _blob = blob;
             }
 
             protected override void Dispose(bool disposing)
             {
                 lock (_blobSystem._lock)
                 {
-                    _blobSystem._bytes[_blobName] = ToArray();
+                    _blobSystem._bytes[_blob.Name] = ToArray();
+                    _blobSystem._blobs[_blob.Name] = _blob;
                 }
 
                 base.Dispose(disposing);

@@ -54,22 +54,15 @@ namespace Chunkyard.Infrastructure
                     ToFile(blobName)));
         }
 
-        public Stream OpenWrite(string blobName)
-        {
-            var file = ToFile(blobName);
-
-            DirectoryUtil.CreateParent(file);
-
-            return new FileStream(file, FileMode.Create, FileAccess.Write);
-        }
-
-        public void UpdateMetadata(Blob blob)
+        public Stream OpenWrite(Blob blob)
         {
             blob.EnsureNotNull(nameof(blob));
 
-            File.SetLastWriteTimeUtc(
-                ToFile(blob.Name),
-                blob.LastWriteTimeUtc);
+            var file = ToFile(blob.Name);
+
+            DirectoryUtil.CreateParent(file);
+
+            return new WriteStream(file, blob);
         }
 
         private Blob ToBlob(string file)
@@ -160,6 +153,26 @@ namespace Chunkyard.Infrastructure
             }
 
             return parent;
+        }
+
+        private class WriteStream : FileStream
+        {
+            private readonly Blob _blob;
+
+            public WriteStream(string file, Blob blob)
+                : base(file, FileMode.Create, FileAccess.Write)
+            {
+                _blob = blob;
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                base.Dispose(disposing);
+
+                File.SetLastWriteTimeUtc(
+                    Name,
+                    _blob.LastWriteTimeUtc);
+            }
         }
     }
 }
