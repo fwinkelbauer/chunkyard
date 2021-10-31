@@ -10,13 +10,11 @@ namespace Chunkyard.Cli
         public PreviewOptions(
             string repository,
             IEnumerable<string> files,
-            IEnumerable<string> excludePatterns,
-            int snapshotId)
+            IEnumerable<string> excludePatterns)
         {
             Repository = repository;
             Files = files;
             ExcludePatterns = excludePatterns;
-            SnapshotId = snapshotId;
         }
 
         [Option('r', "repository", Required = true, HelpText = "The repository path")]
@@ -27,8 +25,5 @@ namespace Chunkyard.Cli
 
         [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude")]
         public IEnumerable<string> ExcludePatterns { get; }
-
-        [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
-        public int SnapshotId { get; }
     }
 }

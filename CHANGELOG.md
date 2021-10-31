@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
   will now print the actual content URIs
 - The `show` command to also include a `--content-only` option
 
+### Removed
+
+- `--snapshot` from the `preview` command
+
 ## 11.8.0 - 2021-10-10
 
 ### Changed
