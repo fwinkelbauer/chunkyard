@@ -227,8 +227,7 @@ namespace Chunkyard
                 new FastCdc(),
                 new EnvironmentPrompt(
                     new ConsolePrompt()),
-                new ConsoleProbe(),
-                100);
+                new ConsoleProbe());
         }
 
         private static IRepository<Uri> CreateUriRepository(

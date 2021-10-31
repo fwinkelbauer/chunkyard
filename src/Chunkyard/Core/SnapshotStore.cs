@@ -20,7 +20,6 @@ namespace Chunkyard.Core
         private readonly IRepository<int> _intRepository;
         private readonly FastCdc _fastCdc;
         private readonly IProbe _probe;
-        private readonly int _parallelizeChunkThreshold;
         private readonly byte[] _salt;
         private readonly int _iterations;
         private readonly Lazy<byte[]> _key;
@@ -32,21 +31,12 @@ namespace Chunkyard.Core
             IRepository<int> intRepository,
             FastCdc fastCdc,
             IPrompt prompt,
-            IProbe probe,
-            int parallelizeChunkThreshold)
+            IProbe probe)
         {
             _uriRepository = uriRepository;
             _intRepository = intRepository;
             _fastCdc = fastCdc;
             _probe = probe;
-            _parallelizeChunkThreshold = parallelizeChunkThreshold;
-
-            if (parallelizeChunkThreshold <= 0)
-            {
-                throw new ArgumentException(
-                    "Value must be larger than zero",
-                    nameof(parallelizeChunkThreshold));
-            }
 
             _currentSnapshotId = FetchCurrentSnapshotId();
 
@@ -491,20 +481,11 @@ namespace Chunkyard.Core
 
             var expectedChunks = stream.Length / _fastCdc.AvgSize;
 
-            if (expectedChunks < _parallelizeChunkThreshold)
-            {
-                return _fastCdc.SplitIntoChunks(stream)
-                    .Select(WriteChunk)
-                    .ToArray();
-            }
-            else
-            {
-                return _fastCdc.SplitIntoChunks(stream)
-                    .AsParallel()
-                    .AsOrdered()
-                    .Select(WriteChunk)
-                    .ToArray();
-            }
+            return _fastCdc.SplitIntoChunks(stream)
+                .AsParallel()
+                .AsOrdered()
+                .Select(WriteChunk)
+                .ToArray();
         }
 
         private BlobReference[] WriteBlobs(

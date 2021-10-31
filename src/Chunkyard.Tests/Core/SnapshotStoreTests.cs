@@ -431,20 +431,17 @@ namespace Chunkyard.Tests.Core
             Assert.True(snapshotStore.IsEmpty);
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(100)]
-        public static void RetrieveSnapshot_Writes_Ordered_Blob_Chunks_To_Stream(
-            int chunkCount)
+        [Fact]
+        public static void RetrieveSnapshot_Writes_Ordered_Blob_Chunks_To_Stream()
         {
+            var fastCdc = new FastCdc(64, 256, 1024);
             var snapshotStore = CreateSnapshotStore(
-                fastCdc: new FastCdc(64, 256, 1024),
-                parallelizeChunkThreshold: chunkCount);
+                fastCdc: fastCdc);
 
             var blobs = CreateBlobs(new[] { "some blob" });
 
             // Create data that is large enough to create at least two chunks
-            var expectedBytes = GenerateRandomNumber(1025);
+            var expectedBytes = GenerateRandomNumber(fastCdc.MaxSize + 1);
 
             var snapshotId = snapshotStore.StoreSnapshot(
                 new MemoryBlobSystem(
@@ -903,16 +900,14 @@ namespace Chunkyard.Tests.Core
             IRepository<Uri>? uriRepository = null,
             IRepository<int>? intRepository = null,
             FastCdc? fastCdc = null,
-            string password = "secret",
-            int parallelizeChunkThreshold = 100)
+            string password = "secret")
         {
             return new SnapshotStore(
                 uriRepository ?? CreateRepository<Uri>(),
                 intRepository ?? CreateRepository<int>(),
                 fastCdc ?? new FastCdc(),
                 new DummyPrompt(password),
-                new DummyProbe(),
-                parallelizeChunkThreshold);
+                new DummyProbe());
         }
 
         private static IRepository<T> CreateRepository<T>()
