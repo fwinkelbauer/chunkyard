@@ -7,13 +7,13 @@ using Chunkyard.Core;
 
 namespace Chunkyard.Tests.Infrastructure
 {
-    internal class DummyBlobSystem : IBlobSystem
+    internal class MemoryBlobSystem : IBlobSystem
     {
         private readonly Dictionary<string, Blob> _blobs;
         private readonly Dictionary<string, byte[]> _bytes;
         private readonly object _lock;
 
-        public DummyBlobSystem(
+        public MemoryBlobSystem(
             IEnumerable<Blob>? blobs = null,
             Func<string, byte[]>? createContent = null)
         {
@@ -34,6 +34,8 @@ namespace Chunkyard.Tests.Infrastructure
 
                 stream.Write(
                     createContent(blob.Name));
+
+                _blobs[blob.Name] = blob;
             }
         }
 
@@ -74,7 +76,7 @@ namespace Chunkyard.Tests.Infrastructure
 
         public Stream OpenWrite(string blobName)
         {
-            return new DummyStream(this, blobName);
+            return new BlobStream(this, blobName);
         }
 
         public void UpdateMetadata(Blob blob)
@@ -85,13 +87,13 @@ namespace Chunkyard.Tests.Infrastructure
             }
         }
 
-        private class DummyStream : MemoryStream
+        private class BlobStream : MemoryStream
         {
-            private readonly DummyBlobSystem _blobSystem;
+            private readonly MemoryBlobSystem _blobSystem;
             private readonly string _blobName;
 
-            public DummyStream(
-                DummyBlobSystem blobSystem,
+            public BlobStream(
+                MemoryBlobSystem blobSystem,
                 string blobName)
             {
                 _blobSystem = blobSystem;
