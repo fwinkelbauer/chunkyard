@@ -124,23 +124,27 @@ namespace Chunkyard.Core
                 return blobExists;
             }
 
-            var snapshot = GetSnapshot(snapshotId);
-            var snapshotExists = Filter(snapshot, includeFuzzy)
-                .AsParallel()
-                .Select(CheckBlobReferenceExists)
-                .Aggregate(true, (total, next) => total & next);
-
-            _probe.SnapshotValid(
-                snapshot.SnapshotId,
-                snapshotExists);
-
-            return snapshotExists;
+            return CheckSnapshot(
+                snapshotId,
+                includeFuzzy,
+                CheckBlobReferenceExists);
         }
 
         public bool CheckSnapshotValid(
             int snapshotId,
             Fuzzy includeFuzzy)
         {
+            bool CheckBlobReferenceValid(BlobReference blobReference)
+            {
+                var blobValid = blobReference.ContentUris
+                    .Select(CheckContentUriValid)
+                    .Aggregate(true, (total, next) => total & next);
+
+                _probe.BlobValid(blobReference, blobValid);
+
+                return blobValid;
+            }
+
             bool CheckContentUriValid(Uri contentUri)
             {
                 try
@@ -155,28 +159,10 @@ namespace Chunkyard.Core
                 }
             }
 
-            bool CheckBlobReferenceValid(BlobReference blobReference)
-            {
-                var blobValid = blobReference.ContentUris
-                    .Select(CheckContentUriValid)
-                    .Aggregate(true, (total, next) => total & next);
-
-                _probe.BlobValid(blobReference, blobValid);
-
-                return blobValid;
-            }
-
-            var snapshot = GetSnapshot(snapshotId);
-            var snapshotValid = Filter(snapshot, includeFuzzy)
-                .AsParallel()
-                .Select(CheckBlobReferenceValid)
-                .Aggregate(true, (total, next) => total & next);
-
-            _probe.SnapshotValid(
-                snapshot.SnapshotId,
-                snapshotValid);
-
-            return snapshotValid;
+            return CheckSnapshot(
+                snapshotId,
+                includeFuzzy,
+                CheckBlobReferenceValid);
         }
 
         public IEnumerable<Blob> RetrieveSnapshot(
@@ -442,6 +428,24 @@ namespace Chunkyard.Core
             }
 
             return contentUris;
+        }
+
+        private bool CheckSnapshot(
+            int snapshotId,
+            Fuzzy includeFuzzy,
+            Func<BlobReference, bool> checkFunc)
+        {
+            var snapshot = GetSnapshot(snapshotId);
+            var snapshotExists = Filter(snapshot, includeFuzzy)
+                .AsParallel()
+                .Select(checkFunc)
+                .Aggregate(true, (total, next) => total & next);
+
+            _probe.SnapshotValid(
+                snapshot.SnapshotId,
+                snapshotExists);
+
+            return snapshotExists;
         }
 
         private static BlobReference[] Filter(
