@@ -479,8 +479,6 @@ namespace Chunkyard.Core
                 return contentUri;
             }
 
-            var expectedChunks = stream.Length / _fastCdc.AvgSize;
-
             return _fastCdc.SplitIntoChunks(stream)
                 .AsParallel()
                 .AsOrdered()
