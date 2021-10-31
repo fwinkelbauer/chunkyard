@@ -294,6 +294,32 @@ namespace Chunkyard.Core
             }
         }
 
+        public void RetrieveContent(
+            IEnumerable<Uri> contentUris,
+            Stream outputStream)
+        {
+            contentUris.EnsureNotNull(nameof(contentUris));
+            outputStream.EnsureNotNull(nameof(outputStream));
+
+            foreach (var contentUri in contentUris)
+            {
+                try
+                {
+                    var decrypted = AesGcmCrypto.Decrypt(
+                        _uriRepository.RetrieveValue(contentUri),
+                        _key.Value);
+
+                    outputStream.Write(decrypted);
+                }
+                catch (CryptographicException e)
+                {
+                    throw new ChunkyardException(
+                        $"Could not decrypt content: {contentUri}",
+                        e);
+                }
+            }
+        }
+
         public void Copy(
             IRepository<Uri> otherUriRepository,
             IRepository<int> otherIntRepository)
@@ -391,32 +417,6 @@ namespace Chunkyard.Core
                     otherUriRepository.RemoveValue(contentUri);
 
                     _probe.RemovedContent(contentUri);
-                }
-            }
-        }
-
-        public void RetrieveContent(
-            IEnumerable<Uri> contentUris,
-            Stream outputStream)
-        {
-            contentUris.EnsureNotNull(nameof(contentUris));
-            outputStream.EnsureNotNull(nameof(outputStream));
-
-            foreach (var contentUri in contentUris)
-            {
-                try
-                {
-                    var decrypted = AesGcmCrypto.Decrypt(
-                        _uriRepository.RetrieveValue(contentUri),
-                        _key.Value);
-
-                    outputStream.Write(decrypted);
-                }
-                catch (CryptographicException e)
-                {
-                    throw new ChunkyardException(
-                        $"Could not decrypt content: {contentUri}",
-                        e);
                 }
             }
         }
