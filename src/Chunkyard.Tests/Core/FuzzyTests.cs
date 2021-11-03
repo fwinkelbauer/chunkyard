@@ -9,41 +9,39 @@ namespace Chunkyard.Tests.Core
         [Fact]
         public static void IsMatch_Returns_True_For_Empty_String()
         {
-            var include = Fuzzy.Include(new[] { "" });
-            var exclude = Fuzzy.Exclude(new[] { "" });
+            var fuzzy = new Fuzzy(new[] { "" });
 
-            Assert.True(include.IsMatch("some text!"));
-            Assert.True(exclude.IsMatch("some text!"));
+            Assert.True(fuzzy.IsIncludingMatch("some text!"));
+            Assert.True(fuzzy.IsExcludingMatch("some text!"));
         }
 
         [Fact]
         public static void IsMatch_Matches_Empty_Collection_Based_On_Type()
         {
-            var includeAll = Fuzzy.IncludeAll;
-            var include = Fuzzy.Include(Array.Empty<string>());
+            var fuzzy = Fuzzy.Default;
 
-            var excludeNothing = Fuzzy.ExcludeNothing;
-            var exclude = Fuzzy.Exclude(Array.Empty<string>());
+            Assert.True(fuzzy.IsIncludingMatch("some text!"));
+            Assert.True(fuzzy.IsIncludingMatch("some text!"));
 
-            Assert.True(includeAll.IsMatch("some text!"));
-            Assert.True(include.IsMatch("some text!"));
-
-            Assert.False(excludeNothing.IsMatch("some text!"));
-            Assert.False(exclude.IsMatch("some text!"));
+            Assert.False(fuzzy.IsExcludingMatch("some text!"));
+            Assert.False(fuzzy.IsExcludingMatch("some text!"));
         }
 
-        [Fact]
-        public static void IsMatch_Treats_Spaces_As_Wildcards()
+        [Theory]
+        [InlineData("Hello World!", true)]
+        [InlineData("Held", true)]
+        [InlineData("HELLO WORLD!", true)]
+        [InlineData("hello world!", false)]
+        [InlineData("Goodbye World!", false)]
+        public static void IsMatch_Treats_Spaces_As_Wildcards(
+            string input,
+            bool expected)
         {
-            var fuzzy = Fuzzy.Include(
+            var fuzzy = new Fuzzy(
                 new[] { "He ld", "HE LD" });
 
-            Assert.True(fuzzy.IsMatch("Hello World!"));
-            Assert.True(fuzzy.IsMatch("Held"));
-            Assert.True(fuzzy.IsMatch("HELLO WORLD!"));
-
-            Assert.False(fuzzy.IsMatch("hello world!"));
-            Assert.False(fuzzy.IsMatch("Goodbye World!"));
+            Assert.Equal(expected, fuzzy.IsIncludingMatch(input));
+            Assert.Equal(expected, fuzzy.IsExcludingMatch(input));
         }
     }
 }

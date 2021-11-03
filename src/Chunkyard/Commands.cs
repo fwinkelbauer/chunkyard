@@ -17,13 +17,13 @@ namespace Chunkyard
             var blobReader = new FileBlobSystem(o.Files);
 
             var blobs = blobReader.FetchBlobs(
-                Fuzzy.Exclude(o.ExcludePatterns));
+                new Fuzzy(o.ExcludePatterns));
 
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
             var snapshotBlobs = snapshotStore.IsEmpty
                 ? Array.Empty<Blob>()
-                : snapshotStore.ShowSnapshot(SnapshotStore.LatestSnapshotId, Fuzzy.IncludeAll)
+                : snapshotStore.ShowSnapshot(SnapshotStore.LatestSnapshotId, Fuzzy.Default)
                     .Select(blobReference => blobReference.ToBlob())
                     .ToArray();
 
@@ -43,7 +43,7 @@ namespace Chunkyard
 
             snapshotStore.StoreSnapshot(
                 blobReader,
-                Fuzzy.Exclude(o.ExcludePatterns),
+                new Fuzzy(o.ExcludePatterns),
                 DateTime.UtcNow);
         }
 
@@ -51,7 +51,7 @@ namespace Chunkyard
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            var fuzzy = Fuzzy.Include(o.IncludePatterns);
+            var fuzzy = new Fuzzy(o.IncludePatterns);
 
             var ok = o.Shallow
                 ? snapshotStore.CheckSnapshotExists(
@@ -74,7 +74,7 @@ namespace Chunkyard
 
             var blobReferences = snapshotStore.ShowSnapshot(
                 o.SnapshotId,
-                Fuzzy.Include(o.IncludePatterns));
+                new Fuzzy(o.IncludePatterns));
 
             if (o.ContentOnly)
             {
@@ -101,7 +101,7 @@ namespace Chunkyard
             snapshotStore.RetrieveSnapshot(
                 new FileBlobSystem(new[] { o.Directory }),
                 o.SnapshotId,
-                Fuzzy.Include(o.IncludePatterns));
+                new Fuzzy(o.IncludePatterns));
         }
 
         public static void ListSnapshots(ListOptions o)
@@ -123,7 +123,7 @@ namespace Chunkyard
         {
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            var fuzzy = Fuzzy.Include(o.IncludePatterns);
+            var fuzzy = new Fuzzy(o.IncludePatterns);
             var first = snapshotStore.ShowSnapshot(o.FirstSnapshotId, fuzzy);
             var second = snapshotStore.ShowSnapshot(o.SecondSnapshotId, fuzzy);
 

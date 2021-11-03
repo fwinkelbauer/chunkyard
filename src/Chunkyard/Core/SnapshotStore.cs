@@ -443,7 +443,7 @@ namespace Chunkyard.Core
             Fuzzy includeFuzzy)
         {
             return snapshot.BlobReferences
-                .Where(br => includeFuzzy.IsMatch(br.Name))
+                .Where(br => includeFuzzy.IsIncludingMatch(br.Name))
                 .ToArray();
         }
 

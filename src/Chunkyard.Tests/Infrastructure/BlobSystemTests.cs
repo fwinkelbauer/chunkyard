@@ -44,7 +44,7 @@ namespace Chunkyard.Tests.Infrastructure
 
             Assert.Equal(
                 new[] { blob },
-                blobSystem.FetchBlobs(Fuzzy.ExcludeNothing));
+                blobSystem.FetchBlobs(Fuzzy.Default));
 
             using (var readStream = blobSystem.OpenRead(blob.Name))
             using (var memoryStream = new MemoryStream())

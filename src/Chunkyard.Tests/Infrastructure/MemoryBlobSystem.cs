@@ -50,7 +50,7 @@ namespace Chunkyard.Tests.Infrastructure
             lock (_lock)
             {
                 return _blobs.Values
-                    .Where(b => !excludeFuzzy.IsMatch(b.Name))
+                    .Where(b => !excludeFuzzy.IsExcludingMatch(b.Name))
                     .ToArray();
             }
         }

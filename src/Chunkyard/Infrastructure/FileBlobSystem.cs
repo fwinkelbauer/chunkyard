@@ -112,7 +112,7 @@ namespace Chunkyard.Infrastructure
                 throw new FileNotFoundException("Could not find file", file);
             }
 
-            return files.Where(f => !excludeFuzzy.IsMatch(f));
+            return files.Where(f => !excludeFuzzy.IsExcludingMatch(f));
         }
 
         // https://rosettacode.org/wiki/Find_common_directory_path#C.23

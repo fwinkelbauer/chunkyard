@@ -10,45 +10,35 @@ namespace Chunkyard.Core
     /// </summary>
     public class Fuzzy
     {
-        public static readonly Fuzzy IncludeAll = Include(
-            Array.Empty<string>());
-
-        public static readonly Fuzzy ExcludeNothing = Exclude(
+        public static readonly Fuzzy Default = new Fuzzy(
             Array.Empty<string>());
 
         private readonly Regex[] _compiledRegex;
-        private readonly bool _initial;
 
-        private Fuzzy(
-            IEnumerable<string> patterns,
-            bool emptyShouldMatch)
+        public Fuzzy(IEnumerable<string> patterns)
         {
             _compiledRegex = patterns
                 .Select(p => new Regex(string.IsNullOrEmpty(p)
                     ? ".*"
                     : p.Replace(" ", ".*")))
                 .ToArray();
-
-            _initial = emptyShouldMatch
-                ? _compiledRegex.Length == 0
-                : false;
         }
 
-        public bool IsMatch(string input)
+        public bool IsIncludingMatch(string input)
+        {
+            return IsMatch(input, _compiledRegex.Length == 0);
+        }
+
+        public bool IsExcludingMatch(string input)
+        {
+            return IsMatch(input, false);
+        }
+
+        private bool IsMatch(string input, bool initial)
         {
             return _compiledRegex
                 .Select(r => r.IsMatch(input))
-                .Aggregate(_initial, (total, next) => total | next);
-        }
-
-        public static Fuzzy Include(IEnumerable<string> patterns)
-        {
-            return new Fuzzy(patterns, true);
-        }
-
-        public static Fuzzy Exclude(IEnumerable<string> patterns)
-        {
-            return new Fuzzy(patterns, false);
+                .Aggregate(initial, (total, next) => total | next);
         }
     }
 }
