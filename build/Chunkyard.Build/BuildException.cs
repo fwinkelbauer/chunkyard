@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Chunkyard.Build.Cli
+namespace Chunkyard.Build
 {
     /// <summary>
     /// A custom exception type.
