@@ -306,10 +306,10 @@ namespace Chunkyard.Core
             bool mirror)
         {
             var localContentUris = _uriRepository.ListKeys();
-            var remoteContentUris = otherUriRepository.ListKeys();
+            var otherContentUris = otherUriRepository.ListKeys();
 
             var contentUrisToCopy = localContentUris
-                .Except(remoteContentUris)
+                .Except(otherContentUris)
                 .ToArray();
 
             foreach (var contentUri in contentUrisToCopy)
@@ -328,10 +328,10 @@ namespace Chunkyard.Core
             }
 
             var localSnapshotIds = _intRepository.ListKeys();
-            var remoteSnapshotIds = otherIntRepository.ListKeys();
+            var otherSnapshotIds = otherIntRepository.ListKeys();
 
             var snapshotIdsToCopy = localSnapshotIds
-                .Except(remoteSnapshotIds)
+                .Except(otherSnapshotIds)
                 .ToArray();
 
             foreach (var snapshotId in snapshotIdsToCopy)
@@ -351,7 +351,7 @@ namespace Chunkyard.Core
                 // We need to delete snapshotIds prior to deleting contentUris
                 // so that a cancelled mirror operation does not corrupt any
                 // snapshots
-                var snapshotIdsToDelete = remoteSnapshotIds
+                var snapshotIdsToDelete = otherSnapshotIds
                     .Except(localSnapshotIds)
                     .ToArray();
 
@@ -362,7 +362,7 @@ namespace Chunkyard.Core
                     _probe.RemovedSnapshot(snapshotId);
                 }
 
-                var contentUrisToDelete = remoteContentUris
+                var contentUrisToDelete = otherContentUris
                     .Except(localContentUris)
                     .ToArray();
 
