@@ -184,7 +184,6 @@ namespace Chunkyard.Core
             var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
 
             return GetSnapshot(
-                resolvedSnapshotId,
                 GetSnapshotReference(resolvedSnapshotId));
         }
 
@@ -269,6 +268,12 @@ namespace Chunkyard.Core
                 {
                     throw new ChunkyardException(
                         $"Could not decrypt content: {contentUri}",
+                        e);
+                }
+                catch (Exception e)
+                {
+                    throw new ChunkyardException(
+                        $"Could not read content: {contentUri}",
                         e);
                 }
             }
@@ -380,9 +385,7 @@ namespace Chunkyard.Core
                 contentUris.UnionWith(
                     snapshotReference.ContentUris);
 
-                var snapshot = GetSnapshot(
-                    snapshotId,
-                    snapshotReference);
+                var snapshot = GetSnapshot(snapshotReference);
 
                 contentUris.UnionWith(
                     snapshot.BlobReferences.SelectMany(
@@ -546,33 +549,6 @@ namespace Chunkyard.Core
             return snapshotIds[index];
         }
 
-        private Snapshot GetSnapshot(
-            int snapshotId,
-            SnapshotReference snapshotReference)
-        {
-            try
-            {
-                using var memoryStream = new MemoryStream();
-
-                RetrieveContent(
-                    snapshotReference.ContentUris,
-                    memoryStream);
-
-                return DataConvert.BytesToObject<Snapshot>(
-                    memoryStream.ToArray());
-            }
-            catch (ChunkyardException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                throw new ChunkyardException(
-                    $"Could not read snapshot: #{snapshotId}",
-                    e);
-            }
-        }
-
         private SnapshotReference GetSnapshotReference(int snapshotId)
         {
             try
@@ -586,6 +562,18 @@ namespace Chunkyard.Core
                     $"Could not read snapshot reference: #{snapshotId}",
                     e);
             }
+        }
+
+        private Snapshot GetSnapshot(SnapshotReference snapshotReference)
+        {
+            using var memoryStream = new MemoryStream();
+
+            RetrieveContent(
+                snapshotReference.ContentUris,
+                memoryStream);
+
+            return DataConvert.BytesToObject<Snapshot>(
+                memoryStream.ToArray());
         }
 
         private byte[] GetValidContent(Uri contentUri)
