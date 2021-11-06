@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.10.0 - 2021-11-06
+
+### Removed
+
+- The `--snapshot` option from the `preview` command
+
 ## 11.9.0 - 2021-10-30
 
 ### Changed
@@ -14,10 +20,6 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 - The `diff` command to include an `--include` option. The `--content-only` flag
   will now print the actual content URIs
 - The `show` command to also include a `--content-only` option
-
-### Removed
-
-- `--snapshot` from the `preview` command
 
 ## 11.8.0 - 2021-10-10
 
