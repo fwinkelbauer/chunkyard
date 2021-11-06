@@ -314,15 +314,9 @@ namespace Chunkyard.Core
 
             foreach (var contentUri in contentUrisToCopy)
             {
-                var content = _uriRepository.RetrieveValue(contentUri);
-
-                if (!Id.ContentUriValid(contentUri, content))
-                {
-                    throw new ChunkyardException(
-                        $"Invalid content: {contentUri}");
-                }
-
-                otherUriRepository.StoreValue(contentUri, content);
+                otherUriRepository.StoreValue(
+                    contentUri,
+                    GetValidContent(contentUri));
 
                 _probe.CopiedContent(contentUri);
             }
@@ -590,6 +584,32 @@ namespace Chunkyard.Core
             {
                 throw new ChunkyardException(
                     $"Could not read snapshot reference: #{snapshotId}",
+                    e);
+            }
+        }
+
+        private byte[] GetValidContent(Uri contentUri)
+        {
+            try
+            {
+                var content = _uriRepository.RetrieveValue(contentUri);
+
+                if (!Id.ContentUriValid(contentUri, content))
+                {
+                    throw new ChunkyardException(
+                        $"Invalid content: {contentUri}");
+                }
+
+                return content;
+            }
+            catch (ChunkyardException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new ChunkyardException(
+                    $"Could not read content: {contentUri}",
                     e);
             }
         }
