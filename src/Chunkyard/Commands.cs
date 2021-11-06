@@ -21,14 +21,14 @@ namespace Chunkyard
 
             var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            var snapshotBlobs = snapshotStore.IsEmpty
-                ? Array.Empty<Blob>()
-                : snapshotStore.ShowSnapshot(SnapshotStore.LatestSnapshotId, Fuzzy.Default)
-                    .Select(blobReference => blobReference.ToBlob())
-                    .ToArray();
+            var blobReferences = snapshotStore.IsEmpty
+                ? Array.Empty<BlobReference>()
+                : snapshotStore.ShowSnapshot(
+                    SnapshotStore.LatestSnapshotId,
+                    Fuzzy.Default);
 
             var diff = DiffSet.Create(
-                snapshotBlobs,
+                blobReferences.Select(blobReference => blobReference.ToBlob()),
                 blobs,
                 blob => blob.Name);
 
