@@ -1,29 +1,28 @@
-namespace Chunkyard.Core
+namespace Chunkyard.Core;
+
+/// <summary>
+/// Defines a set of events which are created while using an instance of a
+/// <see cref="SnapshotStore"/>.
+/// </summary>
+public interface IProbe
 {
-    /// <summary>
-    /// Defines a set of events which are created while using an instance of a
-    /// <see crefa="SnapshotStore"/>.
-    /// </summary>
-    public interface IProbe
-    {
-        void StoredBlob(BlobReference blobReference);
+    void StoredBlob(BlobReference blobReference);
 
-        void RetrievedBlob(BlobReference blobReference);
+    void RetrievedBlob(BlobReference blobReference);
 
-        void BlobValid(BlobReference blobReference, bool valid);
+    void BlobValid(BlobReference blobReference, bool valid);
 
-        void CopiedContent(Uri contentUri);
+    void CopiedContent(Uri contentUri);
 
-        void RemovedContent(Uri contentUri);
+    void RemovedContent(Uri contentUri);
 
-        void CopiedSnapshot(int snapshotId);
+    void CopiedSnapshot(int snapshotId);
 
-        void StoredSnapshot(int snapshotId);
+    void StoredSnapshot(int snapshotId);
 
-        void RetrievedSnapshot(int snapshotId);
+    void RetrievedSnapshot(int snapshotId);
 
-        void RemovedSnapshot(int snapshotId);
+    void RemovedSnapshot(int snapshotId);
 
-        void SnapshotValid(int snapshotId, bool valid);
-    }
+    void SnapshotValid(int snapshotId, bool valid);
 }

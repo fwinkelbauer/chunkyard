@@ -1,11 +1,10 @@
-namespace Chunkyard.Build.Cli
+namespace Chunkyard.Build.Cli;
+
+[Verb("publish", HelpText = "Publish the main project.")]
+public class PublishOptions : DotnetOptions
 {
-    [Verb("publish", HelpText = "Publish the main project.")]
-    public class PublishOptions : DotnetOptions
+    public PublishOptions(string configuration)
+        : base(configuration)
     {
-        public PublishOptions(string configuration)
-            : base(configuration)
-        {
-        }
     }
 }

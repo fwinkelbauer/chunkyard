@@ -1,15 +1,15 @@
-namespace Chunkyard.Tests.Core
-{
-    public static class DiffSetTests
-    {
-        [Fact]
-        public static void DiffSet_Outlines_Differences_Between_Collections()
-        {
-            var date = DateTime.UtcNow;
-            var nonce = new byte[] { 0xFF };
+namespace Chunkyard.Tests.Core;
 
-            var first = new[]
-            {
+public static class DiffSetTests
+{
+    [Fact]
+    public static void DiffSet_Outlines_Differences_Between_Collections()
+    {
+        var date = DateTime.UtcNow;
+        var nonce = new byte[] { 0xFF };
+
+        var first = new[]
+        {
                 new BlobReference(
                     "some blob",
                     date,
@@ -32,8 +32,8 @@ namespace Chunkyard.Tests.Core
                     new[] { new Uri("some://uri") })
             };
 
-            var second = new[]
-            {
+        var second = new[]
+        {
                 new BlobReference(
                     "some blob",
                     date,
@@ -56,17 +56,16 @@ namespace Chunkyard.Tests.Core
                     new[] { new Uri("some://uri") })
             };
 
-            var expectedDiff = new DiffSet(
-                new[] { "new blob" },
-                new[] { "changed uri blob", "changed date blob" },
-                new[] { "removed blob" });
+        var expectedDiff = new DiffSet(
+            new[] { "new blob" },
+            new[] { "changed uri blob", "changed date blob" },
+            new[] { "removed blob" });
 
-            Assert.Equal(
-                expectedDiff,
-                DiffSet.Create(
-                    first,
-                    second,
-                    br => br.Name));
-        }
+        Assert.Equal(
+            expectedDiff,
+            DiffSet.Create(
+                first,
+                second,
+                br => br.Name));
     }
 }

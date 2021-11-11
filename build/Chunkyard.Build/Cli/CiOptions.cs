@@ -1,11 +1,10 @@
-namespace Chunkyard.Build.Cli
+namespace Chunkyard.Build.Cli;
+
+[Verb("ci", HelpText = "Build and test the solution.")]
+public class CiOptions : DotnetOptions
 {
-    [Verb("ci", HelpText = "Build and test the solution.")]
-    public class CiOptions : DotnetOptions
+    public CiOptions(string configuration)
+        : base(configuration)
     {
-        public CiOptions(string configuration)
-            : base(configuration)
-        {
-        }
     }
 }

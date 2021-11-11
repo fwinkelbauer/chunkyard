@@ -1,22 +1,21 @@
-namespace Chunkyard.Tests.Infrastructure
+namespace Chunkyard.Tests.Infrastructure;
+
+internal class DisposableDirectory : IDisposable
 {
-    internal class DisposableDirectory : IDisposable
+    public DisposableDirectory()
     {
-        public DisposableDirectory()
-        {
-            Name = Path.Combine(
-                Path.GetTempPath(),
-                $"chunkyard-test-{Path.GetRandomFileName()}");
-        }
+        Name = Path.Combine(
+            Path.GetTempPath(),
+            $"chunkyard-test-{Path.GetRandomFileName()}");
+    }
 
-        public string Name { get; }
+    public string Name { get; }
 
-        public void Dispose()
+    public void Dispose()
+    {
+        if (Directory.Exists(Name))
         {
-            if (Directory.Exists(Name))
-            {
-                Directory.Delete(Name, true);
-            }
+            Directory.Delete(Name, true);
         }
     }
 }

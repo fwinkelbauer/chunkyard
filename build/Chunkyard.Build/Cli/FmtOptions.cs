@@ -1,7 +1,6 @@
-namespace Chunkyard.Build.Cli
+namespace Chunkyard.Build.Cli;
+
+[Verb("fmt", HelpText = "Run the formatter.")]
+public class FmtOptions
 {
-    [Verb("fmt", HelpText = "Run the formatter.")]
-    public class FmtOptions
-    {
-    }
 }

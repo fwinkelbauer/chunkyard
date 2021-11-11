@@ -1,62 +1,61 @@
-namespace Chunkyard.Tests.Infrastructure
+namespace Chunkyard.Tests.Infrastructure;
+
+internal class MemoryRepository<T> : IRepository<T>
+    where T : notnull
 {
-    internal class MemoryRepository<T> : IRepository<T>
-        where T : notnull
+    private readonly object _lock;
+    private readonly Dictionary<T, byte[]> _valuesPerKey;
+
+    public MemoryRepository()
     {
-        private readonly object _lock;
-        private readonly Dictionary<T, byte[]> _valuesPerKey;
+        _lock = new object();
+        _valuesPerKey = new Dictionary<T, byte[]>();
+    }
 
-        public MemoryRepository()
+    public void StoreValue(T key, ReadOnlySpan<byte> value)
+    {
+        lock (_lock)
         {
-            _lock = new object();
-            _valuesPerKey = new Dictionary<T, byte[]>();
-        }
-
-        public void StoreValue(T key, ReadOnlySpan<byte> value)
-        {
-            lock (_lock)
+            if (_valuesPerKey.ContainsKey(key))
             {
-                if (_valuesPerKey.ContainsKey(key))
-                {
-                    return;
-                }
-
-                _valuesPerKey[key] = value.ToArray();
+                return;
             }
+
+            _valuesPerKey[key] = value.ToArray();
         }
+    }
 
-        public byte[] RetrieveValue(T key)
+    public byte[] RetrieveValue(T key)
+    {
+        lock (_lock)
         {
-            lock (_lock)
-            {
-                return _valuesPerKey[key]
-                    .ToArray();
-            }
+            return _valuesPerKey[key]
+                .ToArray();
         }
+    }
 
-        public bool ValueExists(T key)
+    public bool ValueExists(T key)
+    {
+        lock (_lock)
         {
-            lock (_lock)
-            {
-                return _valuesPerKey.ContainsKey(key);
-            }
+            return _valuesPerKey.ContainsKey(key);
         }
+    }
 
-        public IReadOnlyCollection<T> ListKeys()
+    public IReadOnlyCollection<T> ListKeys()
+    {
+        lock (_lock)
         {
-            lock (_lock)
-            {
-                return _valuesPerKey.Keys
-                    .ToArray();
-            }
+            return _valuesPerKey.Keys
+                .ToArray();
         }
+    }
 
-        public void RemoveValue(T key)
+    public void RemoveValue(T key)
+    {
+        lock (_lock)
         {
-            lock (_lock)
-            {
-                _valuesPerKey.Remove(key);
-            }
+            _valuesPerKey.Remove(key);
         }
     }
 }

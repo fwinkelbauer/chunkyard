@@ -1,25 +1,24 @@
-namespace Chunkyard.Infrastructure
+namespace Chunkyard.Infrastructure;
+
+/// <summary>
+/// A set of directory utility methods.
+/// </summary>
+internal static class DirectoryUtil
 {
-    /// <summary>
-    /// A set of directory utility methods.
-    /// </summary>
-    internal static class DirectoryUtil
+    public static string GetParent(string file)
     {
-        public static string GetParent(string file)
-        {
-            return Path.GetDirectoryName(file)
-                ?? throw new ChunkyardException(
-                    $"File '{file}' does not have a parent directory");
-        }
+        return Path.GetDirectoryName(file)
+            ?? throw new ChunkyardException(
+                $"File '{file}' does not have a parent directory");
+    }
 
-        public static void CreateParent(string file)
-        {
-            var parent = Path.GetDirectoryName(file);
+    public static void CreateParent(string file)
+    {
+        var parent = Path.GetDirectoryName(file);
 
-            if (!string.IsNullOrEmpty(parent))
-            {
-                Directory.CreateDirectory(parent);
-            }
+        if (!string.IsNullOrEmpty(parent))
+        {
+            Directory.CreateDirectory(parent);
         }
     }
 }
