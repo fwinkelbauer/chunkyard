@@ -1,5 +1,3 @@
-using CommandLine;
-
 namespace Chunkyard.Cli
 {
     [Verb("gc", HelpText = "Remove unreferenced content.")]

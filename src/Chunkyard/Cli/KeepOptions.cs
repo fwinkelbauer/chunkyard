@@ -1,5 +1,3 @@
-using CommandLine;
-
 namespace Chunkyard.Cli
 {
     [Verb("keep", HelpText = "Keep only the given list of snapshots.")]

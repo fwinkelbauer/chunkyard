@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using CommandLine;
-
 namespace Chunkyard.Cli
 {
     [Verb("create", HelpText = "Create a new snapshot.")]

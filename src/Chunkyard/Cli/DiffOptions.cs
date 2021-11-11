@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using Chunkyard.Core;
-using CommandLine;
-
 namespace Chunkyard.Cli
 {
     [Verb("diff", HelpText = "Show the difference between two snapshots.")]

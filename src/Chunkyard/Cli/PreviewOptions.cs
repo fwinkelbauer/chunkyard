@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using CommandLine;
-
 namespace Chunkyard.Cli
 {
     [Verb("preview", HelpText = "Preview the output of a create command.")]

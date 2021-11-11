@@ -1,5 +1,3 @@
-using CommandLine;
-
 namespace Chunkyard.Build.Cli
 {
     [Verb("test", HelpText = "Test the solution.")]

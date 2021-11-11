@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using Chunkyard.Core;
-using CommandLine;
-
 namespace Chunkyard.Cli
 {
     [Verb("check", HelpText = "Check if a snapshot is valid.")]

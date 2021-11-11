@@ -1,5 +1,3 @@
-using CommandLine;
-
 namespace Chunkyard.Cli
 {
     [Verb("list", HelpText = "List all snapshots.")]

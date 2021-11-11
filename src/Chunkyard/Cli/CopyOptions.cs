@@ -1,5 +1,3 @@
-using CommandLine;
-
 namespace Chunkyard.Cli
 {
     [Verb("copy", HelpText = "Copy/Mirror snapshots from one repository to another.")]

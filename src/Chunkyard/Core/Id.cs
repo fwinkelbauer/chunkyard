@@ -1,7 +1,3 @@
-using System;
-using System.Security.Cryptography;
-using System.Text;
-
 namespace Chunkyard.Core
 {
     /// <summary>

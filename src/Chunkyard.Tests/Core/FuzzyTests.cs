@@ -1,6 +1,3 @@
-using Chunkyard.Core;
-using Xunit;
-
 namespace Chunkyard.Tests.Core
 {
     public static class FuzzyTests

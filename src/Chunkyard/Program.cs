@@ -1,9 +1,3 @@
-using System;
-using System.Linq;
-using System.Reflection;
-using Chunkyard.Cli;
-using CommandLine;
-
 namespace Chunkyard
 {
     public static class Program

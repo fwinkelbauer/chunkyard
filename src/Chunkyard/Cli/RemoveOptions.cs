@@ -1,5 +1,3 @@
-using CommandLine;
-
 namespace Chunkyard.Cli
 {
     [Verb("remove", HelpText = "Remove a snapshot.")]

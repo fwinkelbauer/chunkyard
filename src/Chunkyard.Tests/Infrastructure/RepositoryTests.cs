@@ -1,9 +1,3 @@
-using System;
-using System.Linq;
-using Chunkyard.Core;
-using Chunkyard.Infrastructure;
-using Xunit;
-
 namespace Chunkyard.Tests.Infrastructure
 {
     public static class RepositoryTests

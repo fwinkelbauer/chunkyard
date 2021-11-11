@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using CommandLine;
-
 namespace Chunkyard.Cli
 {
     [Verb("cat", HelpText = "Export or print the value of a set of content URIs.")]

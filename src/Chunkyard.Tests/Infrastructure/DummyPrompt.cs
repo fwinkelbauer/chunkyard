@@ -1,5 +1,3 @@
-using Chunkyard.Core;
-
 namespace Chunkyard.Tests.Infrastructure
 {
     internal class DummyPrompt : IPrompt
