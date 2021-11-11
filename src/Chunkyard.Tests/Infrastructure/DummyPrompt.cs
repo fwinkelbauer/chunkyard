@@ -1,4 +1,4 @@
-﻿using Chunkyard.Core;
+using Chunkyard.Core;
 
 namespace Chunkyard.Tests.Infrastructure
 {

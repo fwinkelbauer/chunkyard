@@ -3,6 +3,7 @@
 root = true
 
 [*.cs]
+charset = utf-8
 dotnet_sort_system_directives_first = true
 dotnet_diagnostic.CA1031.severity = none
 dotnet_diagnostic.CA1303.severity = none

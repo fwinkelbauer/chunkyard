@@ -1,4 +1,4 @@
-﻿namespace Chunkyard.Core
+namespace Chunkyard.Core
 {
     /// <summary>
     /// An interface to retrieve a user password.
