@@ -39,12 +39,10 @@ internal static class Commands
             "-warnaserror");
     }
 
-    public static void Test(DotnetOptions o, bool live = false)
+    public static void Test(DotnetOptions o)
     {
         Dotnet(
-            live
-            ? $"watch test --project {SourceSolution}"
-            : $"test {SourceSolution}",
+            $"test {SourceSolution}",
             $"-c {o.Configuration}");
     }
 
