@@ -405,16 +405,16 @@ public class SnapshotStore
         }
 
         var snapshot = GetSnapshot(snapshotId);
-        var snapshotExists = Filter(snapshot, includeFuzzy)
+        var snapshotValid = Filter(snapshot, includeFuzzy)
             .AsParallel()
             .Select(CheckBlobReference)
             .Aggregate(true, (total, next) => total & next);
 
         _probe.SnapshotValid(
             snapshot.SnapshotId,
-            snapshotExists);
+            snapshotValid);
 
-        return snapshotExists;
+        return snapshotValid;
     }
 
     private static BlobReference[] Filter(
