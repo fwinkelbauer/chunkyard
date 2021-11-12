@@ -7,6 +7,14 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.11.0 - 2021-11-12
+
+### Changed
+
+- The .NET version from 5 to 6:
+  - Windows releases can now be shipped using a single binary
+  - The overall binary size was cut in half
+
 ## 11.10.0 - 2021-11-06
 
 ### Removed
