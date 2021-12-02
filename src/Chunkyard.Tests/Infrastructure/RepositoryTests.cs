@@ -34,6 +34,28 @@ public static class RepositoryTests
         IntRepository_Can_Read_Write(repository);
     }
 
+    [Fact]
+    public static void FileUriRepository_Prevents_Directory_Traversal_Attack()
+    {
+        using var directory = new DisposableDirectory();
+        var repository = FileRepository.CreateUriRepository(
+            directory.Name);
+
+        var invalidUri = new Uri("sha256://../some-file");
+
+        Assert.Throws<ChunkyardException>(
+            () => repository.StoreValue(invalidUri, new byte[] { 0xFF }));
+
+        Assert.Throws<ChunkyardException>(
+            () => repository.RetrieveValue(invalidUri));
+
+        Assert.Throws<ChunkyardException>(
+            () => repository.ValueExists(invalidUri));
+
+        Assert.Throws<ChunkyardException>(
+            () => repository.RemoveValue(invalidUri));
+    }
+
     private static void UriRepository_Can_Read_Write(
         IRepository<Uri> repository)
     {

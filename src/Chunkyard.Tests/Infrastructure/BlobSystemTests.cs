@@ -17,6 +17,30 @@ public static class BlobSystemTests
         BlobSystem_Can_Read_Write(blobSystem);
     }
 
+    [Fact]
+    public static void FileBlobSystem_Prevents_Directory_Traversal_Attack()
+    {
+        using var directory = new DisposableDirectory();
+        var blobSystem = new FileBlobSystem(new[] { directory.Name });
+
+        var invalidBlobName = "../some-file";
+        var invalidBlob = new Blob(
+            invalidBlobName,
+            DateTime.UtcNow);
+
+        Assert.Throws<ChunkyardException>(
+            () => blobSystem.BlobExists(invalidBlobName));
+
+        Assert.Throws<ChunkyardException>(
+            () => blobSystem.FetchMetadata(invalidBlobName));
+
+        Assert.Throws<ChunkyardException>(
+            () => blobSystem.OpenRead(invalidBlobName));
+
+        Assert.Throws<ChunkyardException>(
+            () => blobSystem.OpenWrite(invalidBlob));
+    }
+
     private static void BlobSystem_Can_Read_Write(
         IBlobSystem blobSystem)
     {
