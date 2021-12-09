@@ -46,7 +46,7 @@ public static class AesGcmCrypto
         var plainText = new byte[
             cipherText.Length - NonceBytes - TagBytes];
 
-        var nonce = cipherText.Slice(0, NonceBytes);
+        var nonce = cipherText[..NonceBytes];
 
         var innerCipherText = cipherText.Slice(
             nonce.Length,
