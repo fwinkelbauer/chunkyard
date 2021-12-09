@@ -59,14 +59,15 @@ public static class RepositoryTests
     private static void UriRepository_Can_Read_Write(
         IRepository<Uri> repository)
     {
-        var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+        var expectedBytes1 = new byte[] { 0xAA, 0xAA, 0xAA, 0xAA };
+        var expectedBytes2 = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
         var uri1 = new Uri("sha256://aa");
         var uri2 = new Uri("sha256://bb");
 
         Assert.Empty(repository.ListKeys());
 
-        repository.StoreValue(uri1, expectedBytes);
-        repository.StoreValue(uri2, expectedBytes);
+        repository.StoreValue(uri1, expectedBytes1);
+        repository.StoreValue(uri2, expectedBytes2);
 
         Assert.Equal(
             new[] { uri1, uri2 },
@@ -75,8 +76,8 @@ public static class RepositoryTests
         Assert.True(repository.ValueExists(uri1));
         Assert.True(repository.ValueExists(uri2));
 
-        Assert.Equal(expectedBytes, repository.RetrieveValue(uri1));
-        Assert.Equal(expectedBytes, repository.RetrieveValue(uri2));
+        Assert.Equal(expectedBytes1, repository.RetrieveValue(uri1));
+        Assert.Equal(expectedBytes2, repository.RetrieveValue(uri2));
 
         repository.RemoveValue(uri1);
         repository.RemoveValue(uri2);
@@ -89,28 +90,29 @@ public static class RepositoryTests
     private static void IntRepository_Can_Read_Write(
         IRepository<int> repository)
     {
-        var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+        var expectedBytes1 = new byte[] { 0xAA, 0xAA, 0xAA, 0xAA };
+        var expectedBytes2 = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
         Assert.Empty(repository.ListKeys());
 
-        repository.StoreValue(0, expectedBytes);
-        repository.StoreValue(1, expectedBytes);
+        repository.StoreValue(1, expectedBytes1);
+        repository.StoreValue(2, expectedBytes2);
 
         Assert.Equal(
-            new[] { 0, 1 },
+            new[] { 1, 2 },
             repository.ListKeys().OrderBy(i => i));
 
-        Assert.True(repository.ValueExists(0));
         Assert.True(repository.ValueExists(1));
+        Assert.True(repository.ValueExists(2));
 
-        Assert.Equal(expectedBytes, repository.RetrieveValue(0));
-        Assert.Equal(expectedBytes, repository.RetrieveValue(1));
+        Assert.Equal(expectedBytes1, repository.RetrieveValue(1));
+        Assert.Equal(expectedBytes2, repository.RetrieveValue(2));
 
-        repository.RemoveValue(0);
         repository.RemoveValue(1);
+        repository.RemoveValue(2);
 
         Assert.Empty(repository.ListKeys());
-        Assert.False(repository.ValueExists(0));
         Assert.False(repository.ValueExists(1));
+        Assert.False(repository.ValueExists(2));
     }
 }

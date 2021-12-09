@@ -244,7 +244,6 @@ public static class SnapshotStoreTests
     public static void CheckSnapshot_Detects_Valid_Snapshot()
     {
         var snapshotStore = CreateSnapshotStore();
-        var checkFuzzy = Fuzzy.Default;
 
         var snapshotId = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
@@ -254,12 +253,12 @@ public static class SnapshotStoreTests
         Assert.True(
             snapshotStore.CheckSnapshotExists(
                 snapshotId,
-                checkFuzzy));
+                Fuzzy.Default));
 
         Assert.True(
             snapshotStore.CheckSnapshotValid(
                 snapshotId,
-                checkFuzzy));
+                Fuzzy.Default));
     }
 
     [Fact]
@@ -267,7 +266,6 @@ public static class SnapshotStoreTests
     {
         var uriRepository = CreateRepository<Uri>();
         var snapshotStore = CreateSnapshotStore(uriRepository);
-        var checkFuzzy = Fuzzy.Default;
 
         var snapshotId = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
@@ -282,12 +280,12 @@ public static class SnapshotStoreTests
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
                 snapshotId,
-                checkFuzzy));
+                Fuzzy.Default));
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotValid(
                 snapshotId,
-                checkFuzzy));
+                Fuzzy.Default));
     }
 
     [Fact]
@@ -295,7 +293,6 @@ public static class SnapshotStoreTests
     {
         var uriRepository = CreateRepository<Uri>();
         var snapshotStore = CreateSnapshotStore(uriRepository);
-        var checkFuzzy = Fuzzy.Default;
 
         var snapshotId = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
@@ -307,12 +304,12 @@ public static class SnapshotStoreTests
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
                 snapshotId,
-                checkFuzzy));
+                Fuzzy.Default));
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotValid(
                 snapshotId,
-                checkFuzzy));
+                Fuzzy.Default));
     }
 
     [Fact]
@@ -320,7 +317,6 @@ public static class SnapshotStoreTests
     {
         var uriRepository = CreateRepository<Uri>();
         var snapshotStore = CreateSnapshotStore(uriRepository);
-        var checkFuzzy = Fuzzy.Default;
 
         var snapshotId = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
@@ -339,12 +335,12 @@ public static class SnapshotStoreTests
         Assert.False(
             snapshotStore.CheckSnapshotExists(
                 snapshotId,
-                checkFuzzy));
+                Fuzzy.Default));
 
         Assert.False(
             snapshotStore.CheckSnapshotValid(
                 snapshotId,
-                checkFuzzy));
+                Fuzzy.Default));
     }
 
     [Fact]
@@ -352,7 +348,6 @@ public static class SnapshotStoreTests
     {
         var uriRepository = CreateRepository<Uri>();
         var snapshotStore = CreateSnapshotStore(uriRepository);
-        var checkFuzzy = Fuzzy.Default;
 
         var snapshotId = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
@@ -368,29 +363,28 @@ public static class SnapshotStoreTests
         Assert.True(
            snapshotStore.CheckSnapshotExists(
                snapshotId,
-               checkFuzzy));
+               Fuzzy.Default));
 
         Assert.False(
             snapshotStore.CheckSnapshotValid(
                 snapshotId,
-                checkFuzzy));
+                Fuzzy.Default));
     }
 
     [Fact]
     public static void CheckSnapshot_Throws_On_Empty_SnapshotStore()
     {
         var snapshotStore = CreateSnapshotStore();
-        var checkFuzzy = Fuzzy.Default;
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
                 SnapshotStore.LatestSnapshotId,
-                checkFuzzy));
+                Fuzzy.Default));
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotValid(
                 SnapshotStore.LatestSnapshotId,
-                checkFuzzy));
+                Fuzzy.Default));
     }
 
     [Fact]
