@@ -10,9 +10,16 @@ public static class DataConvert
         return JsonSerializer.SerializeToUtf8Bytes(o);
     }
 
-    public static T BytesToObject<T>(byte[] value) where T : notnull
+    public static T BytesToObject<T>(byte[] json) where T : notnull
     {
-        return JsonSerializer.Deserialize<T>(value)!;
+        var t = JsonSerializer.Deserialize<T>(json);
+
+        if (t == null)
+        {
+            throw new ArgumentNullException(nameof(json));
+        }
+
+        return t;
     }
 
     public static byte[] TextToBytes(string text)

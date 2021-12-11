@@ -29,30 +29,33 @@ public static class DataConvertTests
     [Fact]
     public static void DataConvert_Can_Read_Serialized_Snapshot()
     {
-        var serialized = @"
-{
-  ""SnapshotId"": 15,
-  ""CreationTimeUtc"": ""2020-05-07T18:33:00Z"",
-  ""BlobReferences"": [
-    {
-      ""Name"": ""some blob"",
-      ""LastWriteTimeUtc"": ""2020-05-07T18:33:00Z"",
-      ""Nonce"": ""ESIzRA=="",
-      ""ContentUris"": [
-        ""sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e""
-      ]
-    }
-  ]
-}";
-        var date = new DateTime(2020, 05, 07, 18, 33, 0, DateTimeKind.Utc);
+        var serializedSnapshot = new
+        {
+            SnapshotId = 15,
+            CreationTimeUtc = "2020-05-07T18:33:00Z",
+            BlobReferences = new[]
+            {
+                new
+                {
+                    Name = "some blob",
+                    LastWriteTimeUtc = "2020-05-07T18:33:00Z",
+                    Nonce = "ESIzRA==",
+                    ContentUris = new[]
+                    {
+                        "sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e"
+                    }
+                }
+            }
+        };
+
         var expectedSnapshot = new Snapshot(
             15,
-            date,
+            new DateTime(2020, 05, 07, 18, 33, 0, DateTimeKind.Utc),
             new[]
             {
                     new BlobReference(
                         "some blob",
-                        date,
+                        new DateTime(2020, 05, 07, 18, 33, 0, DateTimeKind.Utc),
                         new byte[] { 0x11, 0x22, 0x33, 0x44 },
                         new[]
                         {
@@ -61,7 +64,7 @@ public static class DataConvertTests
             });
 
         var actualSnapshot = DataConvert.BytesToObject<Snapshot>(
-            DataConvert.TextToBytes(serialized));
+            DataConvert.ObjectToBytes(serializedSnapshot));
 
         Assert.True(
             expectedSnapshot.Equals(actualSnapshot),
@@ -71,14 +74,16 @@ public static class DataConvertTests
     [Fact]
     public static void DataConvert_Can_Read_Serialized_SnapshotReference()
     {
-        var serialized = @"
-{
-  ""Salt"": ""ESIzRA=="",
-  ""Iterations"": 1000,
-  ""ContentUris"": [
-    ""sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e""
-  ]
-}";
+        var serializedReference = new
+        {
+            Salt = "ESIzRA==",
+            Iterations = 1000,
+            ContentUris = new[]
+            {
+                "sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e"
+            }
+        };
+
         var expectedReference = new SnapshotReference(
             new byte[] { 0x11, 0x22, 0x33, 0x44 },
             1000,
@@ -88,7 +93,7 @@ public static class DataConvertTests
             });
 
         var actualReference = DataConvert.BytesToObject<SnapshotReference>(
-            DataConvert.TextToBytes(serialized));
+            DataConvert.ObjectToBytes(serializedReference));
 
         Assert.True(
             expectedReference.Equals(actualReference),
