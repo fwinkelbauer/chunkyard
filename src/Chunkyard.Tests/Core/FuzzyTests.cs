@@ -17,9 +17,6 @@ public static class FuzzyTests
         var fuzzy = Fuzzy.Default;
 
         Assert.True(fuzzy.IsIncludingMatch("some text!"));
-        Assert.True(fuzzy.IsIncludingMatch("some text!"));
-
-        Assert.False(fuzzy.IsExcludingMatch("some text!"));
         Assert.False(fuzzy.IsExcludingMatch("some text!"));
     }
 
