@@ -16,11 +16,11 @@ public class SnapshotReference
         ContentUris = contentUris;
     }
 
-    public IReadOnlyCollection<Uri> ContentUris { get; }
-
     public byte[] Salt { get; }
 
     public int Iterations { get; }
+
+    public IReadOnlyCollection<Uri> ContentUris { get; }
 
     public override bool Equals(object? obj)
     {

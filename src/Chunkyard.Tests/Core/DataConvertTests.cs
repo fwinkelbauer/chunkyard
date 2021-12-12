@@ -48,26 +48,29 @@ public static class DataConvertTests
             }
         };
 
-        var expectedSnapshot = new Snapshot(
+        var currentSnapshot = new Snapshot(
             15,
             new DateTime(2020, 05, 07, 18, 33, 0, DateTimeKind.Utc),
             new[]
             {
-                    new BlobReference(
-                        "some blob",
-                        new DateTime(2020, 05, 07, 18, 33, 0, DateTimeKind.Utc),
-                        new byte[] { 0x11, 0x22, 0x33, 0x44 },
-                        new[]
-                        {
-                            new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e")
-                        })
+                new BlobReference(
+                    "some blob",
+                    new DateTime(2020, 05, 07, 18, 33, 0, DateTimeKind.Utc),
+                    new byte[] { 0x11, 0x22, 0x33, 0x44 },
+                    new[]
+                    {
+                        new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e")
+                    })
             });
 
-        var actualSnapshot = DataConvert.BytesToObject<Snapshot>(
+        var expectedJson = DataConvert.BytesToText(
             DataConvert.ObjectToBytes(serializedSnapshot));
 
+        var actualJson = DataConvert.BytesToText(
+            DataConvert.ObjectToBytes(currentSnapshot));
+
         Assert.True(
-            expectedSnapshot.Equals(actualSnapshot),
+            expectedJson.Equals(actualJson),
             "Broke persisted repository format");
     }
 
@@ -84,19 +87,22 @@ public static class DataConvertTests
             }
         };
 
-        var expectedReference = new SnapshotReference(
+        var currentReference = new SnapshotReference(
             new byte[] { 0x11, 0x22, 0x33, 0x44 },
             1000,
             new[]
             {
-                    new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e")
+                new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e")
             });
 
-        var actualReference = DataConvert.BytesToObject<SnapshotReference>(
+        var expectedJson = DataConvert.BytesToText(
             DataConvert.ObjectToBytes(serializedReference));
 
+        var actualJson = DataConvert.BytesToText(
+            DataConvert.ObjectToBytes(currentReference));
+
         Assert.True(
-            expectedReference.Equals(actualReference),
+            expectedJson.Equals(actualJson),
             "Broke persisted repository format");
     }
 }
