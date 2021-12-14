@@ -43,6 +43,7 @@ public static class Program
             .WithParsed<PublishOptions>(Commands.Publish)
             .WithParsed<ReleaseOptions>(_ => Commands.Release())
             .WithParsed<FmtOptions>(_ => Commands.Fmt())
+            .WithParsed<OutdatedOptions>(_ => Commands.Outdated())
             .WithNotParsed(_ => Environment.ExitCode = 1);
     }
 }

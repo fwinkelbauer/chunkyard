@@ -88,6 +88,21 @@ internal static class Commands
         Dotnet($"format {SourceSolution}");
     }
 
+    public static void Outdated()
+    {
+        Dotnet("tool restore");
+
+        Dotnet(
+            "outdated",
+            BuildSolution,
+            "--fail-on-updates");
+
+        Dotnet(
+            "outdated",
+            SourceSolution,
+            "--fail-on-updates");
+    }
+
     public static void Release()
     {
         var version = FetchVersion();
