@@ -2,8 +2,10 @@
 
 root = true
 
-[*.cs]
+[*]
 charset = utf-8
+
+[*.cs]
 dotnet_diagnostic.CA1031.severity = none
 dotnet_diagnostic.CA1303.severity = none
 dotnet_diagnostic.CA1304.severity = none
