@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 11.11.1 - 2021-12-15
+
+### Fixed
+
+- The file persistence layer to prevent unintended directory traversal
+
 ## 11.11.0 - 2021-11-12
 
 ### Changed
