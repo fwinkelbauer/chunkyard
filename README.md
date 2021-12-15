@@ -40,7 +40,7 @@ tools. Here's a list of [options][backup-tools].
 
 ## Build
 
-- Install the .NET 5 SDK
+- Install the .NET 6 SDK
 - Run `./csake ci` to build and test the solution
 
 The `./csake` script runs the project `./build/Chunkyard.Build`, a CLI tool
