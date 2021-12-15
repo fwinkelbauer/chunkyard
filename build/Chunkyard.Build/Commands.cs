@@ -6,6 +6,7 @@ internal static class Commands
     private const string BuildSolution = "build/Chunkyard.Build.sln";
     private const string SourceSolution = "src/Chunkyard.sln";
     private const string MainProject = "src/Chunkyard/Chunkyard.csproj";
+    private const string Configuration = "Release";
     private const string Changelog = "CHANGELOG.md";
 
     static Commands()
@@ -14,16 +15,16 @@ internal static class Commands
             GitQuery("rev-parse --show-toplevel"));
     }
 
-    public static void Clean(DotnetOptions o)
+    public static void Clean()
     {
         Dotnet(
             $"clean {SourceSolution}",
-            $"-c {o.Configuration}");
+            $"-c {Configuration}");
 
         CleanDirectory(Artifacts);
     }
 
-    public static void Build(DotnetOptions o)
+    public static void Build()
     {
         Dotnet(
             $"format {BuildSolution}",
@@ -35,29 +36,29 @@ internal static class Commands
 
         Dotnet(
             $"build {SourceSolution}",
-            $"-c {o.Configuration}",
+            $"-c {Configuration}",
             "-warnaserror");
     }
 
-    public static void Test(DotnetOptions o)
+    public static void Test()
     {
         Dotnet(
             $"test {SourceSolution}",
-            $"-c {o.Configuration}");
+            $"-c {Configuration}");
     }
 
-    public static void Ci(DotnetOptions o)
+    public static void Ci()
     {
-        Build(o);
-        Test(o);
+        Build();
+        Test();
     }
 
-    public static void Publish(DotnetOptions o)
+    public static void Publish()
     {
         ThrowOnUncommittedChanges();
 
-        Clean(o);
-        Ci(o);
+        Clean();
+        Ci();
 
         var version = FetchVersion();
         var commitId = GitQuery("rev-parse --short HEAD");
@@ -71,7 +72,7 @@ internal static class Commands
 
             Dotnet(
                 $"publish {MainProject}",
-                $"-c {o.Configuration}",
+                $"-c {Configuration}",
                 $"-r {runtime}",
                 "--self-contained",
                 $"-o {directory}",

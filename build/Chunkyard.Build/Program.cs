@@ -36,11 +36,11 @@ public static class Program
             .ToArray();
 
         Parser.Default.ParseArguments(args, optionTypes)
-            .WithParsed<CleanOptions>(Commands.Clean)
-            .WithParsed<BuildOptions>(Commands.Build)
-            .WithParsed<TestOptions>(Commands.Test)
-            .WithParsed<CiOptions>(Commands.Ci)
-            .WithParsed<PublishOptions>(Commands.Publish)
+            .WithParsed<CleanOptions>(_ => Commands.Clean())
+            .WithParsed<BuildOptions>(_ => Commands.Build())
+            .WithParsed<TestOptions>(_ => Commands.Test())
+            .WithParsed<CiOptions>(_ => Commands.Ci())
+            .WithParsed<PublishOptions>(_ => Commands.Publish())
             .WithParsed<ReleaseOptions>(_ => Commands.Release())
             .WithParsed<FmtOptions>(_ => Commands.Fmt())
             .WithParsed<OutdatedOptions>(_ => Commands.Outdated())
