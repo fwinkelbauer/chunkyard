@@ -27,14 +27,6 @@ internal static class Commands
     public static void Build()
     {
         Dotnet(
-            $"format {BuildSolution}",
-            "--verify-no-changes");
-
-        Dotnet(
-            $"format {SourceSolution}",
-            "--verify-no-changes");
-
-        Dotnet(
             $"build {SourceSolution}",
             $"-c {Configuration}",
             "-warnaserror");
@@ -49,6 +41,14 @@ internal static class Commands
 
     public static void Ci()
     {
+        Dotnet(
+            $"format {BuildSolution}",
+            "--verify-no-changes");
+
+        Dotnet(
+            $"format {SourceSolution}",
+            "--verify-no-changes");
+
         Build();
         Test();
     }
