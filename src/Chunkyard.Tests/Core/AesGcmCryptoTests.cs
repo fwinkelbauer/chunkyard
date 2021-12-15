@@ -5,21 +5,21 @@ public static class AesGcmCryptoTests
     [Fact]
     public static void Encrypt_And_Decrypt_Return_Input()
     {
-        var expectedText = "Hello!";
+        var plainBytes = Encoding.UTF8.GetBytes("Hello!");
         var key = AesGcmCrypto.PasswordToKey(
             "secret",
             AesGcmCrypto.GenerateSalt(),
             AesGcmCrypto.Iterations);
 
-        var cipherText = AesGcmCrypto.Encrypt(
+        var encryptedBytes = AesGcmCrypto.Encrypt(
             AesGcmCrypto.GenerateNonce(),
-            Encoding.UTF8.GetBytes(expectedText),
+            plainBytes,
             key);
 
-        var actualText = Encoding.UTF8.GetString(
-            AesGcmCrypto.Decrypt(cipherText, key));
+        var decryptedBytes = AesGcmCrypto.Decrypt(encryptedBytes, key);
 
-        Assert.Equal(expectedText, actualText);
+        Assert.NotEqual(plainBytes, encryptedBytes);
+        Assert.Equal(plainBytes, decryptedBytes);
     }
 
     [Theory]
