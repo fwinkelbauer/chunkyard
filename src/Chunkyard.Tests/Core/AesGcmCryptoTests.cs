@@ -22,6 +22,28 @@ public static class AesGcmCryptoTests
         Assert.Equal(plainBytes, decryptedBytes);
     }
 
+    [Fact]
+    public static void Decrypt_Throws_Given_Wrong_Key()
+    {
+        var someKey = AesGcmCrypto.PasswordToKey(
+            "some secret",
+            AesGcmCrypto.GenerateSalt(),
+            AesGcmCrypto.Iterations);
+
+        var otherKey = AesGcmCrypto.PasswordToKey(
+            "other secret",
+            AesGcmCrypto.GenerateSalt(),
+            AesGcmCrypto.Iterations);
+
+        var encryptedBytes = AesGcmCrypto.Encrypt(
+            AesGcmCrypto.GenerateNonce(),
+            Encoding.UTF8.GetBytes("Hello!"),
+            someKey);
+
+        Assert.Throws<CryptographicException>(
+            () => AesGcmCrypto.Decrypt(encryptedBytes, otherKey));
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData(null)]
