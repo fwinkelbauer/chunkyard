@@ -215,10 +215,7 @@ internal static class Commands
     {
         var dirInfo = new DirectoryInfo(directory);
 
-        if (!dirInfo.Exists)
-        {
-            return;
-        }
+        dirInfo.Create();
 
         foreach (var fileInfo in dirInfo.GetFiles())
         {
