@@ -272,10 +272,7 @@ public static class SnapshotStoreTests
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        foreach (var contentUri in uriRepository.ListKeys())
-        {
-            uriRepository.RemoveValue(contentUri);
-        }
+        Remove(uriRepository, uriRepository.ListKeys());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
@@ -327,10 +324,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ContentUris);
 
-        foreach (var contentUri in contentUris)
-        {
-            uriRepository.RemoveValue(contentUri);
-        }
+        Remove(uriRepository, contentUris);
 
         Assert.False(
             snapshotStore.CheckSnapshotExists(
@@ -861,6 +855,16 @@ public static class SnapshotStoreTests
         randomGenerator.GetBytes(randomNumber);
 
         return randomNumber;
+    }
+
+    private static void Remove<T>(
+        IRepository<T> repository,
+        IEnumerable<T> keys)
+    {
+        foreach (var key in keys)
+        {
+            repository.RemoveValue(key);
+        }
     }
 
     private static void Invalidate<T>(
