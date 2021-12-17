@@ -21,7 +21,7 @@ internal static class Commands
             $"clean {SourceSolution}",
             $"-c {Configuration}");
 
-        Util.CleanDirectory(Artifacts);
+        BuildUtils.CleanDirectory(Artifacts);
     }
 
     public static void Build()
@@ -127,21 +127,21 @@ internal static class Commands
 
     private static string FetchVersion()
     {
-        return Util.FetchChangelogVersion(Changelog);
+        return BuildUtils.FetchChangelogVersion(Changelog);
     }
 
     private static void Dotnet(params string[] arguments)
     {
-        Util.Exec("dotnet", arguments, new[] { 0 });
+        BuildUtils.Exec("dotnet", arguments, new[] { 0 });
     }
 
     private static void Git(params string[] arguments)
     {
-        Util.Exec("git", arguments, new[] { 0 });
+        BuildUtils.Exec("git", arguments, new[] { 0 });
     }
 
     private static string GitQuery(params string[] arguments)
     {
-        return Util.ExecQuery("git", arguments, new[] { 0 });
+        return BuildUtils.ExecQuery("git", arguments, new[] { 0 });
     }
 }

@@ -1,6 +1,6 @@
 namespace Chunkyard.Build;
 
-internal static class Util
+internal static class BuildUtils
 {
     public static string ExecQuery(
         string fileName,

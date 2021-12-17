@@ -32,7 +32,7 @@ internal class FileRepository<T> : IRepository<T>
                 return;
             }
 
-            DirectoryUtil.CreateParent(file);
+            DirectoryUtils.CreateParent(file);
 
             using var fileStream = new FileStream(
                 file,
@@ -118,8 +118,8 @@ public static class FileRepository
             file =>
             {
                 return Id.ToContentUri(
-                    DirectoryUtil.GetParent(
-                        DirectoryUtil.GetParent(file)),
+                    DirectoryUtils.GetParent(
+                        DirectoryUtils.GetParent(file)),
                     Path.GetFileNameWithoutExtension(file));
             });
     }

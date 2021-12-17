@@ -54,7 +54,7 @@ public class FileBlobSystem : IBlobSystem
 
         var file = ToFile(blob.Name);
 
-        DirectoryUtil.CreateParent(file);
+        DirectoryUtils.CreateParent(file);
 
         return new WriteStream(file, blob);
     }
@@ -129,7 +129,7 @@ public class FileBlobSystem : IBlobSystem
         else if (files.Length == 1)
         {
             return File.Exists(files[0])
-                ? DirectoryUtil.GetParent(files[0])
+                ? DirectoryUtils.GetParent(files[0])
                 : files[0];
         }
 
