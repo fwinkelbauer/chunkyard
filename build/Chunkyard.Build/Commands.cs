@@ -65,10 +65,7 @@ internal static class Commands
 
         foreach (var runtime in new[] { "win-x64", "linux-x64" })
         {
-            var directory = Path.Combine(
-                Artifacts,
-                version,
-                runtime);
+            var directory = Path.Combine(Artifacts, version, runtime);
 
             Dotnet(
                 $"publish {MainProject}",
@@ -94,13 +91,11 @@ internal static class Commands
         Dotnet("tool restore");
 
         Dotnet(
-            "outdated",
-            BuildSolution,
+            $"outdated {BuildSolution}",
             "--fail-on-updates");
 
         Dotnet(
-            "outdated",
-            SourceSolution,
+            $"outdated {SourceSolution}",
             "--fail-on-updates");
     }
 
