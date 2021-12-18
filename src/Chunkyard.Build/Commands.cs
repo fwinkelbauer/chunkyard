@@ -3,7 +3,7 @@ namespace Chunkyard.Build;
 internal static class Commands
 {
     private const string Artifacts = "artifacts";
-    private const string BuildSolution = "build/Chunkyard.Build.sln";
+    private const string BuildSolution = "src/Chunkyard.Build.sln";
     private const string SourceSolution = "src/Chunkyard.sln";
     private const string MainProject = "src/Chunkyard/Chunkyard.csproj";
     private const string Changelog = "CHANGELOG.md";
