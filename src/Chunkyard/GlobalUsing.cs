@@ -13,3 +13,5 @@ global using System.Text.RegularExpressions;
 global using Chunkyard.Core;
 global using Chunkyard.Infrastructure;
 global using CommandLine;
+
+[assembly: CLSCompliant(true)]
