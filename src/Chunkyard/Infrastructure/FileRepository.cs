@@ -16,7 +16,7 @@ internal class FileRepository<T> : IRepository<T>
         Func<string, T> fromFile)
     {
         _locks = new ConcurrentDictionary<string, object>();
-        _directory = directory;
+        _directory = Path.GetFullPath(directory);
         _toFile = toFile;
         _fromFile = fromFile;
     }
