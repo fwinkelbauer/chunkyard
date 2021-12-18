@@ -149,6 +149,10 @@ public class SnapshotStore
                     blobReference.ContentUris,
                     stream);
             }
+            catch (ChunkyardException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new ChunkyardException(
@@ -256,6 +260,10 @@ public class SnapshotStore
                     _key.Value);
 
                 outputStream.Write(decrypted);
+            }
+            catch (ChunkyardException)
+            {
+                throw;
             }
             catch (CryptographicException e)
             {
@@ -546,6 +554,10 @@ public class SnapshotStore
         {
             return DataConvert.BytesToObject<SnapshotReference>(
                 _intRepository.RetrieveValue(snapshotId));
+        }
+        catch (ChunkyardException)
+        {
+            throw;
         }
         catch (Exception e)
         {
