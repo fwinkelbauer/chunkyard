@@ -7,18 +7,20 @@ internal static class DirectoryUtils
 {
     public static string GetParent(string file)
     {
-        return Path.GetDirectoryName(file)
-            ?? throw new ChunkyardException(
+        var parent = Path.GetDirectoryName(file);
+
+        if (string.IsNullOrEmpty(parent))
+        {
+            throw new ChunkyardException(
                 $"File '{file}' does not have a parent directory");
+        }
+
+        return parent;
     }
 
     public static void CreateParent(string file)
     {
-        var parent = Path.GetDirectoryName(file);
-
-        if (!string.IsNullOrEmpty(parent))
-        {
-            Directory.CreateDirectory(parent);
-        }
+        Directory.CreateDirectory(
+            GetParent(file));
     }
 }
