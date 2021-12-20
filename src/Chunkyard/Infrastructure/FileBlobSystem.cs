@@ -158,7 +158,7 @@ public class FileBlobSystem : IBlobSystem
         return parent;
     }
 
-    private class WriteStream : FileStream
+    private sealed class WriteStream : FileStream
     {
         private readonly Blob _blob;
 

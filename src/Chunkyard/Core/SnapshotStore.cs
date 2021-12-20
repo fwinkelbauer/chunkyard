@@ -405,7 +405,7 @@ public class SnapshotStore
         {
             var blobValid = blobReference.ContentUris
                 .Select(checkContentUriFunc)
-                .Aggregate(true, (total, next) => total & next);
+                .Aggregate(true, (total, next) => total && next);
 
             _probe.BlobValid(blobReference, blobValid);
 
@@ -416,7 +416,7 @@ public class SnapshotStore
         var snapshotValid = Filter(snapshot, includeFuzzy)
             .AsParallel()
             .Select(CheckBlobReference)
-            .Aggregate(true, (total, next) => total & next);
+            .Aggregate(true, (total, next) => total && next);
 
         _probe.SnapshotValid(
             snapshot.SnapshotId,

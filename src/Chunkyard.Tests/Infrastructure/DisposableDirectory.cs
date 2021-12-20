@@ -1,6 +1,6 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-internal class DisposableDirectory : IDisposable
+internal sealed class DisposableDirectory : IDisposable
 {
     public DisposableDirectory()
     {

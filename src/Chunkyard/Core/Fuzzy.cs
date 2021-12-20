@@ -33,6 +33,6 @@ public class Fuzzy
     {
         return _compiledRegex
             .Select(r => r.IsMatch(input))
-            .Aggregate(initial, (total, next) => total | next);
+            .Aggregate(initial, (total, next) => total || next);
     }
 }
