@@ -3,8 +3,7 @@ namespace Chunkyard.Build;
 internal static class Commands
 {
     private const string Artifacts = "artifacts";
-    private const string BuildSolution = "src/Chunkyard.Build.sln";
-    private const string SourceSolution = "src/Chunkyard.sln";
+    private const string Solution = "src/Chunkyard.sln";
     private const string MainProject = "src/Chunkyard/Chunkyard.csproj";
     private const string Changelog = "CHANGELOG.md";
     private const string Configuration = "Release";
@@ -18,7 +17,7 @@ internal static class Commands
     public static void Clean()
     {
         Dotnet(
-            $"clean {SourceSolution}",
+            $"clean {Solution}",
             $"-c {Configuration}");
 
         BuildUtils.CleanDirectory(Artifacts);
@@ -27,7 +26,7 @@ internal static class Commands
     public static void Build()
     {
         Dotnet(
-            $"build {SourceSolution}",
+            $"build {Solution}",
             $"-c {Configuration}",
             "-warnaserror");
     }
@@ -35,18 +34,14 @@ internal static class Commands
     public static void Test()
     {
         Dotnet(
-            $"test {SourceSolution}",
+            $"test {Solution}",
             $"-c {Configuration}");
     }
 
     public static void Ci()
     {
         Dotnet(
-            $"format {BuildSolution}",
-            "--verify-no-changes");
-
-        Dotnet(
-            $"format {SourceSolution}",
+            $"format {Solution}",
             "--verify-no-changes");
 
         Build();
@@ -82,8 +77,7 @@ internal static class Commands
 
     public static void Fmt()
     {
-        Dotnet($"format {BuildSolution}");
-        Dotnet($"format {SourceSolution}");
+        Dotnet($"format {Solution}");
     }
 
     public static void Outdated()
@@ -91,11 +85,7 @@ internal static class Commands
         Dotnet("tool restore");
 
         Dotnet(
-            $"outdated {BuildSolution}",
-            "--fail-on-updates");
-
-        Dotnet(
-            $"outdated {SourceSolution}",
+            $"outdated {Solution}",
             "--fail-on-updates");
     }
 
