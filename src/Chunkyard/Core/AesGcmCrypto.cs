@@ -85,20 +85,11 @@ public static class AesGcmCrypto
 
     public static byte[] GenerateSalt()
     {
-        return GenerateRandomNumber(SaltBytes);
+        return RandomNumberGenerator.GetBytes(SaltBytes);
     }
 
     public static byte[] GenerateNonce()
     {
-        return GenerateRandomNumber(NonceBytes);
-    }
-
-    private static byte[] GenerateRandomNumber(int length)
-    {
-        using var randomGenerator = RandomNumberGenerator.Create();
-        var randomNumber = new byte[length];
-        randomGenerator.GetBytes(randomNumber);
-
-        return randomNumber;
+        return RandomNumberGenerator.GetBytes(NonceBytes);
     }
 }
