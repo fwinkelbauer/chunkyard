@@ -22,9 +22,8 @@ public static class Id
         ReadOnlySpan<byte> content)
     {
         var (_, hash) = DeconstructContentUri(contentUri);
-        var computedHash = ComputeHash(content);
 
-        return hash.Equals(computedHash);
+        return hash.Equals(ComputeHash(content));
     }
 
     public static (string HashAlgorithmName, string Hash) DeconstructContentUri(
