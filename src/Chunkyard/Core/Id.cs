@@ -14,15 +14,15 @@ public static class Id
     {
         return ToContentUri(
             AlgorithmSha256,
-            ComputeHash(AlgorithmSha256, content));
+            ComputeHash(content));
     }
 
     public static bool ContentUriValid(
         Uri contentUri,
         ReadOnlySpan<byte> content)
     {
-        var (hashAlgorithmName, hash) = DeconstructContentUri(contentUri);
-        var computedHash = ComputeHash(hashAlgorithmName, content);
+        var (_, hash) = DeconstructContentUri(contentUri);
+        var computedHash = ComputeHash(content);
 
         return hash.Equals(computedHash);
     }
@@ -31,6 +31,11 @@ public static class Id
         Uri contentUri)
     {
         ArgumentNullException.ThrowIfNull(contentUri);
+
+        if (!contentUri.Scheme.Equals(AlgorithmSha256))
+        {
+            throw new NotSupportedException();
+        }
 
         return (contentUri.Scheme, contentUri.Host);
     }
@@ -45,31 +50,9 @@ public static class Id
     }
 
     private static string ComputeHash(
-        string hashAlgorithmName,
         ReadOnlySpan<byte> content)
     {
-        // We are publishing Chunkyard using the "-p:TrimMode=Link" compiler
-        // option. This option cuts the binary size in half, but throws null
-        // pointer Exceptions when running Chunkyard if we create the
-        // algorithm dynamically using
-        // "HashAlgorithm.Create(hashAlgorithmName)"
-        if (!hashAlgorithmName.Equals(AlgorithmSha256))
-        {
-            throw new NotSupportedException();
-        }
-
-        return ToHexString(SHA256.HashData(content));
-    }
-
-    private static string ToHexString(byte[] hash)
-    {
-        var builder = new StringBuilder();
-
-        foreach (var h in hash)
-        {
-            builder.Append(h.ToString("x2"));
-        }
-
-        return builder.ToString();
+        return Convert.ToHexString(SHA256.HashData(content))
+            .ToLower();
     }
 }
