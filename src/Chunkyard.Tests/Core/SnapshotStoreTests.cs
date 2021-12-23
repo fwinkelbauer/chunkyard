@@ -465,9 +465,9 @@ public static class SnapshotStoreTests
         var blobs = CreateBlobs(
             new[]
             {
-                    "new blob",
-                    "unchanged blob",
-                    "changed blob"
+                "new blob",
+                "unchanged blob",
+                "changed blob"
             });
 
         var snapshotId = snapshotStore.StoreSnapshot(
@@ -478,8 +478,8 @@ public static class SnapshotStoreTests
         var blobWriter = new MemoryBlobSystem(
             new[]
             {
-                    blobs[1],
-                    new Blob(blobs[2].Name, DateTime.UtcNow)
+                blobs[1],
+                new Blob(blobs[2].Name, DateTime.UtcNow)
             },
             blobName => Array.Empty<byte>());
 
