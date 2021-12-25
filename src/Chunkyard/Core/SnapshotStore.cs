@@ -531,21 +531,15 @@ public class SnapshotStore
             .OrderBy(i => i)
             .ToArray();
 
-        if (snapshotIds.Length == 0)
-        {
-            throw new ChunkyardException(
-                "Cannot operate on an empty repository");
-        }
+        var position = snapshotIds.Length + snapshotId;
 
-        var index = snapshotIds.Length + snapshotId;
-
-        if (index < 0)
+        if (position < 0)
         {
             throw new ChunkyardException(
                 $"Could not resolve snapshot: #{snapshotId}");
         }
 
-        return snapshotIds[index];
+        return snapshotIds[position];
     }
 
     private SnapshotReference GetSnapshotReference(int snapshotId)
