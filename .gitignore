@@ -1,5 +1,5 @@
-.vs
-**/bin/
-**/obj/
-**/Properties/launchSettings.json
+.vs/
+bin/
+obj/
+launchSettings.json
 artifacts/
