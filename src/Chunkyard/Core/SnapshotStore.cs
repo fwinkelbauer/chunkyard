@@ -418,11 +418,6 @@ public class SnapshotStore
         byte[] nonce,
         Stream stream)
     {
-        // Let's create the key here instead of inside the WriteChunk method.
-        // This ensures that a key is generated as soon as possible, even if we
-        // ingest an empty blob (in which case WriteChunk would not be called)
-        _ = _aesGcmCrypto.Value;
-
         Uri WriteChunk(byte[] chunk)
         {
             var encryptedData = _aesGcmCrypto.Value.Encrypt(
@@ -447,6 +442,8 @@ public class SnapshotStore
         IBlobSystem blobSystem,
         Fuzzy excludeFuzzy)
     {
+        _ = _aesGcmCrypto.Value;
+
         var currentBlobReferences = _currentSnapshotId == null
             ? new Dictionary<string, BlobReference>()
             : GetSnapshot(_currentSnapshotId.Value).BlobReferences
