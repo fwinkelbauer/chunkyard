@@ -48,38 +48,43 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void StoreSnapshot_Reuses_Nonce_For_Known_Blobs()
+    public static void StoreSnapshot_Deduplicates_Blobs_Using_Same_Nonce()
     {
         var snapshotStore = CreateSnapshotStore();
 
         var snapshotId1 = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(
-                CreateBlobs(new[] { "some blob" }),
-                blobName => new byte[] { 0x11, 0x11 }),
+                CreateBlobs(new[] { "some blob" })),
             Fuzzy.Default,
             DateTime.UtcNow);
 
         var snapshotId2 = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(
-                CreateBlobs(new[] { "some blob" }),
-                blobName => new byte[] { 0x22, 0x22 }),
+                CreateBlobs(new[] { "some blob" })),
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
-        var snapshot2 = snapshotStore.GetSnapshot(snapshotId2);
+        var blobReferences1 = snapshotStore.GetSnapshot(snapshotId1)
+            .BlobReferences;
+
+        var blobReferences2 = snapshotStore.GetSnapshot(snapshotId2)
+            .BlobReferences;
 
         Assert.NotEqual(
-            snapshot1.BlobReferences,
-            snapshot2.BlobReferences);
+            blobReferences1,
+            blobReferences2);
 
         Assert.Equal(
-            snapshot1.BlobReferences.Select(br => br.Blob.Name),
-            snapshot2.BlobReferences.Select(br => br.Blob.Name));
+            blobReferences1.Select(br => br.Blob.Name),
+            blobReferences2.Select(br => br.Blob.Name));
 
         Assert.Equal(
-            snapshot1.BlobReferences.Select(br => br.Nonce),
-            snapshot2.BlobReferences.Select(br => br.Nonce));
+            blobReferences1.Select(br => br.Nonce),
+            blobReferences2.Select(br => br.Nonce));
+
+        Assert.Equal(
+            blobReferences1.SelectMany(br => br.ContentUris),
+            blobReferences2.SelectMany(br => br.ContentUris));
     }
 
     [Fact]

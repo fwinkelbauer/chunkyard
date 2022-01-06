@@ -21,7 +21,7 @@ internal class MemoryRepository<T> : IRepository<T>
                 return;
             }
 
-            _valuesPerKey[key] = value.ToArray();
+            _valuesPerKey.Add(key, value.ToArray());
         }
     }
 
