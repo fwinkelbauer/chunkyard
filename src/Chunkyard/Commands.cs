@@ -21,7 +21,7 @@ internal static class Commands
                 Fuzzy.Default);
 
         var diff = DiffSet.Create(
-            blobReferences.Select(blobReference => blobReference.ToBlob()),
+            blobReferences.Select(blobReference => blobReference.Blob),
             blobs,
             blob => blob.Name);
 
@@ -82,7 +82,7 @@ internal static class Commands
         {
             foreach (var blobReference in blobReferences)
             {
-                Console.WriteLine(blobReference.Name);
+                Console.WriteLine(blobReference.Blob.Name);
             }
         }
     }
@@ -129,7 +129,7 @@ internal static class Commands
             : DiffSet.Create(
                 first,
                 second,
-                blobReference => blobReference.Name);
+                blobReference => blobReference.Blob.Name);
 
         PrintDiff(diff);
     }

@@ -7,19 +7,19 @@ internal class ConsoleProbe : IProbe
 {
     public void StoredBlob(BlobReference blobReference)
     {
-        Console.WriteLine($"Stored blob: {blobReference.Name}");
+        Console.WriteLine($"Stored blob: {blobReference.Blob.Name}");
     }
 
     public void RetrievedBlob(BlobReference blobReference)
     {
-        Console.WriteLine($"Restored blob: {blobReference.Name}");
+        Console.WriteLine($"Restored blob: {blobReference.Blob.Name}");
     }
 
     public void BlobValid(BlobReference blobReference, bool valid)
     {
         Console.WriteLine(valid
-            ? $"Valid blob: {blobReference.Name}"
-            : $"Invalid blob: {blobReference.Name}");
+            ? $"Valid blob: {blobReference.Blob.Name}"
+            : $"Invalid blob: {blobReference.Blob.Name}");
     }
 
     public void CopiedContent(Uri contentUri)

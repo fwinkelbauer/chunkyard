@@ -25,7 +25,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             expectedBlobs,
-            snapshot.BlobReferences.Select(br => br.ToBlob()));
+            snapshot.BlobReferences.Select(br => br.Blob));
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             new[] { blobs[0] },
-            snapshot.BlobReferences.Select(br => br.ToBlob()));
+            snapshot.BlobReferences.Select(br => br.Blob));
     }
 
     [Fact]
@@ -74,8 +74,8 @@ public static class SnapshotStoreTests
             snapshot2.BlobReferences);
 
         Assert.Equal(
-            snapshot1.BlobReferences.Select(br => br.Name),
-            snapshot2.BlobReferences.Select(br => br.Name));
+            snapshot1.BlobReferences.Select(br => br.Blob.Name),
+            snapshot2.BlobReferences.Select(br => br.Blob.Name));
 
         Assert.Equal(
             snapshot1.BlobReferences.Select(br => br.Nonce),
@@ -163,7 +163,7 @@ public static class SnapshotStoreTests
 
         var actualBlobs = CreateSnapshotStore(uriRepository, intRepository)
             .GetSnapshot(snapshotId).BlobReferences
-            .Select(br => br.ToBlob());
+            .Select(br => br.Blob);
 
         Assert.Equal(
             expectedBlobs,
@@ -583,7 +583,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             expectedBlobs,
-            blobReferences.Select(br => br.ToBlob()));
+            blobReferences.Select(br => br.Blob));
     }
 
     [Fact]

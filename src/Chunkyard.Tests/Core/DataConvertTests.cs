@@ -36,8 +36,11 @@ public static class DataConvertTests
             {
                 new
                 {
-                    Name = "some blob",
-                    LastWriteTimeUtc = "2020-05-07T18:33:00Z",
+                    Blob = new
+                    {
+                        Name = "some blob",
+                        LastWriteTimeUtc = "2020-05-07T18:33:00Z"
+                    },
                     Nonce = "ESIzRA==",
                     ContentUris = new[]
                     {
@@ -52,8 +55,9 @@ public static class DataConvertTests
             new[]
             {
                 new BlobReference(
-                    "some blob",
-                    new DateTime(2020, 05, 07, 18, 33, 0, DateTimeKind.Utc),
+                    new Blob(
+                        "some blob",
+                        new DateTime(2020, 05, 07, 18, 33, 0, DateTimeKind.Utc)),
                     new byte[] { 0x11, 0x22, 0x33, 0x44 },
                     new[]
                     {

@@ -7,45 +7,31 @@ namespace Chunkyard.Core;
 public class BlobReference
 {
     public BlobReference(
-        string name,
-        DateTime lastWriteTimeUtc,
+        Blob blob,
         byte[] nonce,
         IReadOnlyCollection<Uri> contentUris)
     {
-        Name = name;
-        LastWriteTimeUtc = lastWriteTimeUtc;
+        Blob = blob;
         Nonce = nonce;
         ContentUris = contentUris;
     }
 
-    public string Name { get; }
-
-    public DateTime LastWriteTimeUtc { get; }
+    public Blob Blob { get; }
 
     public byte[] Nonce { get; }
 
     public IReadOnlyCollection<Uri> ContentUris { get; }
 
-    public Blob ToBlob()
-    {
-        return new Blob(Name, LastWriteTimeUtc);
-    }
-
     public override bool Equals(object? obj)
     {
         return obj is BlobReference other
-            && Name == other.Name
-            && LastWriteTimeUtc.Equals(other.LastWriteTimeUtc)
+            && Blob.Equals(other.Blob)
             && Nonce.SequenceEqual(other.Nonce)
             && ContentUris.SequenceEqual(other.ContentUris);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(
-            Name,
-            LastWriteTimeUtc,
-            Nonce,
-            ContentUris);
+        return HashCode.Combine(Blob, Nonce, ContentUris);
     }
 }

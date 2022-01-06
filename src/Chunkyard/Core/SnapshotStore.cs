@@ -128,7 +128,7 @@ public class SnapshotStore
     {
         Blob RetrieveBlobReference(BlobReference blobReference)
         {
-            var blob = blobReference.ToBlob();
+            var blob = blobReference.Blob;
 
             if (blobSystem.BlobExists(blob.Name)
                 && blobSystem.FetchMetadata(blob.Name).Equals(blob))
@@ -151,7 +151,7 @@ public class SnapshotStore
             catch (Exception e)
             {
                 throw new ChunkyardException(
-                    $"Could not restore blob {blobReference.Name}",
+                    $"Could not restore blob {blobReference.Blob.Name}",
                     e);
             }
 
@@ -185,7 +185,7 @@ public class SnapshotStore
         Fuzzy includeFuzzy)
     {
         return GetSnapshot(snapshotId).BlobReferences
-            .Where(br => includeFuzzy.IsIncludingMatch(br.Name))
+            .Where(br => includeFuzzy.IsIncludingMatch(br.Blob.Name))
             .ToArray();
     }
 
@@ -450,7 +450,7 @@ public class SnapshotStore
         var currentBlobReferences = _currentSnapshotId == null
             ? new Dictionary<string, BlobReference>()
             : GetSnapshot(_currentSnapshotId.Value).BlobReferences
-                .ToDictionary(br => br.Name, br => br);
+                .ToDictionary(br => br.Blob.Name, br => br);
 
         BlobReference WriteBlob(Blob blob)
         {
@@ -459,7 +459,7 @@ public class SnapshotStore
                 out var current);
 
             if (current != null
-                && current.ToBlob().Equals(blob))
+                && current.Blob.Equals(blob))
             {
                 return current;
             }
@@ -471,8 +471,7 @@ public class SnapshotStore
             using var stream = blobSystem.OpenRead(blob.Name);
 
             var blobReference = new BlobReference(
-                blob.Name,
-                blob.LastWriteTimeUtc,
+                blob,
                 nonce,
                 WriteContent(nonce, stream));
 
@@ -484,7 +483,7 @@ public class SnapshotStore
         return blobSystem.FetchBlobs(excludeFuzzy)
             .AsParallel()
             .Select(WriteBlob)
-            .OrderBy(blobReference => blobReference.Name)
+            .OrderBy(blobReference => blobReference.Blob.Name)
             .ToArray();
     }
 
