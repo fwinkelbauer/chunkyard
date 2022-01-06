@@ -5,18 +5,18 @@ public static class AesGcmCryptoTests
     [Fact]
     public static void Encrypt_And_Decrypt_Return_Input()
     {
-        var plainBytes = Encoding.UTF8.GetBytes("Hello!");
-        var key = AesGcmCrypto.PasswordToKey(
+        var aesGcmCrypto = new AesGcmCrypto(
             "secret",
             AesGcmCrypto.GenerateSalt(),
-            AesGcmCrypto.Iterations);
+            AesGcmCrypto.DefaultIterations);
 
-        var encryptedBytes = AesGcmCrypto.Encrypt(
+        var plainBytes = Encoding.UTF8.GetBytes("Hello!");
+
+        var encryptedBytes = aesGcmCrypto.Encrypt(
             AesGcmCrypto.GenerateNonce(),
-            plainBytes,
-            key);
+            plainBytes);
 
-        var decryptedBytes = AesGcmCrypto.Decrypt(encryptedBytes, key);
+        var decryptedBytes = aesGcmCrypto.Decrypt(encryptedBytes);
 
         Assert.NotEqual(plainBytes, encryptedBytes);
         Assert.Equal(plainBytes, decryptedBytes);
@@ -25,35 +25,34 @@ public static class AesGcmCryptoTests
     [Fact]
     public static void Decrypt_Throws_Given_Wrong_Key()
     {
-        var someKey = AesGcmCrypto.PasswordToKey(
+        var someAes = new AesGcmCrypto(
             "some secret",
             AesGcmCrypto.GenerateSalt(),
-            AesGcmCrypto.Iterations);
+            AesGcmCrypto.DefaultIterations);
 
-        var otherKey = AesGcmCrypto.PasswordToKey(
+        var otherAes = new AesGcmCrypto(
             "other secret",
             AesGcmCrypto.GenerateSalt(),
-            AesGcmCrypto.Iterations);
+            AesGcmCrypto.DefaultIterations);
 
-        var encryptedBytes = AesGcmCrypto.Encrypt(
+        var encryptedBytes = someAes.Encrypt(
             AesGcmCrypto.GenerateNonce(),
-            Encoding.UTF8.GetBytes("Hello!"),
-            someKey);
+            Encoding.UTF8.GetBytes("Hello!"));
 
         Assert.Throws<CryptographicException>(
-            () => AesGcmCrypto.Decrypt(encryptedBytes, otherKey));
+            () => otherAes.Decrypt(encryptedBytes));
     }
 
     [Theory]
     [InlineData("")]
     [InlineData(null)]
-    public static void PasswordToKey_Throws_On_EmptyPassword(
+    public static void Constructor_Throws_On_EmptyPassword(
         string password)
     {
         Assert.Throws<ArgumentException>(
-            () => AesGcmCrypto.PasswordToKey(
+            () => new AesGcmCrypto(
                 password,
                 AesGcmCrypto.GenerateSalt(),
-                AesGcmCrypto.Iterations));
+                AesGcmCrypto.DefaultIterations));
     }
 }

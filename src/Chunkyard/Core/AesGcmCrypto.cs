@@ -3,19 +3,32 @@ namespace Chunkyard.Core;
 /// <summary>
 /// Contains methods to encrypt and decrypt data.
 /// </summary>
-public static class AesGcmCrypto
+public class AesGcmCrypto
 {
-    public const int Iterations = 1000;
+    public const int DefaultIterations = 1000;
 
     private const int NonceBytes = 12;
     private const int TagBytes = 16;
     private const int KeyBytes = 32;
     private const int SaltBytes = 12;
 
-    public static byte[] Encrypt(
+    private readonly byte[] _key;
+
+    public AesGcmCrypto(string password, byte[] salt, int iterations)
+    {
+        _key = PasswordToKey(password, salt, iterations);
+
+        Salt = salt;
+        Iterations = iterations;
+    }
+
+    public byte[] Salt { get; }
+
+    public int Iterations { get; }
+
+    public byte[] Encrypt(
         ReadOnlySpan<byte> nonce,
-        ReadOnlySpan<byte> plainText,
-        ReadOnlySpan<byte> key)
+        ReadOnlySpan<byte> plainText)
     {
         var cipherText = new byte[
             nonce.Length + plainText.Length + TagBytes];
@@ -33,15 +46,14 @@ public static class AesGcmCrypto
             cipherText.Length - TagBytes,
             TagBytes);
 
-        using var aesGcm = new AesGcm(key);
+        using var aesGcm = new AesGcm(_key);
         aesGcm.Encrypt(nonce, plainText, innerCiphertext, tag);
 
         return cipherText;
     }
 
-    public static byte[] Decrypt(
-        ReadOnlySpan<byte> cipherText,
-        ReadOnlySpan<byte> key)
+    public byte[] Decrypt(
+        ReadOnlySpan<byte> cipherText)
     {
         var plainText = new byte[
             cipherText.Length - NonceBytes - TagBytes];
@@ -56,14 +68,14 @@ public static class AesGcmCrypto
             cipherText.Length - TagBytes,
             TagBytes);
 
-        using var aesGcm = new AesGcm(key);
+        using var aesGcm = new AesGcm(_key);
 
         aesGcm.Decrypt(nonce, innerCipherText, tag, plainText);
 
         return plainText;
     }
 
-    public static byte[] PasswordToKey(
+    private static byte[] PasswordToKey(
         string password,
         byte[] salt,
         int iterations)

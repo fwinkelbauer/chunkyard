@@ -13,9 +13,7 @@ public class SnapshotStore
     private readonly IRepository<int> _intRepository;
     private readonly FastCdc _fastCdc;
     private readonly IProbe _probe;
-    private readonly byte[] _salt;
-    private readonly int _iterations;
-    private readonly Lazy<byte[]> _key;
+    private readonly Lazy<AesGcmCrypto> _aesGcmCrypto;
 
     private int? _currentSnapshotId;
 
@@ -33,27 +31,25 @@ public class SnapshotStore
 
         _currentSnapshotId = FetchCurrentSnapshotId();
 
-        if (_currentSnapshotId == null)
+        _aesGcmCrypto = new Lazy<AesGcmCrypto>(() =>
         {
-            _salt = AesGcmCrypto.GenerateSalt();
-            _iterations = AesGcmCrypto.Iterations;
-        }
-        else
-        {
-            var snapshotReference = GetSnapshotReference(
-                _currentSnapshotId.Value);
+            if (_currentSnapshotId == null)
+            {
+                return new AesGcmCrypto(
+                    prompt.NewPassword(),
+                    AesGcmCrypto.GenerateSalt(),
+                    AesGcmCrypto.DefaultIterations);
+            }
+            else
+            {
+                var snapshotReference = GetSnapshotReference(
+                    _currentSnapshotId.Value);
 
-            _salt = snapshotReference.Salt;
-            _iterations = snapshotReference.Iterations;
-        }
-
-        _key = new Lazy<byte[]>(() =>
-        {
-            var password = _currentSnapshotId == null
-                ? prompt.NewPassword()
-                : prompt.ExistingPassword();
-
-            return AesGcmCrypto.PasswordToKey(password, _salt, _iterations);
+                return new AesGcmCrypto(
+                    prompt.ExistingPassword(),
+                    snapshotReference.Salt,
+                    snapshotReference.Iterations);
+            }
         });
     }
 
@@ -77,8 +73,8 @@ public class SnapshotStore
             DataConvert.ObjectToBytes(newSnapshot));
 
         var newSnapshotReference = new SnapshotReference(
-            _salt,
-            _iterations,
+            _aesGcmCrypto.Value.Salt,
+            _aesGcmCrypto.Value.Iterations,
             WriteContent(AesGcmCrypto.GenerateNonce(), memoryStream));
 
         _intRepository.StoreValue(
@@ -255,9 +251,8 @@ public class SnapshotStore
         {
             try
             {
-                var decrypted = AesGcmCrypto.Decrypt(
-                    _uriRepository.RetrieveValue(contentUri),
-                    _key.Value);
+                var decrypted = _aesGcmCrypto.Value.Decrypt(
+                    _uriRepository.RetrieveValue(contentUri));
 
                 outputStream.Write(decrypted);
             }
@@ -448,14 +443,13 @@ public class SnapshotStore
         // Let's create the key here instead of inside the WriteChunk method.
         // This ensures that a key is generated as soon as possible, even if we
         // ingest an empty blob (in which case WriteChunk would not be called)
-        var key = _key.Value;
+        _ = _aesGcmCrypto.Value;
 
         Uri WriteChunk(byte[] chunk)
         {
-            var encryptedData = AesGcmCrypto.Encrypt(
+            var encryptedData = _aesGcmCrypto.Value.Encrypt(
                 nonce,
-                chunk,
-                key);
+                chunk);
 
             var contentUri = Id.ComputeContentUri(encryptedData);
 
