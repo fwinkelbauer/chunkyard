@@ -7,16 +7,12 @@ namespace Chunkyard.Core;
 public class Snapshot
 {
     public Snapshot(
-        int snapshotId,
         DateTime creationTimeUtc,
         IReadOnlyCollection<BlobReference> blobReferences)
     {
-        SnapshotId = snapshotId;
         CreationTimeUtc = creationTimeUtc;
         BlobReferences = blobReferences;
     }
-
-    public int SnapshotId { get; }
 
     public DateTime CreationTimeUtc { get; }
 
@@ -25,7 +21,6 @@ public class Snapshot
     public override bool Equals(object? obj)
     {
         return obj is Snapshot other
-            && SnapshotId == other.SnapshotId
             && CreationTimeUtc == other.CreationTimeUtc
             && BlobReferences.SequenceEqual(other.BlobReferences);
     }
@@ -33,7 +28,6 @@ public class Snapshot
     public override int GetHashCode()
     {
         return HashCode.Combine(
-            SnapshotId,
             CreationTimeUtc,
             BlobReferences);
     }

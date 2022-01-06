@@ -31,7 +31,6 @@ public static class DataConvertTests
     {
         var serializedSnapshot = new
         {
-            SnapshotId = 15,
             CreationTimeUtc = "2020-05-07T18:33:00Z",
             BlobReferences = new[]
             {
@@ -49,7 +48,6 @@ public static class DataConvertTests
         };
 
         var currentSnapshot = new Snapshot(
-            15,
             new DateTime(2020, 05, 07, 18, 33, 0, DateTimeKind.Utc),
             new[]
             {

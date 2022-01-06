@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The storage format by removing the ID property from snapshots
+
 ## 11.11.2 - 2021-12-19
 
 ### Fixed

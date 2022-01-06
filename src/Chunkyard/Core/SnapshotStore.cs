@@ -63,9 +63,6 @@ public class SnapshotStore
         ArgumentNullException.ThrowIfNull(blobSystem);
 
         var newSnapshot = new Snapshot(
-            _currentSnapshotId == null
-                ? 0
-                : _currentSnapshotId.Value + 1,
             creationTimeUtc,
             WriteBlobs(blobSystem, excludeFuzzy));
 
@@ -77,15 +74,17 @@ public class SnapshotStore
             _aesGcmCrypto.Value.Iterations,
             WriteContent(AesGcmCrypto.GenerateNonce(), memoryStream));
 
+        var newSnapshotId = _currentSnapshotId + 1 ?? 0;
+
         _intRepository.StoreValue(
-            newSnapshot.SnapshotId,
+            newSnapshotId,
             DataConvert.ObjectToBytes(newSnapshotReference));
 
-        _currentSnapshotId = newSnapshot.SnapshotId;
+        _currentSnapshotId = newSnapshotId;
 
-        _probe.StoredSnapshot(newSnapshot.SnapshotId);
+        _probe.StoredSnapshot(newSnapshotId);
 
-        return newSnapshot.SnapshotId;
+        return newSnapshotId;
     }
 
     public bool CheckSnapshotExists(
@@ -161,15 +160,10 @@ public class SnapshotStore
             return blob;
         }
 
-        var snapshot = GetSnapshot(snapshotId);
-        var blobs = Filter(snapshot, includeFuzzy)
+        return ShowSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
             .Select(RetrieveBlobReference)
             .ToArray();
-
-        _probe.RetrievedSnapshot(snapshot.SnapshotId);
-
-        return blobs;
     }
 
     public Snapshot GetSnapshot(int snapshotId)
@@ -180,19 +174,19 @@ public class SnapshotStore
             GetSnapshotReference(resolvedSnapshotId));
     }
 
-    public IEnumerable<Snapshot> GetSnapshots()
+    public IEnumerable<int> GetSnapshotIds()
     {
         return _intRepository.ListKeys()
-            .OrderBy(i => i)
-            .Select(GetSnapshot)
-            .ToArray();
+            .OrderBy(i => i);
     }
 
     public IEnumerable<BlobReference> ShowSnapshot(
         int snapshotId,
         Fuzzy includeFuzzy)
     {
-        return Filter(GetSnapshot(snapshotId), includeFuzzy);
+        return GetSnapshot(snapshotId).BlobReferences
+            .Where(br => includeFuzzy.IsIncludingMatch(br.Name))
+            .ToArray();
     }
 
     public void GarbageCollect()
@@ -407,26 +401,10 @@ public class SnapshotStore
             return blobValid;
         }
 
-        var snapshot = GetSnapshot(snapshotId);
-        var snapshotValid = Filter(snapshot, includeFuzzy)
+        return ShowSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
             .Select(CheckBlobReference)
             .Aggregate(true, (total, next) => total && next);
-
-        _probe.SnapshotValid(
-            snapshot.SnapshotId,
-            snapshotValid);
-
-        return snapshotValid;
-    }
-
-    private static BlobReference[] Filter(
-        Snapshot snapshot,
-        Fuzzy includeFuzzy)
-    {
-        return snapshot.BlobReferences
-            .Where(br => includeFuzzy.IsIncludingMatch(br.Name))
-            .ToArray();
     }
 
     private int? FetchCurrentSnapshotId()
