@@ -101,7 +101,7 @@ internal static class Commands
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
 
-        foreach (var snapshotId in snapshotStore.GetSnapshotIds())
+        foreach (var snapshotId in snapshotStore.ListSnapshotIds())
         {
             var snapshot = snapshotStore.GetSnapshot(snapshotId);
             var isoDate = snapshot.CreationTimeUtc

@@ -17,11 +17,11 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             new[] { snapshotId },
-            snapshotStore.GetSnapshotIds());
+            snapshotStore.ListSnapshotIds());
 
         Assert.Equal(
             new[] { snapshot },
-            snapshotStore.GetSnapshotIds().Select(snapshotStore.GetSnapshot));
+            snapshotStore.ListSnapshotIds().Select(snapshotStore.GetSnapshot));
 
         Assert.Equal(
             expectedBlobs,
@@ -657,7 +657,7 @@ public static class SnapshotStoreTests
         snapshotStore.RemoveSnapshot(snapshotId);
         snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
 
-        Assert.Empty(snapshotStore.GetSnapshotIds());
+        Assert.Empty(snapshotStore.ListSnapshotIds());
     }
 
     [Fact]
@@ -690,7 +690,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             new[] { snapshotId },
-            snapshotStore.GetSnapshotIds());
+            snapshotStore.ListSnapshotIds());
     }
 
     [Fact]
@@ -708,7 +708,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             new[] { snapshotId },
-            snapshotStore.GetSnapshotIds());
+            snapshotStore.ListSnapshotIds());
     }
 
     [Fact]
@@ -723,7 +723,7 @@ public static class SnapshotStoreTests
 
         snapshotStore.KeepSnapshots(0);
 
-        Assert.Empty(snapshotStore.GetSnapshotIds());
+        Assert.Empty(snapshotStore.ListSnapshotIds());
     }
 
     [Fact]
@@ -738,7 +738,7 @@ public static class SnapshotStoreTests
 
         snapshotStore.KeepSnapshots(-1);
 
-        Assert.Empty(snapshotStore.GetSnapshotIds());
+        Assert.Empty(snapshotStore.ListSnapshotIds());
     }
 
     [Fact]

@@ -87,9 +87,7 @@ public class SnapshotStore
         return newSnapshotId;
     }
 
-    public bool CheckSnapshotExists(
-        int snapshotId,
-        Fuzzy includeFuzzy)
+    public bool CheckSnapshotExists(int snapshotId, Fuzzy includeFuzzy)
     {
         return CheckSnapshot(
             snapshotId,
@@ -97,9 +95,7 @@ public class SnapshotStore
             _uriRepository.ValueExists);
     }
 
-    public bool CheckSnapshotValid(
-        int snapshotId,
-        Fuzzy includeFuzzy)
+    public bool CheckSnapshotValid(int snapshotId, Fuzzy includeFuzzy)
     {
         bool CheckContentUriValid(Uri contentUri)
         {
@@ -179,7 +175,7 @@ public class SnapshotStore
             GetSnapshotReference(resolvedSnapshotId));
     }
 
-    public IEnumerable<int> GetSnapshotIds()
+    public IEnumerable<int> ListSnapshotIds()
     {
         return _intRepository.ListKeys()
             .OrderBy(i => i);
@@ -196,9 +192,7 @@ public class SnapshotStore
 
     public void GarbageCollect()
     {
-        var usedContentUris = FetchContentUris(
-            _intRepository.ListKeys());
-
+        var usedContentUris = ListUsedContentUris();
         var unusedContentUris = _uriRepository.ListKeys()
             .Except(usedContentUris)
             .ToArray();
@@ -254,10 +248,6 @@ public class SnapshotStore
                     _uriRepository.RetrieveValue(contentUri));
 
                 outputStream.Write(decrypted);
-            }
-            catch (ChunkyardException)
-            {
-                throw;
             }
             catch (CryptographicException e)
             {
@@ -369,8 +359,9 @@ public class SnapshotStore
         }
     }
 
-    private IEnumerable<Uri> FetchContentUris(IEnumerable<int> snapshotIds)
+    private IEnumerable<Uri> ListUsedContentUris()
     {
+        var snapshotIds = _intRepository.ListKeys();
         var contentUris = new HashSet<Uri>();
 
         foreach (var snapshotId in snapshotIds)
@@ -527,10 +518,6 @@ public class SnapshotStore
         {
             return DataConvert.BytesToObject<SnapshotReference>(
                 _intRepository.RetrieveValue(snapshotId));
-        }
-        catch (ChunkyardException)
-        {
-            throw;
         }
         catch (Exception e)
         {
