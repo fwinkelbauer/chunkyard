@@ -190,7 +190,7 @@ public class SnapshotStore
             .ToArray();
     }
 
-    public void GarbageCollect()
+    public IReadOnlyCollection<Uri> GarbageCollect()
     {
         var usedContentUris = ListUsedContentUris();
         var unusedContentUris = _uriRepository.ListKeys()
@@ -203,6 +203,8 @@ public class SnapshotStore
 
             _probe.RemovedContent(contentUri);
         }
+
+        return unusedContentUris;
     }
 
     public void RemoveSnapshot(int snapshotId)
@@ -218,19 +220,25 @@ public class SnapshotStore
         }
     }
 
-    public void KeepSnapshots(int latestCount)
+    public IReadOnlyCollection<int> KeepSnapshots(int latestCount)
     {
         var snapshotIds = _intRepository.ListKeys()
             .OrderBy(i => i)
             .ToArray();
 
         var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
-        var snapshotIdsToDelete = snapshotIds.Except(snapshotIdsToKeep);
+        var snapshotIdsToDelete = snapshotIds.Except(snapshotIdsToKeep)
+            .ToArray();
 
         foreach (var snapshotId in snapshotIdsToDelete)
         {
-            RemoveSnapshot(snapshotId);
+            _intRepository.RemoveValue(snapshotId);
+            _probe.RemovedSnapshot(snapshotId);
         }
+
+        _currentSnapshotId = FetchCurrentSnapshotId();
+
+        return snapshotIdsToDelete;
     }
 
     public void RetrieveContent(

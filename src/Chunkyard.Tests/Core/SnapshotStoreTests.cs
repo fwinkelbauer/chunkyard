@@ -612,7 +612,7 @@ public static class SnapshotStoreTests
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        snapshotStore.GarbageCollect();
+        Assert.Empty(snapshotStore.GarbageCollect());
 
         Assert.True(
             snapshotStore.CheckSnapshotValid(
