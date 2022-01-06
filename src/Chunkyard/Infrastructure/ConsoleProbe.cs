@@ -42,8 +42,20 @@ internal class ConsoleProbe : IProbe
         Console.WriteLine($"Stored snapshot: #{snapshotId}");
     }
 
+    public void RetrievedSnapshot(int snapshotId)
+    {
+        Console.WriteLine($"Restored snapshot: #{snapshotId}");
+    }
+
     public void RemovedSnapshot(int snapshotId)
     {
         Console.WriteLine($"Removed snapshot: #{snapshotId}");
+    }
+
+    public void SnapshotValid(int snapshotId, bool valid)
+    {
+        Console.WriteLine(valid
+            ? $"Valid snapshot: #{snapshotId}"
+            : $"Invalid snapshot: #{snapshotId}");
     }
 }

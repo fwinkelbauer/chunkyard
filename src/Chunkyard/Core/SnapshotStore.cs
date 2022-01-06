@@ -160,10 +160,15 @@ public class SnapshotStore
             return blob;
         }
 
-        return ShowSnapshot(snapshotId, includeFuzzy)
+        var blobs = ShowSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
             .Select(RetrieveBlobReference)
             .ToArray();
+
+        _probe.RetrievedSnapshot(
+            ResolveSnapshotId(snapshotId));
+
+        return blobs;
     }
 
     public Snapshot GetSnapshot(int snapshotId)
@@ -401,10 +406,16 @@ public class SnapshotStore
             return blobValid;
         }
 
-        return ShowSnapshot(snapshotId, includeFuzzy)
+        var snapshotValid = ShowSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
             .Select(CheckBlobReference)
             .Aggregate(true, (total, next) => total && next);
+
+        _probe.SnapshotValid(
+            ResolveSnapshotId(snapshotId),
+            snapshotValid);
+
+        return snapshotValid;
     }
 
     private int? FetchCurrentSnapshotId()

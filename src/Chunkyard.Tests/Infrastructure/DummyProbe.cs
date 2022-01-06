@@ -30,7 +30,15 @@ internal class DummyProbe : IProbe
     {
     }
 
+    public void RetrievedSnapshot(int snapshotId)
+    {
+    }
+
     public void RemovedSnapshot(int snapshotId)
+    {
+    }
+
+    public void SnapshotValid(int snapshotId, bool valid)
     {
     }
 }
