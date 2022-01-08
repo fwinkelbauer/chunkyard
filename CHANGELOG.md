@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 12.0.0 - 2022-01-08
+
 ### Changed
 
 - The storage format by
