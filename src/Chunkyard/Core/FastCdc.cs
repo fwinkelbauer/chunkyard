@@ -357,7 +357,7 @@ public class FastCdc
         }
     }
 
-    private int Cut(ReadOnlySpan<byte> buffer)
+    public int Cut(ReadOnlySpan<byte> buffer)
     {
         if (buffer.Length <= MinSize)
         {

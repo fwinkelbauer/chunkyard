@@ -62,17 +62,27 @@ public class SnapshotStore
     {
         ArgumentNullException.ThrowIfNull(blobSystem);
 
-        var newSnapshot = new Snapshot(
-            creationTimeUtc,
-            WriteBlobs(blobSystem, excludeFuzzy));
+        var snapshotWriter = new SnapshotWriter(
+            _uriRepository,
+            _fastCdc,
+            _probe,
+            _aesGcmCrypto.Value);
 
-        using var memoryStream = new MemoryStream(
-            DataConvert.ObjectToBytes(newSnapshot));
+        var knownBlobReferences = _currentSnapshotId == null
+            ? Array.Empty<BlobReference>()
+            : GetSnapshot(_currentSnapshotId.Value).BlobReferences;
+
+        var blobReferences = snapshotWriter.WriteBlobs(
+            blobSystem,
+            excludeFuzzy,
+            knownBlobReferences);
+
+        var newSnapshot = new Snapshot(creationTimeUtc, blobReferences);
 
         var newSnapshotReference = new SnapshotReference(
             _aesGcmCrypto.Value.Salt,
             _aesGcmCrypto.Value.Iterations,
-            WriteContent(AesGcmCrypto.GenerateNonce(), memoryStream));
+            snapshotWriter.WriteObject(newSnapshot));
 
         var newSnapshotId = _currentSnapshotId + 1 ?? 0;
 
@@ -391,76 +401,6 @@ public class SnapshotStore
         return _intRepository.ListKeys()
             .Select(i => i as int?)
             .Max();
-    }
-
-    private IReadOnlyCollection<Uri> WriteContent(
-        byte[] nonce,
-        Stream stream)
-    {
-        Uri WriteChunk(byte[] chunk)
-        {
-            var encryptedData = _aesGcmCrypto.Value.Encrypt(
-                nonce,
-                chunk);
-
-            var contentUri = Id.ComputeContentUri(encryptedData);
-
-            _uriRepository.StoreValue(contentUri, encryptedData);
-
-            return contentUri;
-        }
-
-        return _fastCdc.SplitIntoChunks(stream)
-            .AsParallel()
-            .AsOrdered()
-            .Select(WriteChunk)
-            .ToArray();
-    }
-
-    private BlobReference[] WriteBlobs(
-        IBlobSystem blobSystem,
-        Fuzzy excludeFuzzy)
-    {
-        _ = _aesGcmCrypto.Value;
-
-        var currentBlobReferences = _currentSnapshotId == null
-            ? new Dictionary<string, BlobReference>()
-            : GetSnapshot(_currentSnapshotId.Value).BlobReferences
-                .ToDictionary(br => br.Blob.Name, br => br);
-
-        BlobReference WriteBlob(Blob blob)
-        {
-            currentBlobReferences.TryGetValue(
-                blob.Name,
-                out var current);
-
-            if (current != null
-                && current.Blob.Equals(blob))
-            {
-                return current;
-            }
-
-            // Known blobs should be encrypted using the same nonce
-            var nonce = current?.Nonce
-                ?? AesGcmCrypto.GenerateNonce();
-
-            using var stream = blobSystem.OpenRead(blob.Name);
-
-            var blobReference = new BlobReference(
-                blob,
-                nonce,
-                WriteContent(nonce, stream));
-
-            _probe.StoredBlob(blobReference.Blob);
-
-            return blobReference;
-        }
-
-        return blobSystem.ListBlobs(excludeFuzzy)
-            .AsParallel()
-            .Select(WriteBlob)
-            .OrderBy(blobReference => blobReference.Blob.Name)
-            .ToArray();
     }
 
     private int ResolveSnapshotId(int snapshotId)

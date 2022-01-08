@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The `clean` command to delete files which are not found in a snapshot
 
+### Changed
+
+- The `store` command to improve performance
+
 ## 12.0.0 - 2022-01-08
 
 ### Changed
