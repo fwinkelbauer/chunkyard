@@ -279,30 +279,6 @@ public class SnapshotStore
         ArgumentNullException.ThrowIfNull(otherUriRepository);
         ArgumentNullException.ThrowIfNull(otherIntRepository);
 
-        Copy(
-            otherUriRepository,
-            otherIntRepository,
-            mirror: false);
-    }
-
-    public void Mirror(
-        IRepository<Uri> otherUriRepository,
-        IRepository<int> otherIntRepository)
-    {
-        ArgumentNullException.ThrowIfNull(otherUriRepository);
-        ArgumentNullException.ThrowIfNull(otherIntRepository);
-
-        Copy(
-            otherUriRepository,
-            otherIntRepository,
-            mirror: true);
-    }
-
-    private void Copy(
-        IRepository<Uri> otherUriRepository,
-        IRepository<int> otherIntRepository,
-        bool mirror)
-    {
         var localContentUris = _uriRepository.ListKeys();
         var otherContentUris = otherUriRepository.ListKeys();
 
@@ -336,34 +312,6 @@ public class SnapshotStore
                     GetSnapshotReference(snapshotId)));
 
             _probe.CopiedSnapshot(snapshotId);
-        }
-
-        if (mirror)
-        {
-            // We need to delete snapshotIds prior to deleting contentUris
-            // so that a cancelled mirror operation does not corrupt any
-            // snapshots
-            var snapshotIdsToDelete = otherSnapshotIds
-                .Except(localSnapshotIds)
-                .ToArray();
-
-            foreach (var snapshotId in snapshotIdsToDelete)
-            {
-                otherIntRepository.RemoveValue(snapshotId);
-
-                _probe.RemovedSnapshot(snapshotId);
-            }
-
-            var contentUrisToDelete = otherContentUris
-                .Except(localContentUris)
-                .ToArray();
-
-            foreach (var contentUri in contentUrisToDelete)
-            {
-                otherUriRepository.RemoveValue(contentUri);
-
-                _probe.RemovedContent(contentUri);
-            }
         }
     }
 

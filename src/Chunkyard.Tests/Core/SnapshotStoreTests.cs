@@ -742,7 +742,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void Copy_Copies_Everything()
+    public static void Copy_Copies_Newer_Snapshots()
     {
         var sourceUriRepository = CreateRepository<Uri>();
         var sourceIntRepository = CreateRepository<int>();
@@ -750,67 +750,28 @@ public static class SnapshotStoreTests
             sourceUriRepository,
             sourceIntRepository);
 
-        snapshotStore.StoreSnapshot(
-            new MemoryBlobSystem(CreateBlobs()),
-            Fuzzy.Default,
-            DateTime.UtcNow);
-
         var destinationUriRepository = CreateRepository<Uri>();
         var destinationIntRepository = CreateRepository<int>();
 
-        snapshotStore.Copy(
-            destinationUriRepository,
-            destinationIntRepository);
+        for (var i = 0; i < 3; i++)
+        {
+            snapshotStore.StoreSnapshot(
+                new MemoryBlobSystem(CreateBlobs()),
+                Fuzzy.Default,
+                DateTime.UtcNow);
 
-        Assert.Equal(
-            sourceUriRepository.ListKeys(),
-            destinationUriRepository.ListKeys());
+            snapshotStore.Copy(
+                destinationUriRepository,
+                destinationIntRepository);
 
-        Assert.Equal(
-            sourceIntRepository.ListKeys(),
-            destinationIntRepository.ListKeys());
-    }
+            Assert.Equal(
+                sourceUriRepository.ListKeys(),
+                destinationUriRepository.ListKeys());
 
-    [Fact]
-    public static void Mirror_Copies_New_Data_And_Deletes_Old_Data()
-    {
-        var sourceUriRepository = CreateRepository<Uri>();
-        var sourceIntRepository = CreateRepository<int>();
-        var snapshotStore = CreateSnapshotStore(
-            sourceUriRepository,
-            sourceIntRepository);
-
-        var firstSnapshotId = snapshotStore.StoreSnapshot(
-            new MemoryBlobSystem(CreateBlobs(new[] { "some blob" })),
-            Fuzzy.Default,
-            DateTime.UtcNow);
-
-        snapshotStore.StoreSnapshot(
-            new MemoryBlobSystem(CreateBlobs(new[] { "some new blob" })),
-            Fuzzy.Default,
-            DateTime.UtcNow);
-
-        var destinationUriRepository = CreateRepository<Uri>();
-        var destinationIntRepository = CreateRepository<int>();
-
-        snapshotStore.Mirror(
-            destinationUriRepository,
-            destinationIntRepository);
-
-        snapshotStore.RemoveSnapshot(firstSnapshotId);
-        snapshotStore.GarbageCollect();
-
-        snapshotStore.Mirror(
-            destinationUriRepository,
-            destinationIntRepository);
-
-        Assert.Equal(
-            sourceUriRepository.ListKeys(),
-            destinationUriRepository.ListKeys());
-
-        Assert.Equal(
-            sourceIntRepository.ListKeys(),
-            destinationIntRepository.ListKeys());
+            Assert.Equal(
+                sourceIntRepository.ListKeys(),
+                destinationIntRepository.ListKeys());
+        }
     }
 
     [Fact]

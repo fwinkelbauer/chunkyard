@@ -161,14 +161,7 @@ internal static class Commands
         var uriRepository = CreateUriRepository(o.DestinationRepository);
         var intRepository = CreateIntRepository(o.DestinationRepository);
 
-        if (o.Mirror)
-        {
-            snapshotStore.Mirror(uriRepository, intRepository);
-        }
-        else
-        {
-            snapshotStore.Copy(uriRepository, intRepository);
-        }
+        snapshotStore.Copy(uriRepository, intRepository);
     }
 
     public static void Cat(CatOptions o)

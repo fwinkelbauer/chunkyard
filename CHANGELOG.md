@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
   - removing the ID property from snapshots
   - changing how a blob reference is structured
 
+### Removed
+
+- The `--mirror` flag o the `copy` command
+
 ## 11.11.2 - 2021-12-19
 
 ### Fixed
