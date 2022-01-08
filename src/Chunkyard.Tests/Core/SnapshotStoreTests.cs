@@ -765,8 +765,8 @@ public static class SnapshotStoreTests
                 destinationIntRepository);
 
             Assert.Equal(
-                sourceUriRepository.ListKeys(),
-                destinationUriRepository.ListKeys());
+                sourceUriRepository.ListKeys().OrderBy(u => u.AbsoluteUri),
+                destinationUriRepository.ListKeys().OrderBy(u => u.AbsoluteUri));
 
             Assert.Equal(
                 sourceIntRepository.ListKeys(),

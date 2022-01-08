@@ -192,7 +192,7 @@ public class SnapshotStore
 
     public IReadOnlyCollection<Uri> GarbageCollect()
     {
-        var usedContentUris = ListUsedContentUris();
+        var usedContentUris = ListContentUris(_intRepository.ListKeys());
         var unusedContentUris = _uriRepository.ListKeys()
             .Except(usedContentUris)
             .ToArray();
@@ -279,11 +279,19 @@ public class SnapshotStore
         ArgumentNullException.ThrowIfNull(otherUriRepository);
         ArgumentNullException.ThrowIfNull(otherIntRepository);
 
-        var localContentUris = _uriRepository.ListKeys();
-        var otherContentUris = otherUriRepository.ListKeys();
+        var localSnapshotIds = _intRepository.ListKeys();
+        var otherSnapshotIds = otherIntRepository.ListKeys();
 
-        var contentUrisToCopy = localContentUris
-            .Except(otherContentUris)
+        var otherSnapshotIdMax = otherSnapshotIds.Count == 0
+            ? LatestSnapshotId
+            : otherSnapshotIds.Max();
+
+        var snapshotIdsToCopy = localSnapshotIds
+            .Where(id => id > otherSnapshotIdMax)
+            .ToArray();
+
+        var contentUrisToCopy = ListContentUris(snapshotIdsToCopy)
+            .Except(otherUriRepository.ListKeys())
             .ToArray();
 
         foreach (var contentUri in contentUrisToCopy)
@@ -295,39 +303,27 @@ public class SnapshotStore
             _probe.CopiedContent(contentUri);
         }
 
-        var localSnapshotIds = _intRepository.ListKeys();
-        var otherSnapshotIds = otherIntRepository.ListKeys();
-
-        var snapshotIdsToCopy = localSnapshotIds
-            .Except(otherSnapshotIds)
-            .ToArray();
-
         foreach (var snapshotId in snapshotIdsToCopy)
         {
-            // We convert a SnapshotReference from/to bytes to check if
-            // these bytes are valid
             otherIntRepository.StoreValue(
                 snapshotId,
-                DataConvert.ObjectToBytes(
-                    GetSnapshotReference(snapshotId)));
+                _intRepository.RetrieveValue(snapshotId));
 
             _probe.CopiedSnapshot(snapshotId);
         }
     }
 
-    private IEnumerable<Uri> ListUsedContentUris()
+    private IEnumerable<Uri> ListContentUris(IEnumerable<int> snapshotIds)
     {
-        var snapshotIds = _intRepository.ListKeys();
         var contentUris = new HashSet<Uri>();
 
         foreach (var snapshotId in snapshotIds)
         {
             var snapshotReference = GetSnapshotReference(snapshotId);
+            var snapshot = GetSnapshot(snapshotReference);
 
             contentUris.UnionWith(
                 snapshotReference.ContentUris);
-
-            var snapshot = GetSnapshot(snapshotReference);
 
             contentUris.UnionWith(
                 snapshot.BlobReferences.SelectMany(

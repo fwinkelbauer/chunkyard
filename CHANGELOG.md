@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 - The storage format by
   - removing the ID property from snapshots
   - changing how a blob reference is structured
+- The `copy` command to now require a password prompt
 
 ### Removed
 
