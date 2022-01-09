@@ -2,15 +2,19 @@ namespace Chunkyard.Tests.Infrastructure;
 
 internal class DummyProbe : IProbe
 {
-    public void StoredBlob(BlobReference blobReference)
+    public void StoredBlob(Blob blob)
     {
     }
 
-    public void RetrievedBlob(BlobReference blobReference)
+    public void RetrievedBlob(Blob blob)
     {
     }
 
-    public void BlobValid(BlobReference blobReference, bool valid)
+    public void RemovedBlob(Blob blob)
+    {
+    }
+
+    public void BlobValid(Blob blob, bool valid)
     {
     }
 

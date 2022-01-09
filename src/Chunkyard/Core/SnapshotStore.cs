@@ -135,6 +135,8 @@ public class SnapshotStore
         foreach (var blob in blobsToRemove)
         {
             blobSystem.RemoveBlob(blob.Name);
+
+            _probe.RemovedBlob(blob);
         }
 
         return blobsToRemove;
@@ -174,7 +176,7 @@ public class SnapshotStore
                     e);
             }
 
-            _probe.RetrievedBlob(blobReference);
+            _probe.RetrievedBlob(blobReference.Blob);
 
             return blob;
         }
@@ -367,7 +369,7 @@ public class SnapshotStore
                 .Select(checkContentUriFunc)
                 .Aggregate(true, (total, next) => total && next);
 
-            _probe.BlobValid(blobReference, blobValid);
+            _probe.BlobValid(blobReference.Blob, blobValid);
 
             return blobValid;
         }
@@ -449,7 +451,7 @@ public class SnapshotStore
                 nonce,
                 WriteContent(nonce, stream));
 
-            _probe.StoredBlob(blobReference);
+            _probe.StoredBlob(blobReference.Blob);
 
             return blobReference;
         }

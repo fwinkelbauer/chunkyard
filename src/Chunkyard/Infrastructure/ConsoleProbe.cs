@@ -5,21 +5,26 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 internal class ConsoleProbe : IProbe
 {
-    public void StoredBlob(BlobReference blobReference)
+    public void StoredBlob(Blob blob)
     {
-        Console.WriteLine($"Stored blob: {blobReference.Blob.Name}");
+        Console.WriteLine($"Stored blob: {blob.Name}");
     }
 
-    public void RetrievedBlob(BlobReference blobReference)
+    public void RetrievedBlob(Blob blob)
     {
-        Console.WriteLine($"Restored blob: {blobReference.Blob.Name}");
+        Console.WriteLine($"Restored blob: {blob.Name}");
     }
 
-    public void BlobValid(BlobReference blobReference, bool valid)
+    public void RemovedBlob(Blob blob)
+    {
+        Console.WriteLine($"Removed blob: {blob.Name}");
+    }
+
+    public void BlobValid(Blob blob, bool valid)
     {
         Console.WriteLine(valid
-            ? $"Valid blob: {blobReference.Blob.Name}"
-            : $"Invalid blob: {blobReference.Blob.Name}");
+            ? $"Valid blob: {blob.Name}"
+            : $"Invalid blob: {blob.Name}");
     }
 
     public void CopiedContent(Uri contentUri)
