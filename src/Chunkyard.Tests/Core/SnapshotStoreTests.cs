@@ -841,10 +841,14 @@ public static class SnapshotStoreTests
             writeStream.Write(new byte[] { 0x10, 0x11 });
         }
 
-        snapshotStore.CleanBlobSystem(
+        var removedBlobs = snapshotStore.CleanBlobSystem(
             blobSystem,
             Fuzzy.Default,
             snapshotId);
+
+        Assert.Equal(
+            new[] { newBlob },
+            removedBlobs);
 
         Assert.Equal(
             expectedBlobs.Select(b => b.Name),
