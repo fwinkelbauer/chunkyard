@@ -128,7 +128,7 @@ public class SnapshotStore
         var blobNamesToKeep = snapshot.BlobReferences
             .Select(br => br.Blob.Name);
 
-        var blobNamessToRemove = blobSystem.FetchBlobs(excludeFuzzy)
+        var blobNamessToRemove = blobSystem.ListBlobs(excludeFuzzy)
             .Select(b => b.Name)
             .Except(blobNamesToKeep);
 
@@ -148,7 +148,7 @@ public class SnapshotStore
             var blob = blobReference.Blob;
 
             if (blobSystem.BlobExists(blob.Name)
-                && blobSystem.FetchMetadata(blob.Name).Equals(blob))
+                && blobSystem.GetBlob(blob.Name).Equals(blob))
             {
                 return blob;
             }
@@ -452,7 +452,7 @@ public class SnapshotStore
             return blobReference;
         }
 
-        return blobSystem.FetchBlobs(excludeFuzzy)
+        return blobSystem.ListBlobs(excludeFuzzy)
             .AsParallel()
             .Select(WriteBlob)
             .OrderBy(blobReference => blobReference.Blob.Name)

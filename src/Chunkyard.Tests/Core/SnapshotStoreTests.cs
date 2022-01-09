@@ -498,7 +498,7 @@ public static class SnapshotStoreTests
         foreach (var blob in blobs)
         {
             Assert.True(blobSystem.BlobExists(blob.Name));
-            Assert.Equal(blob, blobSystem.FetchMetadata(blob.Name));
+            Assert.Equal(blob, blobSystem.GetBlob(blob.Name));
 
             using var stream = blobSystem.OpenRead(blob.Name);
             var bytes = ToBytes(stream);
@@ -848,7 +848,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             expectedBlobs.Select(b => b.Name),
-            blobSystem.FetchBlobs(Fuzzy.Default).Select(b => b.Name));
+            blobSystem.ListBlobs(Fuzzy.Default).Select(b => b.Name));
     }
 
     private static byte[] GenerateRandomNumber(int length)

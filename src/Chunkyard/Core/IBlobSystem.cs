@@ -9,11 +9,11 @@ public interface IBlobSystem
 
     void RemoveBlob(string blobName);
 
-    IReadOnlyCollection<Blob> FetchBlobs(Fuzzy excludeFuzzy);
+    IReadOnlyCollection<Blob> ListBlobs(Fuzzy excludeFuzzy);
 
     Stream OpenRead(string blobName);
 
-    Blob FetchMetadata(string blobName);
+    Blob GetBlob(string blobName);
 
     Stream OpenWrite(Blob blob);
 }

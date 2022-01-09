@@ -29,7 +29,7 @@ public class FileBlobSystem : IBlobSystem
             ToFile(blobName));
     }
 
-    public IReadOnlyCollection<Blob> FetchBlobs(Fuzzy excludeFuzzy)
+    public IReadOnlyCollection<Blob> ListBlobs(Fuzzy excludeFuzzy)
     {
         var foundFiles = _files
             .SelectMany(f => Find(f, excludeFuzzy))
@@ -46,7 +46,7 @@ public class FileBlobSystem : IBlobSystem
             ToFile(blobName));
     }
 
-    public Blob FetchMetadata(string blobName)
+    public Blob GetBlob(string blobName)
     {
         return new Blob(
             blobName,

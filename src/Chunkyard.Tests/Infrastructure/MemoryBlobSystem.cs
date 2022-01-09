@@ -46,7 +46,7 @@ internal class MemoryBlobSystem : IBlobSystem
         }
     }
 
-    public IReadOnlyCollection<Blob> FetchBlobs(Fuzzy excludeFuzzy)
+    public IReadOnlyCollection<Blob> ListBlobs(Fuzzy excludeFuzzy)
     {
         lock (_lock)
         {
@@ -65,7 +65,7 @@ internal class MemoryBlobSystem : IBlobSystem
         }
     }
 
-    public Blob FetchMetadata(string blobName)
+    public Blob GetBlob(string blobName)
     {
         lock (_lock)
         {

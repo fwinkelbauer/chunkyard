@@ -32,7 +32,7 @@ public static class BlobSystemTests
             () => blobSystem.BlobExists(invalidBlobName));
 
         Assert.Throws<ChunkyardException>(
-            () => blobSystem.FetchMetadata(invalidBlobName));
+            () => blobSystem.GetBlob(invalidBlobName));
 
         Assert.Throws<ChunkyardException>(
             () => blobSystem.OpenRead(invalidBlobName));
@@ -58,11 +58,11 @@ public static class BlobSystemTests
 
         Assert.Equal(
             blob,
-            blobSystem.FetchMetadata(blob.Name));
+            blobSystem.GetBlob(blob.Name));
 
         Assert.Equal(
             new[] { blob },
-            blobSystem.FetchBlobs(Fuzzy.Default));
+            blobSystem.ListBlobs(Fuzzy.Default));
 
         using (var readStream = blobSystem.OpenRead(blob.Name))
         using (var memoryStream = new MemoryStream())
@@ -76,6 +76,6 @@ public static class BlobSystemTests
 
         blobSystem.RemoveBlob(blob.Name);
 
-        Assert.Empty(blobSystem.FetchBlobs(Fuzzy.Default));
+        Assert.Empty(blobSystem.ListBlobs(Fuzzy.Default));
     }
 }

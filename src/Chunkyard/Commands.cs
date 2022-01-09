@@ -8,7 +8,7 @@ internal static class Commands
     public static void PreviewSnapshot(PreviewOptions o)
     {
         var blobSystem = new FileBlobSystem(o.Files);
-        var blobs = blobSystem.FetchBlobs(
+        var blobs = blobSystem.ListBlobs(
             new Fuzzy(o.ExcludePatterns));
 
         var snapshotStore = CreateSnapshotStore(o.Repository);
