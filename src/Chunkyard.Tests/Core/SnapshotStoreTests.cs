@@ -212,20 +212,20 @@ public static class SnapshotStoreTests
     public static void GetSnapshot_Accepts_Negative_SnapshotIds_With_Gaps()
     {
         var snapshotStore = CreateSnapshotStore();
-        var blobReader = new MemoryBlobSystem(CreateBlobs());
+        var blobSystem = new MemoryBlobSystem(CreateBlobs());
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            blobReader,
+            blobSystem,
             Fuzzy.Default,
             DateTime.UtcNow);
 
         var snapshotIdToRemove = snapshotStore.StoreSnapshot(
-            blobReader,
+            blobSystem,
             Fuzzy.Default,
             DateTime.UtcNow);
 
         snapshotStore.StoreSnapshot(
-            blobReader,
+            blobSystem,
             Fuzzy.Default,
             DateTime.UtcNow);
 
@@ -392,17 +392,17 @@ public static class SnapshotStoreTests
     public static void IsEmpty_Respects_StoreSnapshot_And_RemoveSnapshot()
     {
         var snapshotStore = CreateSnapshotStore();
-        var blobReader = new MemoryBlobSystem(CreateBlobs());
+        var blobSystem = new MemoryBlobSystem(CreateBlobs());
 
         Assert.True(snapshotStore.IsEmpty);
 
         snapshotStore.StoreSnapshot(
-            blobReader,
+            blobSystem,
             Fuzzy.Default,
             DateTime.UtcNow);
 
         snapshotStore.StoreSnapshot(
-            blobReader,
+            blobSystem,
             Fuzzy.Default,
             DateTime.UtcNow);
 
@@ -642,15 +642,15 @@ public static class SnapshotStoreTests
     public static void RemoveSnapshot_Removes_Existing_Snapshots()
     {
         var snapshotStore = CreateSnapshotStore();
-        var blobReader = new MemoryBlobSystem(CreateBlobs());
+        var blobSystem = new MemoryBlobSystem(CreateBlobs());
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            blobReader,
+            blobSystem,
             Fuzzy.Default,
             DateTime.UtcNow);
 
         snapshotStore.StoreSnapshot(
-            blobReader,
+            blobSystem,
             Fuzzy.Default,
             DateTime.UtcNow);
 
@@ -671,18 +671,18 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void KeepSnapshots_Deletes_Previous_Snapshots()
+    public static void KeepSnapshots_Removes_Previous_Snapshots()
     {
         var snapshotStore = CreateSnapshotStore();
-        var blobReader = new MemoryBlobSystem(CreateBlobs());
+        var blobSystem = new MemoryBlobSystem(CreateBlobs());
 
         snapshotStore.StoreSnapshot(
-            blobReader,
+            blobSystem,
             Fuzzy.Default,
             DateTime.UtcNow);
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            blobReader,
+            blobSystem,
             Fuzzy.Default,
             DateTime.UtcNow);
 

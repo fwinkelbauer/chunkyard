@@ -7,9 +7,8 @@ internal static class Commands
 {
     public static void PreviewSnapshot(PreviewOptions o)
     {
-        var blobReader = new FileBlobSystem(o.Files);
-
-        var blobs = blobReader.FetchBlobs(
+        var blobSystem = new FileBlobSystem(o.Files);
+        var blobs = blobSystem.FetchBlobs(
             new Fuzzy(o.ExcludePatterns));
 
         var snapshotStore = CreateSnapshotStore(o.Repository);
@@ -32,10 +31,8 @@ internal static class Commands
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
 
-        var blobReader = new FileBlobSystem(o.Files);
-
         snapshotStore.StoreSnapshot(
-            blobReader,
+            new FileBlobSystem(o.Files),
             new Fuzzy(o.ExcludePatterns),
             DateTime.UtcNow);
     }

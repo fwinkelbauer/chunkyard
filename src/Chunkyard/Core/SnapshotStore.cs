@@ -227,10 +227,10 @@ public class SnapshotStore
             .ToArray();
 
         var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
-        var snapshotIdsToDelete = snapshotIds.Except(snapshotIdsToKeep)
+        var snapshotIdsToRemove = snapshotIds.Except(snapshotIdsToKeep)
             .ToArray();
 
-        foreach (var snapshotId in snapshotIdsToDelete)
+        foreach (var snapshotId in snapshotIdsToRemove)
         {
             _intRepository.RemoveValue(snapshotId);
             _probe.RemovedSnapshot(snapshotId);
@@ -238,7 +238,7 @@ public class SnapshotStore
 
         _currentSnapshotId = FetchCurrentSnapshotId();
 
-        return snapshotIdsToDelete;
+        return snapshotIdsToRemove;
     }
 
     public void RetrieveContent(
