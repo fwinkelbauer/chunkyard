@@ -7,6 +7,8 @@ public interface IBlobSystem
 {
     bool BlobExists(string blobName);
 
+    void RemoveBlob(string blobName);
+
     IReadOnlyCollection<Blob> FetchBlobs(Fuzzy excludeFuzzy);
 
     Stream OpenRead(string blobName);

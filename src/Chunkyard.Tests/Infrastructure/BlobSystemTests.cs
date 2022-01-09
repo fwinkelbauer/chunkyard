@@ -73,5 +73,9 @@ public static class BlobSystemTests
                 expectedBytes,
                 memoryStream.ToArray());
         }
+
+        blobSystem.RemoveBlob(blob.Name);
+
+        Assert.Empty(blobSystem.FetchBlobs(Fuzzy.Default));
     }
 }

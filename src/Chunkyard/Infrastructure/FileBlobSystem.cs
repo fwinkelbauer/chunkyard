@@ -23,6 +23,12 @@ public class FileBlobSystem : IBlobSystem
             ToFile(blobName));
     }
 
+    public void RemoveBlob(string blobName)
+    {
+        File.Delete(
+            ToFile(blobName));
+    }
+
     public IReadOnlyCollection<Blob> FetchBlobs(Fuzzy excludeFuzzy)
     {
         var foundFiles = _files

@@ -38,6 +38,14 @@ internal class MemoryBlobSystem : IBlobSystem
         }
     }
 
+    public void RemoveBlob(string blobName)
+    {
+        lock (_lock)
+        {
+            _blobs.Remove(blobName);
+        }
+    }
+
     public IReadOnlyCollection<Blob> FetchBlobs(Fuzzy excludeFuzzy)
     {
         lock (_lock)
