@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 12.1.0 - 2022-01-09
+
 ### Added
 
 - The `clean` command to delete files which are not found in a snapshot
