@@ -48,6 +48,7 @@ public static class Program
             .WithParsed<GarbageCollectOptions>(Commands.GarbageCollect)
             .WithParsed<CopyOptions>(Commands.Copy)
             .WithParsed<CatOptions>(Commands.Cat)
+            .WithParsed<CleanOptions>(Commands.CleanBlobSystem)
             .WithNotParsed(_ => Environment.ExitCode = 1);
     }
 }

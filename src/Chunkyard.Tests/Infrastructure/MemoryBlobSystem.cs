@@ -78,14 +78,6 @@ internal class MemoryBlobSystem : IBlobSystem
         return new WriteStream(this, blob);
     }
 
-    public void UpdateMetadata(Blob blob)
-    {
-        lock (_lock)
-        {
-            _blobs[blob.Name] = blob;
-        }
-    }
-
     private class WriteStream : MemoryStream
     {
         private readonly MemoryBlobSystem _blobSystem;

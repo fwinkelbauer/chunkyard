@@ -117,6 +117,27 @@ public class SnapshotStore
             CheckContentUriValid);
     }
 
+    public void CleanBlobSystem(
+        IBlobSystem blobSystem,
+        Fuzzy excludeFuzzy,
+        int snapshotId)
+    {
+        ArgumentNullException.ThrowIfNull(blobSystem);
+
+        var snapshot = GetSnapshot(snapshotId);
+        var blobNamesToKeep = snapshot.BlobReferences
+            .Select(br => br.Blob.Name);
+
+        var blobNamessToRemove = blobSystem.FetchBlobs(excludeFuzzy)
+            .Select(b => b.Name)
+            .Except(blobNamesToKeep);
+
+        foreach (var blobName in blobNamessToRemove)
+        {
+            blobSystem.RemoveBlob(blobName);
+        }
+    }
+
     public IEnumerable<Blob> RetrieveSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,

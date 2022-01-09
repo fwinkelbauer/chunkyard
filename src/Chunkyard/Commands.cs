@@ -84,6 +84,16 @@ internal static class Commands
         }
     }
 
+    public static void CleanBlobSystem(CleanOptions o)
+    {
+        var snapshotStore = CreateSnapshotStore(o.Repository);
+
+        snapshotStore.CleanBlobSystem(
+            new FileBlobSystem(o.Files),
+            new Fuzzy(o.ExcludePatterns),
+            o.SnapshotId);
+    }
+
     public static void RestoreSnapshot(RestoreOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);

@@ -482,7 +482,7 @@ public static class SnapshotStoreTests
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        var blobWriter = new MemoryBlobSystem(
+        var blobSystem = new MemoryBlobSystem(
             new[]
             {
                 blobs[1],
@@ -491,16 +491,16 @@ public static class SnapshotStoreTests
             blobName => Array.Empty<byte>());
 
         snapshotStore.RetrieveSnapshot(
-            blobWriter,
+            blobSystem,
             snapshotId,
             Fuzzy.Default);
 
         foreach (var blob in blobs)
         {
-            Assert.True(blobWriter.BlobExists(blob.Name));
-            Assert.Equal(blob, blobWriter.FetchMetadata(blob.Name));
+            Assert.True(blobSystem.BlobExists(blob.Name));
+            Assert.Equal(blob, blobSystem.FetchMetadata(blob.Name));
 
-            using var stream = blobWriter.OpenRead(blob.Name);
+            using var stream = blobSystem.OpenRead(blob.Name);
             var bytes = ToBytes(stream);
 
             if (blob.Name.Equals(blobs[1].Name))
@@ -814,6 +814,41 @@ public static class SnapshotStoreTests
             () => snapshotStore.Copy(
                 CreateRepository<Uri>(),
                 CreateRepository<int>()));
+    }
+
+    [Fact]
+    public static void Clean_Removes_Blobs_Not_In_Snapshot_Using_Blob_Name_Only()
+    {
+        var snapshotStore = CreateSnapshotStore();
+        var expectedBlobs = CreateBlobs(new[] { "some blob", "other blob" });
+        var blobSystem = new MemoryBlobSystem(expectedBlobs);
+
+        var snapshotId = snapshotStore.StoreSnapshot(
+            blobSystem,
+            Fuzzy.Default,
+            DateTime.UtcNow);
+
+        var newBlob = new Blob("blob to delete", DateTime.UtcNow);
+        var existingBlob = new Blob("other blob", DateTime.UtcNow);
+
+        using (var writeStream = blobSystem.OpenWrite(newBlob))
+        {
+            writeStream.Write(new byte[] { 0x10, 0x11 });
+        }
+
+        using (var writeStream = blobSystem.OpenWrite(existingBlob))
+        {
+            writeStream.Write(new byte[] { 0x10, 0x11 });
+        }
+
+        snapshotStore.CleanBlobSystem(
+            blobSystem,
+            Fuzzy.Default,
+            snapshotId);
+
+        Assert.Equal(
+            expectedBlobs.Select(b => b.Name),
+            blobSystem.FetchBlobs(Fuzzy.Default).Select(b => b.Name));
     }
 
     private static byte[] GenerateRandomNumber(int length)

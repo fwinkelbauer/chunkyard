@@ -263,3 +263,31 @@ public class ShowOptions
     [Option("content-only", Required = false, HelpText = "Show content", Default = false)]
     public bool ContentOnly { get; }
 }
+
+[Verb("clean", HelpText = "Remove files which are not part of a snapshot.")]
+public class CleanOptions
+{
+    public CleanOptions(
+        string repository,
+        IEnumerable<string> files,
+        IEnumerable<string> excludePatterns,
+        int snapshotId)
+    {
+        Repository = repository;
+        Files = files;
+        ExcludePatterns = excludePatterns;
+        SnapshotId = snapshotId;
+    }
+
+    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    public string Repository { get; }
+
+    [Option('f', "files", Required = true, HelpText = "The files and directories to include")]
+    public IEnumerable<string> Files { get; }
+
+    [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude")]
+    public IEnumerable<string> ExcludePatterns { get; }
+
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
+    public int SnapshotId { get; }
+}
