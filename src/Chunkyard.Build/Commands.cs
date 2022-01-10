@@ -82,14 +82,11 @@ internal static class Commands
 
     public static void Outdated()
     {
+        Dotnet($"restore {Solution}");
+
         Dotnet($"list {Solution} package --deprecated --include-transitive");
         Dotnet($"list {Solution} package --vulnerable --include-transitive");
-
-        Dotnet("tool restore");
-
-        Dotnet(
-            $"outdated {Solution}",
-            "--fail-on-updates");
+        Dotnet($"list {Solution} package --outdated");
     }
 
     public static void Release()
