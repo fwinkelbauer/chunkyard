@@ -82,6 +82,9 @@ internal static class Commands
 
     public static void Outdated()
     {
+        Dotnet($"list {Solution} package --deprecated --include-transitive");
+        Dotnet($"list {Solution} package --vulnerable --include-transitive");
+
         Dotnet("tool restore");
 
         Dotnet(
