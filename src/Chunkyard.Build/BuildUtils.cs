@@ -74,7 +74,7 @@ internal static class BuildUtils
         return match.Groups[1].Value;
     }
 
-    public static void CleanDirectory(string directory)
+    public static void CreateCleanDirectory(string directory)
     {
         var dirInfo = new DirectoryInfo(directory);
 

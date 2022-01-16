@@ -20,7 +20,7 @@ internal static class Commands
             $"clean {Solution}",
             $"-c {Configuration}");
 
-        BuildUtils.CleanDirectory(Artifacts);
+        BuildUtils.CreateCleanDirectory(Artifacts);
     }
 
     public static void Build()
