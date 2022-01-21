@@ -1,5 +1,11 @@
 namespace Chunkyard.Core;
 
+/// <summary>
+/// A class which stores blobs as a <see cref="Snapshot"/>. The possibility to
+/// store a snapshot used to be part of the <see cref="SnapshotStore"/> class,
+/// but was moved here in order to improve its performance. Previous
+/// implementations of "StoreSnapshot" can be found in commits prior to e297430.
+/// </summary>
 internal class SnapshotWriter
 {
     private const int RingBufferLength = 64;

@@ -1,6 +1,10 @@
 namespace Chunkyard.Core;
 
-public class RingBuffer
+/// <summary>
+/// An implementation of a lock-free ring buffer which supports multiple
+/// writers.
+/// </summary>
+internal class RingBuffer
 {
     private readonly byte[][] _ringBuffer;
     private readonly int[] _bufferLenghts;
