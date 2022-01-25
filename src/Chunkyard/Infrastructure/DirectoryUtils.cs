@@ -23,4 +23,20 @@ internal static class DirectoryUtils
         Directory.CreateDirectory(
             GetParent(file));
     }
+
+    public static string ToSafePath(
+        string absoluteDirectory,
+        string relativePath)
+    {
+        var absolutePath = Path.GetFullPath(
+            Path.Combine(absoluteDirectory, relativePath));
+
+        if (!absolutePath.StartsWith(absoluteDirectory))
+        {
+            throw new ChunkyardException(
+                "Invalid directory traversal");
+        }
+
+        return absolutePath;
+    }
 }

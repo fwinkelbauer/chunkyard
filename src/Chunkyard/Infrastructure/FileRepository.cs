@@ -80,16 +80,7 @@ internal class FileRepository<T> : IRepository<T>
 
     private string ToFile(T key)
     {
-        var path = Path.GetFullPath(
-            Path.Combine(_directory, _toFile(key)));
-
-        if (!path.StartsWith(_directory))
-        {
-            throw new ChunkyardException(
-                "Invalid directory traversal");
-        }
-
-        return path;
+        return DirectoryUtils.ToSafePath(_directory, _toFile(key));
     }
 
     private T ToKey(string file)

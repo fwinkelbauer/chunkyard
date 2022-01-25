@@ -87,16 +87,7 @@ public class FileBlobSystem : IBlobSystem
 
     private string ToFile(string blobName)
     {
-        var path = Path.GetFullPath(
-            Path.Combine(_parent, blobName));
-
-        if (!path.StartsWith(_parent))
-        {
-            throw new ChunkyardException(
-                "Invalid directory traversal");
-        }
-
-        return path;
+        return DirectoryUtils.ToSafePath(_parent, blobName);
     }
 
     private static IEnumerable<string> Find(
