@@ -8,17 +8,17 @@ internal class FileRepository<T> : IRepository<T>
     private readonly ConcurrentDictionary<string, object> _locks;
     private readonly string _directory;
     private readonly Func<T, string> _toFile;
-    private readonly Func<string, T> _fromFile;
+    private readonly Func<string, T> _toKey;
 
     public FileRepository(
         string directory,
         Func<T, string> toFile,
-        Func<string, T> fromFile)
+        Func<string, T> toKey)
     {
         _locks = new ConcurrentDictionary<string, object>();
         _directory = Path.GetFullPath(directory);
         _toFile = toFile;
-        _fromFile = fromFile;
+        _toKey = toKey;
     }
 
     public void StoreValue(T key, ReadOnlySpan<byte> value)
@@ -68,7 +68,7 @@ internal class FileRepository<T> : IRepository<T>
             SearchOption.AllDirectories);
 
         return files
-            .Select(FromFile)
+            .Select(ToKey)
             .ToArray();
     }
 
@@ -92,9 +92,9 @@ internal class FileRepository<T> : IRepository<T>
         return path;
     }
 
-    private T FromFile(string file)
+    private T ToKey(string file)
     {
-        return _fromFile(
+        return _toKey(
             Path.GetRelativePath(_directory, file));
     }
 }
