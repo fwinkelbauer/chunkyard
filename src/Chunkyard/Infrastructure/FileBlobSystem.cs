@@ -87,7 +87,7 @@ public class FileBlobSystem : IBlobSystem
 
     private string ToFile(string blobName)
     {
-        return DirectoryUtils.ToSafePath(_parent, blobName);
+        return DirectoryUtils.CombinePathSafe(_parent, blobName);
     }
 
     private static IEnumerable<string> Find(

@@ -24,19 +24,23 @@ internal static class DirectoryUtils
             GetParent(file));
     }
 
-    public static string ToSafePath(
+    public static string CombinePathSafe(
         string absoluteDirectory,
         string relativePath)
     {
-        var absolutePath = Path.GetFullPath(
+        var absolutePath1 = Path.GetFullPath(
             Path.Combine(absoluteDirectory, relativePath));
 
-        if (!absolutePath.StartsWith(absoluteDirectory))
+        var absolutePath2 = Path.Combine(
+            Path.GetFullPath(absoluteDirectory),
+            relativePath);
+
+        if (!absolutePath1.Equals(absolutePath2))
         {
             throw new ChunkyardException(
                 "Invalid directory traversal");
         }
 
-        return absolutePath;
+        return absolutePath1;
     }
 }

@@ -80,7 +80,7 @@ internal class FileRepository<T> : IRepository<T>
 
     private string ToFile(T key)
     {
-        return DirectoryUtils.ToSafePath(_directory, _toFile(key));
+        return DirectoryUtils.CombinePathSafe(_directory, _toFile(key));
     }
 
     private T ToKey(string file)
