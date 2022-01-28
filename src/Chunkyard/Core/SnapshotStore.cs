@@ -167,24 +167,11 @@ public class SnapshotStore
                 return blob;
             }
 
-            try
-            {
-                using var stream = blobSystem.OpenWrite(blob);
+            using var stream = blobSystem.OpenWrite(blob);
 
-                RetrieveContent(
-                    blobReference.ContentUris,
-                    stream);
-            }
-            catch (ChunkyardException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                throw new ChunkyardException(
-                    $"Could not restore blob {blobReference.Blob.Name}",
-                    e);
-            }
+            RetrieveContent(
+                blobReference.ContentUris,
+                stream);
 
             _probe.RetrievedBlob(blobReference.Blob);
 
