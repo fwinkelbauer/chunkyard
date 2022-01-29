@@ -22,6 +22,22 @@ public static class DataConvert
         return t;
     }
 
+    public static T BytesToVersionedObject<T>(
+        byte[] json,
+        int supportedSchemaVersion)
+        where T : notnull, IVersioned
+    {
+        var versioned = BytesToObject<Versioned>(json);
+
+        if (versioned.SchemaVersion != supportedSchemaVersion)
+        {
+            throw new NotSupportedException(
+                $"{typeof(T).Name} version {versioned.SchemaVersion} is not supported");
+        }
+
+        return BytesToObject<T>(json);
+    }
+
     public static byte[] TextToBytes(string text)
     {
         return Encoding.UTF8.GetBytes(text);

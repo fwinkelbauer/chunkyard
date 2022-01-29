@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The storage format by re-adding schema information. Chunkyard will again stop
+  processing a snapshot if the schema version is not supported
+
 ## 12.1.0 - 2022-01-09
 
 ### Added

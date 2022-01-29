@@ -65,14 +65,14 @@ public static class DataConvertTests
                     })
             });
 
-        var expectedJson = DataConvert.BytesToText(
+        var expected = DataConvert.BytesToText(
             DataConvert.ObjectToBytes(serializedSnapshot));
 
-        var actualJson = DataConvert.BytesToText(
+        var actual = DataConvert.BytesToText(
             DataConvert.ObjectToBytes(currentSnapshot));
 
         Assert.True(
-            expectedJson.Equals(actualJson),
+            expected.Equals(actual),
             "Broke persisted repository format");
     }
 
@@ -81,6 +81,7 @@ public static class DataConvertTests
     {
         var serializedReference = new
         {
+            SchemaVersion = 1,
             Salt = "ESIzRA==",
             Iterations = 1000,
             ContentUris = new[]
@@ -90,6 +91,7 @@ public static class DataConvertTests
         };
 
         var currentReference = new SnapshotReference(
+            1,
             new byte[] { 0x11, 0x22, 0x33, 0x44 },
             1000,
             new[]
@@ -97,14 +99,37 @@ public static class DataConvertTests
                 new Uri("sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e")
             });
 
-        var expectedJson = DataConvert.BytesToText(
+        var expected = DataConvert.BytesToText(
             DataConvert.ObjectToBytes(serializedReference));
 
-        var actualJson = DataConvert.BytesToText(
+        var actual = DataConvert.BytesToText(
             DataConvert.ObjectToBytes(currentReference));
 
         Assert.True(
-            expectedJson.Equals(actualJson),
+            expected.Equals(actual),
             "Broke persisted repository format");
+    }
+
+    [Fact]
+    public static void BytesToVersionedObject_Returns_Supported_Object()
+    {
+        var expected = new Versioned(1);
+
+        var actual = DataConvert.BytesToVersionedObject<Versioned>(
+            DataConvert.ObjectToBytes(expected),
+            1);
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public static void BytesToVersionedObject_Throws_If_Unsupported_Object()
+    {
+        var obj = new Versioned(1);
+
+        Assert.Throws<NotSupportedException>(
+            () => DataConvert.BytesToVersionedObject<Versioned>(
+                DataConvert.ObjectToBytes(obj),
+                2));
     }
 }

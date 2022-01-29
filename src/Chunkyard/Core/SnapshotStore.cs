@@ -9,6 +9,8 @@ public class SnapshotStore
     public const int LatestSnapshotId = -1;
     public const int SecondLatestSnapshotId = -2;
 
+    private const int SchemaVersion = 1;
+
     private readonly IRepository<Uri> _uriRepository;
     private readonly IRepository<int> _intRepository;
     private readonly FastCdc _fastCdc;
@@ -80,6 +82,7 @@ public class SnapshotStore
         var newSnapshot = new Snapshot(creationTimeUtc, blobReferences);
 
         var newSnapshotReference = new SnapshotReference(
+            SchemaVersion,
             _aesGcmCrypto.Value.Salt,
             _aesGcmCrypto.Value.Iterations,
             snapshotWriter.WriteObject(newSnapshot));
@@ -420,8 +423,9 @@ public class SnapshotStore
     {
         try
         {
-            return DataConvert.BytesToObject<SnapshotReference>(
-                _intRepository.RetrieveValue(snapshotId));
+            return DataConvert.BytesToVersionedObject<SnapshotReference>(
+                _intRepository.RetrieveValue(snapshotId),
+                SchemaVersion);
         }
         catch (Exception e)
         {
