@@ -33,7 +33,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ### Removed
 
-- The `--mirror` flag o the `copy` command
+- The `--mirror` flag of the `copy` command
 
 ## 11.11.2 - 2021-12-19
 
