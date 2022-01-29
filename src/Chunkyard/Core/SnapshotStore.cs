@@ -9,7 +9,7 @@ public class SnapshotStore
     public const int LatestSnapshotId = -1;
     public const int SecondLatestSnapshotId = -2;
 
-    private const int SchemaVersion = 1;
+    private const int SchemaVersion = 0;
 
     private readonly IRepository<Uri> _uriRepository;
     private readonly IRepository<int> _intRepository;
