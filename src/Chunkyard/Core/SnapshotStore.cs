@@ -197,7 +197,8 @@ public class SnapshotStore
         var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
 
         return GetSnapshot(
-            GetSnapshotReference(resolvedSnapshotId));
+            GetSnapshotReference(resolvedSnapshotId),
+            resolvedSnapshotId);
     }
 
     public IEnumerable<int> ListSnapshotIds()
@@ -345,7 +346,7 @@ public class SnapshotStore
         foreach (var snapshotId in snapshotIds)
         {
             var snapshotReference = GetSnapshotReference(snapshotId);
-            var snapshot = GetSnapshot(snapshotReference);
+            var snapshot = GetSnapshot(snapshotReference, snapshotId);
 
             contentUris.UnionWith(
                 snapshotReference.ContentUris);
@@ -435,7 +436,9 @@ public class SnapshotStore
         }
     }
 
-    private Snapshot GetSnapshot(SnapshotReference snapshotReference)
+    private Snapshot GetSnapshot(
+        SnapshotReference snapshotReference,
+        int snapshotId)
     {
         using var memoryStream = new MemoryStream();
 
@@ -443,8 +446,17 @@ public class SnapshotStore
             snapshotReference.ContentUris,
             memoryStream);
 
-        return DataConvert.BytesToObject<Snapshot>(
-            memoryStream.ToArray());
+        try
+        {
+            return DataConvert.BytesToObject<Snapshot>(
+                memoryStream.ToArray());
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not read snapshot: #{snapshotId}",
+                e);
+        }
     }
 
     private byte[] GetValidContent(Uri contentUri)
