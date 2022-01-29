@@ -7,10 +7,12 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 12.2.0 - 2022-01-29
+
 ### Added
 
-- Schema information back to snapshot references. Chunkyard will again stop
-  processing if the schema version is not supported
+- A schema information back to snapshot references. Chunkyard will again stop
+  processing if a given schema version is not supported
 
 ## 12.1.0 - 2022-01-09
 
