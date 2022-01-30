@@ -115,7 +115,6 @@ public class FileBlobSystem : IBlobSystem
         return files.Where(f => !excludeFuzzy.IsExcludingMatch(f));
     }
 
-    // https://rosettacode.org/wiki/Find_common_directory_path#C.23
     private static string FindCommonParent(string[] files)
     {
         if (files.Length == 0)
@@ -131,20 +130,26 @@ public class FileBlobSystem : IBlobSystem
         }
 
         var parent = "";
-        var separatedPaths = files
-            .First(str => str.Length == files.Max(st2 => st2.Length))
-            .Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries)
+        var fileSegments = files
+            .OrderBy(file => file)
+            .Last()
+            .Split(
+                Path.DirectorySeparatorChar,
+                StringSplitOptions.RemoveEmptyEntries)
             .ToArray();
 
-        foreach (var pathSegment in separatedPaths)
+        foreach (var fileSegment in fileSegments)
         {
-            if (parent.Length == 0 && files.All(str => str.StartsWith(pathSegment)))
+            var newParent = parent + Path.DirectorySeparatorChar + fileSegment;
+
+            if (parent.Length == 0
+                && files.All(file => file.StartsWith(fileSegment)))
             {
-                parent = pathSegment;
+                parent = fileSegment;
             }
-            else if (files.All(str => str.StartsWith(parent + Path.DirectorySeparatorChar + pathSegment)))
+            else if (files.All(file => file.StartsWith(newParent)))
             {
-                parent += Path.DirectorySeparatorChar + pathSegment;
+                parent = newParent;
             }
             else
             {
