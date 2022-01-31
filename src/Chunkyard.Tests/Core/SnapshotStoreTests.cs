@@ -418,7 +418,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void RetrieveSnapshot_Writes_Ordered_Blob_Chunks_To_Stream()
+    public static void RestoreSnapshot_Writes_Ordered_Blob_Chunks_To_Stream()
     {
         var fastCdc = new FastCdc(64, 256, 1024);
         var snapshotStore = CreateSnapshotStore(
@@ -438,7 +438,7 @@ public static class SnapshotStoreTests
 
         var blobSystem = new MemoryBlobSystem();
 
-        var retrievedBlobs = snapshotStore.RetrieveSnapshot(
+        var restoredBlobs = snapshotStore.RestoreSnapshot(
             blobSystem,
             snapshotId,
             Fuzzy.Default);
@@ -446,7 +446,7 @@ public static class SnapshotStoreTests
         var blobReferences = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences;
 
-        Assert.Equal(blobs, retrievedBlobs);
+        Assert.Equal(blobs, restoredBlobs);
         Assert.NotEmpty(blobReferences);
 
         foreach (var blobReference in blobReferences)
@@ -454,7 +454,7 @@ public static class SnapshotStoreTests
             using var blobStream = blobSystem.OpenRead(blobs[0].Name);
             using var contentStream = new MemoryStream();
 
-            snapshotStore.RetrieveContent(
+            snapshotStore.RestoreContent(
                 blobReference.ContentUris,
                 contentStream);
 
@@ -465,7 +465,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void RetrieveSnapshot_Overwrites_Blobs_If_LastWriteTimeUtc_Differs()
+    public static void RestoreSnapshot_Overwrites_Blobs_If_LastWriteTimeUtc_Differs()
     {
         var snapshotStore = CreateSnapshotStore();
 
@@ -490,7 +490,7 @@ public static class SnapshotStoreTests
             },
             blobName => Array.Empty<byte>());
 
-        snapshotStore.RetrieveSnapshot(
+        snapshotStore.RestoreSnapshot(
             blobSystem,
             snapshotId,
             Fuzzy.Default);
@@ -515,7 +515,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void RetrieveSnapshot_Can_Write_Empty_Blobs()
+    public static void RestoreSnapshot_Can_Write_Empty_Blobs()
     {
         var snapshotStore = CreateSnapshotStore();
         var blobs = CreateBlobs(new[] { "some empty blob" });
@@ -529,14 +529,14 @@ public static class SnapshotStoreTests
 
         var blobSystem = new MemoryBlobSystem();
 
-        var retrievedBlobs = snapshotStore.RetrieveSnapshot(
+        var restoredBlobs = snapshotStore.RestoreSnapshot(
             blobSystem,
             snapshotId,
             Fuzzy.Default);
 
-        Assert.Equal(blobs, retrievedBlobs);
+        Assert.Equal(blobs, restoredBlobs);
 
-        foreach (var blob in retrievedBlobs)
+        foreach (var blob in restoredBlobs)
         {
             using var stream = blobSystem.OpenRead(blob.Name);
 
@@ -545,19 +545,19 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void RetrieveSnapshot_Throws_On_Empty_SnapshotStore()
+    public static void RestoreSnapshot_Throws_On_Empty_SnapshotStore()
     {
         var snapshotStore = CreateSnapshotStore();
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.RetrieveSnapshot(
+            () => snapshotStore.RestoreSnapshot(
                 new MemoryBlobSystem(),
                 SnapshotStore.LatestSnapshotId,
                 Fuzzy.Default));
     }
 
     [Fact]
-    public static void RetrieveSnapshot_Throws_Given_Wrong_Key()
+    public static void RestoreSnapshot_Throws_Given_Wrong_Key()
     {
         var snapshotId = CreateSnapshotStore(password: "a").StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
@@ -565,7 +565,7 @@ public static class SnapshotStoreTests
             DateTime.UtcNow);
 
         Assert.Throws<ChunkyardException>(
-            () => CreateSnapshotStore(password: "b").RetrieveSnapshot(
+            () => CreateSnapshotStore(password: "b").RestoreSnapshot(
                 new MemoryBlobSystem(),
                 snapshotId,
                 Fuzzy.Default));

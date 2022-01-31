@@ -10,7 +10,7 @@ internal class ConsoleProbe : IProbe
         Console.WriteLine($"Stored blob: {blob.Name}");
     }
 
-    public void RetrievedBlob(Blob blob)
+    public void RestoredBlob(Blob blob)
     {
         Console.WriteLine($"Restored blob: {blob.Name}");
     }
@@ -47,7 +47,7 @@ internal class ConsoleProbe : IProbe
         Console.WriteLine($"Stored snapshot: #{snapshotId}");
     }
 
-    public void RetrievedSnapshot(int snapshotId)
+    public void RestoredSnapshot(int snapshotId)
     {
         Console.WriteLine($"Restored snapshot: #{snapshotId}");
     }

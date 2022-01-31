@@ -154,12 +154,12 @@ public class SnapshotStore
         return blobsToRemove;
     }
 
-    public IEnumerable<Blob> RetrieveSnapshot(
+    public IEnumerable<Blob> RestoreSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,
         Fuzzy includeFuzzy)
     {
-        Blob RetrieveBlobReference(BlobReference blobReference)
+        Blob RestoreBlobReference(BlobReference blobReference)
         {
             var blob = blobReference.Blob;
 
@@ -171,18 +171,18 @@ public class SnapshotStore
 
             using var stream = blobSystem.OpenWrite(blob);
 
-            RetrieveContent(blobReference.ContentUris, stream);
-            _probe.RetrievedBlob(blobReference.Blob);
+            RestoreContent(blobReference.ContentUris, stream);
+            _probe.RestoredBlob(blobReference.Blob);
 
             return blob;
         }
 
         var blobs = ShowSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
-            .Select(RetrieveBlobReference)
+            .Select(RestoreBlobReference)
             .ToArray();
 
-        _probe.RetrievedSnapshot(
+        _probe.RestoredSnapshot(
             ResolveSnapshotId(snapshotId));
 
         return blobs;
@@ -262,7 +262,7 @@ public class SnapshotStore
         return snapshotIdsToRemove;
     }
 
-    public void RetrieveContent(
+    public void RestoreContent(
         IEnumerable<Uri> contentUris,
         Stream outputStream)
     {
@@ -431,7 +431,7 @@ public class SnapshotStore
     {
         using var memoryStream = new MemoryStream();
 
-        RetrieveContent(
+        RestoreContent(
             snapshotReference.ContentUris,
             memoryStream);
 

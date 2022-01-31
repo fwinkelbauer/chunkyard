@@ -98,7 +98,7 @@ internal static class Commands
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
 
-        snapshotStore.RetrieveSnapshot(
+        snapshotStore.RestoreSnapshot(
             new FileBlobSystem(new[] { o.Directory }),
             o.SnapshotId,
             new Fuzzy(o.IncludePatterns));
@@ -178,7 +178,7 @@ internal static class Commands
         if (string.IsNullOrEmpty(o.Export))
         {
             using var stream = new MemoryStream();
-            snapshotStore.RetrieveContent(o.ContentUris, stream);
+            snapshotStore.RestoreContent(o.ContentUris, stream);
 
             Console.WriteLine(
                 DataConvert.BytesToText(stream.ToArray()));
@@ -190,7 +190,7 @@ internal static class Commands
                 FileMode.CreateNew,
                 FileAccess.Write);
 
-            snapshotStore.RetrieveContent(o.ContentUris, stream);
+            snapshotStore.RestoreContent(o.ContentUris, stream);
         }
     }
 

@@ -6,7 +6,7 @@ internal class DummyProbe : IProbe
     {
     }
 
-    public void RetrievedBlob(Blob blob)
+    public void RestoredBlob(Blob blob)
     {
     }
 
@@ -34,7 +34,7 @@ internal class DummyProbe : IProbe
     {
     }
 
-    public void RetrievedSnapshot(int snapshotId)
+    public void RestoredSnapshot(int snapshotId)
     {
     }
 

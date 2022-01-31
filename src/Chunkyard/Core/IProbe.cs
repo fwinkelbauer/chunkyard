@@ -8,7 +8,7 @@ public interface IProbe
 {
     void StoredBlob(Blob blob);
 
-    void RetrievedBlob(Blob blob);
+    void RestoredBlob(Blob blob);
 
     void RemovedBlob(Blob blob);
 
@@ -22,7 +22,7 @@ public interface IProbe
 
     void StoredSnapshot(int snapshotId);
 
-    void RetrievedSnapshot(int snapshotId);
+    void RestoredSnapshot(int snapshotId);
 
     void RemovedSnapshot(int snapshotId);
 
