@@ -110,20 +110,6 @@ public class SnapshotStore
 
     public bool CheckSnapshotValid(int snapshotId, Fuzzy includeFuzzy)
     {
-        bool CheckContentUriValid(Uri contentUri)
-        {
-            try
-            {
-                return Id.ContentUriValid(
-                    contentUri,
-                    _uriRepository.RetrieveValue(contentUri));
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
         return CheckSnapshot(
             snapshotId,
             includeFuzzy,
@@ -159,27 +145,9 @@ public class SnapshotStore
         int snapshotId,
         Fuzzy includeFuzzy)
     {
-        Blob RestoreBlobReference(BlobReference blobReference)
-        {
-            var blob = blobReference.Blob;
-
-            if (blobSystem.BlobExists(blob.Name)
-                && blobSystem.GetBlob(blob.Name).Equals(blob))
-            {
-                return blob;
-            }
-
-            using var stream = blobSystem.OpenWrite(blob);
-
-            RestoreContent(blobReference.ContentUris, stream);
-            _probe.RestoredBlob(blobReference.Blob);
-
-            return blob;
-        }
-
         var blobs = ShowSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
-            .Select(RestoreBlobReference)
+            .Select(br => RestoreBlob(blobSystem, br))
             .ToArray();
 
         _probe.RestoredSnapshot(
@@ -342,7 +310,7 @@ public class SnapshotStore
 
             contentUris.UnionWith(
                 snapshot.BlobReferences.SelectMany(
-                    blobReference => blobReference.ContentUris));
+                    br => br.ContentUris));
         }
 
         return contentUris;
@@ -473,5 +441,39 @@ public class SnapshotStore
         }
 
         return content;
+    }
+
+    private bool CheckContentUriValid(Uri contentUri)
+    {
+        try
+        {
+            return Id.ContentUriValid(
+                contentUri,
+                _uriRepository.RetrieveValue(contentUri));
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    private Blob RestoreBlob(
+        IBlobSystem blobSystem,
+        BlobReference blobReference)
+    {
+        var blob = blobReference.Blob;
+
+        if (blobSystem.BlobExists(blob.Name)
+            && blobSystem.GetBlob(blob.Name).Equals(blob))
+        {
+            return blob;
+        }
+
+        using var stream = blobSystem.OpenWrite(blob);
+
+        RestoreContent(blobReference.ContentUris, stream);
+        _probe.RestoredBlob(blobReference.Blob);
+
+        return blob;
     }
 }
