@@ -148,7 +148,6 @@ public class SnapshotStore
         foreach (var blob in blobsToRemove)
         {
             blobSystem.RemoveBlob(blob.Name);
-
             _probe.RemovedBlob(blob);
         }
 
@@ -172,10 +171,7 @@ public class SnapshotStore
 
             using var stream = blobSystem.OpenWrite(blob);
 
-            RetrieveContent(
-                blobReference.ContentUris,
-                stream);
-
+            RetrieveContent(blobReference.ContentUris, stream);
             _probe.RetrievedBlob(blobReference.Blob);
 
             return blob;
@@ -226,7 +222,6 @@ public class SnapshotStore
         foreach (var contentUri in unusedContentUris)
         {
             _uriRepository.RemoveValue(contentUri);
-
             _probe.RemovedContent(contentUri);
         }
 
@@ -279,7 +274,7 @@ public class SnapshotStore
             try
             {
                 var decrypted = _aesGcmCrypto.Value.Decrypt(
-                    _uriRepository.RetrieveValue(contentUri));
+                    RetrieveContent(contentUri));
 
                 outputStream.Write(decrypted);
             }
@@ -287,12 +282,6 @@ public class SnapshotStore
             {
                 throw new ChunkyardException(
                     $"Could not decrypt content: {contentUri}",
-                    e);
-            }
-            catch (Exception e)
-            {
-                throw new ChunkyardException(
-                    $"Could not read content: {contentUri}",
                     e);
             }
         }
@@ -324,7 +313,7 @@ public class SnapshotStore
         {
             otherUriRepository.StoreValue(
                 contentUri,
-                GetValidContent(contentUri));
+                RetrieveValidContent(contentUri));
 
             _probe.CopiedContent(contentUri);
         }
@@ -459,23 +448,11 @@ public class SnapshotStore
         }
     }
 
-    private byte[] GetValidContent(Uri contentUri)
+    private byte[] RetrieveContent(Uri contentUri)
     {
         try
         {
-            var content = _uriRepository.RetrieveValue(contentUri);
-
-            if (!Id.ContentUriValid(contentUri, content))
-            {
-                throw new ChunkyardException(
-                    $"Invalid content: {contentUri}");
-            }
-
-            return content;
-        }
-        catch (ChunkyardException)
-        {
-            throw;
+            return _uriRepository.RetrieveValue(contentUri);
         }
         catch (Exception e)
         {
@@ -483,5 +460,18 @@ public class SnapshotStore
                 $"Could not read content: {contentUri}",
                 e);
         }
+    }
+
+    private byte[] RetrieveValidContent(Uri contentUri)
+    {
+        var content = RetrieveContent(contentUri);
+
+        if (!Id.ContentUriValid(contentUri, content))
+        {
+            throw new ChunkyardException(
+                $"Invalid content: {contentUri}");
+        }
+
+        return content;
     }
 }
