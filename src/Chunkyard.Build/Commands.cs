@@ -95,7 +95,12 @@ internal static class Commands
         var tag = $"v{version}";
         var message = $"Prepare Chunkyard release {tag}";
 
-        Git("reset");
+        if (!GitQuery("status --porcelain").Equals($" M {Changelog}"))
+        {
+            throw new BuildException(
+                $"A release commit should only contain changes to {Changelog}");
+        }
+
         Git($"add {Changelog}");
         Git($"commit -m \"{message}\"");
         Git($"tag -a \"{tag}\" -m \"{message}\"");

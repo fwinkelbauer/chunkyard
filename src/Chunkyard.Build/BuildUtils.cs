@@ -15,7 +15,7 @@ internal static class BuildUtils
             validExitCodes,
             line => builder.AppendLine(line));
 
-        return builder.ToString().Trim();
+        return builder.ToString().TrimEnd();
     }
 
     public static void Exec(
