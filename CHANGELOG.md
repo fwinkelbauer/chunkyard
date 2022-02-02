@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Fixed
+
+- An error when checking for directory traversals
+
 ## 12.2.0 - 2022-01-29
 
 ### Added

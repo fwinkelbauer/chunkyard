@@ -28,19 +28,15 @@ internal static class DirectoryUtils
         string absoluteDirectory,
         string relativePath)
     {
-        var absolutePath1 = Path.GetFullPath(
+        var absolutePath = Path.GetFullPath(
             Path.Combine(absoluteDirectory, relativePath));
 
-        var absolutePath2 = Path.Combine(
-            Path.GetFullPath(absoluteDirectory),
-            relativePath);
-
-        if (!absolutePath1.Equals(absolutePath2))
+        if (!absolutePath.StartsWith(absoluteDirectory))
         {
             throw new ChunkyardException(
                 "Invalid directory traversal");
         }
 
-        return absolutePath1;
+        return absolutePath;
     }
 }
