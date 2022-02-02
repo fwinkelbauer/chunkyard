@@ -16,11 +16,6 @@ internal class MemoryRepository<T> : IRepository<T>
     {
         lock (_lock)
         {
-            if (_valuesPerKey.ContainsKey(key))
-            {
-                return;
-            }
-
             _valuesPerKey.Add(key, value.ToArray());
         }
     }

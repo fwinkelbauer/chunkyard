@@ -3,25 +3,15 @@ namespace Chunkyard.Tests.Infrastructure;
 public static class RepositoryTests
 {
     [Fact]
-    public static void MemoryUriRepository_Can_Read_Write()
-    {
-        UriRepository_Can_Read_Write(new MemoryRepository<Uri>());
-    }
-
-    [Fact]
     public static void MemoryIntRepository_Can_Read_Write()
     {
         IntRepository_Can_Read_Write(new MemoryRepository<int>());
     }
 
     [Fact]
-    public static void FileUriRepository_Can_Read_Write()
+    public static void MemoryUriRepository_Can_Read_Write()
     {
-        using var directory = new DisposableDirectory();
-        var repository = FileRepository.CreateUriRepository(
-            directory.Name);
-
-        UriRepository_Can_Read_Write(repository);
+        UriRepository_Can_Read_Write(new MemoryRepository<Uri>());
     }
 
     [Fact]
@@ -32,6 +22,16 @@ public static class RepositoryTests
             directory.Name);
 
         IntRepository_Can_Read_Write(repository);
+    }
+
+    [Fact]
+    public static void FileUriRepository_Can_Read_Write()
+    {
+        using var directory = new DisposableDirectory();
+        var repository = FileRepository.CreateUriRepository(
+            directory.Name);
+
+        UriRepository_Can_Read_Write(repository);
     }
 
     [Fact]
@@ -54,6 +54,36 @@ public static class RepositoryTests
 
         Assert.Throws<ChunkyardException>(
             () => repository.RemoveValue(invalidUri));
+    }
+
+    [Fact]
+    public static void MemoryRepository_Throws_When_Writing_To_Same_Key()
+    {
+        var repository = new MemoryRepository<Uri>();
+
+        var uri = new Uri("sha256://aa");
+        var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+
+        repository.StoreValue(uri, bytes);
+
+        Assert.Throws<ArgumentException>(
+            () => repository.StoreValue(uri, bytes));
+    }
+
+    [Fact]
+    public static void FileRepository_Throws_When_Writing_To_Same_Key()
+    {
+        using var directory = new DisposableDirectory();
+        var repository = FileRepository.CreateUriRepository(
+            directory.Name);
+
+        var uri = new Uri("sha256://aa");
+        var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+
+        repository.StoreValue(uri, bytes);
+
+        Assert.Throws<IOException>(
+            () => repository.StoreValue(uri, bytes));
     }
 
     private static void UriRepository_Can_Read_Write(

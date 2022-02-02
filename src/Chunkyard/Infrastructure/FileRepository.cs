@@ -5,7 +5,6 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 internal class FileRepository<T> : IRepository<T>
 {
-    private readonly ConcurrentDictionary<string, object> _locks;
     private readonly string _directory;
     private readonly Func<T, string> _toFile;
     private readonly Func<string, T> _toKey;
@@ -15,7 +14,6 @@ internal class FileRepository<T> : IRepository<T>
         Func<T, string> toFile,
         Func<string, T> toKey)
     {
-        _locks = new ConcurrentDictionary<string, object>();
         _directory = Path.GetFullPath(directory);
         _toFile = toFile;
         _toKey = toKey;
@@ -25,22 +23,14 @@ internal class FileRepository<T> : IRepository<T>
     {
         var file = ToFile(key);
 
-        lock (_locks.GetOrAdd(file, _ => new object()))
-        {
-            if (File.Exists(file))
-            {
-                return;
-            }
+        DirectoryUtils.CreateParent(file);
 
-            DirectoryUtils.CreateParent(file);
+        using var fileStream = new FileStream(
+            file,
+            FileMode.CreateNew,
+            FileAccess.Write);
 
-            using var fileStream = new FileStream(
-                file,
-                FileMode.CreateNew,
-                FileAccess.Write);
-
-            fileStream.Write(value);
-        }
+        fileStream.Write(value);
     }
 
     public byte[] RetrieveValue(T key)

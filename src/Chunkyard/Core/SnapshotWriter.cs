@@ -16,6 +16,7 @@ internal class SnapshotWriter
     private readonly AesGcmCrypto _aesGcmCrypto;
     private readonly RingBuffer _unencryptedRingBuffer;
     private readonly RingBuffer _encryptedRingBuffer;
+    private readonly ConcurrentDictionary<Uri, object> _locks;
 
     public SnapshotWriter(
         IRepository<Uri> uriRepository,
@@ -35,6 +36,8 @@ internal class SnapshotWriter
         _encryptedRingBuffer = new RingBuffer(
             RingBufferLength,
             _fastCdc.MaxSize + AesGcmCrypto.EncryptionBytes);
+
+        _locks = new ConcurrentDictionary<Uri, object>();
     }
 
     public IReadOnlyCollection<Uri> WriteObject(object o)
@@ -192,7 +195,13 @@ internal class SnapshotWriter
             var readBuffer = ringBuffer.GetReadBuffer(readTicket);
             var contentUri = Id.ComputeContentUri(readBuffer);
 
-            _uriRepository.StoreValue(contentUri, readBuffer);
+            lock (_locks.GetOrAdd(contentUri, _ => new object()))
+            {
+                if (!_uriRepository.ValueExists(contentUri))
+                {
+                    _uriRepository.StoreValue(contentUri, readBuffer);
+                }
+            }
 
             return contentUri;
         }
