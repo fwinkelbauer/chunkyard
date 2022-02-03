@@ -120,7 +120,6 @@ internal class SnapshotWriter
         long bytesProcessed = 0;
         var bytesCarryOver = 0;
         var chunkSize = 0;
-        var tasks = new List<Task<Uri>>();
 
         while (bytesProcessed < stream.Length)
         {
