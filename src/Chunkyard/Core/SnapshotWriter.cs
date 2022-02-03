@@ -80,7 +80,7 @@ internal class SnapshotWriter
             var nonce = knownBlobReference?.Nonce
                 ?? AesGcmCrypto.GenerateNonce();
 
-            var writeBlobTask = WriteBlob(
+            var writeBlobTask = WriteBlobAsync(
                 blobSystem,
                 blob,
                 nonce);
@@ -91,26 +91,24 @@ internal class SnapshotWriter
         return Task.WhenAll(tasks).Result;
     }
 
-    private Task<BlobReference> WriteBlob(
+    private async Task<BlobReference> WriteBlobAsync(
         IBlobSystem blobSystem,
         Blob blob,
         byte[] nonce)
     {
         using var stream = blobSystem.OpenRead(blob.Name);
 
-        return Task.WhenAll(WriteStream(stream, nonce))
-            .ContinueWith(task =>
-            {
-                var blobReference = new BlobReference(
-                    blob,
-                    nonce,
-                    task.Result);
+        var contentUris = await Task.WhenAll(WriteStream(stream, nonce))
+            .ConfigureAwait(false);
 
-                _probe.StoredBlob(blobReference.Blob);
+        var blobReference = new BlobReference(
+            blob,
+            nonce,
+            contentUris);
 
-                return blobReference;
-            },
-            TaskScheduler.Current);
+        _probe.StoredBlob(blobReference.Blob);
+
+        return blobReference;
     }
 
     private IEnumerable<Task<Uri>> WriteStream(
