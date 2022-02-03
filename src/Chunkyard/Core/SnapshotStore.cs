@@ -116,7 +116,7 @@ public class SnapshotStore
             CheckContentUriValid);
     }
 
-    public IEnumerable<Blob> CleanBlobSystem(
+    public IReadOnlyCollection<Blob> CleanBlobSystem(
         IBlobSystem blobSystem,
         Fuzzy excludeFuzzy,
         int snapshotId)
@@ -129,7 +129,8 @@ public class SnapshotStore
             .ToHashSet();
 
         var blobsToRemove = blobSystem.ListBlobs(excludeFuzzy)
-            .Where(blob => !blobNamesToKeep.Contains(blob.Name));
+            .Where(blob => !blobNamesToKeep.Contains(blob.Name))
+            .ToArray();
 
         foreach (var blob in blobsToRemove)
         {
@@ -140,7 +141,7 @@ public class SnapshotStore
         return blobsToRemove;
     }
 
-    public IEnumerable<Blob> RestoreSnapshot(
+    public IReadOnlyCollection<Blob> RestoreSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,
         Fuzzy includeFuzzy)
@@ -165,13 +166,14 @@ public class SnapshotStore
             resolvedSnapshotId);
     }
 
-    public IEnumerable<int> ListSnapshotIds()
+    public IReadOnlyCollection<int> ListSnapshotIds()
     {
         return _intRepository.ListKeys()
-            .OrderBy(i => i);
+            .OrderBy(id => id)
+            .ToArray();
     }
 
-    public IEnumerable<BlobReference> ShowSnapshot(
+    public IReadOnlyCollection<BlobReference> ShowSnapshot(
         int snapshotId,
         Fuzzy includeFuzzy)
     {
@@ -211,10 +213,7 @@ public class SnapshotStore
 
     public IReadOnlyCollection<int> KeepSnapshots(int latestCount)
     {
-        var snapshotIds = _intRepository.ListKeys()
-            .OrderBy(i => i)
-            .ToArray();
-
+        var snapshotIds = ListSnapshotIds();
         var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
         var snapshotIdsToRemove = snapshotIds.Except(snapshotIdsToKeep)
             .ToArray();
@@ -271,6 +270,7 @@ public class SnapshotStore
 
         var snapshotIdsToCopy = localSnapshotIds
             .Where(id => id > otherSnapshotIdMax)
+            .OrderBy(id => id)
             .ToArray();
 
         var contentUrisToCopy = ListContentUris(snapshotIdsToCopy)
@@ -363,7 +363,7 @@ public class SnapshotStore
         }
 
         var snapshotIds = _intRepository.ListKeys()
-            .OrderBy(i => i)
+            .OrderBy(id => id)
             .ToArray();
 
         var position = snapshotIds.Length + snapshotId;
