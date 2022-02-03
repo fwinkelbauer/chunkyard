@@ -53,18 +53,6 @@ public class AesGcmCrypto
         return nonce.Length + plainText.Length + TagBytes;
     }
 
-    public byte[] Encrypt(
-        ReadOnlySpan<byte> nonce,
-        ReadOnlySpan<byte> plainText)
-    {
-        var cipherText = new byte[
-            nonce.Length + plainText.Length + TagBytes];
-
-        Encrypt(nonce, plainText, cipherText);
-
-        return cipherText;
-    }
-
     public byte[] Decrypt(
         ReadOnlySpan<byte> cipherText)
     {
