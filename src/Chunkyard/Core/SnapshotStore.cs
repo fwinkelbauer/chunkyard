@@ -350,6 +350,11 @@ public class SnapshotStore
         {
             return snapshotId;
         }
+        else if (snapshotId == LatestSnapshotId
+            && _currentSnapshotId != null)
+        {
+            return _currentSnapshotId.Value;
+        }
 
         var snapshotIds = _intRepository.ListKeys()
             .OrderBy(id => id)
