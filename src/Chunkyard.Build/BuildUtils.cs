@@ -73,21 +73,4 @@ internal static class BuildUtils
 
         return match.Groups[1].Value;
     }
-
-    public static void CreateCleanDirectory(string directory)
-    {
-        var dirInfo = new DirectoryInfo(directory);
-
-        dirInfo.Create();
-
-        foreach (var fileInfo in dirInfo.GetFiles())
-        {
-            fileInfo.Delete();
-        }
-
-        foreach (var subDirInfo in dirInfo.GetDirectories())
-        {
-            subDirInfo.Delete(true);
-        }
-    }
 }

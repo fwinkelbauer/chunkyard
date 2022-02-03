@@ -16,11 +16,7 @@ internal static class Commands
 
     public static void Clean()
     {
-        Dotnet(
-            $"clean {Solution}",
-            $"-c {Configuration}");
-
-        BuildUtils.CreateCleanDirectory(Artifacts);
+        Git("clean -dfX");
     }
 
     public static void Build()
