@@ -220,11 +220,8 @@ public class SnapshotStore
 
         foreach (var snapshotId in snapshotIdsToRemove)
         {
-            _intRepository.RemoveValue(snapshotId);
-            _probe.RemovedSnapshot(snapshotId);
+            RemoveSnapshot(snapshotId);
         }
-
-        _currentSnapshotId = FetchCurrentSnapshotId();
 
         return snapshotIdsToRemove;
     }
