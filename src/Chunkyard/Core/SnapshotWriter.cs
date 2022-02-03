@@ -76,15 +76,13 @@ internal class SnapshotWriter
                 continue;
             }
 
-            using var stream = blobSystem.OpenRead(blob.Name);
-
             // Known blobs should be encrypted using the same nonce
             var nonce = knownBlobReference?.Nonce
                 ?? AesGcmCrypto.GenerateNonce();
 
             var writeBlobTask = WriteBlob(
+                blobSystem,
                 blob,
-                stream,
                 nonce);
 
             tasks.Add(writeBlobTask);
@@ -94,10 +92,12 @@ internal class SnapshotWriter
     }
 
     private Task<BlobReference> WriteBlob(
+        IBlobSystem blobSystem,
         Blob blob,
-        Stream stream,
         byte[] nonce)
     {
+        using var stream = blobSystem.OpenRead(blob.Name);
+
         return Task.WhenAll(WriteStream(stream, nonce))
             .ContinueWith(task =>
             {
