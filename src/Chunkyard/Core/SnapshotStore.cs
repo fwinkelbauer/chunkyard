@@ -321,20 +321,9 @@ public class SnapshotStore
         Fuzzy includeFuzzy,
         Func<Uri, bool> checkContentUriFunc)
     {
-        bool CheckBlobReference(BlobReference blobReference)
-        {
-            var blobValid = blobReference.ContentUris
-                .Select(checkContentUriFunc)
-                .Aggregate(true, (total, next) => total && next);
-
-            _probe.BlobValid(blobReference.Blob, blobValid);
-
-            return blobValid;
-        }
-
         var snapshotValid = ShowSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
-            .Select(CheckBlobReference)
+            .Select(br => CheckBlobReference(br, checkContentUriFunc))
             .Aggregate(true, (total, next) => total && next);
 
         _probe.SnapshotValid(
@@ -475,5 +464,18 @@ public class SnapshotStore
         _probe.RestoredBlob(blobReference.Blob);
 
         return blob;
+    }
+
+    private bool CheckBlobReference(
+        BlobReference blobReference,
+        Func<Uri, bool> checkContentUriFunc)
+    {
+        var blobValid = blobReference.ContentUris
+            .Select(checkContentUriFunc)
+            .Aggregate(true, (total, next) => total && next);
+
+        _probe.BlobValid(blobReference.Blob, blobValid);
+
+        return blobValid;
     }
 }
