@@ -365,7 +365,7 @@ public class SnapshotStore
         if (position < 0)
         {
             throw new ChunkyardException(
-                $"Could not resolve snapshot: #{snapshotId}");
+                $"Could not resolve snapshot reference: #{snapshotId}");
         }
 
         return snapshotIds[position];
