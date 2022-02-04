@@ -16,7 +16,7 @@ internal static class Commands
 
     public static void Clean()
     {
-        Git("clean -dfX");
+        Git("clean -dfx -e .vs -e launchSettings.json -e *.Build");
     }
 
     public static void Build()
