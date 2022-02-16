@@ -15,7 +15,7 @@ internal static class Commands
 
         var blobReferences = snapshotStore.IsEmpty
             ? Array.Empty<BlobReference>()
-            : snapshotStore.ShowSnapshot(
+            : snapshotStore.FilterSnapshot(
                 SnapshotStore.LatestSnapshotId,
                 Fuzzy.Default);
 
@@ -62,7 +62,7 @@ internal static class Commands
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
 
-        var blobReferences = snapshotStore.ShowSnapshot(
+        var blobReferences = snapshotStore.FilterSnapshot(
             o.SnapshotId,
             new Fuzzy(o.IncludePatterns));
 
@@ -125,8 +125,8 @@ internal static class Commands
         var snapshotStore = CreateSnapshotStore(o.Repository);
 
         var fuzzy = new Fuzzy(o.IncludePatterns);
-        var first = snapshotStore.ShowSnapshot(o.FirstSnapshotId, fuzzy);
-        var second = snapshotStore.ShowSnapshot(o.SecondSnapshotId, fuzzy);
+        var first = snapshotStore.FilterSnapshot(o.FirstSnapshotId, fuzzy);
+        var second = snapshotStore.FilterSnapshot(o.SecondSnapshotId, fuzzy);
 
         var diff = o.ContentOnly
             ? DiffSet.Create(

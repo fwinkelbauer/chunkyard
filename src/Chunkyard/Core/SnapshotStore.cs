@@ -146,7 +146,7 @@ public class SnapshotStore
         int snapshotId,
         Fuzzy includeFuzzy)
     {
-        var blobs = ShowSnapshot(snapshotId, includeFuzzy)
+        var blobs = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
             .Select(br => RestoreBlob(blobSystem, br))
             .ToArray();
@@ -173,7 +173,7 @@ public class SnapshotStore
             .ToArray();
     }
 
-    public IReadOnlyCollection<BlobReference> ShowSnapshot(
+    public IReadOnlyCollection<BlobReference> FilterSnapshot(
         int snapshotId,
         Fuzzy includeFuzzy)
     {
@@ -318,7 +318,7 @@ public class SnapshotStore
         Fuzzy includeFuzzy,
         Func<Uri, bool> checkContentUriFunc)
     {
-        var snapshotValid = ShowSnapshot(snapshotId, includeFuzzy)
+        var snapshotValid = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
             .Select(br => CheckBlobReference(br, checkContentUriFunc))
             .Aggregate(true, (total, next) => total && next);

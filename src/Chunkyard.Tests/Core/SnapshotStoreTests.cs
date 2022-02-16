@@ -572,7 +572,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void ShowSnapshot_Lists_Blobs()
+    public static void FilterSnapshot_Lists_Blobs()
     {
         var snapshotStore = CreateSnapshotStore();
         var expectedBlobs = CreateBlobs();
@@ -582,7 +582,7 @@ public static class SnapshotStoreTests
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        var blobReferences = snapshotStore.ShowSnapshot(
+        var blobReferences = snapshotStore.FilterSnapshot(
             snapshotId,
             Fuzzy.Default);
 
@@ -597,7 +597,7 @@ public static class SnapshotStoreTests
         var snapshotStore = CreateSnapshotStore();
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.ShowSnapshot(
+            () => snapshotStore.FilterSnapshot(
                 SnapshotStore.LatestSnapshotId,
                 Fuzzy.Default));
     }
