@@ -8,12 +8,6 @@ internal static class Commands
     private const string Changelog = "CHANGELOG.md";
     private const string Configuration = "Release";
 
-    static Commands()
-    {
-        Directory.SetCurrentDirectory(
-            GitQuery("rev-parse --show-toplevel"));
-    }
-
     public static void Clean()
     {
         Git("clean -dfx -e .vs -e launchSettings.json -e *.Build");
