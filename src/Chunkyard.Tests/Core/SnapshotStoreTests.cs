@@ -20,10 +20,6 @@ public static class SnapshotStoreTests
             snapshotStore.ListSnapshotIds());
 
         Assert.Equal(
-            new[] { snapshot },
-            snapshotStore.ListSnapshotIds().Select(snapshotStore.GetSnapshot));
-
-        Assert.Equal(
             expectedBlobs,
             snapshot.BlobReferences.Select(br => br.Blob));
     }
