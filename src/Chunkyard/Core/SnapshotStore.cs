@@ -55,7 +55,9 @@ public class SnapshotStore
         });
     }
 
-    public bool IsEmpty => _currentSnapshotId == null;
+    public Snapshot? CurrentSnapshot => _currentSnapshotId == null
+        ? null
+        : GetSnapshot(_currentSnapshotId.Value);
 
     public int StoreSnapshot(
         IBlobSystem blobSystem,
@@ -70,9 +72,8 @@ public class SnapshotStore
             _probe,
             _aesGcmCrypto.Value);
 
-        var knownBlobReferences = _currentSnapshotId == null
-            ? Array.Empty<BlobReference>()
-            : GetSnapshot(_currentSnapshotId.Value).BlobReferences;
+        var knownBlobReferences = CurrentSnapshot?.BlobReferences
+            ?? Array.Empty<BlobReference>();
 
         var blobReferences = snapshotWriter.WriteBlobs(
             blobSystem,

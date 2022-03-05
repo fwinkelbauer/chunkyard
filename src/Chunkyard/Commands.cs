@@ -13,11 +13,8 @@ internal static class Commands
 
         var snapshotStore = CreateSnapshotStore(o.Repository);
 
-        var blobReferences = snapshotStore.IsEmpty
-            ? Array.Empty<BlobReference>()
-            : snapshotStore.FilterSnapshot(
-                SnapshotStore.LatestSnapshotId,
-                Fuzzy.Default);
+        var blobReferences = snapshotStore.CurrentSnapshot?.BlobReferences
+            ?? Array.Empty<BlobReference>();
 
         var diff = DiffSet.Create(
             blobReferences.Select(blobReference => blobReference.Blob),

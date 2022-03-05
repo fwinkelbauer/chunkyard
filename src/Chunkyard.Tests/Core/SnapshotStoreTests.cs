@@ -385,12 +385,12 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void IsEmpty_Respects_StoreSnapshot_And_RemoveSnapshot()
+    public static void CurrentSnapshot_Respects_StoreSnapshot_And_RemoveSnapshot()
     {
         var snapshotStore = CreateSnapshotStore();
         var blobSystem = new MemoryBlobSystem(CreateBlobs());
 
-        Assert.True(snapshotStore.IsEmpty);
+        Assert.Null(snapshotStore.CurrentSnapshot);
 
         snapshotStore.StoreSnapshot(
             blobSystem,
@@ -402,15 +402,15 @@ public static class SnapshotStoreTests
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        Assert.False(snapshotStore.IsEmpty);
+        Assert.NotNull(snapshotStore.CurrentSnapshot);
 
         snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
 
-        Assert.False(snapshotStore.IsEmpty);
+        Assert.NotNull(snapshotStore.CurrentSnapshot);
 
         snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
 
-        Assert.True(snapshotStore.IsEmpty);
+        Assert.Null(snapshotStore.CurrentSnapshot);
     }
 
     [Fact]
