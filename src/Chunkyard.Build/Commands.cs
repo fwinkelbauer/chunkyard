@@ -30,10 +30,6 @@ internal static class Commands
 
     public static void Ci()
     {
-        Dotnet(
-            $"format {Solution}",
-            "--verify-no-changes");
-
         Build();
         Test();
     }
