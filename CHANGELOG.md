@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 13.0.0 - 2022-03-07
+
 ### Added
 
 - A new command called `mirror`, which is a combination of `restore` and
