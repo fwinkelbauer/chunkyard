@@ -461,53 +461,23 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void RestoreSnapshot_Overwrites_Blobs_If_LastWriteTimeUtc_Differs()
+    public static void RestoreSnapshot_Does_Not_Overwrite_Blob()
     {
         var snapshotStore = CreateSnapshotStore();
 
-        var blobs = CreateBlobs(
-            new[]
-            {
-                "new blob",
-                "unchanged blob",
-                "changed blob"
-            });
+        var blobSystem = new MemoryBlobSystem(
+            CreateBlobs(new[] { "some blob" }));
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            new MemoryBlobSystem(blobs),
+            blobSystem,
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        var blobSystem = new MemoryBlobSystem(
-            new[]
-            {
-                blobs[1],
-                new Blob(blobs[2].Name, DateTime.UtcNow)
-            },
-            blobName => Array.Empty<byte>());
-
-        snapshotStore.RestoreSnapshot(
-            blobSystem,
-            snapshotId,
-            Fuzzy.Default);
-
-        foreach (var blob in blobs)
-        {
-            Assert.True(blobSystem.BlobExists(blob.Name));
-            Assert.Equal(blob, blobSystem.GetBlob(blob.Name));
-
-            using var stream = blobSystem.OpenRead(blob.Name);
-            var bytes = ToBytes(stream);
-
-            if (blob.Name.Equals(blobs[1].Name))
-            {
-                Assert.Empty(bytes);
-            }
-            else
-            {
-                Assert.NotEmpty(bytes);
-            }
-        }
+        Assert.Throws<AggregateException>(
+            () => snapshotStore.RestoreSnapshot(
+                blobSystem,
+                snapshotId,
+                Fuzzy.Default));
     }
 
     [Fact]
@@ -813,10 +783,12 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void Clean_Removes_Blobs_Not_In_Snapshot_Using_Blob_Name_Only()
+    public static void Mirror_Restores_Blobs_And_Removes_Blobs_Not_In_Snapshot()
     {
         var snapshotStore = CreateSnapshotStore();
-        var expectedBlobs = CreateBlobs(new[] { "some blob", "other blob" });
+        var expectedBlobs = CreateBlobs(
+            new[] { "some blob", "other blob" });
+
         var blobSystem = new MemoryBlobSystem(expectedBlobs);
 
         var snapshotId = snapshotStore.StoreSnapshot(
@@ -824,27 +796,27 @@ public static class SnapshotStoreTests
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        var newBlob = new Blob("blob to delete", DateTime.UtcNow);
-        var existingBlob = new Blob("other blob", DateTime.UtcNow);
+        var blobToDelete = new Blob("blob to delete", DateTime.UtcNow);
+        var otherBlob = new Blob("other blob", DateTime.UtcNow);
 
-        using (var writeStream = blobSystem.OpenWrite(newBlob))
+        using (var writeStream = blobSystem.NewWrite(blobToDelete))
         {
             writeStream.Write(new byte[] { 0x10, 0x11 });
         }
 
-        using (var writeStream = blobSystem.OpenWrite(existingBlob))
+        using (var writeStream = blobSystem.OpenWrite(otherBlob))
         {
             writeStream.Write(new byte[] { 0x10, 0x11 });
         }
 
-        var removedBlobs = snapshotStore.CleanBlobSystem(
+        var restoredBlobs = snapshotStore.MirrorSnapshot(
             blobSystem,
             Fuzzy.Default,
             snapshotId);
 
         Assert.Equal(
-            new[] { newBlob },
-            removedBlobs);
+            expectedBlobs,
+            restoredBlobs);
 
         Assert.Equal(
             expectedBlobs.Select(b => b.Name),

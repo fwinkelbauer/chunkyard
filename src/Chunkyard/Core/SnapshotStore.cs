@@ -117,37 +117,12 @@ public class SnapshotStore
             CheckContentUriValid);
     }
 
-    public IReadOnlyCollection<Blob> CleanBlobSystem(
-        IBlobSystem blobSystem,
-        Fuzzy excludeFuzzy,
-        int snapshotId)
-    {
-        ArgumentNullException.ThrowIfNull(blobSystem);
-
-        var snapshot = GetSnapshot(snapshotId);
-        var blobNamesToKeep = snapshot.BlobReferences
-            .Select(br => br.Blob.Name)
-            .ToHashSet();
-
-        var blobsToRemove = blobSystem.ListBlobs(excludeFuzzy)
-            .Where(blob => !blobNamesToKeep.Contains(blob.Name))
-            .ToArray();
-
-        foreach (var blob in blobsToRemove)
-        {
-            blobSystem.RemoveBlob(blob.Name);
-            _probe.RemovedBlob(blob);
-        }
-
-        return blobsToRemove;
-    }
-
     public IReadOnlyCollection<Blob> RestoreSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,
         Fuzzy includeFuzzy)
     {
-        var blobs = FilterSnapshot(snapshotId, includeFuzzy)
+        var restoredBlob = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
             .Select(br => RestoreBlob(blobSystem, br))
             .ToArray();
@@ -155,7 +130,37 @@ public class SnapshotStore
         _probe.RestoredSnapshot(
             ResolveSnapshotId(snapshotId));
 
-        return blobs;
+        return restoredBlob;
+    }
+
+    public IReadOnlyCollection<Blob> MirrorSnapshot(
+        IBlobSystem blobSystem,
+        Fuzzy excludeFuzzy,
+        int snapshotId)
+    {
+        ArgumentNullException.ThrowIfNull(blobSystem);
+
+        var snapshot = GetSnapshot(snapshotId);
+
+        var mirroredBlobs = snapshot.BlobReferences
+            .AsParallel()
+            .Select(br => MirrorBlob(blobSystem, br))
+            .ToArray();
+
+        _probe.RestoredSnapshot(
+            ResolveSnapshotId(snapshotId));
+
+        var blobNamesToRemove = blobSystem.ListBlobs(excludeFuzzy)
+            .Select(blob => blob.Name)
+            .Except(mirroredBlobs.Select(blob => blob.Name));
+
+        foreach (var blobName in blobNamesToRemove)
+        {
+            blobSystem.RemoveBlob(blobName);
+            _probe.RemovedBlob(blobName);
+        }
+
+        return mirroredBlobs;
     }
 
     public Snapshot GetSnapshot(int snapshotId)
@@ -455,16 +460,34 @@ public class SnapshotStore
     {
         var blob = blobReference.Blob;
 
+        using (var stream = blobSystem.NewWrite(blob))
+        {
+            RestoreContent(blobReference.ContentUris, stream);
+        }
+
+        _probe.RestoredBlob(blobReference.Blob.Name);
+
+        return blob;
+    }
+
+    private Blob MirrorBlob(
+        IBlobSystem blobSystem,
+        BlobReference blobReference)
+    {
+        var blob = blobReference.Blob;
+
         if (blobSystem.BlobExists(blob.Name)
             && blobSystem.GetBlob(blob.Name).Equals(blob))
         {
             return blob;
         }
 
-        using var stream = blobSystem.OpenWrite(blob);
+        using (var stream = blobSystem.OpenWrite(blob))
+        {
+            RestoreContent(blobReference.ContentUris, stream);
+        }
 
-        RestoreContent(blobReference.ContentUris, stream);
-        _probe.RestoredBlob(blobReference.Blob);
+        _probe.RestoredBlob(blobReference.Blob.Name);
 
         return blob;
     }
@@ -477,7 +500,7 @@ public class SnapshotStore
             .Select(checkContentUriFunc)
             .Aggregate(true, (total, next) => total && next);
 
-        _probe.BlobValid(blobReference.Blob, blobValid);
+        _probe.BlobValid(blobReference.Blob.Name, blobValid);
 
         return blobValid;
     }

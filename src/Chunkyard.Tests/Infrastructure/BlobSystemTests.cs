@@ -39,6 +39,9 @@ public static class BlobSystemTests
 
         Assert.Throws<ChunkyardException>(
             () => blobSystem.OpenWrite(invalidBlob));
+
+        Assert.Throws<ChunkyardException>(
+            () => blobSystem.NewWrite(invalidBlob));
     }
 
     private static void BlobSystem_Can_Read_Write(
@@ -49,7 +52,7 @@ public static class BlobSystemTests
 
         Assert.False(blobSystem.BlobExists(blob.Name));
 
-        using (var writeStream = blobSystem.OpenWrite(blob))
+        using (var writeStream = blobSystem.NewWrite(blob))
         {
             writeStream.Write(expectedBytes);
         }

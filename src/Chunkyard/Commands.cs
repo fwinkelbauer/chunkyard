@@ -81,16 +81,6 @@ internal static class Commands
         }
     }
 
-    public static void CleanBlobSystem(CleanOptions o)
-    {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
-
-        snapshotStore.CleanBlobSystem(
-            new FileBlobSystem(o.Files),
-            new Fuzzy(o.ExcludePatterns),
-            o.SnapshotId);
-    }
-
     public static void RestoreSnapshot(RestoreOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
@@ -99,6 +89,16 @@ internal static class Commands
             new FileBlobSystem(new[] { o.Directory }),
             o.SnapshotId,
             new Fuzzy(o.IncludePatterns));
+    }
+
+    public static void MirrorSnapshot(MirrorOptions o)
+    {
+        var snapshotStore = CreateSnapshotStore(o.Repository);
+
+        snapshotStore.MirrorSnapshot(
+            new FileBlobSystem(o.Files),
+            new Fuzzy(o.ExcludePatterns),
+            o.SnapshotId);
     }
 
     public static void ListSnapshots(ListOptions o)

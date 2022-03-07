@@ -23,7 +23,7 @@ internal class MemoryBlobSystem : IBlobSystem
 
         foreach (var blob in _blobs.Values)
         {
-            using var stream = OpenWrite(blob);
+            using var stream = NewWrite(blob);
 
             stream.Write(
                 createContent(blob.Name));
@@ -75,27 +75,43 @@ internal class MemoryBlobSystem : IBlobSystem
 
     public Stream OpenWrite(Blob blob)
     {
-        return new WriteStream(this, blob);
+        return new WriteStream(this, blob, true);
+    }
+
+    public Stream NewWrite(Blob blob)
+    {
+        return new WriteStream(this, blob, false);
     }
 
     private class WriteStream : MemoryStream
     {
         private readonly MemoryBlobSystem _blobSystem;
         private readonly Blob _blob;
+        private readonly bool _overwrite;
 
         public WriteStream(
             MemoryBlobSystem blobSystem,
-            Blob blob)
+            Blob blob,
+            bool overwrite)
         {
             _blobSystem = blobSystem;
             _blob = blob;
+            _overwrite = overwrite;
         }
 
         protected override void Dispose(bool disposing)
         {
             lock (_blobSystem._lock)
             {
-                _blobSystem._bytes[_blob.Name] = ToArray();
+                if (_overwrite)
+                {
+                    _blobSystem._bytes[_blob.Name] = ToArray();
+                }
+                else
+                {
+                    _blobSystem._bytes.Add(_blob.Name, ToArray());
+                }
+
                 _blobSystem._blobs[_blob.Name] = _blob;
             }
 

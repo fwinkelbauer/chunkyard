@@ -106,7 +106,7 @@ internal class SnapshotWriter
             nonce,
             contentUris);
 
-        _probe.StoredBlob(blobReference.Blob);
+        _probe.StoredBlob(blobReference.Blob.Name);
 
         return blobReference;
     }

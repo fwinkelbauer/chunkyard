@@ -38,6 +38,7 @@ public static class Program
         Parser.Default.ParseArguments(args, optionTypes)
             .WithParsed<PreviewOptions>(Commands.PreviewSnapshot)
             .WithParsed<RestoreOptions>(Commands.RestoreSnapshot)
+            .WithParsed<MirrorOptions>(Commands.MirrorSnapshot)
             .WithParsed<CreateOptions>(Commands.CreateSnapshot)
             .WithParsed<CheckOptions>(Commands.CheckSnapshot)
             .WithParsed<ShowOptions>(Commands.ShowSnapshot)
@@ -48,7 +49,6 @@ public static class Program
             .WithParsed<GarbageCollectOptions>(Commands.GarbageCollect)
             .WithParsed<CopyOptions>(Commands.Copy)
             .WithParsed<CatOptions>(Commands.Cat)
-            .WithParsed<CleanOptions>(Commands.CleanBlobSystem)
             .WithNotParsed(_ => Environment.ExitCode = 1);
     }
 }

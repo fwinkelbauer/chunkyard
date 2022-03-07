@@ -7,6 +7,21 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- A new command called `mirror`, which is a combination of `restore` and
+  `clean`. This command can be used to restore a snapshot in a way that the file
+  system matches the exact content of a snapshot. As a result, `mirror` can
+  overwrite and delete existing files
+
+### Changed
+
+- The `restore` command to fail if it would overwrite a file
+
+### Removed
+
+- The `clean` command
+
 ## 12.2.1 - 2022-02-03
 
 ### Fixed

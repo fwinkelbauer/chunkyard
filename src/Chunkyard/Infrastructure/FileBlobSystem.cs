@@ -58,11 +58,26 @@ public class FileBlobSystem : IBlobSystem
     {
         ArgumentNullException.ThrowIfNull(blob);
 
+        return OpenWrite(blob, FileMode.OpenOrCreate);
+    }
+
+    public Stream NewWrite(Blob blob)
+    {
+        ArgumentNullException.ThrowIfNull(blob);
+
+        return OpenWrite(blob, FileMode.CreateNew);
+    }
+
+    private Stream OpenWrite(Blob blob, FileMode mode)
+    {
         var file = ToFile(blob.Name);
 
         DirectoryUtils.CreateParent(file);
 
-        return new WriteStream(file, blob);
+        return new WriteStream(
+            file,
+            mode,
+            blob);
     }
 
     private Blob ToBlob(string file)
@@ -164,8 +179,8 @@ public class FileBlobSystem : IBlobSystem
     {
         private readonly Blob _blob;
 
-        public WriteStream(string file, Blob blob)
-            : base(file, FileMode.Create, FileAccess.Write)
+        public WriteStream(string file, FileMode mode, Blob blob)
+            : base(file, mode, FileAccess.Write)
         {
             _blob = blob;
         }
