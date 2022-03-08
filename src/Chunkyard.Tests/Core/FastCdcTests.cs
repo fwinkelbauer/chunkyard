@@ -5,41 +5,27 @@ public static class FastCdcTests
     private static readonly byte[] _pictureBytes = File.ReadAllBytes(
         "Assets/SekienAkashita.jpg");
 
-    [Fact]
-    public static void SplitIntoChunks_16k_Chunks()
+    public static TheoryData<FastCdc, int[]> TheoryData => new()
     {
-        AssertSplit(
-            new FastCdc(
-                8 * 1024,
-                16 * 1024,
-                32 * 1024),
-            new[] { 22366, 8282, 16303, 18696, 32768, 11051 });
-    }
+        {
+            new FastCdc(8 * 1024, 16 * 1024, 32 * 1024),
+            new[] { 22366, 8282, 16303, 18696, 32768, 11051 }
+        },
+        {
+            new FastCdc(16 * 1024, 32 * 1024, 64 * 1024),
+            new[] { 32857, 16408, 60201 }
+        },
+        {
+            new FastCdc(32 * 1024, 64 * 1024, 128 * 1024),
+            new[] { 32857, 76609 }
+        }
+    };
 
-    [Fact]
-    public static void SplitIntoChunks_32k_Chunks()
+    [Theory, MemberData(nameof(TheoryData))]
+    public static void SplitIntoChunks(FastCdc fastCdc, int[] chunkSizes)
     {
-        AssertSplit(
-            new FastCdc(
-                16 * 1024,
-                32 * 1024,
-                64 * 1024),
-            new[] { 32857, 16408, 60201 });
-    }
+        ArgumentNullException.ThrowIfNull(fastCdc);
 
-    [Fact]
-    public static void SplitIntoChunks_64k_Chunks()
-    {
-        AssertSplit(
-            new FastCdc(
-                32 * 1024,
-                64 * 1024,
-                128 * 1024),
-            new[] { 32857, 76609 });
-    }
-
-    private static void AssertSplit(FastCdc fastCdc, int[] chunkSizes)
-    {
         using var stream = new MemoryStream(_pictureBytes);
         var chunks = fastCdc.SplitIntoChunks(stream).ToArray();
 
