@@ -7,13 +7,13 @@ namespace Chunkyard.Core;
 /// </summary>
 public static class ChunkId
 {
-    private const string AlgorithmSha256 = "sha256";
+    public const string HashAlgorithmName = "sha256";
 
     public static Uri ComputeChunkId(
         ReadOnlySpan<byte> chunk)
     {
         return ToChunkId(
-            AlgorithmSha256,
+            HashAlgorithmName,
             ComputeHash(chunk));
     }
 
@@ -31,7 +31,7 @@ public static class ChunkId
     {
         ArgumentNullException.ThrowIfNull(chunkId);
 
-        if (!chunkId.Scheme.Equals(AlgorithmSha256))
+        if (!chunkId.Scheme.Equals(HashAlgorithmName))
         {
             throw new NotSupportedException();
         }

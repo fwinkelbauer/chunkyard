@@ -88,19 +88,17 @@ public static class FileRepository
             directory,
             chunkId =>
             {
-                var (algorithm, hash) = ChunkId.DeconstructChunkId(
+                var (_, hash) = ChunkId.DeconstructChunkId(
                     chunkId);
 
                 return Path.Combine(
-                    algorithm,
                     hash[..2],
                     hash);
             },
             file =>
             {
                 return ChunkId.ToChunkId(
-                    DirectoryUtils.GetParent(
-                        DirectoryUtils.GetParent(file)),
+                    ChunkId.HashAlgorithmName,
                     Path.GetFileNameWithoutExtension(file));
             });
     }
