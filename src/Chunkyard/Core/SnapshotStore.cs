@@ -6,10 +6,9 @@ namespace Chunkyard.Core;
 /// </summary>
 public class SnapshotStore
 {
+    public const int SchemaVersion = 1;
     public const int LatestSnapshotId = -1;
     public const int SecondLatestSnapshotId = -2;
-
-    private const int SchemaVersion = 0;
 
     private readonly IRepository<Uri> _uriRepository;
     private readonly IRepository<int> _intRepository;
@@ -114,7 +113,7 @@ public class SnapshotStore
         return CheckSnapshot(
             snapshotId,
             includeFuzzy,
-            CheckContentUriValid);
+            CheckChunkIdValid);
     }
 
     public IReadOnlyCollection<Blob> RestoreSnapshot(
@@ -190,18 +189,18 @@ public class SnapshotStore
 
     public IReadOnlyCollection<Uri> GarbageCollect()
     {
-        var usedContentUris = ListContentUris(_intRepository.ListKeys());
-        var unusedContentUris = _uriRepository.ListKeys()
-            .Except(usedContentUris)
+        var usedChunkIds = ListChunkIds(_intRepository.ListKeys());
+        var unusedChunkIds = _uriRepository.ListKeys()
+            .Except(usedChunkIds)
             .ToArray();
 
-        foreach (var contentUri in unusedContentUris)
+        foreach (var chunkId in unusedChunkIds)
         {
-            _uriRepository.RemoveValue(contentUri);
-            _probe.RemovedContent(contentUri);
+            _uriRepository.RemoveValue(chunkId);
+            _probe.RemovedChunk(chunkId);
         }
 
-        return unusedContentUris;
+        return unusedChunkIds;
     }
 
     public void RemoveSnapshot(int snapshotId)
@@ -232,26 +231,26 @@ public class SnapshotStore
         return snapshotIdsToRemove;
     }
 
-    public void RestoreContent(
-        IEnumerable<Uri> contentUris,
+    public void RestoreChunks(
+        IEnumerable<Uri> chunkIds,
         Stream outputStream)
     {
-        ArgumentNullException.ThrowIfNull(contentUris);
+        ArgumentNullException.ThrowIfNull(chunkIds);
         ArgumentNullException.ThrowIfNull(outputStream);
 
-        foreach (var contentUri in contentUris)
+        foreach (var chunkId in chunkIds)
         {
             try
             {
                 var decrypted = _aesGcmCrypto.Value.Decrypt(
-                    RetrieveContent(contentUri));
+                    RetrieveChunk(chunkId));
 
                 outputStream.Write(decrypted);
             }
             catch (CryptographicException e)
             {
                 throw new ChunkyardException(
-                    $"Could not decrypt content: {contentUri}",
+                    $"Could not decrypt chunk: {chunkId}",
                     e);
             }
         }
@@ -276,17 +275,17 @@ public class SnapshotStore
             .OrderBy(id => id)
             .ToArray();
 
-        var contentUrisToCopy = ListContentUris(snapshotIdsToCopy)
+        var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
             .Except(otherUriRepository.ListKeys())
             .ToArray();
 
-        foreach (var contentUri in contentUrisToCopy)
+        foreach (var chunkId in chunkIdsToCopy)
         {
             otherUriRepository.StoreValue(
-                contentUri,
-                RetrieveValidContent(contentUri));
+                chunkId,
+                RetrieveValidChunk(chunkId));
 
-            _probe.CopiedContent(contentUri);
+            _probe.CopiedChunk(chunkId);
         }
 
         foreach (var snapshotId in snapshotIdsToCopy)
@@ -299,34 +298,34 @@ public class SnapshotStore
         }
     }
 
-    private IEnumerable<Uri> ListContentUris(IEnumerable<int> snapshotIds)
+    private IEnumerable<Uri> ListChunkIds(IEnumerable<int> snapshotIds)
     {
-        var contentUris = new HashSet<Uri>();
+        var chunkIds = new HashSet<Uri>();
 
         foreach (var snapshotId in snapshotIds)
         {
             var snapshotReference = GetSnapshotReference(snapshotId);
             var snapshot = GetSnapshot(snapshotReference, snapshotId);
 
-            contentUris.UnionWith(
-                snapshotReference.ContentUris);
+            chunkIds.UnionWith(
+                snapshotReference.ChunkIds);
 
-            contentUris.UnionWith(
+            chunkIds.UnionWith(
                 snapshot.BlobReferences.SelectMany(
-                    br => br.ContentUris));
+                    br => br.ChunkIds));
         }
 
-        return contentUris;
+        return chunkIds;
     }
 
     private bool CheckSnapshot(
         int snapshotId,
         Fuzzy includeFuzzy,
-        Func<Uri, bool> checkContentUriFunc)
+        Func<Uri, bool> checkChunkIdFunc)
     {
         var snapshotValid = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
-            .Select(br => CheckBlobReference(br, checkContentUriFunc))
+            .Select(br => CheckBlobReference(br, checkChunkIdFunc))
             .Aggregate(true, (total, next) => total && next);
 
         _probe.SnapshotValid(
@@ -396,8 +395,8 @@ public class SnapshotStore
     {
         using var memoryStream = new MemoryStream();
 
-        RestoreContent(
-            snapshotReference.ContentUris,
+        RestoreChunks(
+            snapshotReference.ChunkIds,
             memoryStream);
 
         try
@@ -413,40 +412,40 @@ public class SnapshotStore
         }
     }
 
-    private byte[] RetrieveContent(Uri contentUri)
+    private byte[] RetrieveChunk(Uri chunkId)
     {
         try
         {
-            return _uriRepository.RetrieveValue(contentUri);
+            return _uriRepository.RetrieveValue(chunkId);
         }
         catch (Exception e)
         {
             throw new ChunkyardException(
-                $"Could not read content: {contentUri}",
+                $"Could not read chunk: {chunkId}",
                 e);
         }
     }
 
-    private byte[] RetrieveValidContent(Uri contentUri)
+    private byte[] RetrieveValidChunk(Uri chunkId)
     {
-        var content = RetrieveContent(contentUri);
+        var chunk = RetrieveChunk(chunkId);
 
-        if (!Id.ContentUriValid(contentUri, content))
+        if (!ChunkId.ChunkIdValid(chunkId, chunk))
         {
             throw new ChunkyardException(
-                $"Invalid content: {contentUri}");
+                $"Invalid chunk: {chunkId}");
         }
 
-        return content;
+        return chunk;
     }
 
-    private bool CheckContentUriValid(Uri contentUri)
+    private bool CheckChunkIdValid(Uri chunkId)
     {
         try
         {
-            return Id.ContentUriValid(
-                contentUri,
-                _uriRepository.RetrieveValue(contentUri));
+            return ChunkId.ChunkIdValid(
+                chunkId,
+                _uriRepository.RetrieveValue(chunkId));
         }
         catch (Exception)
         {
@@ -462,7 +461,7 @@ public class SnapshotStore
 
         using (var stream = blobSystem.NewWrite(blob))
         {
-            RestoreContent(blobReference.ContentUris, stream);
+            RestoreChunks(blobReference.ChunkIds, stream);
         }
 
         _probe.RestoredBlob(blobReference.Blob.Name);
@@ -484,7 +483,7 @@ public class SnapshotStore
 
         using (var stream = blobSystem.OpenWrite(blob))
         {
-            RestoreContent(blobReference.ContentUris, stream);
+            RestoreChunks(blobReference.ChunkIds, stream);
         }
 
         _probe.RestoredBlob(blobReference.Blob.Name);
@@ -494,10 +493,10 @@ public class SnapshotStore
 
     private bool CheckBlobReference(
         BlobReference blobReference,
-        Func<Uri, bool> checkContentUriFunc)
+        Func<Uri, bool> checkChunkIdFunc)
     {
-        var blobValid = blobReference.ContentUris
-            .Select(checkContentUriFunc)
+        var blobValid = blobReference.ChunkIds
+            .Select(checkChunkIdFunc)
             .Aggregate(true, (total, next) => total && next);
 
         _probe.BlobValid(blobReference.Blob.Name, blobValid);

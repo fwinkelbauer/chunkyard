@@ -98,13 +98,13 @@ internal class SnapshotWriter
     {
         using var stream = blobSystem.OpenRead(blob.Name);
 
-        var contentUris = await Task.WhenAll(WriteStream(stream, nonce))
+        var chunkIds = await Task.WhenAll(WriteStream(stream, nonce))
             .ConfigureAwait(false);
 
         var blobReference = new BlobReference(
             blob,
             nonce,
-            contentUris);
+            chunkIds);
 
         _probe.StoredBlob(blobReference.Blob.Name);
 
@@ -190,17 +190,17 @@ internal class SnapshotWriter
         try
         {
             var readBuffer = ringBuffer.GetReadBuffer(readTicket);
-            var contentUri = Id.ComputeContentUri(readBuffer);
+            var chunkId = ChunkId.ComputeChunkId(readBuffer);
 
-            lock (_locks.GetOrAdd(contentUri, _ => new object()))
+            lock (_locks.GetOrAdd(chunkId, _ => new object()))
             {
-                if (!_uriRepository.ValueExists(contentUri))
+                if (!_uriRepository.ValueExists(chunkId))
                 {
-                    _uriRepository.StoreValue(contentUri, readBuffer);
+                    _uriRepository.StoreValue(chunkId, readBuffer);
                 }
             }
 
-            return contentUri;
+            return chunkId;
         }
         finally
         {

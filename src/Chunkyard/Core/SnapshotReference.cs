@@ -10,12 +10,12 @@ public class SnapshotReference : IVersioned
         int schemaVersion,
         byte[] salt,
         int iterations,
-        IReadOnlyCollection<Uri> contentUris)
+        IReadOnlyCollection<Uri> chunkIds)
     {
         SchemaVersion = schemaVersion;
         Salt = salt;
         Iterations = iterations;
-        ContentUris = contentUris;
+        ChunkIds = chunkIds;
     }
 
     public int SchemaVersion { get; }
@@ -24,7 +24,7 @@ public class SnapshotReference : IVersioned
 
     public int Iterations { get; }
 
-    public IReadOnlyCollection<Uri> ContentUris { get; }
+    public IReadOnlyCollection<Uri> ChunkIds { get; }
 
     public override bool Equals(object? obj)
     {
@@ -32,11 +32,11 @@ public class SnapshotReference : IVersioned
             && SchemaVersion == other.SchemaVersion
             && Salt.SequenceEqual(other.Salt)
             && Iterations == other.Iterations
-            && ContentUris.SequenceEqual(other.ContentUris);
+            && ChunkIds.SequenceEqual(other.ChunkIds);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(SchemaVersion, Salt, Iterations, ContentUris);
+        return HashCode.Combine(SchemaVersion, Salt, Iterations, ChunkIds);
     }
 }

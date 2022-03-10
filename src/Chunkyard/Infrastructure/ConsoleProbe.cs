@@ -27,14 +27,14 @@ internal class ConsoleProbe : IProbe
             : $"Invalid blob: {blobName}");
     }
 
-    public void CopiedContent(Uri contentUri)
+    public void CopiedChunk(Uri chunkId)
     {
-        Console.WriteLine($"Copied content: {contentUri}");
+        Console.WriteLine($"Copied chunk: {chunkId}");
     }
 
-    public void RemovedContent(Uri contentUri)
+    public void RemovedChunk(Uri chunkId)
     {
-        Console.WriteLine($"Removed content: {contentUri}");
+        Console.WriteLine($"Removed chunk: {chunkId}");
     }
 
     public void CopiedSnapshot(int snapshotId)

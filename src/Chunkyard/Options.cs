@@ -1,23 +1,23 @@
 namespace Chunkyard;
 
-[Verb("cat", HelpText = "Export or print the value of a set of content URIs.")]
+[Verb("cat", HelpText = "Export or print the value of a set of chunk IDs.")]
 public class CatOptions
 {
     public CatOptions(
         string repository,
-        IEnumerable<Uri> contentUris,
+        IEnumerable<Uri> chunkIds,
         string? export)
     {
         Repository = repository;
-        ContentUris = contentUris;
+        ChunkIds = chunkIds;
         Export = export;
     }
 
     [Option('r', "repository", Required = true, HelpText = "The repository path")]
     public string Repository { get; }
 
-    [Option('c', "content", Required = true, HelpText = "The content URIs")]
-    public IEnumerable<Uri> ContentUris { get; }
+    [Option('c', "chunk", Required = true, HelpText = "The chunk IDs")]
+    public IEnumerable<Uri> ChunkIds { get; }
 
     [Option('e', "export", Required = false, HelpText = "The export path", Default = "")]
     public string? Export { get; }
@@ -47,7 +47,7 @@ public class CheckOptions
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
     public IEnumerable<string> IncludePatterns { get; }
 
-    [Option("shallow", Required = false, HelpText = "Check if content exists without further validation", Default = false)]
+    [Option("shallow", Required = false, HelpText = "Check if chunks exist without further validation", Default = false)]
     public bool Shallow { get; }
 }
 
@@ -100,13 +100,13 @@ public class DiffOptions
         int firstSnapshotId,
         int secondSnapshotId,
         IEnumerable<string> includePatterns,
-        bool contentOnly)
+        bool chunksOnly)
     {
         Repository = repository;
         FirstSnapshotId = firstSnapshotId;
         SecondSnapshotId = secondSnapshotId;
         IncludePatterns = includePatterns;
-        ContentOnly = contentOnly;
+        ChunksOnly = chunksOnly;
     }
 
     [Option('r', "repository", Required = true, HelpText = "The repository path")]
@@ -121,11 +121,11 @@ public class DiffOptions
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
     public IEnumerable<string> IncludePatterns { get; }
 
-    [Option("content-only", Required = false, HelpText = "Show content", Default = false)]
-    public bool ContentOnly { get; }
+    [Option("chunks-only", Required = false, HelpText = "Show chunk IDs", Default = false)]
+    public bool ChunksOnly { get; }
 }
 
-[Verb("gc", HelpText = "Remove unreferenced content.")]
+[Verb("gc", HelpText = "Remove unreferenced chunks.")]
 public class GarbageCollectOptions
 {
     public GarbageCollectOptions(string repository)
@@ -271,12 +271,12 @@ public class ShowOptions
         string repository,
         int snapshotId,
         IEnumerable<string> includePatterns,
-        bool contentOnly)
+        bool chunksOnly)
     {
         Repository = repository;
         SnapshotId = snapshotId;
         IncludePatterns = includePatterns;
-        ContentOnly = contentOnly;
+        ChunksOnly = chunksOnly;
     }
 
     [Option('r', "repository", Required = true, HelpText = "The repository path")]
@@ -288,6 +288,6 @@ public class ShowOptions
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
     public IEnumerable<string> IncludePatterns { get; }
 
-    [Option("content-only", Required = false, HelpText = "Show content", Default = false)]
-    public bool ContentOnly { get; }
+    [Option("chunks-only", Required = false, HelpText = "Show chunk IDs", Default = false)]
+    public bool ChunksOnly { get; }
 }

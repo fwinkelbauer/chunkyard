@@ -18,11 +18,11 @@ internal class DummyProbe : IProbe
     {
     }
 
-    public void CopiedContent(Uri contentUri)
+    public void CopiedChunk(Uri chunkId)
     {
     }
 
-    public void RemovedContent(Uri contentUri)
+    public void RemovedChunk(Uri chunkId)
     {
     }
 

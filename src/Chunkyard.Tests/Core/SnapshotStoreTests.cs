@@ -79,8 +79,8 @@ public static class SnapshotStoreTests
             blobReferences2.Select(br => br.Nonce));
 
         Assert.Equal(
-            blobReferences1.SelectMany(br => br.ContentUris),
-            blobReferences2.SelectMany(br => br.ContentUris));
+            blobReferences1.SelectMany(br => br.ChunkIds),
+            blobReferences2.SelectMany(br => br.ChunkIds));
     }
 
     [Fact]
@@ -140,12 +140,12 @@ public static class SnapshotStoreTests
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        var contentUris = snapshotStore.GetSnapshot(snapshotId)
+        var chunkIds = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
             .First()
-            .ContentUris;
+            .ChunkIds;
 
-        Assert.Empty(contentUris);
+        Assert.Empty(chunkIds);
     }
 
     [Fact]
@@ -323,11 +323,11 @@ public static class SnapshotStoreTests
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        var contentUris = snapshotStore.GetSnapshot(snapshotId)
+        var chunkIds = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
-            .SelectMany(b => b.ContentUris);
+            .SelectMany(b => b.ChunkIds);
 
-        Remove(uriRepository, contentUris);
+        Remove(uriRepository, chunkIds);
 
         Assert.False(
             snapshotStore.CheckSnapshotExists(
@@ -351,11 +351,11 @@ public static class SnapshotStoreTests
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        var contentUris = snapshotStore.GetSnapshot(snapshotId)
+        var chunkIds = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
-            .SelectMany(b => b.ContentUris);
+            .SelectMany(b => b.ChunkIds);
 
-        Invalidate(uriRepository, contentUris);
+        Invalidate(uriRepository, chunkIds);
 
         Assert.True(
            snapshotStore.CheckSnapshotExists(
@@ -448,15 +448,15 @@ public static class SnapshotStoreTests
         foreach (var blobReference in blobReferences)
         {
             using var blobStream = blobSystem.OpenRead(blobs[0].Name);
-            using var contentStream = new MemoryStream();
+            using var memoryStream = new MemoryStream();
 
-            snapshotStore.RestoreContent(
-                blobReference.ContentUris,
-                contentStream);
+            snapshotStore.RestoreChunks(
+                blobReference.ChunkIds,
+                memoryStream);
 
-            Assert.True(blobReference.ContentUris.Count > 1);
+            Assert.True(blobReference.ChunkIds.Count > 1);
             Assert.Equal(expectedBytes, ToBytes(blobStream));
-            Assert.Equal(expectedBytes, contentStream.ToArray());
+            Assert.Equal(expectedBytes, memoryStream.ToArray());
         }
     }
 
@@ -569,7 +569,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void GarbageCollect_Keeps_Used_Uris()
+    public static void GarbageCollect_Keeps_Used_Ids()
     {
         var snapshotStore = CreateSnapshotStore();
 
@@ -587,7 +587,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void GarbageCollect_Removes_Unused_Uris()
+    public static void GarbageCollect_Removes_Unused_Ids()
     {
         var uriRepository = CreateRepository<Uri>();
         var snapshotStore = CreateSnapshotStore(
@@ -741,7 +741,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void Copy_Throws_On_Invalid_Content()
+    public static void Copy_Throws_On_Invalid_Chunk()
     {
         var uriRepository = CreateRepository<Uri>();
         var snapshotStore = CreateSnapshotStore(

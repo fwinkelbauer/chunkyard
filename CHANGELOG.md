@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- All flags named `--content` to `--chunk`
+- All flags named `--content-only` to `--chunks-only`
+- The storage format by renaming `ContentUris` to `ChunkIds`
+
 ## 13.0.0 - 2022-03-07
 
 ### Added

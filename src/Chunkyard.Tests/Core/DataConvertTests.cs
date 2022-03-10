@@ -42,7 +42,7 @@ public static class DataConvertTests
                         LastWriteTimeUtc = "2020-05-07T18:33:00Z"
                     },
                     Nonce = "ESIzRA==",
-                    ContentUris = new[]
+                    ChunkIds = new[]
                     {
                         "sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e"
                     }
@@ -84,14 +84,14 @@ public static class DataConvertTests
             SchemaVersion = 1,
             Salt = "ESIzRA==",
             Iterations = 1000,
-            ContentUris = new[]
+            ChunkIds = new[]
             {
                 "sha256://ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e"
             }
         };
 
         var currentReference = new SnapshotReference(
-            1,
+            SnapshotStore.SchemaVersion,
             new byte[] { 0x11, 0x22, 0x33, 0x44 },
             1000,
             new[]

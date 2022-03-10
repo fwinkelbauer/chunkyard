@@ -86,19 +86,19 @@ public static class FileRepository
     {
         return new FileRepository<Uri>(
             directory,
-            contentUri =>
+            chunkId =>
             {
-                var (algorithm, hash) = Id.DeconstructContentUri(
-                    contentUri);
+                var (algorithm, hash) = ChunkId.DeconstructChunkId(
+                    chunkId);
 
                 return Path.Combine(
                     algorithm,
-                    hash.Substring(0, 2),
+                    hash[..2],
                     hash);
             },
             file =>
             {
-                return Id.ToContentUri(
+                return ChunkId.ToChunkId(
                     DirectoryUtils.GetParent(
                         DirectoryUtils.GetParent(file)),
                     Path.GetFileNameWithoutExtension(file));

@@ -9,29 +9,29 @@ public class BlobReference
     public BlobReference(
         Blob blob,
         byte[] nonce,
-        IReadOnlyCollection<Uri> contentUris)
+        IReadOnlyCollection<Uri> chunkIds)
     {
         Blob = blob;
         Nonce = nonce;
-        ContentUris = contentUris;
+        ChunkIds = chunkIds;
     }
 
     public Blob Blob { get; }
 
     public byte[] Nonce { get; }
 
-    public IReadOnlyCollection<Uri> ContentUris { get; }
+    public IReadOnlyCollection<Uri> ChunkIds { get; }
 
     public override bool Equals(object? obj)
     {
         return obj is BlobReference other
             && Blob.Equals(other.Blob)
             && Nonce.SequenceEqual(other.Nonce)
-            && ContentUris.SequenceEqual(other.ContentUris);
+            && ChunkIds.SequenceEqual(other.ChunkIds);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Blob, Nonce, ContentUris);
+        return HashCode.Combine(Blob, Nonce, ChunkIds);
     }
 }

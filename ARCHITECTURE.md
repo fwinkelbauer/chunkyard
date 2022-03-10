@@ -8,13 +8,13 @@ This document should provide an overview of how Chunkyard is built.
 - **Snapshot:** A set of BlobReferences. It describes the current state of a set
   of Blobs at a specific point in time
 - **Repository:** A key/value store which Chunkyard uses to persist data
-- **Content:** An encrypted piece (chunk) of a Blob or a Snapshot
-- **Content URI:** A hash address which can be used to retrieve Content from an
+- **Chunk:** An encrypted piece of a Blob or a Snapshot
+- **Chunk ID:** A hash address which can be used to retrieve Chunks from an
   IRepository
-- **BlobReference:** Contains Content URIs and meta data which can be used to
+- **BlobReference:** Contains Chunk IDs and meta data which can be used to
   restore a Blob
-- **SnapshotReference:** Contains Content URIs and meta data which can be used
-  to restore a Snapshot
+- **SnapshotReference:** Contains Chunk IDs and meta data which can be used to
+  restore a Snapshot
 
 ## Main Components
 

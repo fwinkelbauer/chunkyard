@@ -8,7 +8,7 @@ internal class MemoryBlobSystem : IBlobSystem
 
     public MemoryBlobSystem(
         IEnumerable<Blob>? blobs = null,
-        Func<string, byte[]>? createContent = null)
+        Func<string, byte[]>? generate = null)
     {
         _blobs = blobs == null
             ? new Dictionary<string, Blob>()
@@ -19,14 +19,14 @@ internal class MemoryBlobSystem : IBlobSystem
         _bytes = new Dictionary<string, byte[]>();
         _lock = new object();
 
-        createContent ??= (blobName => Encoding.UTF8.GetBytes(blobName));
+        generate ??= (blobName => Encoding.UTF8.GetBytes(blobName));
 
         foreach (var blob in _blobs.Values)
         {
             using var stream = NewWrite(blob);
 
             stream.Write(
-                createContent(blob.Name));
+                generate(blob.Name));
         }
     }
 

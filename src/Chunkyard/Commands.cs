@@ -63,13 +63,13 @@ internal static class Commands
             o.SnapshotId,
             new Fuzzy(o.IncludePatterns));
 
-        if (o.ContentOnly)
+        if (o.ChunksOnly)
         {
-            var contentUris = blobReferences.SelectMany(b => b.ContentUris);
+            var chunkIds = blobReferences.SelectMany(b => b.ChunkIds);
 
-            foreach (var contentUri in contentUris)
+            foreach (var chunkId in chunkIds)
             {
-                Console.WriteLine(contentUri.AbsoluteUri);
+                Console.WriteLine(chunkId.AbsoluteUri);
             }
         }
         else
@@ -125,11 +125,11 @@ internal static class Commands
         var first = snapshotStore.FilterSnapshot(o.FirstSnapshotId, fuzzy);
         var second = snapshotStore.FilterSnapshot(o.SecondSnapshotId, fuzzy);
 
-        var diff = o.ContentOnly
+        var diff = o.ChunksOnly
             ? DiffSet.Create(
-                first.SelectMany(b => b.ContentUris),
-                second.SelectMany(b => b.ContentUris),
-                contentUri => contentUri.AbsoluteUri)
+                first.SelectMany(b => b.ChunkIds),
+                second.SelectMany(b => b.ChunkIds),
+                chunkId => chunkId.AbsoluteUri)
             : DiffSet.Create(
                 first,
                 second,
@@ -175,7 +175,7 @@ internal static class Commands
         if (string.IsNullOrEmpty(o.Export))
         {
             using var stream = new MemoryStream();
-            snapshotStore.RestoreContent(o.ContentUris, stream);
+            snapshotStore.RestoreChunks(o.ChunkIds, stream);
 
             Console.WriteLine(
                 DataConvert.BytesToText(stream.ToArray()));
@@ -187,7 +187,7 @@ internal static class Commands
                 FileMode.CreateNew,
                 FileAccess.Write);
 
-            snapshotStore.RestoreContent(o.ContentUris, stream);
+            snapshotStore.RestoreChunks(o.ChunkIds, stream);
         }
     }
 
@@ -225,7 +225,7 @@ internal static class Commands
         string repositoryPath)
     {
         return FileRepository.CreateUriRepository(
-            Path.Combine(repositoryPath, "blobs"));
+            Path.Combine(repositoryPath, "chunks"));
     }
 
     private static IRepository<int> CreateIntRepository(
