@@ -385,35 +385,6 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void CurrentSnapshot_Respects_StoreSnapshot_And_RemoveSnapshot()
-    {
-        var snapshotStore = CreateSnapshotStore();
-        var blobSystem = new MemoryBlobSystem(CreateBlobs());
-
-        Assert.Null(snapshotStore.CurrentSnapshot);
-
-        snapshotStore.StoreSnapshot(
-            blobSystem,
-            Fuzzy.Default,
-            DateTime.UtcNow);
-
-        snapshotStore.StoreSnapshot(
-            blobSystem,
-            Fuzzy.Default,
-            DateTime.UtcNow);
-
-        Assert.NotNull(snapshotStore.CurrentSnapshot);
-
-        snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
-
-        Assert.NotNull(snapshotStore.CurrentSnapshot);
-
-        snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
-
-        Assert.Null(snapshotStore.CurrentSnapshot);
-    }
-
-    [Fact]
     public static void RestoreSnapshot_Writes_Ordered_Blob_Chunks_To_Stream()
     {
         var fastCdc = new FastCdc(64, 256, 1024);

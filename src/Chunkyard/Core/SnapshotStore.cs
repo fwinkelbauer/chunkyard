@@ -54,9 +54,23 @@ public class SnapshotStore
         });
     }
 
-    public Snapshot? CurrentSnapshot => _currentSnapshotId == null
-        ? null
-        : GetSnapshot(_currentSnapshotId.Value);
+    public DiffSet StoreSnapshotPreview(
+        IBlobSystem blobSystem,
+        Fuzzy excludeFuzzy)
+    {
+        ArgumentNullException.ThrowIfNull(blobSystem);
+
+        var blobReferences = _currentSnapshotId == null
+            ? Array.Empty<BlobReference>()
+            : GetSnapshot(_currentSnapshotId.Value).BlobReferences;
+
+        var blobs = blobSystem.ListBlobs(excludeFuzzy);
+
+        return DiffSet.Create(
+            blobReferences.Select(blobReference => blobReference.Blob),
+            blobs,
+            blob => blob.Name);
+    }
 
     public int StoreSnapshot(
         IBlobSystem blobSystem,
@@ -71,8 +85,9 @@ public class SnapshotStore
             _probe,
             _aesGcmCrypto.Value);
 
-        var knownBlobReferences = CurrentSnapshot?.BlobReferences
-            ?? Array.Empty<BlobReference>();
+        var knownBlobReferences = _currentSnapshotId == null
+            ? Array.Empty<BlobReference>()
+            : GetSnapshot(_currentSnapshotId.Value).BlobReferences;
 
         var blobReferences = snapshotWriter.WriteBlobs(
             blobSystem,
@@ -130,6 +145,22 @@ public class SnapshotStore
             ResolveSnapshotId(snapshotId));
 
         return restoredBlob;
+    }
+
+    public DiffSet MirrorSnapshotPreview(
+        IBlobSystem blobSystem,
+        Fuzzy excludeFuzzy,
+        int snapshotId)
+    {
+        ArgumentNullException.ThrowIfNull(blobSystem);
+
+        var blobs = blobSystem.ListBlobs(excludeFuzzy);
+        var blobReferences = GetSnapshot(snapshotId).BlobReferences;
+
+        return DiffSet.Create(
+            blobs,
+            blobReferences.Select(blobReference => blobReference.Blob),
+            blob => blob.Name);
     }
 
     public IReadOnlyCollection<Blob> MirrorSnapshot(

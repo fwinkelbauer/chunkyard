@@ -7,11 +7,19 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- A `--preview` flag to the commands `create` and `mirror`
+
 ### Changed
 
 - All flags named `--content` to `--chunk`
 - All flags named `--content-only` to `--chunks-only`
 - The storage format by renaming `ContentUris` to `ChunkIds`
+
+### Removed
+
+- The `preview` command
 
 ## 13.0.0 - 2022-03-07
 

@@ -36,7 +36,6 @@ public static class Program
             .ToArray();
 
         Parser.Default.ParseArguments(args, optionTypes)
-            .WithParsed<PreviewOptions>(Commands.PreviewSnapshot)
             .WithParsed<RestoreOptions>(Commands.RestoreSnapshot)
             .WithParsed<MirrorOptions>(Commands.MirrorSnapshot)
             .WithParsed<CreateOptions>(Commands.CreateSnapshot)

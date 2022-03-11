@@ -5,33 +5,27 @@ namespace Chunkyard;
 /// </summary>
 internal static class Commands
 {
-    public static void PreviewSnapshot(PreviewOptions o)
-    {
-        var blobSystem = new FileBlobSystem(o.Files);
-        var blobs = blobSystem.ListBlobs(
-            new Fuzzy(o.ExcludePatterns));
-
-        var snapshotStore = CreateSnapshotStore(o.Repository);
-
-        var blobReferences = snapshotStore.CurrentSnapshot?.BlobReferences
-            ?? Array.Empty<BlobReference>();
-
-        var diff = DiffSet.Create(
-            blobReferences.Select(blobReference => blobReference.Blob),
-            blobs,
-            blob => blob.Name);
-
-        PrintDiff(diff);
-    }
-
     public static void CreateSnapshot(CreateOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
+        var blobSystem = new FileBlobSystem(o.Files);
+        var excludeFuzzy = new Fuzzy(o.ExcludePatterns);
 
-        snapshotStore.StoreSnapshot(
-            new FileBlobSystem(o.Files),
-            new Fuzzy(o.ExcludePatterns),
-            DateTime.UtcNow);
+        if (o.Preview)
+        {
+            var diffSet = snapshotStore.StoreSnapshotPreview(
+                blobSystem,
+                excludeFuzzy);
+
+            PrintDiff(diffSet);
+        }
+        else
+        {
+            snapshotStore.StoreSnapshot(
+                blobSystem,
+                excludeFuzzy,
+                DateTime.UtcNow);
+        }
     }
 
     public static void CheckSnapshot(CheckOptions o)
@@ -94,11 +88,25 @@ internal static class Commands
     public static void MirrorSnapshot(MirrorOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
+        var blobSystem = new FileBlobSystem(o.Files);
+        var excludeFuzzy = new Fuzzy(o.ExcludePatterns);
 
-        snapshotStore.MirrorSnapshot(
-            new FileBlobSystem(o.Files),
-            new Fuzzy(o.ExcludePatterns),
-            o.SnapshotId);
+        if (o.Preview)
+        {
+            var diffSet = snapshotStore.MirrorSnapshotPreview(
+                blobSystem,
+                excludeFuzzy,
+                o.SnapshotId);
+
+            PrintDiff(diffSet);
+        }
+        else
+        {
+            snapshotStore.MirrorSnapshot(
+                blobSystem,
+                excludeFuzzy,
+                o.SnapshotId);
+        }
     }
 
     public static void ListSnapshots(ListOptions o)

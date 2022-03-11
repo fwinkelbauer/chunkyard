@@ -75,11 +75,13 @@ public class CreateOptions
     public CreateOptions(
         string repository,
         IEnumerable<string> files,
-        IEnumerable<string> excludePatterns)
+        IEnumerable<string> excludePatterns,
+        bool preview)
     {
         Repository = repository;
         Files = files;
         ExcludePatterns = excludePatterns;
+        Preview = preview;
     }
 
     [Option('r', "repository", Required = true, HelpText = "The repository path")]
@@ -90,6 +92,9 @@ public class CreateOptions
 
     [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude")]
     public IEnumerable<string> ExcludePatterns { get; }
+
+    [Option("preview", Required = false, HelpText = "Show only a preview")]
+    public bool Preview { get; }
 }
 
 [Verb("diff", HelpText = "Show the difference between two snapshots.")]
@@ -167,29 +172,6 @@ public class ListOptions
     public string Repository { get; }
 }
 
-[Verb("preview", HelpText = "Preview the output of a create command.")]
-public class PreviewOptions
-{
-    public PreviewOptions(
-        string repository,
-        IEnumerable<string> files,
-        IEnumerable<string> excludePatterns)
-    {
-        Repository = repository;
-        Files = files;
-        ExcludePatterns = excludePatterns;
-    }
-
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
-    public string Repository { get; }
-
-    [Option('f', "files", Required = true, HelpText = "The files and directories to include")]
-    public IEnumerable<string> Files { get; }
-
-    [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude")]
-    public IEnumerable<string> ExcludePatterns { get; }
-}
-
 [Verb("remove", HelpText = "Remove a snapshot.")]
 public class RemoveOptions
 {
@@ -243,12 +225,14 @@ public class MirrorOptions
         string repository,
         IEnumerable<string> files,
         IEnumerable<string> excludePatterns,
-        int snapshotId)
+        int snapshotId,
+        bool preview)
     {
         Repository = repository;
         Files = files;
         ExcludePatterns = excludePatterns;
         SnapshotId = snapshotId;
+        Preview = preview;
     }
 
     [Option('r', "repository", Required = true, HelpText = "The repository path")]
@@ -262,6 +246,9 @@ public class MirrorOptions
 
     [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
     public int SnapshotId { get; }
+
+    [Option("preview", Required = false, HelpText = "Show only a preview")]
+    public bool Preview { get; }
 }
 
 [Verb("show", HelpText = "Show the content of a snapshot.")]
