@@ -13,13 +13,13 @@ public class CatOptions
         Export = export;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option('c', "chunk", Required = true, HelpText = "The chunk IDs")]
+    [Option('c', "chunk", Required = true, HelpText = "The chunk IDs.")]
     public IEnumerable<Uri> ChunkIds { get; }
 
-    [Option('e', "export", Required = false, HelpText = "The export path", Default = "")]
+    [Option('e', "export", Required = false, HelpText = "The export path.", Default = "")]
     public string? Export { get; }
 }
 
@@ -38,16 +38,16 @@ public class CheckOptions
         Shallow = shallow;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
     public int SnapshotId { get; }
 
-    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
+    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include.")]
     public IEnumerable<string> IncludePatterns { get; }
 
-    [Option("shallow", Required = false, HelpText = "Check if chunks exist without further validation", Default = false)]
+    [Option("shallow", Required = false, HelpText = "Only check if chunks exist.", Default = false)]
     public bool Shallow { get; }
 }
 
@@ -62,10 +62,10 @@ public class CopyOptions
         DestinationRepository = destinationRepository;
     }
 
-    [Option('s', "source", Required = true, HelpText = "The source repository path")]
+    [Option('s', "source", Required = true, HelpText = "The source repository path.")]
     public string SourceRepository { get; }
 
-    [Option('d', "destination", Required = true, HelpText = "The destination repository path")]
+    [Option('d', "destination", Required = true, HelpText = "The destination repository path.")]
     public string DestinationRepository { get; }
 }
 
@@ -84,16 +84,16 @@ public class CreateOptions
         Preview = preview;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option('f', "files", Required = true, HelpText = "The files and directories to include")]
+    [Option('f', "files", Required = true, HelpText = "The files and directories to include.")]
     public IEnumerable<string> Files { get; }
 
-    [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude")]
+    [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude.")]
     public IEnumerable<string> ExcludePatterns { get; }
 
-    [Option("preview", Required = false, HelpText = "Show only a preview")]
+    [Option("preview", Required = false, HelpText = "Show only a preview.")]
     public bool Preview { get; }
 }
 
@@ -114,19 +114,19 @@ public class DiffOptions
         ChunksOnly = chunksOnly;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option('f', "first", Required = false, HelpText = "The first snapshot ID", Default = SnapshotStore.SecondLatestSnapshotId)]
+    [Option('f', "first", Required = false, HelpText = "The first snapshot ID.", Default = SnapshotStore.SecondLatestSnapshotId)]
     public int FirstSnapshotId { get; }
 
-    [Option('s', "second", Required = false, HelpText = "The second snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
+    [Option('s', "second", Required = false, HelpText = "The second snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
     public int SecondSnapshotId { get; }
 
-    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
+    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include.")]
     public IEnumerable<string> IncludePatterns { get; }
 
-    [Option("chunks-only", Required = false, HelpText = "Show chunk IDs", Default = false)]
+    [Option("chunks-only", Required = false, HelpText = "Show chunk IDs.", Default = false)]
     public bool ChunksOnly { get; }
 }
 
@@ -138,7 +138,7 @@ public class GarbageCollectOptions
         Repository = repository;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 }
 
@@ -153,10 +153,10 @@ public class KeepOptions
         LatestCount = latestCount;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option("latest", Required = true, HelpText = "The count of the latest snapshots to keep")]
+    [Option("latest", Required = true, HelpText = "The count of the latest snapshots to keep.")]
     public int LatestCount { get; }
 }
 
@@ -168,7 +168,7 @@ public class ListOptions
         Repository = repository;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 }
 
@@ -183,10 +183,10 @@ public class RemoveOptions
         SnapshotId = snapshotId;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option('s', "snapshot", Required = true, HelpText = "The snapshot ID")]
+    [Option('s', "snapshot", Required = true, HelpText = "The snapshot ID.")]
     public int SnapshotId { get; }
 }
 
@@ -205,20 +205,20 @@ public class RestoreOptions
         IncludePatterns = includePatterns;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option('d', "directory", Required = false, HelpText = "The directory to restore into", Default = ".")]
+    [Option('d', "directory", Required = false, HelpText = "The directory to restore into.", Default = ".")]
     public string Directory { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
     public int SnapshotId { get; }
 
-    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
+    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include.")]
     public IEnumerable<string> IncludePatterns { get; }
 }
 
-[Verb("mirror", HelpText = "Restore, overwrite and remove files to mirror the snapshot.")]
+[Verb("mirror", HelpText = "Restore, overwrite and remove files to mirror a snapshot.")]
 public class MirrorOptions
 {
     public MirrorOptions(
@@ -235,19 +235,19 @@ public class MirrorOptions
         Preview = preview;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option('f', "files", Required = true, HelpText = "The files and directories to include")]
+    [Option('f', "files", Required = true, HelpText = "The files and directories to include.")]
     public IEnumerable<string> Files { get; }
 
-    [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude")]
+    [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude.")]
     public IEnumerable<string> ExcludePatterns { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
     public int SnapshotId { get; }
 
-    [Option("preview", Required = false, HelpText = "Show only a preview")]
+    [Option("preview", Required = false, HelpText = "Show only a preview.")]
     public bool Preview { get; }
 }
 
@@ -266,15 +266,15 @@ public class ShowOptions
         ChunksOnly = chunksOnly;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path")]
+    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID", Default = SnapshotStore.LatestSnapshotId)]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
     public int SnapshotId { get; }
 
-    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include")]
+    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include.")]
     public IEnumerable<string> IncludePatterns { get; }
 
-    [Option("chunks-only", Required = false, HelpText = "Show chunk IDs", Default = false)]
+    [Option("chunks-only", Required = false, HelpText = "Show chunk IDs.", Default = false)]
     public bool ChunksOnly { get; }
 }
