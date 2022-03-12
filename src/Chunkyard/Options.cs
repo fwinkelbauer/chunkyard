@@ -69,10 +69,10 @@ public class CopyOptions
     public string DestinationRepository { get; }
 }
 
-[Verb("create", HelpText = "Create a new snapshot.")]
-public class CreateOptions
+[Verb("store", HelpText = "Store a new snapshot.")]
+public class StoreOptions
 {
-    public CreateOptions(
+    public StoreOptions(
         string repository,
         IEnumerable<string> files,
         IEnumerable<string> excludePatterns,

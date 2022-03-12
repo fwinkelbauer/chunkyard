@@ -5,7 +5,7 @@ namespace Chunkyard;
 /// </summary>
 internal static class Commands
 {
-    public static void CreateSnapshot(CreateOptions o)
+    public static void StoreSnapshot(StoreOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
         var blobSystem = new FileBlobSystem(o.Files);

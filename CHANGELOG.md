@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 - All flags named `--content` to `--chunk`
 - All flags named `--content-only` to `--chunks-only`
 - The storage format by renaming `ContentUris` to `ChunkIds`
+- The `create` command to `store`
 
 ### Removed
 
