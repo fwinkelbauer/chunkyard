@@ -794,6 +794,68 @@ public static class SnapshotStoreTests
             blobSystem.ListBlobs(Fuzzy.Default).Select(b => b.Name));
     }
 
+    [Fact]
+    public static void StoreSnapshotPreview_Shows_Preview()
+    {
+        var snapshotStore = CreateSnapshotStore();
+
+        var initialBlobSystem = new MemoryBlobSystem(
+            CreateBlobs(new[] { "some blob" }));
+
+        var initialDiff = snapshotStore.StoreSnapshotPreview(
+            initialBlobSystem,
+            Fuzzy.Default);
+
+        snapshotStore.StoreSnapshot(
+            initialBlobSystem,
+            Fuzzy.Default,
+            DateTime.UtcNow);
+
+        var changedBlobSystem = new MemoryBlobSystem(
+            CreateBlobs(new[] { "other blob" }));
+
+        var changedDiff = snapshotStore.StoreSnapshotPreview(
+            changedBlobSystem,
+            Fuzzy.Default);
+
+        Assert.Equal(
+            new DiffSet(
+                new[] { "some blob" },
+                Array.Empty<string>(),
+                Array.Empty<string>()),
+            initialDiff);
+
+        Assert.Equal(
+            new DiffSet(
+                new[] { "other blob" },
+                Array.Empty<string>(),
+                new[] { "some blob" }),
+            changedDiff);
+    }
+
+    [Fact]
+    public static void MirrorSnapshotPreview_Shows_Preview()
+    {
+        var snapshotStore = CreateSnapshotStore();
+
+        var snapshotId = snapshotStore.StoreSnapshot(
+            new MemoryBlobSystem(CreateBlobs(new[] { "some blob" })),
+            Fuzzy.Default,
+            DateTime.UtcNow);
+
+        var actualDiff = snapshotStore.MirrorSnapshotPreview(
+            new MemoryBlobSystem(CreateBlobs(new[] { "other blob" })),
+            Fuzzy.Default,
+            snapshotId);
+
+        Assert.Equal(
+            new DiffSet(
+                new[] { "some blob" },
+                Array.Empty<string>(),
+                new[] { "other blob" }),
+            actualDiff);
+    }
+
     private static byte[] GenerateRandomNumber(int length)
     {
         using var randomGenerator = RandomNumberGenerator.Create();
