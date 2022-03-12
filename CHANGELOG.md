@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 14.0.0 - 2022-03-12
+
 ### Added
 
 - A `--preview` flag to the commands `create` and `mirror`
