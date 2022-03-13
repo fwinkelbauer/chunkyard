@@ -70,14 +70,14 @@ Example:
 # List all available commands
 chunkyard --help
 
-# Learn more about the preview command
-chunkyard preview --help
+# Learn more about the store command
+chunkyard store --help
 
 # See which files chunkyard would backup
-chunkyard preview -r "../repository" -f "Music" -e "Desktop\.ini" "thumbs\.db"
+chunkyard store -r "../repository" -f "Music" -e "Desktop\.ini" "thumbs\.db" --preview
 
-# Create a backup
-chunkyard create -r "../repository" -f "Music" -e "Desktop\.ini" "thumbs\.db"
+# Store a backup
+chunkyard store -r "../repository" -f "Music" -e "Desktop\.ini" "thumbs\.db"
 
 # Check if the backup is valid
 chunkyard check -r "../repository"
@@ -103,8 +103,8 @@ directories=(
 # export CHUNKYARD_PASSWORD="my secret password"
 # export CHUNKYARD_PASSCMD="echo \"my secret password\""
 
-# Create backup
-chunkyard create -r "$repo" -f ${directories[*]}
+# Store backup
+chunkyard store -r "$repo" -f ${directories[*]}
 
 # Keep the latest four backups
 chunkyard keep -r "$repo" --latest 4
@@ -126,8 +126,8 @@ $directories = @(
 # $env:CHUNKYARD_PASSWORD = 'my secret password'
 # $env:CHUNKYARD_PASSCMD = 'echo "my secret password"'
 
-# Create backup
-chunkyard create --repository $repo --files $directories
+# Store backup
+chunkyard store --repository $repo --files $directories
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # Keep the latest four backups
