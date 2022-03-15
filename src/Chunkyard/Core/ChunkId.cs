@@ -12,9 +12,7 @@ public static class ChunkId
     public static Uri ComputeChunkId(
         ReadOnlySpan<byte> chunk)
     {
-        return ToChunkId(
-            HashAlgorithmName,
-            ComputeHash(chunk));
+        return ToChunkId(HashAlgorithmName, ComputeHash(chunk));
     }
 
     public static bool ChunkIdValid(

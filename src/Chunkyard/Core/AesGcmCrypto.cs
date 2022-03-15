@@ -76,6 +76,16 @@ public class AesGcmCrypto
         return plainText;
     }
 
+    public static byte[] GenerateSalt()
+    {
+        return RandomNumberGenerator.GetBytes(SaltBytes);
+    }
+
+    public static byte[] GenerateNonce()
+    {
+        return RandomNumberGenerator.GetBytes(NonceBytes);
+    }
+
     private static byte[] PasswordToKey(
         string password,
         byte[] salt,
@@ -94,15 +104,5 @@ public class AesGcmCrypto
             HashAlgorithmName.SHA256);
 
         return rfc2898.GetBytes(KeyBytes);
-    }
-
-    public static byte[] GenerateSalt()
-    {
-        return RandomNumberGenerator.GetBytes(SaltBytes);
-    }
-
-    public static byte[] GenerateNonce()
-    {
-        return RandomNumberGenerator.GetBytes(NonceBytes);
     }
 }
