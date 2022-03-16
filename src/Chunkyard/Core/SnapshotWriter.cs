@@ -117,23 +117,11 @@ internal class SnapshotWriter
     {
         long bytesProcessed = 0;
         var bytesCarryOver = 0;
-        var chunkSize = 0;
+        var ticket = _unencryptedRingBuffer.ReserveTicketBlocking();
+        var buffer = _unencryptedRingBuffer.GetWriteBuffer(ticket);
 
         while (bytesProcessed < stream.Length)
         {
-            var ticket = _unencryptedRingBuffer.ReserveTicketBlocking();
-            var buffer = _unencryptedRingBuffer.GetWriteBuffer(ticket);
-
-            if (bytesCarryOver > 0)
-            {
-                Array.Copy(
-                    _unencryptedRingBuffer.GetWriteBuffer(ticket - 1),
-                    chunkSize,
-                    buffer,
-                    0,
-                    bytesCarryOver);
-            }
-
             var bytesRead = stream.Read(
                 buffer,
                 bytesCarryOver,
@@ -141,19 +129,27 @@ internal class SnapshotWriter
 
             var bytesTotal = bytesCarryOver + bytesRead;
 
-            chunkSize = _fastCdc.Cut(
+            var chunkSize = _fastCdc.Cut(
                 new ReadOnlySpan<byte>(buffer, 0, bytesTotal));
 
             bytesProcessed += chunkSize;
             bytesCarryOver = bytesTotal - chunkSize;
 
+            var previousTicket = ticket;
+            var previousBuffer = buffer;
+
+            ticket = _unencryptedRingBuffer.ReserveTicketBlocking();
+            buffer = _unencryptedRingBuffer.GetWriteBuffer(ticket);
+
+            Array.Copy(previousBuffer, chunkSize, buffer, 0, bytesCarryOver);
+
             _unencryptedRingBuffer.CommitTicketWrite(
-                ticket,
+                previousTicket,
                 chunkSize);
 
             yield return Task.Run(() => WriteEncryptedChunk(
                 nonce,
-                ticket));
+                previousTicket));
         }
     }
 
