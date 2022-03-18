@@ -36,8 +36,6 @@ internal static class Commands
 
     public static void Publish()
     {
-        ThrowOnUncommittedChanges();
-
         Clean();
         Ci();
 
@@ -90,15 +88,6 @@ internal static class Commands
         Git($"add {Changelog}");
         Git($"commit -m \"{message}\"");
         Git($"tag -a \"{tag}\" -m \"{message}\"");
-    }
-
-    private static void ThrowOnUncommittedChanges()
-    {
-        if (GitQuery("status --porcelain").Length > 0)
-        {
-            throw new BuildException(
-                "Publishing uncommitted changes is not allowed");
-        }
     }
 
     private static string FetchVersion()
