@@ -2,10 +2,4 @@
 
 set -euo pipefail
 
-root=$(git rev-parse --show-toplevel)
-
-cd "$root"
-
-project=$(git ls-files '*.Build.csproj')
-
-dotnet run --project "$project" -- "$@"
+dotnet run --project "src/Chunkyard.Build/Chunkyard.Build.csproj" -- "$@"
