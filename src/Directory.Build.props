@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Nullable>enable</Nullable>
-    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <AnalysisMode>All</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
