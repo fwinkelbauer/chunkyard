@@ -6,7 +6,6 @@ namespace Chunkyard.Core;
 public class AesGcmCrypto
 {
     public const int DefaultIterations = 1000;
-    public const int EncryptionBytes = NonceBytes + TagBytes;
 
     private const int NonceBytes = 12;
     private const int TagBytes = 16;
@@ -27,30 +26,30 @@ public class AesGcmCrypto
 
     public int Iterations { get; }
 
-    public int Encrypt(
+    public byte[] Encrypt(
         ReadOnlySpan<byte> nonce,
-        ReadOnlySpan<byte> plainText,
-        byte[] buffer)
+        ReadOnlySpan<byte> plainText)
     {
-        ArgumentNullException.ThrowIfNull(buffer);
+        var cipherText = new byte[
+            nonce.Length + plainText.Length + TagBytes];
 
         nonce.CopyTo(
-            new Span<byte>(buffer, 0, nonce.Length));
+            new Span<byte>(cipherText, 0, nonce.Length));
 
-        var ciphertext = new Span<byte>(
-            buffer,
+        var innerCiphertext = new Span<byte>(
+            cipherText,
             nonce.Length,
             plainText.Length);
 
         var tag = new Span<byte>(
-            buffer,
-            nonce.Length + ciphertext.Length,
+            cipherText,
+            cipherText.Length - TagBytes,
             TagBytes);
 
         using var aesGcm = new AesGcm(_key);
-        aesGcm.Encrypt(nonce, plainText, ciphertext, tag);
+        aesGcm.Encrypt(nonce, plainText, innerCiphertext, tag);
 
-        return nonce.Length + plainText.Length + TagBytes;
+        return cipherText;
     }
 
     public byte[] Decrypt(

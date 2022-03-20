@@ -758,7 +758,7 @@ public static class SnapshotStoreTests
     {
         var snapshotStore = CreateSnapshotStore();
         var expectedBlobs = CreateBlobs(
-            new[] { "some blob", "other blob" });
+            new[] { "some blob", "some other blob" });
 
         var blobSystem = new MemoryBlobSystem(expectedBlobs);
 
@@ -768,7 +768,7 @@ public static class SnapshotStoreTests
             DateTime.UtcNow);
 
         var blobToDelete = new Blob("blob to delete", DateTime.UtcNow);
-        var otherBlob = new Blob("other blob", DateTime.UtcNow);
+        var otherBlob = new Blob("some other blob", DateTime.UtcNow);
 
         using (var writeStream = blobSystem.NewWrite(blobToDelete))
         {

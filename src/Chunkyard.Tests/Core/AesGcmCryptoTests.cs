@@ -11,13 +11,10 @@ public static class AesGcmCryptoTests
             AesGcmCrypto.DefaultIterations);
 
         var plainBytes = Encoding.UTF8.GetBytes("Hello!");
-        var encryptedBytes = new byte[
-            plainBytes.Length + AesGcmCrypto.EncryptionBytes];
 
-        aesGcmCrypto.Encrypt(
+        var encryptedBytes = aesGcmCrypto.Encrypt(
             AesGcmCrypto.GenerateNonce(),
-            plainBytes,
-            encryptedBytes);
+            plainBytes);
 
         var decryptedBytes = aesGcmCrypto.Decrypt(encryptedBytes);
 
@@ -39,13 +36,10 @@ public static class AesGcmCryptoTests
             AesGcmCrypto.DefaultIterations);
 
         var plainBytes = Encoding.UTF8.GetBytes("Hello!");
-        var encryptedBytes = new byte[
-            plainBytes.Length + AesGcmCrypto.EncryptionBytes];
 
-        someAes.Encrypt(
+        var encryptedBytes = someAes.Encrypt(
             AesGcmCrypto.GenerateNonce(),
-            Encoding.UTF8.GetBytes("Hello!"),
-            encryptedBytes);
+            Encoding.UTF8.GetBytes("Hello!"));
 
         Assert.Throws<CryptographicException>(
             () => otherAes.Decrypt(encryptedBytes));
