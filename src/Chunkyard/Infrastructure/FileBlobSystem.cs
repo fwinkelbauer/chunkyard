@@ -31,11 +31,10 @@ public class FileBlobSystem : IBlobSystem
 
     public IReadOnlyCollection<Blob> ListBlobs(Fuzzy excludeFuzzy)
     {
-        var foundFiles = _files
-            .SelectMany(f => Find(f, excludeFuzzy))
-            .Distinct();
-
-        return foundFiles
+        return _files
+            .SelectMany(ListFiles)
+            .Where(f => !excludeFuzzy.IsExcludingMatch(f))
+            .Distinct()
             .Select(ToBlob)
             .ToArray();
     }
@@ -105,29 +104,23 @@ public class FileBlobSystem : IBlobSystem
         return DirectoryUtils.CombinePathSafe(_parent, blobName);
     }
 
-    private static IEnumerable<string> Find(
-        string file,
-        Fuzzy excludeFuzzy)
+    private static IReadOnlyCollection<string> ListFiles(string path)
     {
-        IEnumerable<string>? files = null;
-
-        if (Directory.Exists(file))
+        if (Directory.Exists(path))
         {
-            files = Directory.GetFiles(
-                file,
+            return Directory.GetFiles(
+                path,
                 "*",
                 SearchOption.AllDirectories);
         }
-        else if (File.Exists(file))
+        else if (File.Exists(path))
         {
-            files = new[] { file };
+            return new[] { path };
         }
         else
         {
-            throw new FileNotFoundException("Could not find file", file);
+            throw new FileNotFoundException("Could not find path", path);
         }
-
-        return files.Where(f => !excludeFuzzy.IsExcludingMatch(f));
     }
 
     private static string FindCommonParent(string[] files)
