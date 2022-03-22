@@ -320,7 +320,7 @@ public class SnapshotStore
         }
     }
 
-    private IEnumerable<Uri> ListChunkIds(IEnumerable<int> snapshotIds)
+    private IReadOnlyCollection<Uri> ListChunkIds(IEnumerable<int> snapshotIds)
     {
         var chunkIds = new HashSet<Uri>();
 
