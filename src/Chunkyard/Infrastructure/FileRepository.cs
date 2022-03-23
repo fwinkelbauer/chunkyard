@@ -52,12 +52,7 @@ internal class FileRepository<T> : IRepository<T>
             return Array.Empty<T>();
         }
 
-        var files = Directory.GetFiles(
-            _directory,
-            "*",
-            SearchOption.AllDirectories);
-
-        return files
+        return Directory.GetFiles(_directory, "*", SearchOption.AllDirectories)
             .Select(ToKey)
             .ToArray();
     }

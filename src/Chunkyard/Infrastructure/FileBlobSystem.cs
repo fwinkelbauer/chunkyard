@@ -108,10 +108,7 @@ public class FileBlobSystem : IBlobSystem
     {
         if (Directory.Exists(path))
         {
-            return Directory.GetFiles(
-                path,
-                "*",
-                SearchOption.AllDirectories);
+            return Directory.GetFiles(path, "*", SearchOption.AllDirectories);
         }
         else if (File.Exists(path))
         {
@@ -141,9 +138,7 @@ public class FileBlobSystem : IBlobSystem
         var fileSegments = files
             .OrderBy(file => file)
             .Last()
-            .Split(
-                Path.DirectorySeparatorChar,
-                StringSplitOptions.RemoveEmptyEntries)
+            .Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries)
             .ToArray();
 
         foreach (var fileSegment in fileSegments)

@@ -10,7 +10,11 @@ internal static class Commands
 
     public static void Clean()
     {
-        Git("clean -dfx -e .vs -e launchSettings.json -e *.Build");
+        Git(
+            "clean -dfx",
+            "-e .vs",
+            "-e launchSettings.json",
+            "-e *.Build");
     }
 
     public static void Build()
@@ -69,8 +73,8 @@ internal static class Commands
     {
         Dotnet($"restore {Solution}");
 
-        Dotnet($"list {Solution} package --deprecated --include-transitive");
-        Dotnet($"list {Solution} package --vulnerable --include-transitive");
+        Dotnet($"list {Solution} package --deprecated");
+        Dotnet($"list {Solution} package --vulnerable");
         Dotnet($"list {Solution} package --outdated");
     }
 
