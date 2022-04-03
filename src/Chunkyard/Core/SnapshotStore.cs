@@ -125,7 +125,7 @@ public class SnapshotStore
     {
         var restoredBlob = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
-            .Select(br => RestoreBlob(blobSystem, br))
+            .Select(br => RestoreBlob(blobSystem.NewWrite, br))
             .ToArray();
 
         _probe.RestoredSnapshot(
@@ -470,12 +470,12 @@ public class SnapshotStore
     }
 
     private Blob RestoreBlob(
-        IBlobSystem blobSystem,
+        Func<Blob, Stream> createWriteStream,
         BlobReference blobReference)
     {
         var blob = blobReference.Blob;
 
-        using (var stream = blobSystem.NewWrite(blob))
+        using (var stream = createWriteStream(blob))
         {
             RestoreChunks(blobReference.ChunkIds, stream);
         }
@@ -497,14 +497,7 @@ public class SnapshotStore
             return blob;
         }
 
-        using (var stream = blobSystem.OpenWrite(blob))
-        {
-            RestoreChunks(blobReference.ChunkIds, stream);
-        }
-
-        _probe.RestoredBlob(blobReference.Blob.Name);
-
-        return blob;
+        return RestoreBlob(blobSystem.OpenWrite, blobReference);
     }
 
     private bool CheckBlobReference(
