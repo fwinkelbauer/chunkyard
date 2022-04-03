@@ -22,6 +22,25 @@ public static class RepositoryTests
     }
 
     [Fact]
+    public static void MemoryRepository_Throws_When_Writing_To_Same_Key()
+    {
+        var repository = new MemoryRepository();
+
+        Repository_Throws_When_Writing_To_Same_Key<ArgumentException>(
+            repository.Chunks);
+    }
+
+    [Fact]
+    public static void FileRepository_Throws_When_Writing_To_Same_Key()
+    {
+        using var directory = new DisposableDirectory();
+        var repository = new FileRepository(directory.Name);
+
+        Repository_Throws_When_Writing_To_Same_Key<IOException>(
+            repository.Chunks);
+    }
+
+    [Fact]
     public static void FileRepository_Prevents_Directory_Traversal_Attack()
     {
         using var directory = new DisposableDirectory();
@@ -40,25 +59,6 @@ public static class RepositoryTests
 
         Assert.Throws<ChunkyardException>(
             () => repository.Chunks.RemoveValue(invalidUri));
-    }
-
-    [Fact]
-    public static void MemoryRepository_Throws_When_Writing_To_Same_Key()
-    {
-        var repository = new MemoryRepository();
-
-        Repository_Throws_When_Writing_To_Same_Key<ArgumentException>(
-            repository.Chunks);
-    }
-
-    [Fact]
-    public static void FileRepository_Throws_When_Writing_To_Same_Key()
-    {
-        using var directory = new DisposableDirectory();
-        var repository = new FileRepository(directory.Name);
-
-        Repository_Throws_When_Writing_To_Same_Key<IOException>(
-            repository.Chunks);
     }
 
     private static void Repository_Throws_When_Writing_To_Same_Key<TException>(
