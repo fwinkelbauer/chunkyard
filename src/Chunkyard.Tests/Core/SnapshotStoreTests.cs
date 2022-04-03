@@ -676,7 +676,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void Copy_Copies_Newer_Snapshots()
+    public static void CopyTo_Copies_Newer_Snapshots()
     {
         var repository = CreateRepository();
         var snapshotStore = CreateSnapshotStore(repository);
@@ -689,7 +689,7 @@ public static class SnapshotStoreTests
                 Fuzzy.Default,
                 DateTime.UtcNow);
 
-            snapshotStore.Copy(otherRepository);
+            snapshotStore.CopyTo(otherRepository);
 
             Assert.Equal(
                 repository.Chunks.ListKeys().OrderBy(u => u.AbsoluteUri),
@@ -702,7 +702,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void Copy_Throws_On_Invalid_Chunk()
+    public static void CopyTo_Throws_On_Invalid_Chunk()
     {
         var repository = CreateRepository();
         var snapshotStore = CreateSnapshotStore(repository);
@@ -715,12 +715,12 @@ public static class SnapshotStoreTests
         Invalidate(repository.Chunks, repository.Chunks.ListKeys());
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.Copy(
+            () => snapshotStore.CopyTo(
                 CreateRepository()));
     }
 
     [Fact]
-    public static void Copy_Throws_On_Invalid_References()
+    public static void CopyTo_Throws_On_Invalid_References()
     {
         var repository = CreateRepository();
         var snapshotStore = CreateSnapshotStore(repository);
@@ -733,7 +733,7 @@ public static class SnapshotStoreTests
         Invalidate(repository.Snapshots, repository.Snapshots.ListKeys());
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.Copy(
+            () => snapshotStore.CopyTo(
                 CreateRepository()));
     }
 

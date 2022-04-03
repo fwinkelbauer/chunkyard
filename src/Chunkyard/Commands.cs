@@ -172,7 +172,7 @@ internal static class Commands
         var snapshotStore = CreateSnapshotStore(o.SourceRepository);
         var otherRepository = CreateRepository(o.DestinationRepository);
 
-        snapshotStore.Copy(otherRepository);
+        snapshotStore.CopyTo(otherRepository);
     }
 
     public static void Cat(CatOptions o)

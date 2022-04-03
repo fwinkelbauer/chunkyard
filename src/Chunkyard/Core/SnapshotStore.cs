@@ -275,7 +275,7 @@ public class SnapshotStore
         }
     }
 
-    public void Copy(IRepository otherRepository)
+    public void CopyTo(IRepository otherRepository)
     {
         ArgumentNullException.ThrowIfNull(otherRepository);
 
