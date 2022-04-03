@@ -151,18 +151,16 @@ public static class SnapshotStoreTests
     [Fact]
     public static void New_SnapshotStore_Can_Read_Existing_Snapshot()
     {
-        var uriRepository = CreateRepository<Uri>();
-        var intRepository = CreateRepository<int>();
-
+        var repository = CreateRepository();
         var expectedBlobs = CreateBlobs(new[] { "some blob" });
 
-        var snapshotId = CreateSnapshotStore(uriRepository, intRepository)
+        var snapshotId = CreateSnapshotStore(repository)
             .StoreSnapshot(
                 new MemoryBlobSystem(expectedBlobs),
                 Fuzzy.Default,
                 DateTime.UtcNow);
 
-        var actualBlobs = CreateSnapshotStore(uriRepository, intRepository)
+        var actualBlobs = CreateSnapshotStore(repository)
             .GetSnapshot(snapshotId).BlobReferences
             .Select(br => br.Blob);
 
@@ -267,15 +265,15 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CheckSnapshot_Throws_If_Snapshot_Missing()
     {
-        var uriRepository = CreateRepository<Uri>();
-        var snapshotStore = CreateSnapshotStore(uriRepository);
+        var repository = CreateRepository();
+        var snapshotStore = CreateSnapshotStore(repository);
 
         var snapshotId = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        Remove(uriRepository, uriRepository.ListKeys());
+        Remove(repository.Chunks, repository.Chunks.ListKeys());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
@@ -291,15 +289,15 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CheckSnapshot_Throws_If_Snapshot_Invalid()
     {
-        var uriRepository = CreateRepository<Uri>();
-        var snapshotStore = CreateSnapshotStore(uriRepository);
+        var repository = CreateRepository();
+        var snapshotStore = CreateSnapshotStore(repository);
 
         var snapshotId = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        Invalidate(uriRepository, uriRepository.ListKeys());
+        Invalidate(repository.Chunks, repository.Chunks.ListKeys());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
@@ -315,8 +313,8 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CheckSnapshot_Detects_Missing_Blob()
     {
-        var uriRepository = CreateRepository<Uri>();
-        var snapshotStore = CreateSnapshotStore(uriRepository);
+        var repository = CreateRepository();
+        var snapshotStore = CreateSnapshotStore(repository);
 
         var snapshotId = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
@@ -327,7 +325,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Remove(uriRepository, chunkIds);
+        Remove(repository.Chunks, chunkIds);
 
         Assert.False(
             snapshotStore.CheckSnapshotExists(
@@ -343,8 +341,8 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CheckSnapshot_Detects_Invalid_Blob()
     {
-        var uriRepository = CreateRepository<Uri>();
-        var snapshotStore = CreateSnapshotStore(uriRepository);
+        var repository = CreateRepository();
+        var snapshotStore = CreateSnapshotStore(repository);
 
         var snapshotId = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
@@ -355,7 +353,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Invalidate(uriRepository, chunkIds);
+        Invalidate(repository.Chunks, chunkIds);
 
         Assert.True(
            snapshotStore.CheckSnapshotExists(
@@ -560,9 +558,8 @@ public static class SnapshotStoreTests
     [Fact]
     public static void GarbageCollect_Removes_Unused_Ids()
     {
-        var uriRepository = CreateRepository<Uri>();
-        var snapshotStore = CreateSnapshotStore(
-            uriRepository);
+        var repository = CreateRepository();
+        var snapshotStore = CreateSnapshotStore(repository);
 
         var snapshotId = snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
@@ -572,7 +569,7 @@ public static class SnapshotStoreTests
         snapshotStore.RemoveSnapshot(snapshotId);
         snapshotStore.GarbageCollect();
 
-        Assert.Empty(uriRepository.ListKeys());
+        Assert.Empty(repository.Chunks.ListKeys());
     }
 
     [Fact]
@@ -681,14 +678,9 @@ public static class SnapshotStoreTests
     [Fact]
     public static void Copy_Copies_Newer_Snapshots()
     {
-        var sourceUriRepository = CreateRepository<Uri>();
-        var sourceIntRepository = CreateRepository<int>();
-        var snapshotStore = CreateSnapshotStore(
-            sourceUriRepository,
-            sourceIntRepository);
-
-        var destinationUriRepository = CreateRepository<Uri>();
-        var destinationIntRepository = CreateRepository<int>();
+        var repository = CreateRepository();
+        var snapshotStore = CreateSnapshotStore(repository);
+        var otherRepository = CreateRepository();
 
         for (var i = 0; i < 3; i++)
         {
@@ -697,60 +689,52 @@ public static class SnapshotStoreTests
                 Fuzzy.Default,
                 DateTime.UtcNow);
 
-            snapshotStore.Copy(
-                destinationUriRepository,
-                destinationIntRepository);
+            snapshotStore.Copy(otherRepository);
 
             Assert.Equal(
-                sourceUriRepository.ListKeys().OrderBy(u => u.AbsoluteUri),
-                destinationUriRepository.ListKeys().OrderBy(u => u.AbsoluteUri));
+                repository.Chunks.ListKeys().OrderBy(u => u.AbsoluteUri),
+                otherRepository.Chunks.ListKeys().OrderBy(u => u.AbsoluteUri));
 
             Assert.Equal(
-                sourceIntRepository.ListKeys(),
-                destinationIntRepository.ListKeys());
+                repository.Snapshots.ListKeys(),
+                otherRepository.Snapshots.ListKeys());
         }
     }
 
     [Fact]
     public static void Copy_Throws_On_Invalid_Chunk()
     {
-        var uriRepository = CreateRepository<Uri>();
-        var snapshotStore = CreateSnapshotStore(
-            uriRepository,
-            CreateRepository<int>());
+        var repository = CreateRepository();
+        var snapshotStore = CreateSnapshotStore(repository);
 
         snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        Invalidate(uriRepository, uriRepository.ListKeys());
+        Invalidate(repository.Chunks, repository.Chunks.ListKeys());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.Copy(
-                CreateRepository<Uri>(),
-                CreateRepository<int>()));
+                CreateRepository()));
     }
 
     [Fact]
     public static void Copy_Throws_On_Invalid_References()
     {
-        var intRepository = CreateRepository<int>();
-        var snapshotStore = CreateSnapshotStore(
-            CreateRepository<Uri>(),
-            intRepository);
+        var repository = CreateRepository();
+        var snapshotStore = CreateSnapshotStore(repository);
 
         snapshotStore.StoreSnapshot(
             new MemoryBlobSystem(CreateBlobs()),
             Fuzzy.Default,
             DateTime.UtcNow);
 
-        Invalidate(intRepository, intRepository.ListKeys());
+        Invalidate(repository.Snapshots, repository.Snapshots.ListKeys());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.Copy(
-                CreateRepository<Uri>(),
-                CreateRepository<int>()));
+                CreateRepository()));
     }
 
     [Fact]
@@ -894,23 +878,20 @@ public static class SnapshotStoreTests
     }
 
     private static SnapshotStore CreateSnapshotStore(
-        IRepository<Uri>? uriRepository = null,
-        IRepository<int>? intRepository = null,
+        IRepository? repository = null,
         FastCdc? fastCdc = null,
         string password = "secret")
     {
         return new SnapshotStore(
-            uriRepository ?? CreateRepository<Uri>(),
-            intRepository ?? CreateRepository<int>(),
+            repository ?? CreateRepository(),
             fastCdc ?? new FastCdc(),
             new DummyPrompt(password),
             new DummyProbe());
     }
 
-    private static IRepository<T> CreateRepository<T>()
-        where T : notnull
+    private static IRepository CreateRepository()
     {
-        return new MemoryRepository<T>();
+        return new MemoryRepository();
     }
 
     private static Blob[] CreateBlobs(

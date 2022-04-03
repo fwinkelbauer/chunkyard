@@ -1,8 +1,41 @@
 namespace Chunkyard.Infrastructure;
 
 /// <summary>
-/// An implementation of <see cref="IRepository{T}"/> using the file system.
+/// An implementation of <see cref="IRepository"/> using the file system.
 /// </summary>
+public class FileRepository : IRepository
+{
+    public FileRepository(string directory)
+    {
+        Chunks = new FileRepository<Uri>(
+            Path.Combine(directory, "chunks"),
+            chunkId =>
+            {
+                var (_, hash) = ChunkId.DeconstructChunkId(
+                    chunkId);
+
+                return Path.Combine(
+                    hash[..2],
+                    hash);
+            },
+            file =>
+            {
+                return ChunkId.ToChunkId(
+                    ChunkId.HashAlgorithmName,
+                    Path.GetFileNameWithoutExtension(file));
+            });
+
+        Snapshots = new FileRepository<int>(
+            Path.Combine(directory, "snapshots"),
+            number => number.ToString(),
+            file => Convert.ToInt32(file));
+    }
+
+    public IRepository<Uri> Chunks { get; }
+
+    public IRepository<int> Snapshots { get; }
+}
+
 internal class FileRepository<T> : IRepository<T>
 {
     private readonly string _directory;
@@ -72,37 +105,5 @@ internal class FileRepository<T> : IRepository<T>
     {
         return _toKey(
             Path.GetRelativePath(_directory, file));
-    }
-}
-
-public static class FileRepository
-{
-    public static IRepository<Uri> CreateUriRepository(string directory)
-    {
-        return new FileRepository<Uri>(
-            directory,
-            chunkId =>
-            {
-                var (_, hash) = ChunkId.DeconstructChunkId(
-                    chunkId);
-
-                return Path.Combine(
-                    hash[..2],
-                    hash);
-            },
-            file =>
-            {
-                return ChunkId.ToChunkId(
-                    ChunkId.HashAlgorithmName,
-                    Path.GetFileNameWithoutExtension(file));
-            });
-    }
-
-    public static IRepository<int> CreateIntRepository(string directory)
-    {
-        return new FileRepository<int>(
-            directory,
-            number => number.ToString(),
-            file => Convert.ToInt32(file));
     }
 }

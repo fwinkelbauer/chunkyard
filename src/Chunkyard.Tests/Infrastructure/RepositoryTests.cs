@@ -3,90 +3,78 @@ namespace Chunkyard.Tests.Infrastructure;
 public static class RepositoryTests
 {
     [Fact]
-    public static void MemoryIntRepository_Can_Read_Write()
+    public static void MemoryRepository_Can_Read_Write()
     {
-        IntRepository_Can_Read_Write(new MemoryRepository<int>());
+        var repository = new MemoryRepository();
+
+        Repository_Can_Read_Write(repository.Chunks);
+        Repository_Can_Read_Write(repository.Snapshots);
     }
 
     [Fact]
-    public static void MemoryUriRepository_Can_Read_Write()
-    {
-        UriRepository_Can_Read_Write(new MemoryRepository<Uri>());
-    }
-
-    [Fact]
-    public static void FileIntRepository_Can_Read_Write()
+    public static void FileRepository_Can_Read_Write()
     {
         using var directory = new DisposableDirectory();
-        var repository = FileRepository.CreateIntRepository(
-            directory.Name);
+        var repository = new FileRepository(directory.Name);
 
-        IntRepository_Can_Read_Write(repository);
+        Repository_Can_Read_Write(repository.Chunks);
+        Repository_Can_Read_Write(repository.Snapshots);
     }
 
     [Fact]
-    public static void FileUriRepository_Can_Read_Write()
+    public static void FileRepository_Prevents_Directory_Traversal_Attack()
     {
         using var directory = new DisposableDirectory();
-        var repository = FileRepository.CreateUriRepository(
-            directory.Name);
-
-        UriRepository_Can_Read_Write(repository);
-    }
-
-    [Fact]
-    public static void FileUriRepository_Prevents_Directory_Traversal_Attack()
-    {
-        using var directory = new DisposableDirectory();
-        var repository = FileRepository.CreateUriRepository(
-            directory.Name);
+        var repository = new FileRepository(directory.Name);
 
         var invalidUri = new Uri("sha256://../some-file");
 
         Assert.Throws<ChunkyardException>(
-            () => repository.StoreValue(invalidUri, new byte[] { 0xFF }));
+            () => repository.Chunks.StoreValue(invalidUri, new byte[] { 0xFF }));
 
         Assert.Throws<ChunkyardException>(
-            () => repository.RetrieveValue(invalidUri));
+            () => repository.Chunks.RetrieveValue(invalidUri));
 
         Assert.Throws<ChunkyardException>(
-            () => repository.ValueExists(invalidUri));
+            () => repository.Chunks.ValueExists(invalidUri));
 
         Assert.Throws<ChunkyardException>(
-            () => repository.RemoveValue(invalidUri));
+            () => repository.Chunks.RemoveValue(invalidUri));
     }
 
     [Fact]
     public static void MemoryRepository_Throws_When_Writing_To_Same_Key()
     {
-        var repository = new MemoryRepository<Uri>();
+        var repository = new MemoryRepository();
 
-        var uri = new Uri("sha256://aa");
-        var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-
-        repository.StoreValue(uri, bytes);
-
-        Assert.Throws<ArgumentException>(
-            () => repository.StoreValue(uri, bytes));
+        Repository_Throws_When_Writing_To_Same_Key<ArgumentException>(
+            repository.Chunks);
     }
 
     [Fact]
     public static void FileRepository_Throws_When_Writing_To_Same_Key()
     {
         using var directory = new DisposableDirectory();
-        var repository = FileRepository.CreateUriRepository(
-            directory.Name);
+        var repository = new FileRepository(directory.Name);
 
+        Repository_Throws_When_Writing_To_Same_Key<IOException>(
+            repository.Chunks);
+    }
+
+    private static void Repository_Throws_When_Writing_To_Same_Key<TException>(
+        IRepository<Uri> repository)
+        where TException : Exception
+    {
         var uri = new Uri("sha256://aa");
         var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
         repository.StoreValue(uri, bytes);
 
-        Assert.Throws<IOException>(
+        Assert.Throws<TException>(
             () => repository.StoreValue(uri, bytes));
     }
 
-    private static void UriRepository_Can_Read_Write(
+    private static void Repository_Can_Read_Write(
         IRepository<Uri> repository)
     {
         var expectedBytes1 = new byte[] { 0xAA, 0xAA, 0xAA, 0xAA };
@@ -117,7 +105,7 @@ public static class RepositoryTests
         Assert.False(repository.ValueExists(uri2));
     }
 
-    private static void IntRepository_Can_Read_Write(
+    private static void Repository_Can_Read_Write(
         IRepository<int> repository)
     {
         var expectedBytes1 = new byte[] { 0xAA, 0xAA, 0xAA, 0xAA };

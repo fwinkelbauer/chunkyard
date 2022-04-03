@@ -170,10 +170,9 @@ internal static class Commands
     public static void Copy(CopyOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o.SourceRepository);
-        var uriRepository = CreateUriRepository(o.DestinationRepository);
-        var intRepository = CreateIntRepository(o.DestinationRepository);
+        var otherRepository = CreateRepository(o.DestinationRepository);
 
-        snapshotStore.Copy(uriRepository, intRepository);
+        snapshotStore.Copy(otherRepository);
     }
 
     public static void Cat(CatOptions o)
@@ -221,25 +220,15 @@ internal static class Commands
         string repositoryPath)
     {
         return new SnapshotStore(
-            CreateUriRepository(repositoryPath),
-            CreateIntRepository(repositoryPath),
+            CreateRepository(repositoryPath),
             new FastCdc(),
             new EnvironmentPrompt(
                 new ConsolePrompt()),
             new ConsoleProbe());
     }
 
-    private static IRepository<Uri> CreateUriRepository(
-        string repositoryPath)
+    private static IRepository CreateRepository(string repositoryPath)
     {
-        return FileRepository.CreateUriRepository(
-            Path.Combine(repositoryPath, "chunks"));
-    }
-
-    private static IRepository<int> CreateIntRepository(
-        string repositoryPath)
-    {
-        return FileRepository.CreateIntRepository(
-            Path.Combine(repositoryPath, "snapshots"));
+        return new FileRepository(repositoryPath);
     }
 }

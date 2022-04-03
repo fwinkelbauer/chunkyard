@@ -1,8 +1,8 @@
 namespace Chunkyard.Core;
 
 /// <summary>
-/// A class which uses <see cref="IRepository{int}"/> and
-/// <see cref="IRepository{Uri}"/> to store snapshots of a set of blobs.
+/// A class which uses a <see cref="IRepository"/> to store snapshots of a set
+/// of blobs.
 /// </summary>
 public class SnapshotStore
 {
@@ -10,8 +10,7 @@ public class SnapshotStore
     public const int LatestSnapshotId = -1;
     public const int SecondLatestSnapshotId = -2;
 
-    private readonly IRepository<Uri> _uriRepository;
-    private readonly IRepository<int> _intRepository;
+    private readonly IRepository _repository;
     private readonly FastCdc _fastCdc;
     private readonly IProbe _probe;
     private readonly Lazy<AesGcmCrypto> _aesGcmCrypto;
@@ -20,14 +19,12 @@ public class SnapshotStore
     private int? _currentSnapshotId;
 
     public SnapshotStore(
-        IRepository<Uri> uriRepository,
-        IRepository<int> intRepository,
+        IRepository repository,
         FastCdc fastCdc,
         IPrompt prompt,
         IProbe probe)
     {
-        _uriRepository = uriRepository;
-        _intRepository = intRepository;
+        _repository = repository;
         _fastCdc = fastCdc;
         _probe = probe;
 
@@ -94,7 +91,7 @@ public class SnapshotStore
 
         var newSnapshotId = _currentSnapshotId + 1 ?? 0;
 
-        _intRepository.StoreValue(
+        _repository.Snapshots.StoreValue(
             newSnapshotId,
             DataConvert.ObjectToBytes(newSnapshotReference));
 
@@ -110,7 +107,7 @@ public class SnapshotStore
         return CheckSnapshot(
             snapshotId,
             includeFuzzy,
-            _uriRepository.ValueExists);
+            _repository.Chunks.ValueExists);
     }
 
     public bool CheckSnapshotValid(int snapshotId, Fuzzy includeFuzzy)
@@ -195,7 +192,7 @@ public class SnapshotStore
 
     public IReadOnlyCollection<int> ListSnapshotIds()
     {
-        return _intRepository.ListKeys()
+        return _repository.Snapshots.ListKeys()
             .OrderBy(id => id)
             .ToArray();
     }
@@ -211,14 +208,14 @@ public class SnapshotStore
 
     public IReadOnlyCollection<Uri> GarbageCollect()
     {
-        var usedChunkIds = ListChunkIds(_intRepository.ListKeys());
-        var unusedChunkIds = _uriRepository.ListKeys()
+        var usedChunkIds = ListChunkIds(_repository.Snapshots.ListKeys());
+        var unusedChunkIds = _repository.Chunks.ListKeys()
             .Except(usedChunkIds)
             .ToArray();
 
         foreach (var chunkId in unusedChunkIds)
         {
-            _uriRepository.RemoveValue(chunkId);
+            _repository.Chunks.RemoveValue(chunkId);
             _probe.RemovedChunk(chunkId);
         }
 
@@ -229,7 +226,7 @@ public class SnapshotStore
     {
         var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
 
-        _intRepository.RemoveValue(resolvedSnapshotId);
+        _repository.Snapshots.RemoveValue(resolvedSnapshotId);
         _probe.RemovedSnapshot(resolvedSnapshotId);
 
         if (_currentSnapshotId == resolvedSnapshotId)
@@ -278,15 +275,12 @@ public class SnapshotStore
         }
     }
 
-    public void Copy(
-        IRepository<Uri> otherUriRepository,
-        IRepository<int> otherIntRepository)
+    public void Copy(IRepository otherRepository)
     {
-        ArgumentNullException.ThrowIfNull(otherUriRepository);
-        ArgumentNullException.ThrowIfNull(otherIntRepository);
+        ArgumentNullException.ThrowIfNull(otherRepository);
 
-        var localSnapshotIds = _intRepository.ListKeys();
-        var otherSnapshotIds = otherIntRepository.ListKeys();
+        var localSnapshotIds = _repository.Snapshots.ListKeys();
+        var otherSnapshotIds = otherRepository.Snapshots.ListKeys();
 
         var otherSnapshotIdMax = otherSnapshotIds.Count == 0
             ? LatestSnapshotId
@@ -298,12 +292,12 @@ public class SnapshotStore
             .ToArray();
 
         var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
-            .Except(otherUriRepository.ListKeys())
+            .Except(otherRepository.Chunks.ListKeys())
             .ToArray();
 
         foreach (var chunkId in chunkIdsToCopy)
         {
-            otherUriRepository.StoreValue(
+            otherRepository.Chunks.StoreValue(
                 chunkId,
                 RetrieveValidChunk(chunkId));
 
@@ -312,9 +306,9 @@ public class SnapshotStore
 
         foreach (var snapshotId in snapshotIdsToCopy)
         {
-            otherIntRepository.StoreValue(
+            otherRepository.Snapshots.StoreValue(
                 snapshotId,
-                _intRepository.RetrieveValue(snapshotId));
+                _repository.Snapshots.RetrieveValue(snapshotId));
 
             _probe.CopiedSnapshot(snapshotId);
         }
@@ -359,7 +353,7 @@ public class SnapshotStore
 
     private int? FetchCurrentSnapshotId()
     {
-        return _intRepository.ListKeys()
+        return _repository.Snapshots.ListKeys()
             .Select(i => i as int?)
             .Max();
     }
@@ -380,7 +374,7 @@ public class SnapshotStore
             return _currentSnapshotId.Value;
         }
 
-        var snapshotIds = _intRepository.ListKeys()
+        var snapshotIds = _repository.Snapshots.ListKeys()
             .OrderBy(id => id)
             .ToArray();
 
@@ -400,7 +394,7 @@ public class SnapshotStore
         try
         {
             return DataConvert.BytesToVersionedObject<SnapshotReference>(
-                _intRepository.RetrieveValue(snapshotId),
+                _repository.Snapshots.RetrieveValue(snapshotId),
                 SchemaVersion);
         }
         catch (Exception e)
@@ -438,7 +432,7 @@ public class SnapshotStore
     {
         try
         {
-            return _uriRepository.RetrieveValue(chunkId);
+            return _repository.Chunks.RetrieveValue(chunkId);
         }
         catch (Exception e)
         {
@@ -467,7 +461,7 @@ public class SnapshotStore
         {
             return ChunkId.ChunkIdValid(
                 chunkId,
-                _uriRepository.RetrieveValue(chunkId));
+                _repository.Chunks.RetrieveValue(chunkId));
         }
         catch (Exception)
         {
@@ -596,9 +590,9 @@ public class SnapshotStore
 
             lock (_locks.GetOrAdd(chunkId, _ => new object()))
             {
-                if (!_uriRepository.ValueExists(chunkId))
+                if (!_repository.Chunks.ValueExists(chunkId))
                 {
-                    _uriRepository.StoreValue(chunkId, encryptedData);
+                    _repository.Chunks.StoreValue(chunkId, encryptedData);
                 }
             }
 

@@ -1,5 +1,18 @@
 namespace Chunkyard.Tests.Infrastructure;
 
+internal class MemoryRepository : IRepository
+{
+    public MemoryRepository()
+    {
+        Chunks = new MemoryRepository<Uri>();
+        Snapshots = new MemoryRepository<int>();
+    }
+
+    public IRepository<Uri> Chunks { get; }
+
+    public IRepository<int> Snapshots { get; }
+}
+
 internal class MemoryRepository<T> : IRepository<T>
     where T : notnull
 {

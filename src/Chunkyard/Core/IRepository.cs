@@ -4,6 +4,13 @@ namespace Chunkyard.Core;
 /// Defines a basic contract to store and retrieve bytes. Stored data can be
 /// referenced using a key.
 /// </summary>
+public interface IRepository
+{
+    IRepository<Uri> Chunks { get; }
+
+    IRepository<int> Snapshots { get; }
+}
+
 public interface IRepository<T>
 {
     void StoreValue(T key, ReadOnlySpan<byte> value);
