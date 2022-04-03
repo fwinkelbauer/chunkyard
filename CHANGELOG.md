@@ -7,6 +7,13 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 14.0.1 - 2022-04-03
+
+### Fixed
+
+- A concurrency issue when using the `store` command which was caused by an
+  attempt to improve performance
+
 ## 14.0.0 - 2022-03-12
 
 ### Added
