@@ -29,12 +29,12 @@ internal class ConsoleProbe : IProbe
 
     public void CopiedChunk(Uri chunkId)
     {
-        Console.WriteLine($"Copied chunk: {chunkId}");
+        Console.WriteLine($"Copied chunk: {chunkId.Host}");
     }
 
     public void RemovedChunk(Uri chunkId)
     {
-        Console.WriteLine($"Removed chunk: {chunkId}");
+        Console.WriteLine($"Removed chunk: {chunkId.Host}");
     }
 
     public void CopiedSnapshot(int snapshotId)
