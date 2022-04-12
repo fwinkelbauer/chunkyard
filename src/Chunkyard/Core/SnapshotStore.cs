@@ -6,7 +6,6 @@ namespace Chunkyard.Core;
 /// </summary>
 public class SnapshotStore
 {
-    public const int SchemaVersion = 1;
     public const int LatestSnapshotId = -1;
     public const int SecondLatestSnapshotId = -2;
 
@@ -84,16 +83,15 @@ public class SnapshotStore
             WriteBlobs(blobSystem, excludeFuzzy));
 
         var newSnapshotReference = new SnapshotReference(
-            SchemaVersion,
             _aesGcmCrypto.Value.Salt,
             _aesGcmCrypto.Value.Iterations,
-            WriteObject(newSnapshot));
+            WriteSnapshot(newSnapshot));
 
         var newSnapshotId = _currentSnapshotId + 1 ?? 0;
 
         _repository.Snapshots.StoreValue(
             newSnapshotId,
-            DataConvert.ObjectToBytes(newSnapshotReference));
+            DataConvert.SnapshotReferenceToBytes(newSnapshotReference));
 
         _currentSnapshotId = newSnapshotId;
 
@@ -393,9 +391,8 @@ public class SnapshotStore
     {
         try
         {
-            return DataConvert.BytesToVersionedObject<SnapshotReference>(
-                _repository.Snapshots.RetrieveValue(snapshotId),
-                SchemaVersion);
+            return DataConvert.BytesToSnapshotReference(
+                _repository.Snapshots.RetrieveValue(snapshotId));
         }
         catch (Exception e)
         {
@@ -417,7 +414,7 @@ public class SnapshotStore
 
         try
         {
-            return DataConvert.BytesToObject<Snapshot>(
+            return DataConvert.BytesToSnapshot(
                 memoryStream.ToArray());
         }
         catch (Exception e)
@@ -559,10 +556,10 @@ public class SnapshotStore
             .ToArray();
     }
 
-    private IReadOnlyCollection<Uri> WriteObject(object o)
+    private IReadOnlyCollection<Uri> WriteSnapshot(Snapshot snapshot)
     {
         using var memoryStream = new MemoryStream(
-            DataConvert.ObjectToBytes(o));
+            DataConvert.SnapshotToBytes(snapshot));
 
         return WriteChunks(
             AesGcmCrypto.GenerateNonce(),

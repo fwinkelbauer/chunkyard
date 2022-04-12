@@ -1,50 +1,38 @@
 namespace Chunkyard.Core;
 
 /// <summary>
-/// A utility class to convert objects and text into bytes.
+/// A utility class to convert objects into bytes.
 /// </summary>
 public static class DataConvert
 {
-    public static byte[] ObjectToBytes(object o)
+    public static byte[] SnapshotToBytes(Snapshot snapshot)
     {
-        return JsonSerializer.SerializeToUtf8Bytes(o);
+        return JsonSerializer.SerializeToUtf8Bytes(
+            snapshot,
+            JsonContext.Default.Snapshot);
     }
 
-    public static T BytesToObject<T>(byte[] json) where T : notnull
+    public static byte[] SnapshotReferenceToBytes(
+        SnapshotReference snapshotReference)
     {
-        var t = JsonSerializer.Deserialize<T>(json);
-
-        if (t == null)
-        {
-            throw new ArgumentNullException(nameof(json));
-        }
-
-        return t;
+        return JsonSerializer.SerializeToUtf8Bytes(
+            snapshotReference,
+            JsonContext.Default.SnapshotReference);
     }
 
-    public static T BytesToVersionedObject<T>(
-        byte[] json,
-        int supportedSchemaVersion)
-        where T : notnull, IVersioned
+    public static Snapshot BytesToSnapshot(byte[] json)
     {
-        var versioned = BytesToObject<Versioned>(json);
-
-        if (versioned.SchemaVersion != supportedSchemaVersion)
-        {
-            throw new NotSupportedException(
-                $"{typeof(T).Name} version {versioned.SchemaVersion} is not supported");
-        }
-
-        return BytesToObject<T>(json);
+        return JsonSerializer.Deserialize(
+            json,
+            JsonContext.Default.Snapshot)
+            ?? throw new ArgumentNullException(nameof(json));
     }
 
-    public static byte[] TextToBytes(string text)
+    public static SnapshotReference BytesToSnapshotReference(byte[] json)
     {
-        return Encoding.UTF8.GetBytes(text);
-    }
-
-    public static string BytesToText(byte[] value)
-    {
-        return Encoding.UTF8.GetString(value);
+        return JsonSerializer.Deserialize(
+            json,
+            JsonContext.Default.SnapshotReference)
+            ?? throw new ArgumentNullException(nameof(json));
     }
 }

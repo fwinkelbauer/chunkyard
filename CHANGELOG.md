@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Removed
+
+- Schema information from snapshot references
+
 ## 14.0.1 - 2022-04-03
 
 ### Fixed

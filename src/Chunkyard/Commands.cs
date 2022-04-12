@@ -185,7 +185,7 @@ internal static class Commands
             snapshotStore.RestoreChunks(o.ChunkIds, stream);
 
             Console.WriteLine(
-                DataConvert.BytesToText(stream.ToArray()));
+                Encoding.UTF8.GetString(stream.ToArray()));
         }
         else
         {
