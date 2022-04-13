@@ -9,28 +9,16 @@ public static class DiffSetTests
 
         var first = new[]
         {
-            new Blob(
-                "some blob",
-                date),
-            new Blob(
-                "changed date blob",
-                date),
-            new Blob(
-                "removed blob",
-                date)
+            new Blob("some blob", date),
+            new Blob("changed date blob", date),
+            new Blob("removed blob", date)
         };
 
         var second = new[]
         {
-            new Blob(
-                "some blob",
-                date),
-            new Blob(
-                "changed date blob",
-                date.AddSeconds(1)),
-            new Blob(
-                "new blob",
-                date)
+            new Blob("some blob", date),
+            new Blob("changed date blob", date.AddSeconds(1)),
+            new Blob("new blob", date)
         };
 
         var expectedDiff = new DiffSet(
