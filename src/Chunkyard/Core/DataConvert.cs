@@ -11,7 +11,7 @@ public partial class DataConvert : JsonSerializerContext
     {
         return JsonSerializer.SerializeToUtf8Bytes(
             snapshot,
-            DataConvert.Default.Snapshot);
+            Default.Snapshot);
     }
 
     public static byte[] SnapshotReferenceToBytes(
@@ -19,22 +19,18 @@ public partial class DataConvert : JsonSerializerContext
     {
         return JsonSerializer.SerializeToUtf8Bytes(
             snapshotReference,
-            DataConvert.Default.SnapshotReference);
+            Default.SnapshotReference);
     }
 
     public static Snapshot BytesToSnapshot(byte[] json)
     {
-        return JsonSerializer.Deserialize(
-            json,
-            DataConvert.Default.Snapshot)
+        return JsonSerializer.Deserialize(json, Default.Snapshot)
             ?? throw new ArgumentNullException(nameof(json));
     }
 
     public static SnapshotReference BytesToSnapshotReference(byte[] json)
     {
-        return JsonSerializer.Deserialize(
-            json,
-            DataConvert.Default.SnapshotReference)
+        return JsonSerializer.Deserialize(json, Default.SnapshotReference)
             ?? throw new ArgumentNullException(nameof(json));
     }
 }
