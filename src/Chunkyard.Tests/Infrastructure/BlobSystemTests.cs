@@ -32,6 +32,9 @@ public static class BlobSystemTests
             () => blobSystem.BlobExists(invalidBlobName));
 
         Assert.Throws<ChunkyardException>(
+            () => blobSystem.RemoveBlob(invalidBlobName));
+
+        Assert.Throws<ChunkyardException>(
             () => blobSystem.GetBlob(invalidBlobName));
 
         Assert.Throws<ChunkyardException>(
