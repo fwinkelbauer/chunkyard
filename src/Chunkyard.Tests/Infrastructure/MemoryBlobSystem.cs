@@ -3,7 +3,7 @@ namespace Chunkyard.Tests.Infrastructure;
 internal class MemoryBlobSystem : IBlobSystem
 {
     private readonly Dictionary<string, Blob> _blobs;
-    private readonly Dictionary<string, byte[]> _bytes;
+    private readonly Dictionary<string, byte[]> _values;
     private readonly object _lock;
 
     public MemoryBlobSystem(
@@ -16,17 +16,14 @@ internal class MemoryBlobSystem : IBlobSystem
                 b => b.Name,
                 b => b);
 
-        _bytes = new Dictionary<string, byte[]>();
+        _values = new Dictionary<string, byte[]>();
         _lock = new object();
 
         generate ??= (blobName => Encoding.UTF8.GetBytes(blobName));
 
         foreach (var blob in _blobs.Values)
         {
-            using var stream = NewWrite(blob);
-
-            stream.Write(
-                generate(blob.Name));
+            Write(blob, generate(blob.Name), true);
         }
     }
 
@@ -42,6 +39,7 @@ internal class MemoryBlobSystem : IBlobSystem
     {
         lock (_lock)
         {
+            _values.Remove(blobName);
             _blobs.Remove(blobName);
         }
     }
@@ -61,7 +59,7 @@ internal class MemoryBlobSystem : IBlobSystem
         lock (_lock)
         {
             return new MemoryStream(
-                _bytes[blobName].ToArray());
+                _values[blobName].ToArray());
         }
     }
 
@@ -83,6 +81,23 @@ internal class MemoryBlobSystem : IBlobSystem
         return new WriteStream(this, blob, false);
     }
 
+    private void Write(Blob blob, byte[] value, bool overwrite)
+    {
+        lock (_lock)
+        {
+            if (overwrite)
+            {
+                _values[blob.Name] = value;
+            }
+            else
+            {
+                _values.Add(blob.Name, value);
+            }
+
+            _blobs[blob.Name] = blob;
+        }
+    }
+
     private class WriteStream : MemoryStream
     {
         private readonly MemoryBlobSystem _blobSystem;
@@ -101,19 +116,7 @@ internal class MemoryBlobSystem : IBlobSystem
 
         protected override void Dispose(bool disposing)
         {
-            lock (_blobSystem._lock)
-            {
-                if (_overwrite)
-                {
-                    _blobSystem._bytes[_blob.Name] = ToArray();
-                }
-                else
-                {
-                    _blobSystem._bytes.Add(_blob.Name, ToArray());
-                }
-
-                _blobSystem._blobs[_blob.Name] = _blob;
-            }
+            _blobSystem.Write(_blob, ToArray(), _overwrite);
 
             base.Dispose(disposing);
         }
