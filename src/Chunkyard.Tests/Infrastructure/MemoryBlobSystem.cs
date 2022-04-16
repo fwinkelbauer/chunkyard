@@ -6,25 +6,11 @@ internal class MemoryBlobSystem : IBlobSystem
     private readonly Dictionary<string, byte[]> _values;
     private readonly object _lock;
 
-    public MemoryBlobSystem(
-        IEnumerable<Blob>? blobs = null,
-        Func<string, byte[]>? generate = null)
+    public MemoryBlobSystem()
     {
-        _blobs = blobs == null
-            ? new Dictionary<string, Blob>()
-            : blobs.ToDictionary(
-                b => b.Name,
-                b => b);
-
+        _blobs = new Dictionary<string, Blob>();
         _values = new Dictionary<string, byte[]>();
         _lock = new object();
-
-        generate ??= (blobName => Encoding.UTF8.GetBytes(blobName));
-
-        foreach (var blob in _blobs.Values)
-        {
-            Write(blob, generate(blob.Name), true);
-        }
     }
 
     public bool BlobExists(string blobName)
