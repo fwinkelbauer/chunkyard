@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 ### Removed
 
 - Schema information from snapshot references
+- "sha256://" prefix when printing chunks
 
 ## 14.0.1 - 2022-04-03
 
