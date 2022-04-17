@@ -47,7 +47,7 @@ internal class SecretToolPrompt : IPrompt
             RedirectStandardOutput = true
         };
 
-        return ProcessUtils.RunQuery(startInfo);
+        return ProcessUtils.RunQuery(startInfo, new[] { 0, 1 });
     }
 
     private void Store()
