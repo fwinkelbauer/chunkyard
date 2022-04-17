@@ -36,7 +36,7 @@ internal static class BuildUtils
         if (process == null)
         {
             throw new BuildException(
-                $"Could not start process '{fileName}'");
+                $"Could not run '{fileName}'");
         }
 
         string? line;
