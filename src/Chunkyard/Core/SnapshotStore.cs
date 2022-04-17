@@ -20,7 +20,7 @@ public class SnapshotStore
     public SnapshotStore(
         IRepository repository,
         FastCdc fastCdc,
-        IPrompt prompt,
+        Prompt prompt,
         IProbe probe)
     {
         _repository = repository;

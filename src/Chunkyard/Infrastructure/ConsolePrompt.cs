@@ -6,7 +6,7 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 internal class ConsolePrompt : IPrompt
 {
-    public string NewPassword()
+    public string? NewPassword()
     {
         var firstPassword = ReadPassword("Enter new password: ");
         var secondPassword = ReadPassword("Re-enter password: ");
@@ -19,7 +19,7 @@ internal class ConsolePrompt : IPrompt
         return firstPassword;
     }
 
-    public string ExistingPassword()
+    public string? ExistingPassword()
     {
         return ReadPassword("Password: ");
     }
