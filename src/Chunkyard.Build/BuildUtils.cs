@@ -2,14 +2,14 @@ namespace Chunkyard.Build;
 
 internal static class BuildUtils
 {
-    public static string ExecQuery(
+    public static string RunQuery(
         string fileName,
         string[] arguments,
         int[] validExitCodes)
     {
         var builder = new StringBuilder();
 
-        Exec(
+        Run(
             fileName,
             arguments,
             validExitCodes,
@@ -18,7 +18,7 @@ internal static class BuildUtils
         return builder.ToString().TrimEnd();
     }
 
-    public static void Exec(
+    public static void Run(
         string fileName,
         string[] arguments,
         int[] validExitCodes,

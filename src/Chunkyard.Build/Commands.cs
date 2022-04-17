@@ -102,16 +102,16 @@ internal static class Commands
 
     private static void Dotnet(params string[] arguments)
     {
-        BuildUtils.Exec("dotnet", arguments, new[] { 0 });
+        BuildUtils.Run("dotnet", arguments, new[] { 0 });
     }
 
     private static void Git(params string[] arguments)
     {
-        BuildUtils.Exec("git", arguments, new[] { 0 });
+        BuildUtils.Run("git", arguments, new[] { 0 });
     }
 
     private static string GitQuery(params string[] arguments)
     {
-        return BuildUtils.ExecQuery("git", arguments, new[] { 0 });
+        return BuildUtils.RunQuery("git", arguments, new[] { 0 });
     }
 }
