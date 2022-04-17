@@ -57,7 +57,7 @@ public class FileBlobSystem : IBlobSystem
     {
         ArgumentNullException.ThrowIfNull(blob);
 
-        return OpenWrite(blob, FileMode.OpenOrCreate);
+        return OpenWrite(blob, FileMode.Create);
     }
 
     public Stream NewWrite(Blob blob)

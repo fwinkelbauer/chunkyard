@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Fixed
+
+- A bug in which the `mirror` command would only overwrite parts of a file
+
 ## 15.0.0 - 2022-04-16
 
 ### Removed

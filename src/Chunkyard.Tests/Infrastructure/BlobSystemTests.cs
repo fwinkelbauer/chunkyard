@@ -47,6 +47,35 @@ public static class BlobSystemTests
             () => blobSystem.NewWrite(invalidBlob));
     }
 
+    [Fact]
+    public static void FileblobSystem_OpenWrite_Overwrites_Previous_Content()
+    {
+        using var directory = new DisposableDirectory();
+        var blobSystem = new FileBlobSystem(new[] { directory.Name });
+        var blob = new Blob("some-blob", DateTime.UtcNow);
+
+        using (var writeStream = blobSystem.NewWrite(blob))
+        {
+            writeStream.Write(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
+        }
+
+        using (var writeStream = blobSystem.OpenWrite(blob))
+        {
+            writeStream.Write(new byte[] { 0x11 });
+        }
+
+
+        using (var readStream = blobSystem.OpenRead(blob.Name))
+        using (var memoryStream = new MemoryStream())
+        {
+            readStream.CopyTo(memoryStream);
+
+            Assert.Equal(
+                new byte[] { 0x11 },
+                memoryStream.ToArray());
+        }
+    }
+
     private static void BlobSystem_Can_Read_Write(
         IBlobSystem blobSystem)
     {
