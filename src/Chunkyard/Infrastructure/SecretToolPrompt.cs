@@ -12,7 +12,8 @@ internal class SecretToolPrompt : IPrompt
 
     public SecretToolPrompt(string repositoryPath)
     {
-        _repositoryPath = Path.GetFullPath(repositoryPath);
+        _repositoryPath = Path.TrimEndingDirectorySeparator(
+            Path.GetFullPath(repositoryPath));
     }
 
     public string? NewPassword()
