@@ -47,31 +47,7 @@ internal class SecretToolPrompt : IPrompt
             RedirectStandardOutput = true
         };
 
-        using var process = Process.Start(startInfo);
-
-        if (process == null)
-        {
-            throw new ChunkyardException(
-                $"Could not run '{fileName}'");
-        }
-
-        var builder = new StringBuilder();
-        string? line;
-
-        while ((line = process.StandardOutput.ReadLine()) != null)
-        {
-            builder.Append(line);
-        }
-
-        process.WaitForExit();
-
-        if (process.ExitCode != 0 && process.ExitCode != 1)
-        {
-            throw new ChunkyardException(
-                $"Exit code of '{fileName}' was {process.ExitCode}");
-        }
-
-        return builder.ToString();
+        return ProcessUtils.RunQuery(startInfo);
     }
 
     private void Store()
@@ -83,20 +59,6 @@ internal class SecretToolPrompt : IPrompt
             UseShellExecute = true
         };
 
-        using var process = Process.Start(startInfo);
-
-        if (process == null)
-        {
-            throw new ChunkyardException(
-                $"Could not run '{fileName}'");
-        }
-
-        process.WaitForExit();
-
-        if (process.ExitCode != 0)
-        {
-            throw new ChunkyardException(
-                $"Exit code of '{fileName}' was {process.ExitCode}");
-        }
+        ProcessUtils.Run(startInfo);
     }
 }

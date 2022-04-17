@@ -40,30 +40,6 @@ internal class EnvironmentPrompt : IPrompt
             RedirectStandardOutput = true
         };
 
-        using var process = Process.Start(startInfo);
-
-        if (process == null)
-        {
-            throw new ChunkyardException(
-                $"Could not run '{command}'");
-        }
-
-        var builder = new StringBuilder();
-        string? line;
-
-        while ((line = process.StandardOutput.ReadLine()) != null)
-        {
-            builder.Append(line);
-        }
-
-        process.WaitForExit();
-
-        if (process.ExitCode != 0)
-        {
-            throw new ChunkyardException(
-                $"Exit code of '{command}' was {process.ExitCode}");
-        }
-
-        return builder.ToString();
+        return ProcessUtils.RunQuery(startInfo);
     }
 }
