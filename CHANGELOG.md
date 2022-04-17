@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- A custom prompt that can utilize the Linux application secret-tool
+
 ### Fixed
 
 - A bug in which the `mirror` command would only overwrite parts of a file
