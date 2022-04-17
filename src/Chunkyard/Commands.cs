@@ -225,6 +225,7 @@ internal static class Commands
             new Prompt(new IPrompt[]
             {
                 new EnvironmentPrompt(),
+                new SecretToolPrompt(repositoryPath),
                 new ConsolePrompt()
             }),
             new ConsoleProbe());
