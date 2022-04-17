@@ -46,7 +46,7 @@ internal static class Commands
         var version = FetchVersion();
         var commitId = GitQuery("rev-parse --short HEAD");
 
-        foreach (var runtime in new[] { "win-x64", "linux-x64" })
+        foreach (var runtime in new[] { "linux-x64", "win-x64" })
         {
             var directory = Path.Combine(Artifacts, version, runtime);
 
