@@ -53,7 +53,7 @@ internal class SecretToolPrompt : IPrompt
     private void Store()
     {
         var fileName = "secret-tool";
-        var arguments = $"store --label=\"Chunkyard {_repositoryPath}\" chunkyard-repository {_repositoryPath}";
+        var arguments = $"store --label=\"Chunkyard\" chunkyard-repository {_repositoryPath}";
         var startInfo = new ProcessStartInfo(fileName, arguments)
         {
             UseShellExecute = true
