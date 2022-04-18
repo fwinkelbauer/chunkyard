@@ -6,8 +6,6 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 internal class SecretToolPrompt : IPrompt
 {
-    private const string PromptVariable = "CHUNKYARD_PROMPT";
-
     private readonly string _repositoryPath;
 
     public SecretToolPrompt(string repositoryPath)
@@ -18,10 +16,7 @@ internal class SecretToolPrompt : IPrompt
 
     public string? NewPassword()
     {
-        var promptName = Environment.GetEnvironmentVariable(PromptVariable);
-
-        if (string.IsNullOrEmpty(promptName)
-            || !promptName.Equals("secret-tool"))
+        if (!Installed())
         {
             return null;
         }
@@ -37,6 +32,24 @@ internal class SecretToolPrompt : IPrompt
     public string? ExistingPassword()
     {
         return NewPassword();
+    }
+
+    private static bool Installed()
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo("which", "secret-tool")
+            {
+                RedirectStandardOutput = true
+            };
+
+            return !string.IsNullOrEmpty(
+                ProcessUtils.RunQuery(startInfo, new[] { 0, 1 }));
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 
     private string Lookup()
