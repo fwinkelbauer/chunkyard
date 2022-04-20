@@ -124,6 +124,7 @@ public class SnapshotStore
         var restoredBlob = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
             .Select(br => RestoreBlob(blobSystem.NewWrite, br))
+            .OrderBy(blob => blob.Name)
             .ToArray();
 
         _probe.RestoredSnapshot(
