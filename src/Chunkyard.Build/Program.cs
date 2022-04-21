@@ -41,6 +41,7 @@ public static class Program
             .WithParsed<TestOptions>(_ => Commands.Test())
             .WithParsed<CiOptions>(_ => Commands.Ci())
             .WithParsed<PublishOptions>(_ => Commands.Publish())
+            .WithParsed<InstallOptions>(_ => Commands.Install())
             .WithParsed<ReleaseOptions>(_ => Commands.Release())
             .WithParsed<FmtOptions>(_ => Commands.Fmt())
             .WithParsed<OutdatedOptions>(_ => Commands.Outdated())

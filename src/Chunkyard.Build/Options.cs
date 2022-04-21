@@ -30,6 +30,11 @@ public class PublishOptions
 {
 }
 
+[Verb("install", HelpText = "Installs the main project for the current user.")]
+public class InstallOptions
+{
+}
+
 [Verb("release", HelpText = "Create a release commit.")]
 public class ReleaseOptions
 {
