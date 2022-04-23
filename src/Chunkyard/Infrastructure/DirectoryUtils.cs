@@ -20,8 +20,14 @@ internal static class DirectoryUtils
 
     public static void CreateParent(string file)
     {
-        Directory.CreateDirectory(
-            GetParent(file));
+        var parent = Path.GetDirectoryName(file);
+
+        if (string.IsNullOrEmpty(parent))
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(parent);
     }
 
     public static string CombinePathSafe(
