@@ -25,7 +25,7 @@ internal class MemoryRepository<T> : IRepository<T>
         _valuesPerKey = new Dictionary<T, byte[]>();
     }
 
-    public void StoreValue(T key, ReadOnlySpan<byte> value)
+    public void StoreValue(T key, byte[] value)
     {
         lock (_lock)
         {

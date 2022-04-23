@@ -52,7 +52,7 @@ internal class FileRepository<T> : IRepository<T>
         _toKey = toKey;
     }
 
-    public void StoreValue(T key, ReadOnlySpan<byte> value)
+    public void StoreValue(T key, byte[] value)
     {
         var file = ToFile(key);
 
