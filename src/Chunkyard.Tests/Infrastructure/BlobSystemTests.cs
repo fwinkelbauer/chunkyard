@@ -64,7 +64,6 @@ public static class BlobSystemTests
             writeStream.Write(new byte[] { 0x11 });
         }
 
-
         using (var readStream = blobSystem.OpenRead(blob.Name))
         using (var memoryStream = new MemoryStream())
         {

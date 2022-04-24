@@ -45,7 +45,6 @@ public static class RepositoryTests
     {
         using var directory = new DisposableDirectory();
         var repository = new FileRepository(directory.Name);
-
         var invalidKey = "../some-file";
 
         Assert.Throws<ChunkyardException>(

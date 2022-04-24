@@ -27,7 +27,7 @@ public static class PromptTests
             {
                 new DummyPrompt(null),
                 new DummyPrompt(expectedPassword),
-                new DummyPrompt("some-password")
+                new DummyPrompt("other-password")
             });
 
         Assert.Equal(expectedPassword, prompt.NewPassword());
