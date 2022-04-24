@@ -7,23 +7,10 @@ public class FileRepository : IRepository
 {
     public FileRepository(string directory)
     {
-        Chunks = new FileRepository<Uri>(
+        Chunks = new FileRepository<string>(
             Path.Combine(directory, "chunks"),
-            chunkId =>
-            {
-                var (_, hash) = ChunkId.Deconstruct(
-                    chunkId);
-
-                return Path.Combine(
-                    hash[..2],
-                    hash);
-            },
-            file =>
-            {
-                return ChunkId.Construct(
-                    ChunkId.HashAlgorithmName,
-                    Path.GetFileNameWithoutExtension(file));
-            });
+            chunkId => Path.Combine(chunkId[..2], chunkId),
+            file => Path.GetFileNameWithoutExtension(file));
 
         Snapshots = new FileRepository<int>(
             Path.Combine(directory, "snapshots"),
@@ -31,7 +18,7 @@ public class FileRepository : IRepository
             file => Convert.ToInt32(file));
     }
 
-    public IRepository<Uri> Chunks { get; }
+    public IRepository<string> Chunks { get; }
 
     public IRepository<int> Snapshots { get; }
 }

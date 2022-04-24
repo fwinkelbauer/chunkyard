@@ -9,7 +9,7 @@ public class BlobReference
     public BlobReference(
         Blob blob,
         byte[] nonce,
-        IReadOnlyCollection<Uri> chunkIds)
+        IReadOnlyCollection<string> chunkIds)
     {
         Blob = blob;
         Nonce = nonce;
@@ -20,7 +20,7 @@ public class BlobReference
 
     public byte[] Nonce { get; }
 
-    public IReadOnlyCollection<Uri> ChunkIds { get; }
+    public IReadOnlyCollection<string> ChunkIds { get; }
 
     public override bool Equals(object? obj)
     {

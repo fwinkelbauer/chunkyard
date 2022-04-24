@@ -13,7 +13,7 @@ public class SnapshotStore
     private readonly FastCdc _fastCdc;
     private readonly IProbe _probe;
     private readonly Lazy<AesGcmCrypto> _aesGcmCrypto;
-    private readonly ConcurrentDictionary<Uri, object> _locks;
+    private readonly ConcurrentDictionary<string, object> _locks;
 
     private int? _currentSnapshotId;
 
@@ -50,7 +50,7 @@ public class SnapshotStore
             }
         });
 
-        _locks = new ConcurrentDictionary<Uri, object>();
+        _locks = new ConcurrentDictionary<string, object>();
     }
 
     public DiffSet StoreSnapshotPreview(
@@ -205,7 +205,7 @@ public class SnapshotStore
             .ToArray();
     }
 
-    public IReadOnlyCollection<Uri> GarbageCollect()
+    public IReadOnlyCollection<string> GarbageCollect()
     {
         var usedChunkIds = ListChunkIds(_repository.Snapshots.ListKeys());
         var unusedChunkIds = _repository.Chunks.ListKeys()
@@ -250,7 +250,7 @@ public class SnapshotStore
     }
 
     public void RestoreChunks(
-        IEnumerable<Uri> chunkIds,
+        IEnumerable<string> chunkIds,
         Stream outputStream)
     {
         ArgumentNullException.ThrowIfNull(chunkIds);
@@ -313,9 +313,9 @@ public class SnapshotStore
         }
     }
 
-    private IReadOnlyCollection<Uri> ListChunkIds(IEnumerable<int> snapshotIds)
+    private IReadOnlyCollection<string> ListChunkIds(IEnumerable<int> snapshotIds)
     {
-        var chunkIds = new HashSet<Uri>();
+        var chunkIds = new HashSet<string>();
 
         foreach (var snapshotId in snapshotIds)
         {
@@ -336,7 +336,7 @@ public class SnapshotStore
     private bool CheckSnapshot(
         int snapshotId,
         Fuzzy includeFuzzy,
-        Func<Uri, bool> checkChunkIdFunc)
+        Func<string, bool> checkChunkIdFunc)
     {
         var snapshotValid = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
@@ -426,7 +426,7 @@ public class SnapshotStore
         }
     }
 
-    private byte[] RetrieveChunk(Uri chunkId)
+    private byte[] RetrieveChunk(string chunkId)
     {
         try
         {
@@ -440,7 +440,7 @@ public class SnapshotStore
         }
     }
 
-    private byte[] RetrieveValidChunk(Uri chunkId)
+    private byte[] RetrieveValidChunk(string chunkId)
     {
         var chunk = RetrieveChunk(chunkId);
 
@@ -453,7 +453,7 @@ public class SnapshotStore
         return chunk;
     }
 
-    private bool CheckChunkIdValid(Uri chunkId)
+    private bool CheckChunkIdValid(string chunkId)
     {
         try
         {
@@ -500,7 +500,7 @@ public class SnapshotStore
 
     private bool CheckBlobReference(
         BlobReference blobReference,
-        Func<Uri, bool> checkChunkIdFunc)
+        Func<string, bool> checkChunkIdFunc)
     {
         var blobValid = blobReference.ChunkIds
             .Select(checkChunkIdFunc)
@@ -557,7 +557,7 @@ public class SnapshotStore
             .ToArray();
     }
 
-    private IReadOnlyCollection<Uri> WriteSnapshot(Snapshot snapshot)
+    private IReadOnlyCollection<string> WriteSnapshot(Snapshot snapshot)
     {
         using var memoryStream = new MemoryStream(
             DataConvert.SnapshotToBytes(snapshot));
@@ -567,11 +567,11 @@ public class SnapshotStore
             memoryStream);
     }
 
-    private IReadOnlyCollection<Uri> WriteChunks(
+    private IReadOnlyCollection<string> WriteChunks(
         byte[] nonce,
         Stream stream)
     {
-        Uri WriteChunk(byte[] chunk)
+        string WriteChunk(byte[] chunk)
         {
             var encryptedData = _aesGcmCrypto.Value.Encrypt(
                 nonce,

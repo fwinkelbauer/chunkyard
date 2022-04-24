@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The storage format by turning `ChunkIds` from URIs into strings
+
 ## 15.1.0 - 2022-04-17
 
 ### Added

@@ -4,11 +4,11 @@ internal class MemoryRepository : IRepository
 {
     public MemoryRepository()
     {
-        Chunks = new MemoryRepository<Uri>();
+        Chunks = new MemoryRepository<string>();
         Snapshots = new MemoryRepository<int>();
     }
 
-    public IRepository<Uri> Chunks { get; }
+    public IRepository<string> Chunks { get; }
 
     public IRepository<int> Snapshots { get; }
 }

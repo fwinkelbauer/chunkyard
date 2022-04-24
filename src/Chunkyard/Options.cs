@@ -5,7 +5,7 @@ public class CatOptions
 {
     public CatOptions(
         string repository,
-        IEnumerable<Uri> chunkIds,
+        IEnumerable<string> chunkIds,
         string? export)
     {
         Repository = repository;
@@ -17,7 +17,7 @@ public class CatOptions
     public string Repository { get; }
 
     [Option('c', "chunk", Required = true, HelpText = "The chunk IDs.")]
-    public IEnumerable<Uri> ChunkIds { get; }
+    public IEnumerable<string> ChunkIds { get; }
 
     [Option('e', "export", Required = false, HelpText = "The export path.", Default = "")]
     public string? Export { get; }

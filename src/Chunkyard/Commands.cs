@@ -63,7 +63,7 @@ internal static class Commands
 
             foreach (var chunkId in chunkIds)
             {
-                Console.WriteLine(chunkId.AbsoluteUri);
+                Console.WriteLine(chunkId);
             }
         }
         else
@@ -137,7 +137,7 @@ internal static class Commands
             ? DiffSet.Create(
                 first.SelectMany(b => b.ChunkIds),
                 second.SelectMany(b => b.ChunkIds),
-                chunkId => chunkId.AbsoluteUri)
+                chunkId => chunkId)
             : DiffSet.Create(
                 first,
                 second,

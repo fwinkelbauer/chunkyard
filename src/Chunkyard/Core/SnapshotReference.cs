@@ -9,7 +9,7 @@ public class SnapshotReference
     public SnapshotReference(
         byte[] salt,
         int iterations,
-        IReadOnlyCollection<Uri> chunkIds)
+        IReadOnlyCollection<string> chunkIds)
     {
         Salt = salt;
         Iterations = iterations;
@@ -20,7 +20,7 @@ public class SnapshotReference
 
     public int Iterations { get; }
 
-    public IReadOnlyCollection<Uri> ChunkIds { get; }
+    public IReadOnlyCollection<string> ChunkIds { get; }
 
     public override bool Equals(object? obj)
     {

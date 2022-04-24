@@ -14,9 +14,9 @@ public interface IProbe
 
     void BlobValid(string blobName, bool valid);
 
-    void CopiedChunk(Uri chunkId);
+    void CopiedChunk(string chunkId);
 
-    void RemovedChunk(Uri chunkId);
+    void RemovedChunk(string chunkId);
 
     void CopiedSnapshot(int snapshotId);
 

@@ -5,9 +5,7 @@ namespace Chunkyard.Core;
 /// </summary>
 public class Blob
 {
-    public Blob(
-        string name,
-        DateTime lastWriteTimeUtc)
+    public Blob(string name, DateTime lastWriteTimeUtc)
     {
         Name = name;
         LastWriteTimeUtc = lastWriteTimeUtc;

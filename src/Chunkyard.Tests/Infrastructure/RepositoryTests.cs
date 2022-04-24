@@ -46,63 +46,63 @@ public static class RepositoryTests
         using var directory = new DisposableDirectory();
         var repository = new FileRepository(directory.Name);
 
-        var invalidUri = new Uri("sha256://../some-file");
+        var invalidKey = "../some-file";
 
         Assert.Throws<ChunkyardException>(
-            () => repository.Chunks.StoreValue(invalidUri, new byte[] { 0xFF }));
+            () => repository.Chunks.StoreValue(invalidKey, new byte[] { 0xFF }));
 
         Assert.Throws<ChunkyardException>(
-            () => repository.Chunks.RetrieveValue(invalidUri));
+            () => repository.Chunks.RetrieveValue(invalidKey));
 
         Assert.Throws<ChunkyardException>(
-            () => repository.Chunks.ValueExists(invalidUri));
+            () => repository.Chunks.ValueExists(invalidKey));
 
         Assert.Throws<ChunkyardException>(
-            () => repository.Chunks.RemoveValue(invalidUri));
+            () => repository.Chunks.RemoveValue(invalidKey));
     }
 
     private static void Repository_Throws_When_Writing_To_Same_Key<TException>(
-        IRepository<Uri> repository)
+        IRepository<string> repository)
         where TException : Exception
     {
-        var uri = new Uri("sha256://aa");
+        var key = "aa";
         var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
-        repository.StoreValue(uri, bytes);
+        repository.StoreValue(key, bytes);
 
         Assert.Throws<TException>(
-            () => repository.StoreValue(uri, bytes));
+            () => repository.StoreValue(key, bytes));
     }
 
     private static void Repository_Can_Read_Write(
-        IRepository<Uri> repository)
+        IRepository<string> repository)
     {
         var expectedBytes1 = new byte[] { 0xAA, 0xAA, 0xAA, 0xAA };
         var expectedBytes2 = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-        var uri1 = new Uri("sha256://aa");
-        var uri2 = new Uri("sha256://bb");
+        var key1 = "aa";
+        var key2 = "bb";
 
         Assert.Empty(repository.ListKeys());
 
-        repository.StoreValue(uri1, expectedBytes1);
-        repository.StoreValue(uri2, expectedBytes2);
+        repository.StoreValue(key1, expectedBytes1);
+        repository.StoreValue(key2, expectedBytes2);
 
         Assert.Equal(
-            new[] { uri1, uri2 },
-            repository.ListKeys().OrderBy(u => u.AbsoluteUri));
+            new[] { key1, key2 },
+            repository.ListKeys().OrderBy(key => key));
 
-        Assert.True(repository.ValueExists(uri1));
-        Assert.True(repository.ValueExists(uri2));
+        Assert.True(repository.ValueExists(key1));
+        Assert.True(repository.ValueExists(key2));
 
-        Assert.Equal(expectedBytes1, repository.RetrieveValue(uri1));
-        Assert.Equal(expectedBytes2, repository.RetrieveValue(uri2));
+        Assert.Equal(expectedBytes1, repository.RetrieveValue(key1));
+        Assert.Equal(expectedBytes2, repository.RetrieveValue(key2));
 
-        repository.RemoveValue(uri1);
-        repository.RemoveValue(uri2);
+        repository.RemoveValue(key1);
+        repository.RemoveValue(key2);
 
         Assert.Empty(repository.ListKeys());
-        Assert.False(repository.ValueExists(uri1));
-        Assert.False(repository.ValueExists(uri2));
+        Assert.False(repository.ValueExists(key1));
+        Assert.False(repository.ValueExists(key2));
     }
 
     private static void Repository_Can_Read_Write(
@@ -118,7 +118,7 @@ public static class RepositoryTests
 
         Assert.Equal(
             new[] { 1, 2 },
-            repository.ListKeys().OrderBy(i => i));
+            repository.ListKeys().OrderBy(key => key));
 
         Assert.True(repository.ValueExists(1));
         Assert.True(repository.ValueExists(2));
