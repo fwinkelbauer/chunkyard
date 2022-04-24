@@ -11,7 +11,7 @@ public class FileRepository : IRepository
             Path.Combine(directory, "chunks"),
             chunkId =>
             {
-                var (_, hash) = ChunkId.DeconstructChunkId(
+                var (_, hash) = ChunkId.Deconstruct(
                     chunkId);
 
                 return Path.Combine(
@@ -20,7 +20,7 @@ public class FileRepository : IRepository
             },
             file =>
             {
-                return ChunkId.ToChunkId(
+                return ChunkId.Construct(
                     ChunkId.HashAlgorithmName,
                     Path.GetFileNameWithoutExtension(file));
             });

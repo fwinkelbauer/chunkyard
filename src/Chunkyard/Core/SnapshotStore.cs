@@ -444,7 +444,7 @@ public class SnapshotStore
     {
         var chunk = RetrieveChunk(chunkId);
 
-        if (!ChunkId.ChunkIdValid(chunkId, chunk))
+        if (!ChunkId.Valid(chunkId, chunk))
         {
             throw new ChunkyardException(
                 $"Invalid chunk: {chunkId}");
@@ -457,7 +457,7 @@ public class SnapshotStore
     {
         try
         {
-            return ChunkId.ChunkIdValid(
+            return ChunkId.Valid(
                 chunkId,
                 _repository.Chunks.RetrieveValue(chunkId));
         }
@@ -577,7 +577,7 @@ public class SnapshotStore
                 nonce,
                 chunk);
 
-            var chunkId = ChunkId.ComputeChunkId(encryptedData);
+            var chunkId = ChunkId.Compute(encryptedData);
 
             lock (_locks.GetOrAdd(chunkId, _ => new object()))
             {

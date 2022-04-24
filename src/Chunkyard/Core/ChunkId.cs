@@ -9,22 +9,19 @@ public static class ChunkId
 {
     public const string HashAlgorithmName = "sha256";
 
-    public static Uri ComputeChunkId(
-        ReadOnlySpan<byte> chunk)
+    public static Uri Compute(ReadOnlySpan<byte> chunk)
     {
-        return ToChunkId(HashAlgorithmName, ComputeHash(chunk));
+        return Construct(
+            HashAlgorithmName,
+            Convert.ToHexString(SHA256.HashData(chunk)).ToLower());
     }
 
-    public static bool ChunkIdValid(
-        Uri chunkId,
-        ReadOnlySpan<byte> chunk)
+    public static bool Valid(Uri chunkId, ReadOnlySpan<byte> chunk)
     {
-        var (_, hash) = DeconstructChunkId(chunkId);
-
-        return hash.Equals(ComputeHash(chunk));
+        return Compute(chunk).Equals(chunkId);
     }
 
-    public static (string HashAlgorithmName, string Hash) DeconstructChunkId(
+    public static (string HashAlgorithmName, string Hash) Deconstruct(
         Uri chunkId)
     {
         ArgumentNullException.ThrowIfNull(chunkId);
@@ -37,19 +34,12 @@ public static class ChunkId
         return (chunkId.Scheme, chunkId.Host);
     }
 
-    public static Uri ToChunkId(
+    public static Uri Construct(
         string hashAlgorithmName,
         string hash)
     {
         ArgumentNullException.ThrowIfNull(hashAlgorithmName);
 
         return new Uri($"{hashAlgorithmName}://{hash}");
-    }
-
-    private static string ComputeHash(
-        ReadOnlySpan<byte> chunk)
-    {
-        return Convert.ToHexString(SHA256.HashData(chunk))
-            .ToLower();
     }
 }
