@@ -74,6 +74,7 @@ internal class FileRepository<T> : IRepository<T>
 
         return Directory.GetFiles(_directory, "*", SearchOption.AllDirectories)
             .Select(ToKey)
+            .OrderBy(key => key)
             .ToArray();
     }
 

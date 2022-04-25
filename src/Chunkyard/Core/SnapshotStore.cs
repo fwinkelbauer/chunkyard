@@ -191,9 +191,7 @@ public class SnapshotStore
 
     public IReadOnlyCollection<int> ListSnapshotIds()
     {
-        return _repository.Snapshots.ListKeys()
-            .OrderBy(id => id)
-            .ToArray();
+        return _repository.Snapshots.ListKeys();
     }
 
     public IReadOnlyCollection<BlobReference> FilterSnapshot(
@@ -374,7 +372,6 @@ public class SnapshotStore
         }
 
         var snapshotIds = _repository.Snapshots.ListKeys()
-            .OrderBy(id => id)
             .ToArray();
 
         var position = snapshotIds.Length + snapshotId;

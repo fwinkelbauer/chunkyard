@@ -55,6 +55,7 @@ internal class MemoryRepository<T> : IRepository<T>
         lock (_lock)
         {
             return _valuesPerKey.Keys
+                .OrderBy(key => key)
                 .ToArray();
         }
     }

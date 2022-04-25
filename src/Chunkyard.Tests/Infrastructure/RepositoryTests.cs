@@ -86,9 +86,7 @@ public static class RepositoryTests
         repository.StoreValue(key1, expectedBytes1);
         repository.StoreValue(key2, expectedBytes2);
 
-        Assert.Equal(
-            new[] { key1, key2 },
-            repository.ListKeys().OrderBy(key => key));
+        Assert.Equal(new[] { key1, key2 }, repository.ListKeys());
 
         Assert.True(repository.ValueExists(key1));
         Assert.True(repository.ValueExists(key2));
@@ -115,9 +113,7 @@ public static class RepositoryTests
         repository.StoreValue(1, expectedBytes1);
         repository.StoreValue(2, expectedBytes2);
 
-        Assert.Equal(
-            new[] { 1, 2 },
-            repository.ListKeys().OrderBy(key => key));
+        Assert.Equal(new[] { 1, 2 }, repository.ListKeys());
 
         Assert.True(repository.ValueExists(1));
         Assert.True(repository.ValueExists(2));
