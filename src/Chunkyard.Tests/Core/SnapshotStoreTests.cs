@@ -528,7 +528,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void ShowSnapshot_Throws_On_Empty_SnapshotStore()
+    public static void FilterSnapshot_Throws_On_Empty_SnapshotStore()
     {
         var snapshotStore = CreateSnapshotStore();
 
