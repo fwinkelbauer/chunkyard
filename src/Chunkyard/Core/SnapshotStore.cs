@@ -331,23 +331,6 @@ public class SnapshotStore
         return chunkIds;
     }
 
-    private bool CheckSnapshot(
-        int snapshotId,
-        Fuzzy includeFuzzy,
-        Func<string, bool> checkChunkIdFunc)
-    {
-        var snapshotValid = FilterSnapshot(snapshotId, includeFuzzy)
-            .AsParallel()
-            .Select(br => CheckBlobReference(br, checkChunkIdFunc))
-            .Aggregate(true, (total, next) => total && next);
-
-        _probe.SnapshotValid(
-            ResolveSnapshotId(snapshotId),
-            snapshotValid);
-
-        return snapshotValid;
-    }
-
     private int? FetchCurrentSnapshotId()
     {
         return _repository.Snapshots.ListKeys()
@@ -464,6 +447,36 @@ public class SnapshotStore
         }
     }
 
+    private bool CheckSnapshot(
+        int snapshotId,
+        Fuzzy includeFuzzy,
+        Func<string, bool> checkChunkIdFunc)
+    {
+        var snapshotValid = FilterSnapshot(snapshotId, includeFuzzy)
+            .AsParallel()
+            .Select(br => CheckBlobReference(br, checkChunkIdFunc))
+            .Aggregate(true, (total, next) => total && next);
+
+        _probe.SnapshotValid(
+            ResolveSnapshotId(snapshotId),
+            snapshotValid);
+
+        return snapshotValid;
+    }
+
+    private bool CheckBlobReference(
+        BlobReference blobReference,
+        Func<string, bool> checkChunkIdFunc)
+    {
+        var blobValid = blobReference.ChunkIds
+            .Select(checkChunkIdFunc)
+            .Aggregate(true, (total, next) => total && next);
+
+        _probe.BlobValid(blobReference.Blob.Name, blobValid);
+
+        return blobValid;
+    }
+
     private Blob RestoreBlob(
         Func<Blob, Stream> createWriteStream,
         BlobReference blobReference)
@@ -493,19 +506,6 @@ public class SnapshotStore
         }
 
         return RestoreBlob(blobSystem.OpenWrite, blobReference);
-    }
-
-    private bool CheckBlobReference(
-        BlobReference blobReference,
-        Func<string, bool> checkChunkIdFunc)
-    {
-        var blobValid = blobReference.ChunkIds
-            .Select(checkChunkIdFunc)
-            .Aggregate(true, (total, next) => total && next);
-
-        _probe.BlobValid(blobReference.Blob.Name, blobValid);
-
-        return blobValid;
     }
 
     private BlobReference[] WriteBlobs(
