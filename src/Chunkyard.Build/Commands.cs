@@ -63,30 +63,6 @@ internal static class Commands
         }
     }
 
-    public static void Install()
-    {
-        Publish();
-
-        var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        var runtime = isWindows ? "win-x64" : "linux-x64";
-        var name = isWindows ? "chunkyard.exe" : "chunkyard";
-        var targetDirectory = isWindows
-            ? Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "bin")
-            : Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                ".local/bin");
-
-        var source = Path.Combine(Artifacts, runtime, name);
-        var target = Path.Combine(targetDirectory, name);
-
-        Console.WriteLine($"Copying {source} to {target}");
-
-        Directory.CreateDirectory(targetDirectory);
-        File.Copy(source, target, true);
-    }
-
     public static void Fmt()
     {
         Dotnet($"format {Solution}");
