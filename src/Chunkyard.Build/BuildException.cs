@@ -11,19 +11,19 @@ public class BuildException : Exception
     }
 
     public BuildException(string message)
-    : base(message)
+        : base(message)
     {
     }
 
     public BuildException(string message, Exception innerException)
-    : base(message, innerException)
+        : base(message, innerException)
     {
     }
 
     protected BuildException(
         SerializationInfo info,
         StreamingContext context)
-    : base(info, context)
+        : base(info, context)
     {
     }
 }
