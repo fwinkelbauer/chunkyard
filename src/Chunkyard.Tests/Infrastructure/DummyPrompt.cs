@@ -2,19 +2,19 @@ namespace Chunkyard.Tests.Infrastructure;
 
 internal class DummyPrompt : IPrompt
 {
-    private readonly string? _password;
+    private readonly string _password;
 
-    public DummyPrompt(string? password)
+    public DummyPrompt(string password)
     {
         _password = password;
     }
 
-    public string? NewPassword()
+    public string NewPassword()
     {
         return _password;
     }
 
-    public string? ExistingPassword()
+    public string ExistingPassword()
     {
         return _password;
     }

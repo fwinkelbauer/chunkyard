@@ -1,15 +1,15 @@
 namespace Chunkyard.Tests.Core;
 
-public static class PromptTests
+public static class MultiPromptTests
 {
-    public static TheoryData<Prompt> TheoryData => new()
+    public static TheoryData<MultiPrompt> TheoryData => new()
     {
-        { new Prompt(new[] { new DummyPrompt(null) }) },
-        { new Prompt(Array.Empty<IPrompt>()) }
+        { new MultiPrompt(new[] { new DummyPrompt("") }) },
+        { new MultiPrompt(Array.Empty<IPrompt>()) }
     };
 
     [Theory, MemberData(nameof(TheoryData))]
-    public static void Prompt_Throws_If_Null_Or_Empty(Prompt prompt)
+    public static void MultiPrompt_Returns_Empty_If_Prompts_Empty(MultiPrompt prompt)
     {
         Assert.Throws<ChunkyardException>(
             () => prompt.NewPassword());
@@ -19,13 +19,13 @@ public static class PromptTests
     }
 
     [Fact]
-    public static void Prompt_Returns_Password()
+    public static void MultiPrompt_Returns_First_Non_Empty_Password()
     {
         var expectedPassword = "some-password";
-        var prompt = new Prompt(
+        var prompt = new MultiPrompt(
             new[]
             {
-                new DummyPrompt(null),
+                new DummyPrompt(""),
                 new DummyPrompt(expectedPassword),
                 new DummyPrompt("other-password")
             });

@@ -2,13 +2,13 @@ namespace Chunkyard.Core;
 
 /// <summary>
 /// A class to retrieve a user password using a set of <see cref="IPrompt"/>
-/// implementations.
+/// instances.
 /// </summary>
-public class Prompt
+public class MultiPrompt : IPrompt
 {
     private readonly IPrompt[] _prompts;
 
-    public Prompt(IEnumerable<IPrompt> prompts)
+    public MultiPrompt(IEnumerable<IPrompt> prompts)
     {
         _prompts = prompts.ToArray();
     }
@@ -29,7 +29,7 @@ public class Prompt
         {
             var password = passwordFunc(prompt);
 
-            if (password != null)
+            if (!string.IsNullOrEmpty(password))
             {
                 return password;
             }

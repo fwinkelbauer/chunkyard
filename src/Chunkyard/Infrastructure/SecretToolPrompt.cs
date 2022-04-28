@@ -14,11 +14,11 @@ internal class SecretToolPrompt : IPrompt
             Path.GetFullPath(repositoryPath));
     }
 
-    public string? NewPassword()
+    public string NewPassword()
     {
         if (!Installed())
         {
-            return null;
+            return "";
         }
 
         if (string.IsNullOrEmpty(Lookup()))
@@ -29,7 +29,7 @@ internal class SecretToolPrompt : IPrompt
         return Lookup();
     }
 
-    public string? ExistingPassword()
+    public string ExistingPassword()
     {
         return NewPassword();
     }

@@ -885,7 +885,7 @@ public static class SnapshotStoreTests
         return new SnapshotStore(
             repository ?? CreateRepository(),
             fastCdc ?? new FastCdc(),
-            new Prompt(new[] { new DummyPrompt(password) }),
+            new DummyPrompt(password),
             new DummyProbe());
     }
 

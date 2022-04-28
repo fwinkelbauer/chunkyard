@@ -9,24 +9,24 @@ internal class EnvironmentPrompt : IPrompt
     private const string PasswordVariable = "CHUNKYARD_PASSWORD";
     private const string ProcessVariable = "CHUNKYARD_PASSCMD";
 
-    public string? NewPassword()
+    public string NewPassword()
     {
         return Environment.GetEnvironmentVariable(PasswordVariable)
             ?? GetProcessPassword();
     }
 
-    public string? ExistingPassword()
+    public string ExistingPassword()
     {
         return NewPassword();
     }
 
-    private static string? GetProcessPassword()
+    private static string GetProcessPassword()
     {
         var command = Environment.GetEnvironmentVariable(ProcessVariable);
 
         if (string.IsNullOrEmpty(command))
         {
-            return null;
+            return "";
         }
 
         var split = command.Split(" ", 2);
