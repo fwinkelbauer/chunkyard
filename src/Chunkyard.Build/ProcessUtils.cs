@@ -1,4 +1,4 @@
-namespace Chunkyard.Infrastructure;
+namespace Chunkyard.Build;
 
 /// <summary>
 /// A set of process utility methods.

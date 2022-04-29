@@ -1,5 +1,8 @@
 namespace Chunkyard.Build;
 
+/// <summary>
+/// Describes every available command line verb of the Chunkyard.Build assembly.
+/// </summary>
 internal static class Commands
 {
     private const string Artifacts = "artifacts";
@@ -96,21 +99,34 @@ internal static class Commands
 
     private static string FetchVersion()
     {
-        return BuildUtils.FetchChangelogVersion(Changelog);
+        var match = Regex.Match(
+            File.ReadAllText(Changelog),
+            @"##\s+(\d+\.\d+\.\d+)");
+
+        if (match.Groups.Count < 2)
+        {
+            throw new BuildException(
+                $"Could not fetch version from {Changelog}");
+        }
+
+        return match.Groups[1].Value;
     }
 
     private static void Dotnet(params string[] arguments)
     {
-        BuildUtils.Run("dotnet", arguments, new[] { 0 });
+        ProcessUtils.Run(
+            new ProcessStartInfo("dotnet", string.Join(' ', arguments)));
     }
 
     private static void Git(params string[] arguments)
     {
-        BuildUtils.Run("git", arguments, new[] { 0 });
+        ProcessUtils.Run(
+            new ProcessStartInfo("git", string.Join(' ', arguments)));
     }
 
     private static string GitQuery(params string[] arguments)
     {
-        return BuildUtils.RunQuery("git", arguments, new[] { 0 });
+        return ProcessUtils.RunQuery(
+            new ProcessStartInfo("git", string.Join(' ', arguments)));
     }
 }

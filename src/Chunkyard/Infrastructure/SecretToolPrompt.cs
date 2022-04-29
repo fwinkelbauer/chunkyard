@@ -42,7 +42,6 @@ internal class SecretToolPrompt : IPrompt
             {
                 FileName = "which",
                 Arguments = "secret-tool",
-                RedirectStandardOutput = true
             };
 
             return !string.IsNullOrEmpty(
@@ -60,7 +59,6 @@ internal class SecretToolPrompt : IPrompt
         {
             FileName = "secret-tool",
             Arguments = $"lookup chunkyard-repository {_repositoryPath}",
-            RedirectStandardOutput = true
         };
 
         return ProcessUtils.RunQuery(startInfo, new[] { 0, 1 });
