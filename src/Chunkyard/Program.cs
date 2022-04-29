@@ -6,6 +6,8 @@ public static class Program
     {
         try
         {
+            DotEnv.Populate();
+
             ProcessArguments(args);
         }
         catch (Exception e)

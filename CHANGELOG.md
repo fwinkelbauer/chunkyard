@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- Support for `.env` files to populate environment variables
+
 ## 16.0.0 - 2022-04-26
 
 ### Changed
