@@ -99,9 +99,8 @@ directories=(
     ~/Videos
 )
 
-# Optional: Prevent password prompts using one of these methods
+# Optional: Prevent password prompts
 # export CHUNKYARD_PASSWORD="my secret password"
-# export CHUNKYARD_PASSCMD="echo \"my secret password\""
 
 # Store backup
 chunkyard store -r "$repo" -f ${directories[*]}
@@ -122,9 +121,8 @@ $directories = @(
     "$env:UserProfile\Videos"
 )
 
-# Optional: Prevent password prompts using one of these methods
+# Optional: Prevent password prompts
 # $env:CHUNKYARD_PASSWORD = 'my secret password'
-# $env:CHUNKYARD_PASSCMD = 'echo "my secret password"'
 
 # Store backup
 chunkyard store --repository $repo --files $directories
