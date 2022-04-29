@@ -38,8 +38,10 @@ internal class SecretToolPrompt : IPrompt
     {
         try
         {
-            var startInfo = new ProcessStartInfo("which", "secret-tool")
+            var startInfo = new ProcessStartInfo
             {
+                FileName = "which",
+                Arguments = "secret-tool",
                 RedirectStandardOutput = true
             };
 
@@ -54,10 +56,10 @@ internal class SecretToolPrompt : IPrompt
 
     private string Lookup()
     {
-        var fileName = "secret-tool";
-        var arguments = $"lookup chunkyard-repository {_repositoryPath}";
-        var startInfo = new ProcessStartInfo(fileName, arguments)
+        var startInfo = new ProcessStartInfo
         {
+            FileName = "secret-tool",
+            Arguments = $"lookup chunkyard-repository {_repositoryPath}",
             RedirectStandardOutput = true
         };
 
@@ -66,10 +68,10 @@ internal class SecretToolPrompt : IPrompt
 
     private void Store()
     {
-        var fileName = "secret-tool";
-        var arguments = $"store --label=\"Chunkyard\" chunkyard-repository {_repositoryPath}";
-        var startInfo = new ProcessStartInfo(fileName, arguments)
+        var startInfo = new ProcessStartInfo
         {
+            FileName = "secret-tool",
+            Arguments = $"store --label=\"Chunkyard\" chunkyard-repository {_repositoryPath}",
             UseShellExecute = true
         };
 
