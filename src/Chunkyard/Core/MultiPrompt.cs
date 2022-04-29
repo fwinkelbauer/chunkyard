@@ -23,18 +23,11 @@ public class MultiPrompt : IPrompt
         return First(prompt => prompt.ExistingPassword());
     }
 
-    private string First(Func<IPrompt, string?> passwordFunc)
+    private string First(Func<IPrompt, string> passwordFunc)
     {
-        foreach (var prompt in _prompts)
-        {
-            var password = passwordFunc(prompt);
-
-            if (!string.IsNullOrEmpty(password))
-            {
-                return password;
-            }
-        }
-
-        throw new ChunkyardException("Could not retrieve user password");
+        return _prompts
+            .Select(passwordFunc)
+            .FirstOrDefault(password => !string.IsNullOrEmpty(password))
+            ?? throw new ChunkyardException("Could not retrieve user password");
     }
 }
