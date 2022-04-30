@@ -5,16 +5,16 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 public class FileBlobSystem : IBlobSystem
 {
-    private readonly string[] _files;
+    private readonly string[] _paths;
     private readonly string _parent;
 
     public FileBlobSystem(
-        IEnumerable<string> files)
+        IEnumerable<string> paths)
     {
-        _files = files.Select(Path.GetFullPath)
+        _paths = paths.Select(Path.GetFullPath)
             .ToArray();
 
-        _parent = FindCommonParent(_files);
+        _parent = FindCommonParent(_paths);
     }
 
     public bool BlobExists(string blobName)
@@ -31,7 +31,7 @@ public class FileBlobSystem : IBlobSystem
 
     public IReadOnlyCollection<Blob> ListBlobs(Fuzzy excludeFuzzy)
     {
-        return _files
+        return _paths
             .SelectMany(ListFiles)
             .Where(f => !excludeFuzzy.IsExcludingMatch(f))
             .Distinct()
