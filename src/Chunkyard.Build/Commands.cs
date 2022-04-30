@@ -88,7 +88,7 @@ internal static class Commands
 
         if (!GitQuery("status --porcelain").Equals($" M {Changelog}"))
         {
-            throw new BuildException(
+            throw new InvalidOperationException(
                 $"A release commit should only contain changes to {Changelog}");
         }
 
@@ -105,7 +105,7 @@ internal static class Commands
 
         if (match.Groups.Count < 2)
         {
-            throw new BuildException(
+            throw new InvalidOperationException(
                 $"Could not fetch version from {Changelog}");
         }
 
