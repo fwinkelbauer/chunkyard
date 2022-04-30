@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The default hashing iterations when deriving a key
+
 ### Removed
 
 - Support for the environment variable `CHUNKYARD_PASSCMD`

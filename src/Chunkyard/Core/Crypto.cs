@@ -5,7 +5,7 @@ namespace Chunkyard.Core;
 /// </summary>
 public class Crypto
 {
-    public const int DefaultIterations = 1000;
+    public const int DefaultIterations = 100000;
 
     private const int NonceBytes = 12;
     private const int TagBytes = 16;
