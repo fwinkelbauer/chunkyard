@@ -12,7 +12,7 @@ public class SnapshotStore
     private readonly IRepository _repository;
     private readonly FastCdc _fastCdc;
     private readonly IProbe _probe;
-    private readonly Lazy<AesGcmCrypto> _aesGcmCrypto;
+    private readonly Lazy<Crypto> _crypto;
     private readonly ConcurrentDictionary<string, object> _locks;
 
     private int? _currentSnapshotId;
@@ -29,21 +29,21 @@ public class SnapshotStore
 
         _currentSnapshotId = FetchCurrentSnapshotId();
 
-        _aesGcmCrypto = new Lazy<AesGcmCrypto>(() =>
+        _crypto = new Lazy<Crypto>(() =>
         {
             if (_currentSnapshotId == null)
             {
-                return new AesGcmCrypto(
+                return new Crypto(
                     prompt.NewPassword(),
-                    AesGcmCrypto.GenerateSalt(),
-                    AesGcmCrypto.DefaultIterations);
+                    Crypto.GenerateSalt(),
+                    Crypto.DefaultIterations);
             }
             else
             {
                 var snapshotReference = GetSnapshotReference(
                     _currentSnapshotId.Value);
 
-                return new AesGcmCrypto(
+                return new Crypto(
                     prompt.ExistingPassword(),
                     snapshotReference.Salt,
                     snapshotReference.Iterations);
@@ -83,8 +83,8 @@ public class SnapshotStore
             WriteBlobs(blobSystem, excludeFuzzy));
 
         var newSnapshotReference = new SnapshotReference(
-            _aesGcmCrypto.Value.Salt,
-            _aesGcmCrypto.Value.Iterations,
+            _crypto.Value.Salt,
+            _crypto.Value.Iterations,
             WriteSnapshot(newSnapshot));
 
         var newSnapshotId = _currentSnapshotId + 1 ?? 0;
@@ -258,7 +258,7 @@ public class SnapshotStore
         {
             try
             {
-                var decrypted = _aesGcmCrypto.Value.Decrypt(
+                var decrypted = _crypto.Value.Decrypt(
                     RetrieveChunk(chunkId));
 
                 outputStream.Write(decrypted);
@@ -512,7 +512,7 @@ public class SnapshotStore
         IBlobSystem blobSystem,
         Fuzzy excludeFuzzy)
     {
-        _ = _aesGcmCrypto.Value;
+        _ = _crypto.Value;
 
         var currentBlobReferences = _currentSnapshotId == null
             ? new Dictionary<string, BlobReference>()
@@ -533,7 +533,7 @@ public class SnapshotStore
 
             // Known blobs should be encrypted using the same nonce
             var nonce = current?.Nonce
-                ?? AesGcmCrypto.GenerateNonce();
+                ?? Crypto.GenerateNonce();
 
             using var stream = blobSystem.OpenRead(blob.Name);
 
@@ -560,7 +560,7 @@ public class SnapshotStore
             DataConvert.SnapshotToBytes(snapshot));
 
         return WriteChunks(
-            AesGcmCrypto.GenerateNonce(),
+            Crypto.GenerateNonce(),
             memoryStream);
     }
 
@@ -570,7 +570,7 @@ public class SnapshotStore
     {
         string WriteChunk(byte[] chunk)
         {
-            var encryptedData = _aesGcmCrypto.Value.Encrypt(
+            var encryptedData = _crypto.Value.Encrypt(
                 nonce,
                 chunk);
 

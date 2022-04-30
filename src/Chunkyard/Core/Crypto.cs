@@ -3,7 +3,7 @@ namespace Chunkyard.Core;
 /// <summary>
 /// Contains methods to encrypt and decrypt data.
 /// </summary>
-public class AesGcmCrypto
+public class Crypto
 {
     public const int DefaultIterations = 1000;
 
@@ -14,7 +14,7 @@ public class AesGcmCrypto
 
     private readonly byte[] _key;
 
-    public AesGcmCrypto(string password, byte[] salt, int iterations)
+    public Crypto(string password, byte[] salt, int iterations)
     {
         _key = PasswordToKey(password, salt, iterations);
 
