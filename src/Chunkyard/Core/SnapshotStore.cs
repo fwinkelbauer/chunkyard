@@ -259,7 +259,7 @@ public class SnapshotStore
             try
             {
                 var decrypted = _crypto.Value.Decrypt(
-                    RetrieveChunk(chunkId));
+                    Retrieve(chunkId));
 
                 outputStream.Write(decrypted);
             }
@@ -305,7 +305,7 @@ public class SnapshotStore
         {
             otherRepository.Snapshots.StoreValue(
                 snapshotId,
-                _repository.Snapshots.RetrieveValue(snapshotId));
+                Retrieve(snapshotId));
 
             _probe.CopiedSnapshot(snapshotId);
         }
@@ -406,7 +406,7 @@ public class SnapshotStore
         }
     }
 
-    private byte[] RetrieveChunk(string chunkId)
+    private byte[] Retrieve(string chunkId)
     {
         try
         {
@@ -420,9 +420,23 @@ public class SnapshotStore
         }
     }
 
+    private byte[] Retrieve(int snapshotId)
+    {
+        try
+        {
+            return _repository.Snapshots.RetrieveValue(snapshotId);
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not read snapshot reference: #{snapshotId}",
+                e);
+        }
+    }
+
     private byte[] RetrieveValidChunk(string chunkId)
     {
-        var chunk = RetrieveChunk(chunkId);
+        var chunk = Retrieve(chunkId);
 
         if (!ChunkId.Valid(chunkId, chunk))
         {
