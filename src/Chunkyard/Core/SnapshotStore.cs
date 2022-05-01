@@ -113,7 +113,7 @@ public class SnapshotStore
         return CheckSnapshot(
             snapshotId,
             includeFuzzy,
-            CheckChunkIdValid);
+            ChunkIdValid);
     }
 
     public IReadOnlyCollection<Blob> RestoreSnapshot(
@@ -433,7 +433,7 @@ public class SnapshotStore
         return chunk;
     }
 
-    private bool CheckChunkIdValid(string chunkId)
+    private bool ChunkIdValid(string chunkId)
     {
         try
         {
