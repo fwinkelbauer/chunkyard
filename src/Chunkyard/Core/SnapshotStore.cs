@@ -91,7 +91,7 @@ public class SnapshotStore
 
         _repository.Snapshots.StoreValue(
             newSnapshotId,
-            DataConvert.SnapshotReferenceToBytes(newSnapshotReference));
+            Serialize.SnapshotReferenceToBytes(newSnapshotReference));
 
         _currentSnapshotId = newSnapshotId;
 
@@ -372,7 +372,7 @@ public class SnapshotStore
     {
         try
         {
-            return DataConvert.BytesToSnapshotReference(
+            return Serialize.BytesToSnapshotReference(
                 _repository.Snapshots.RetrieveValue(snapshotId));
         }
         catch (Exception e)
@@ -395,7 +395,7 @@ public class SnapshotStore
 
         try
         {
-            return DataConvert.BytesToSnapshot(
+            return Serialize.BytesToSnapshot(
                 memoryStream.ToArray());
         }
         catch (Exception e)
@@ -571,7 +571,7 @@ public class SnapshotStore
     private IReadOnlyCollection<string> WriteSnapshot(Snapshot snapshot)
     {
         using var memoryStream = new MemoryStream(
-            DataConvert.SnapshotToBytes(snapshot));
+            Serialize.SnapshotToBytes(snapshot));
 
         return WriteChunks(
             Crypto.GenerateNonce(),

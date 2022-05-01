@@ -1,11 +1,11 @@
 namespace Chunkyard.Core;
 
 /// <summary>
-/// A utility class to convert objects into bytes.
+/// A utility class to serialize objects into bytes and back.
 /// </summary>
 [JsonSerializable(typeof(Snapshot))]
 [JsonSerializable(typeof(SnapshotReference))]
-public partial class DataConvert : JsonSerializerContext
+public partial class Serialize : JsonSerializerContext
 {
     public static byte[] SnapshotToBytes(Snapshot snapshot)
     {
