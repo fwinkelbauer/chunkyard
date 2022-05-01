@@ -114,19 +114,16 @@ internal static class Commands
 
     private static void Dotnet(params string[] arguments)
     {
-        ProcessUtils.Run(
-            new ProcessStartInfo("dotnet", string.Join(' ', arguments)));
+        ProcessUtils.Run("dotnet", string.Join(' ', arguments));
     }
 
     private static void Git(params string[] arguments)
     {
-        ProcessUtils.Run(
-            new ProcessStartInfo("git", string.Join(' ', arguments)));
+        ProcessUtils.Run("git", string.Join(' ', arguments));
     }
 
     private static string GitQuery(params string[] arguments)
     {
-        return ProcessUtils.RunQuery(
-            new ProcessStartInfo("git", string.Join(' ', arguments)));
+        return ProcessUtils.RunQuery("git", string.Join(' ', arguments));
     }
 }

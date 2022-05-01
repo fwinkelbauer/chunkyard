@@ -38,14 +38,8 @@ internal class SecretToolPrompt : IPrompt
     {
         try
         {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = "which",
-                Arguments = "secret-tool",
-            };
-
             return !string.IsNullOrEmpty(
-                ProcessUtils.RunQuery(startInfo, new[] { 0, 1 }));
+                ProcessUtils.RunQuery("which", "secret-tool", new[] { 0, 1 }));
         }
         catch (Exception)
         {
@@ -55,13 +49,10 @@ internal class SecretToolPrompt : IPrompt
 
     private string Lookup()
     {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = "secret-tool",
-            Arguments = $"lookup chunkyard-repository {_repositoryPath}",
-        };
-
-        return ProcessUtils.RunQuery(startInfo, new[] { 0, 1 });
+        return ProcessUtils.RunQuery(
+            "secret-tool",
+            $"lookup chunkyard-repository {_repositoryPath}",
+            new[] { 0, 1 });
     }
 
     private void Store()
