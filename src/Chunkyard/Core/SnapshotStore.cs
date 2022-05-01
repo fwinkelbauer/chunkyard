@@ -570,10 +570,7 @@ public class SnapshotStore
     {
         string WriteChunk(byte[] chunk)
         {
-            var encryptedData = _crypto.Value.Encrypt(
-                nonce,
-                chunk);
-
+            var encryptedData = _crypto.Value.Encrypt(nonce, chunk);
             var chunkId = ChunkId.Compute(encryptedData);
 
             lock (_locks.GetOrAdd(chunkId, _ => new object()))
