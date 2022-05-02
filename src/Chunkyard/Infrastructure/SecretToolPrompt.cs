@@ -38,7 +38,7 @@ internal class SecretToolPrompt : IPrompt
     {
         try
         {
-            return !string.IsNullOrEmpty(
+            return File.Exists(
                 ProcessUtils.RunQuery("which", "secret-tool", new[] { 0, 1 }));
         }
         catch (Exception)
