@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 16.2.0 - 2022-05-02
+
 ### Changed
 
 - The default hashing iterations when deriving a key
