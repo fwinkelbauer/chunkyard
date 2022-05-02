@@ -38,8 +38,16 @@ internal class SecretToolPrompt : IPrompt
     {
         try
         {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "which",
+                Arguments = "secret-tool",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+
             return File.Exists(
-                ProcessUtils.RunQuery("which", "secret-tool", new[] { 0, 1 }));
+                ProcessUtils.RunQuery(startInfo, new[] { 0, 1 }));
         }
         catch (Exception)
         {
