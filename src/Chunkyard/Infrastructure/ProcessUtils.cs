@@ -3,23 +3,17 @@ namespace Chunkyard.Infrastructure;
 /// <summary>
 /// A set of process utility methods.
 /// </summary>
-internal static class ProcessUtils
+public static class ProcessUtils
 {
     public static void Run(
         ProcessStartInfo startInfo,
         int[]? validExitCodes = null)
     {
+        ArgumentNullException.ThrowIfNull(startInfo);
+
         using var process = Start(startInfo);
 
-        process.WaitForExit();
-
-        validExitCodes ??= new[] { 0 };
-
-        if (!validExitCodes.Contains(process.ExitCode))
-        {
-            throw new InvalidOperationException(
-                $"Exit code of '{startInfo.FileName}' was {process.ExitCode}");
-        }
+        EnsureValidExitCode(process, validExitCodes);
     }
 
     public static void Run(
@@ -34,6 +28,8 @@ internal static class ProcessUtils
         ProcessStartInfo startInfo,
         int[]? validExitCodes = null)
     {
+        ArgumentNullException.ThrowIfNull(startInfo);
+
         using var process = Start(startInfo);
 
         var builder = new StringBuilder();
@@ -44,15 +40,7 @@ internal static class ProcessUtils
             builder.Append(line);
         }
 
-        process.WaitForExit();
-
-        validExitCodes ??= new[] { 0 };
-
-        if (!validExitCodes.Contains(process.ExitCode))
-        {
-            throw new InvalidOperationException(
-                $"Exit code of '{startInfo.FileName}' was {process.ExitCode}");
-        }
+        EnsureValidExitCode(process, validExitCodes);
 
         return builder.ToString();
     }
@@ -68,6 +56,21 @@ internal static class ProcessUtils
                 RedirectStandardOutput = true
             },
             validExitCodes);
+    }
+
+    private static void EnsureValidExitCode(
+        Process process,
+        int[]? validExitCodes)
+    {
+        process.WaitForExit();
+
+        validExitCodes ??= new[] { 0 };
+
+        if (!validExitCodes.Contains(process.ExitCode))
+        {
+            throw new InvalidOperationException(
+                $"Exit code of '{process.StartInfo.FileName}' was {process.ExitCode}");
+        }
     }
 
     private static Process Start(ProcessStartInfo startInfo)
