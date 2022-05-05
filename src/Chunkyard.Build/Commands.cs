@@ -105,7 +105,7 @@ internal static class Commands
 
         if (match.Groups.Count < 2)
         {
-            throw new InvalidOperationException(
+            throw new IOException(
                 $"Could not fetch version from {Changelog}");
         }
 
