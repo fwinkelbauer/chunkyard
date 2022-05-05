@@ -71,7 +71,7 @@ public class FileBlobSystem : IBlobSystem
     {
         var file = ToFile(blob.Name);
 
-        DirectoryUtils.CreateParent(file);
+        DirectoryUtils.EnsureParent(file);
 
         return new WriteStream(
             file,

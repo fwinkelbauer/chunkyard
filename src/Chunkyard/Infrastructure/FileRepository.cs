@@ -43,7 +43,7 @@ internal class FileRepository<T> : IRepository<T>
     {
         var file = ToFile(key);
 
-        DirectoryUtils.CreateParent(file);
+        DirectoryUtils.EnsureParent(file);
 
         using var fileStream = new FileStream(
             file,

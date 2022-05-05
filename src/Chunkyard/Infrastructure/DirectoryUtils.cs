@@ -5,22 +5,23 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 internal static class DirectoryUtils
 {
-    public static string GetParent(string file)
+    public static string GetParent(string path)
     {
-        var parent = Path.GetDirectoryName(file);
+        var parent = Path.GetDirectoryName(path);
 
         if (string.IsNullOrEmpty(parent))
         {
-            throw new IOException(
-                $"File '{file}' does not have a parent directory");
+            throw new ArgumentException(
+                $"Path '{path}' does not have a parent directory",
+                nameof(path));
         }
 
         return parent;
     }
 
-    public static void CreateParent(string file)
+    public static void EnsureParent(string path)
     {
-        var parent = Path.GetDirectoryName(file);
+        var parent = Path.GetDirectoryName(path);
 
         if (string.IsNullOrEmpty(parent))
         {
@@ -30,44 +31,13 @@ internal static class DirectoryUtils
         Directory.CreateDirectory(parent);
     }
 
-    public static string CombinePathSafe(
-        string absoluteDirectory,
-        string relativePath)
-    {
-        var absolutePath = Path.GetFullPath(
-            Path.Combine(absoluteDirectory, relativePath));
-
-        if (!absolutePath.StartsWith(absoluteDirectory))
-        {
-            throw new IOException(
-                "Invalid directory traversal");
-        }
-
-        return absolutePath;
-    }
-
-    public static IReadOnlyCollection<string> ListFiles(string path)
-    {
-        if (Directory.Exists(path))
-        {
-            return Directory.GetFiles(path, "*", SearchOption.AllDirectories);
-        }
-        else if (File.Exists(path))
-        {
-            return new[] { path };
-        }
-        else
-        {
-            throw new FileNotFoundException("Could not find path", path);
-        }
-    }
-
     public static string FindCommonParent(string[] files)
     {
         if (files.Length == 0)
         {
-            throw new IOException(
-                "Cannot operate on empty file list");
+            throw new ArgumentException(
+                "Cannot operate on empty file list",
+                nameof(files));
         }
         else if (files.Length == 1)
         {
@@ -105,20 +75,55 @@ internal static class DirectoryUtils
         return parent;
     }
 
-    public static IEnumerable<string> FindFilesUpwards(string fileName)
+    public static string CombinePathSafe(
+        string absoluteDirectory,
+        string relativePath)
     {
-        var directory = Directory.GetCurrentDirectory();
+        var absolutePath = Path.GetFullPath(
+            Path.Combine(absoluteDirectory, relativePath));
+
+        if (!absolutePath.StartsWith(absoluteDirectory))
+        {
+            throw new ArgumentException(
+                "Invalid directory traversal",
+                nameof(relativePath));
+        }
+
+        return absolutePath;
+    }
+
+    public static IReadOnlyCollection<string> ListFiles(string path)
+    {
+        if (Directory.Exists(path))
+        {
+            return Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+        }
+        else if (File.Exists(path))
+        {
+            return new[] { path };
+        }
+        else
+        {
+            throw new FileNotFoundException("Could not find path", path);
+        }
+    }
+
+    public static IEnumerable<string> FindFilesUpwards(
+        string directory,
+        string fileName)
+    {
+        var currentDirectory = directory;
 
         do
         {
-            var file = Path.Combine(directory, fileName);
+            var file = Path.Combine(currentDirectory, fileName);
 
             if (File.Exists(file))
             {
                 yield return file;
             }
 
-            directory = Path.GetDirectoryName(directory);
-        } while (!string.IsNullOrEmpty(directory));
+            currentDirectory = Path.GetDirectoryName(currentDirectory);
+        } while (!string.IsNullOrEmpty(currentDirectory));
     }
 }

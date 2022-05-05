@@ -9,7 +9,8 @@ internal static class DotEnv
 
     public static void Populate()
     {
-        var lines = DirectoryUtils.FindFilesUpwards(".env")
+        var lines = DirectoryUtils
+            .FindFilesUpwards(Directory.GetCurrentDirectory(), ".env")
             .Reverse()
             .SelectMany(File.ReadAllLines);
 

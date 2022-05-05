@@ -47,16 +47,16 @@ public static class RepositoryTests
         var repository = new FileRepository(directory.Name);
         var invalidKey = "../some-file";
 
-        Assert.Throws<IOException>(
+        Assert.Throws<ArgumentException>(
             () => repository.Chunks.StoreValue(invalidKey, new byte[] { 0xFF }));
 
-        Assert.Throws<IOException>(
+        Assert.Throws<ArgumentException>(
             () => repository.Chunks.RetrieveValue(invalidKey));
 
-        Assert.Throws<IOException>(
+        Assert.Throws<ArgumentException>(
             () => repository.Chunks.ValueExists(invalidKey));
 
-        Assert.Throws<IOException>(
+        Assert.Throws<ArgumentException>(
             () => repository.Chunks.RemoveValue(invalidKey));
     }
 
