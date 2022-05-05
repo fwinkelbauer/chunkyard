@@ -9,7 +9,7 @@ internal static class DotEnv
 
     public static void Populate()
     {
-        var files = FindFilesUpwards(".env").Reverse();
+        var files = DirectoryUtils.FindFilesUpwards(".env").Reverse();
         var lines = files.SelectMany(File.ReadAllLines);
 
         foreach (var line in lines)
@@ -24,22 +24,5 @@ internal static class DotEnv
                 Environment.SetEnvironmentVariable(split[0], split[1]);
             }
         }
-    }
-
-    private static IEnumerable<string> FindFilesUpwards(string fileName)
-    {
-        var directory = Directory.GetCurrentDirectory();
-
-        do
-        {
-            var file = Path.Combine(directory, fileName);
-
-            if (File.Exists(file))
-            {
-                yield return file;
-            }
-
-            directory = Path.GetDirectoryName(directory);
-        } while (!string.IsNullOrEmpty(directory));
     }
 }

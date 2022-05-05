@@ -14,7 +14,7 @@ public class FileBlobSystem : IBlobSystem
         _paths = paths.Select(Path.GetFullPath)
             .ToArray();
 
-        _parent = FindCommonParent(_paths);
+        _parent = DirectoryUtils.FindCommonParent(_paths);
     }
 
     public bool BlobExists(string blobName)
@@ -32,7 +32,7 @@ public class FileBlobSystem : IBlobSystem
     public IReadOnlyCollection<Blob> ListBlobs(Fuzzy excludeFuzzy)
     {
         return _paths
-            .SelectMany(ListFiles)
+            .SelectMany(DirectoryUtils.ListFiles)
             .Where(f => !excludeFuzzy.IsExcludingMatch(f))
             .Distinct()
             .Select(ToBlob)
@@ -102,65 +102,6 @@ public class FileBlobSystem : IBlobSystem
     private string ToFile(string blobName)
     {
         return DirectoryUtils.CombinePathSafe(_parent, blobName);
-    }
-
-    private static IReadOnlyCollection<string> ListFiles(string path)
-    {
-        if (Directory.Exists(path))
-        {
-            return Directory.GetFiles(path, "*", SearchOption.AllDirectories);
-        }
-        else if (File.Exists(path))
-        {
-            return new[] { path };
-        }
-        else
-        {
-            throw new FileNotFoundException("Could not find path", path);
-        }
-    }
-
-    private static string FindCommonParent(string[] files)
-    {
-        if (files.Length == 0)
-        {
-            throw new IOException(
-                "Cannot operate on empty file list");
-        }
-        else if (files.Length == 1)
-        {
-            return File.Exists(files[0])
-                ? DirectoryUtils.GetParent(files[0])
-                : files[0];
-        }
-
-        var parent = "";
-        var fileSegments = files
-            .OrderBy(file => file)
-            .Last()
-            .Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries)
-            .ToArray();
-
-        foreach (var fileSegment in fileSegments)
-        {
-            var newParent = parent + Path.DirectorySeparatorChar + fileSegment;
-
-            if (parent.Length == 0
-                && files.All(file => file.StartsWith(fileSegment)))
-            {
-                parent = fileSegment;
-            }
-            else if (files.All(file => file.StartsWith(newParent)))
-            {
-                parent = newParent;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        return parent;
     }
 
     private sealed class WriteStream : FileStream
