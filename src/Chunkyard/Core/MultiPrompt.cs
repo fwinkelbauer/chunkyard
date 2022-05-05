@@ -28,6 +28,6 @@ public class MultiPrompt : IPrompt
         return _prompts
             .Select(passwordFunc)
             .FirstOrDefault(password => !string.IsNullOrEmpty(password))
-            ?? throw new ChunkyardException("Could not retrieve user password");
+            ?? throw new InvalidOperationException("Could not retrieve user password");
     }
 }

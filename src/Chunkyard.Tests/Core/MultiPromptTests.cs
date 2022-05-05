@@ -11,10 +11,10 @@ public static class MultiPromptTests
     [Theory, MemberData(nameof(TheoryData))]
     public static void MultiPrompt_Returns_Empty_If_Prompts_Empty(MultiPrompt prompt)
     {
-        Assert.Throws<ChunkyardException>(
+        Assert.Throws<InvalidOperationException>(
             () => prompt.NewPassword());
 
-        Assert.Throws<ChunkyardException>(
+        Assert.Throws<InvalidOperationException>(
             () => prompt.ExistingPassword());
     }
 
