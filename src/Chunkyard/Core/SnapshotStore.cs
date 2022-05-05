@@ -468,8 +468,7 @@ public class SnapshotStore
     {
         var snapshotValid = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
-            .Select(br => CheckBlobReference(br, checkChunkIdFunc))
-            .Aggregate(true, (total, next) => total && next);
+            .All(br => CheckBlobReference(br, checkChunkIdFunc));
 
         _probe.SnapshotValid(
             ResolveSnapshotId(snapshotId),
@@ -482,9 +481,7 @@ public class SnapshotStore
         BlobReference blobReference,
         Func<string, bool> checkChunkIdFunc)
     {
-        var blobValid = blobReference.ChunkIds
-            .Select(checkChunkIdFunc)
-            .Aggregate(true, (total, next) => total && next);
+        var blobValid = blobReference.ChunkIds.All(checkChunkIdFunc);
 
         _probe.BlobValid(blobReference.Blob.Name, blobValid);
 
