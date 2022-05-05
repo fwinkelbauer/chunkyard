@@ -124,7 +124,7 @@ public class FileBlobSystem : IBlobSystem
     {
         if (files.Length == 0)
         {
-            throw new ChunkyardException(
+            throw new IOException(
                 "Cannot operate on empty file list");
         }
         else if (files.Length == 1)

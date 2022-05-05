@@ -13,7 +13,7 @@ internal class ConsolePrompt : IPrompt
 
         if (!firstPassword.Equals(secondPassword))
         {
-            throw new ChunkyardException("Passwords do not match");
+            throw new InvalidOperationException("Passwords do not match");
         }
 
         return firstPassword;

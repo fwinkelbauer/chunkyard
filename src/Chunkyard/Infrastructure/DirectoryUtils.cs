@@ -11,7 +11,7 @@ internal static class DirectoryUtils
 
         if (string.IsNullOrEmpty(parent))
         {
-            throw new ChunkyardException(
+            throw new IOException(
                 $"File '{file}' does not have a parent directory");
         }
 
@@ -39,7 +39,7 @@ internal static class DirectoryUtils
 
         if (!absolutePath.StartsWith(absoluteDirectory))
         {
-            throw new ChunkyardException(
+            throw new IOException(
                 "Invalid directory traversal");
         }
 

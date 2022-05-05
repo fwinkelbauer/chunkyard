@@ -28,22 +28,22 @@ public static class BlobSystemTests
             invalidBlobName,
             DateTime.UtcNow);
 
-        Assert.Throws<ChunkyardException>(
+        Assert.Throws<IOException>(
             () => blobSystem.BlobExists(invalidBlobName));
 
-        Assert.Throws<ChunkyardException>(
+        Assert.Throws<IOException>(
             () => blobSystem.RemoveBlob(invalidBlobName));
 
-        Assert.Throws<ChunkyardException>(
+        Assert.Throws<IOException>(
             () => blobSystem.GetBlob(invalidBlobName));
 
-        Assert.Throws<ChunkyardException>(
+        Assert.Throws<IOException>(
             () => blobSystem.OpenRead(invalidBlobName));
 
-        Assert.Throws<ChunkyardException>(
+        Assert.Throws<IOException>(
             () => blobSystem.OpenWrite(invalidBlob));
 
-        Assert.Throws<ChunkyardException>(
+        Assert.Throws<IOException>(
             () => blobSystem.NewWrite(invalidBlob));
     }
 
