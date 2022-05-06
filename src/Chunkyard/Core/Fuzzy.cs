@@ -31,8 +31,7 @@ public class Fuzzy
 
     private bool IsMatch(string input, bool initial)
     {
-        return _compiledRegex
-            .Select(r => r.IsMatch(input))
-            .Aggregate(initial, (total, next) => total || next);
+        return initial
+            || _compiledRegex.Any(r => r.IsMatch(input));
     }
 }
