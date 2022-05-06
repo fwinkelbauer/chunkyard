@@ -93,7 +93,8 @@ public class Crypto
         if (string.IsNullOrEmpty(password))
         {
             throw new ArgumentException(
-                "Password cannot be empty");
+                "Password cannot be empty",
+                nameof(password));
         }
 
         using var rfc2898 = new Rfc2898DeriveBytes(
