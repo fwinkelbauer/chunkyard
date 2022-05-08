@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 16.2.1 - 2022-05-08
+
 ### Fixed
 
 - A bug when using the secret-tool password prompt on Windows
