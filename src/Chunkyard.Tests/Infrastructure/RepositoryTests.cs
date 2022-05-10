@@ -60,6 +60,53 @@ public static class RepositoryTests
             () => repository.Chunks.RemoveValue(invalidKey));
     }
 
+    [Fact]
+    public static void MemoryRepository_Sorts_Listed_Keys()
+    {
+        var repository = new MemoryRepository();
+
+        Repository_Sorts_Listed_Keys(repository.Chunks);
+        Repository_Sorts_Listed_Keys(repository.Snapshots);
+    }
+
+    [Fact]
+    public static void FileRepository_Sorts_Listed_Keys()
+    {
+        using var directory = new DisposableDirectory();
+        var repository = new FileRepository(directory.Name);
+
+        Repository_Sorts_Listed_Keys(repository.Chunks);
+        Repository_Sorts_Listed_Keys(repository.Snapshots);
+    }
+
+    private static void Repository_Sorts_Listed_Keys(IRepository<string> repository)
+    {
+        var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+
+        repository.StoreValue("dd", bytes);
+        repository.StoreValue("cc", bytes);
+        repository.StoreValue("aa", bytes);
+        repository.StoreValue("bb", bytes);
+
+        Assert.Equal(
+            new[] { "aa", "bb", "cc", "dd" },
+            repository.ListKeys());
+    }
+
+    private static void Repository_Sorts_Listed_Keys(IRepository<int> repository)
+    {
+        var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+
+        repository.StoreValue(4, bytes);
+        repository.StoreValue(3, bytes);
+        repository.StoreValue(1, bytes);
+        repository.StoreValue(2, bytes);
+
+        Assert.Equal(
+            new[] { 1, 2, 3, 4 },
+            repository.ListKeys());
+    }
+
     private static void Repository_Throws_When_Writing_To_Same_Key<TException>(
         IRepository<string> repository)
         where TException : Exception
