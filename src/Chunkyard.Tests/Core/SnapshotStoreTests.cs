@@ -387,8 +387,7 @@ public static class SnapshotStoreTests
     public static void RestoreSnapshot_Writes_Ordered_Blob_Chunks_To_Stream()
     {
         var fastCdc = new FastCdc(64, 256, 1024);
-        var snapshotStore = CreateSnapshotStore(
-            fastCdc: fastCdc);
+        var snapshotStore = CreateSnapshotStore(fastCdc: fastCdc);
 
         var blobs = CreateBlobs("some blob");
 
@@ -396,9 +395,7 @@ public static class SnapshotStoreTests
         var expectedBytes = GenerateRandomNumber(fastCdc.MaxSize + 1);
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(
-                blobs,
-                _ => expectedBytes),
+            CreateBlobSystem(blobs, _ => expectedBytes),
             Fuzzy.Default,
             DateTime.UtcNow);
 
@@ -420,9 +417,7 @@ public static class SnapshotStoreTests
             using var blobStream = blobSystem.OpenRead(blobs[0].Name);
             using var memoryStream = new MemoryStream();
 
-            snapshotStore.RestoreChunks(
-                blobReference.ChunkIds,
-                memoryStream);
+            snapshotStore.RestoreChunks(blobReference.ChunkIds, memoryStream);
 
             Assert.True(blobReference.ChunkIds.Count > 1);
             Assert.Equal(expectedBytes, ToBytes(blobStream));
@@ -901,7 +896,7 @@ public static class SnapshotStoreTests
             .ToArray();
     }
 
-    public static IBlobSystem CreateBlobSystem(
+    private static IBlobSystem CreateBlobSystem(
         IEnumerable<Blob>? blobs = null,
         Func<string, byte[]>? generate = null)
     {

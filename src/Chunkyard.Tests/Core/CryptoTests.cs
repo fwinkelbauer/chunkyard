@@ -11,11 +11,7 @@ public static class CryptoTests
             Crypto.DefaultIterations);
 
         var plainBytes = Encoding.UTF8.GetBytes("Hello!");
-
-        var encryptedBytes = crypto.Encrypt(
-            Crypto.GenerateNonce(),
-            plainBytes);
-
+        var encryptedBytes = crypto.Encrypt(Crypto.GenerateNonce(), plainBytes);
         var decryptedBytes = crypto.Decrypt(encryptedBytes);
 
         Assert.NotEqual(plainBytes, encryptedBytes);

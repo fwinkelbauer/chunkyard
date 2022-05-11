@@ -12,13 +12,8 @@ public static class EnvironmentPromptTests
             EnvironmentPrompt.PasswordVariable,
             password);
 
-        Assert.Equal(
-            password,
-            prompt.NewPassword());
-
-        Assert.Equal(
-            password,
-            prompt.ExistingPassword());
+        Assert.Equal(password, prompt.NewPassword());
+        Assert.Equal(password, prompt.ExistingPassword());
     }
 
     [Fact]
