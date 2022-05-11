@@ -563,9 +563,10 @@ public static class SnapshotStoreTests
             DateTime.UtcNow);
 
         snapshotStore.RemoveSnapshot(snapshotId);
-        snapshotStore.GarbageCollect();
 
+        Assert.NotEmpty(snapshotStore.GarbageCollect());
         Assert.Empty(repository.Chunks.ListKeys());
+        Assert.Empty(repository.Snapshots.ListKeys());
     }
 
     [Fact]
@@ -678,23 +679,25 @@ public static class SnapshotStoreTests
         var snapshotStore = CreateSnapshotStore(repository);
         var otherRepository = CreateRepository();
 
-        for (var i = 0; i < 3; i++)
-        {
-            snapshotStore.StoreSnapshot(
-                CreateBlobSystem(CreateBlobs()),
-                Fuzzy.Default,
-                DateTime.UtcNow);
+        snapshotStore.StoreSnapshot(
+            CreateBlobSystem(CreateBlobs("some blob")),
+            Fuzzy.Default,
+            DateTime.UtcNow);
 
-            snapshotStore.CopyTo(otherRepository);
+        snapshotStore.StoreSnapshot(
+            CreateBlobSystem(CreateBlobs("some blob", "another blob")),
+            Fuzzy.Default,
+            DateTime.UtcNow);
 
-            Assert.Equal(
-                repository.Chunks.ListKeys(),
-                otherRepository.Chunks.ListKeys());
+        snapshotStore.CopyTo(otherRepository);
 
-            Assert.Equal(
-                repository.Snapshots.ListKeys(),
-                otherRepository.Snapshots.ListKeys());
-        }
+        Assert.Equal(
+            repository.Chunks.ListKeys(),
+            otherRepository.Chunks.ListKeys());
+
+        Assert.Equal(
+            repository.Snapshots.ListKeys(),
+            otherRepository.Snapshots.ListKeys());
     }
 
     [Fact]
