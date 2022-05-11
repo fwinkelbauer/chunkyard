@@ -222,12 +222,10 @@ internal static class Commands
         return new SnapshotStore(
             CreateRepository(repositoryPath),
             new FastCdc(),
-            new MultiPrompt(new IPrompt[]
-            {
+            new MultiPrompt(
                 new EnvironmentPrompt(),
                 new SecretToolPrompt(repositoryPath),
-                new ConsolePrompt()
-            }),
+                new ConsolePrompt()),
             new ConsoleProbe());
     }
 

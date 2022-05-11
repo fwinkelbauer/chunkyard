@@ -8,9 +8,9 @@ public class MultiPrompt : IPrompt
 {
     private readonly IPrompt[] _prompts;
 
-    public MultiPrompt(IEnumerable<IPrompt> prompts)
+    public MultiPrompt(params IPrompt[] prompts)
     {
-        _prompts = prompts.ToArray();
+        _prompts = prompts;
     }
 
     public string NewPassword()

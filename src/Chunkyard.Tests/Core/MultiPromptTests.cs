@@ -4,8 +4,8 @@ public static class MultiPromptTests
 {
     public static TheoryData<MultiPrompt> TheoryData => new()
     {
-        { new MultiPrompt(new[] { new DummyPrompt("") }) },
-        { new MultiPrompt(Array.Empty<IPrompt>()) }
+        { new MultiPrompt(new DummyPrompt("")) },
+        { new MultiPrompt() }
     };
 
     [Theory, MemberData(nameof(TheoryData))]
@@ -23,12 +23,9 @@ public static class MultiPromptTests
     {
         var expectedPassword = "some-password";
         var prompt = new MultiPrompt(
-            new[]
-            {
-                new DummyPrompt(""),
-                new DummyPrompt(expectedPassword),
-                new DummyPrompt("other-password")
-            });
+            new DummyPrompt(""),
+            new DummyPrompt(expectedPassword),
+            new DummyPrompt("other-password"));
 
         Assert.Equal(expectedPassword, prompt.NewPassword());
         Assert.Equal(expectedPassword, prompt.ExistingPassword());
