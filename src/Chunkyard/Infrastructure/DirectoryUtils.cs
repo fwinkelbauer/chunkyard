@@ -75,10 +75,9 @@ internal static class DirectoryUtils
         return parent;
     }
 
-    public static string CombinePathSafe(
-        string absoluteDirectory,
-        string relativePath)
+    public static string CombinePathSafe(string directory, string relativePath)
     {
+        var absoluteDirectory = Path.GetFullPath(directory);
         var absolutePath = Path.GetFullPath(
             Path.Combine(absoluteDirectory, relativePath));
 
