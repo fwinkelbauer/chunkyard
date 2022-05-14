@@ -2,10 +2,10 @@ namespace Chunkyard.Tests.Infrastructure;
 
 internal sealed class DisposableDirectory : IDisposable
 {
-    public DisposableDirectory()
+    public DisposableDirectory(string? directory = null)
     {
         Name = Path.Combine(
-            Path.GetTempPath(),
+            directory ?? Path.GetTempPath(),
             $"chunkyard-test-{Path.GetRandomFileName()}");
     }
 
@@ -17,5 +17,10 @@ internal sealed class DisposableDirectory : IDisposable
         {
             Directory.Delete(Name, true);
         }
+    }
+
+    public void Create()
+    {
+        Directory.CreateDirectory(Name);
     }
 }

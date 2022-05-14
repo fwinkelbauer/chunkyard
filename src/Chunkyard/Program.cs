@@ -6,7 +6,7 @@ public static class Program
     {
         try
         {
-            DotEnv.Populate();
+            DotEnv.Populate(Directory.GetCurrentDirectory());
 
             ProcessArguments(args);
         }
