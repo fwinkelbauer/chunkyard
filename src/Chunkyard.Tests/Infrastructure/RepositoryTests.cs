@@ -28,6 +28,9 @@ public static class RepositoryTests
 
         Repository_Throws_When_Writing_To_Same_Key<ArgumentException>(
             repository.Chunks);
+
+        Repository_Throws_When_Writing_To_Same_Key<ArgumentException>(
+            repository.Snapshots);
     }
 
     [Fact]
@@ -38,6 +41,9 @@ public static class RepositoryTests
 
         Repository_Throws_When_Writing_To_Same_Key<IOException>(
             repository.Chunks);
+
+        Repository_Throws_When_Writing_To_Same_Key<IOException>(
+            repository.Snapshots);
     }
 
     [Fact]
@@ -112,6 +118,19 @@ public static class RepositoryTests
         where TException : Exception
     {
         var key = "aa";
+        var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+
+        repository.StoreValue(key, bytes);
+
+        Assert.Throws<TException>(
+            () => repository.StoreValue(key, bytes));
+    }
+
+    private static void Repository_Throws_When_Writing_To_Same_Key<TException>(
+        IRepository<int> repository)
+        where TException : Exception
+    {
+        var key = 15;
         var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
         repository.StoreValue(key, bytes);
