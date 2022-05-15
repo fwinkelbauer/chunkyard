@@ -26,6 +26,7 @@ public static class DotEnvTests
             Path.Combine(directory.Name, DotEnv.FileName),
             new[]
             {
+                "# just a comment",
                 $"{firstVariable}=not-relevant-text",
                 $"{secondVariable}={secondText}"
             });
