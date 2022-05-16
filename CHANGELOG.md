@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 16.3.0 - 2022-05-16
+
 ### Added
 
 - Debugging symbols to the Chunkyard binaries
