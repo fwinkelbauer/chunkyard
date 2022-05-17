@@ -15,4 +15,4 @@ global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
-[assembly: CLSCompliant(true)]
+[assembly: CLSCompliant(false)]
