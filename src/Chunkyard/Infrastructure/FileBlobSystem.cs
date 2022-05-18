@@ -73,10 +73,7 @@ public class FileBlobSystem : IBlobSystem
 
         DirectoryUtils.EnsureParent(file);
 
-        return new WriteStream(
-            file,
-            mode,
-            blob);
+        return new WriteStream(file, mode, blob);
     }
 
     private Blob ToBlob(string file)
