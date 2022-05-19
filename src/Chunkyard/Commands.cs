@@ -88,7 +88,17 @@ internal static class Commands
     public static void MirrorSnapshot(MirrorOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
-        var blobSystem = new FileBlobSystem(o.Files);
+
+        var blobReferences = snapshotStore.FilterSnapshot(
+            o.SnapshotId,
+            new Fuzzy(o.IncludePatterns));
+
+        var paths = blobReferences
+            .Select(br => DirectoryUtils.GetRootParent(br.Blob.Name))
+            .Distinct()
+            .Select(file => Path.Combine(o.Directory, file));
+
+        var blobSystem = new FileBlobSystem(paths);
         var excludeFuzzy = new Fuzzy(o.ExcludePatterns);
 
         if (o.Preview)

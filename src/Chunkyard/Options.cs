@@ -223,29 +223,34 @@ public class MirrorOptions
 {
     public MirrorOptions(
         string repository,
-        IEnumerable<string> files,
+        string directory,
         IEnumerable<string> excludePatterns,
         int snapshotId,
+        IEnumerable<string> includePatterns,
         bool preview)
     {
         Repository = repository;
-        Files = files;
+        Directory = directory;
         ExcludePatterns = excludePatterns;
         SnapshotId = snapshotId;
         Preview = preview;
+        IncludePatterns = includePatterns;
     }
 
     [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option('f', "files", Required = true, HelpText = "The files and directories to include.")]
-    public IEnumerable<string> Files { get; }
+    [Option('d', "directory", Required = false, HelpText = "The directory to mirror into.", Default = ".")]
+    public string Directory { get; }
 
     [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude.")]
     public IEnumerable<string> ExcludePatterns { get; }
 
     [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
     public int SnapshotId { get; }
+
+    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
+    public IEnumerable<string> IncludePatterns { get; }
 
     [Option("preview", Required = false, HelpText = "Show only a preview.")]
     public bool Preview { get; }

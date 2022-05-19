@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The `mirror` parameters by inferring restore directories using snapshot data
+
 ## 16.3.0 - 2022-05-16
 
 ### Added

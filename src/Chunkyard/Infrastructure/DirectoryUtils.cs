@@ -19,6 +19,15 @@ internal static class DirectoryUtils
         return parent;
     }
 
+    public static string GetRootParent(string path)
+    {
+        var parent = Path.GetDirectoryName(path);
+
+        return string.IsNullOrEmpty(parent)
+            ? path
+            : GetRootParent(parent);
+    }
+
     public static void EnsureParent(string path)
     {
         var parent = Path.GetDirectoryName(path);
