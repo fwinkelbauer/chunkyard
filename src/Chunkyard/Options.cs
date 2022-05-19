@@ -44,7 +44,7 @@ public class CheckOptions
     [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
     public int SnapshotId { get; }
 
-    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include.")]
+    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
     public IEnumerable<string> IncludePatterns { get; }
 
     [Option("shallow", Required = false, HelpText = "Only check if chunks exist.", Default = false)]
@@ -87,7 +87,7 @@ public class StoreOptions
     [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option('f', "files", Required = true, HelpText = "The files and directories to include.")]
+    [Option('f', "files", Required = true, HelpText = "The files and directories to store.")]
     public IEnumerable<string> Files { get; }
 
     [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude.")]
@@ -123,7 +123,7 @@ public class DiffOptions
     [Option('s', "second", Required = false, HelpText = "The second snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
     public int SecondSnapshotId { get; }
 
-    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include.")]
+    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
     public IEnumerable<string> IncludePatterns { get; }
 
     [Option("chunks-only", Required = false, HelpText = "Show chunk IDs.", Default = false)]
@@ -214,7 +214,7 @@ public class RestoreOptions
     [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
     public int SnapshotId { get; }
 
-    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include.")]
+    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
     public IEnumerable<string> IncludePatterns { get; }
 }
 
@@ -272,7 +272,7 @@ public class ShowOptions
     [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
     public int SnapshotId { get; }
 
-    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for files to include.")]
+    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
     public IEnumerable<string> IncludePatterns { get; }
 
     [Option("chunks-only", Required = false, HelpText = "Show chunk IDs.", Default = false)]
