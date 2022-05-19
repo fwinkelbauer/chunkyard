@@ -103,7 +103,7 @@ internal static class DirectoryUtils
         }
         else
         {
-            throw new FileNotFoundException("Could not find path", path);
+            return Array.Empty<string>();
         }
     }
 
