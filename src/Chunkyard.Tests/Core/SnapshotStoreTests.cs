@@ -772,8 +772,8 @@ public static class SnapshotStoreTests
             restoredBlobs);
 
         Assert.Equal(
-            expectedBlobs.Select(b => b.Name),
-            blobSystem.ListBlobs(Fuzzy.Default).Select(b => b.Name));
+            expectedBlobs,
+            blobSystem.ListBlobs(Fuzzy.Default));
     }
 
     [Fact]
