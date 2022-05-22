@@ -401,7 +401,7 @@ public static class SnapshotStoreTests
 
         var blobSystem = CreateBlobSystem();
 
-        var restoredBlobs = snapshotStore.RestoreSnapshot(
+        snapshotStore.RestoreSnapshot(
             blobSystem,
             snapshotId,
             Fuzzy.Default);
@@ -409,7 +409,7 @@ public static class SnapshotStoreTests
         var blobReferences = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences;
 
-        Assert.Equal(blobs, restoredBlobs);
+        Assert.Equal(blobs, blobSystem.ListBlobs(Fuzzy.Default));
         Assert.NotEmpty(blobReferences);
 
         foreach (var blobReference in blobReferences)
@@ -460,10 +460,12 @@ public static class SnapshotStoreTests
 
         var blobSystem = CreateBlobSystem();
 
-        var restoredBlobs = snapshotStore.RestoreSnapshot(
+        snapshotStore.RestoreSnapshot(
             blobSystem,
             snapshotId,
             Fuzzy.Default);
+
+        var restoredBlobs = blobSystem.ListBlobs(Fuzzy.Default);
 
         Assert.Equal(blobs, restoredBlobs);
 
@@ -762,18 +764,12 @@ public static class SnapshotStoreTests
             writeStream.Write(new byte[] { 0x10, 0x11 });
         }
 
-        var restoredBlobs = snapshotStore.MirrorSnapshot(
+        snapshotStore.MirrorSnapshot(
             blobSystem,
             Fuzzy.Default,
             snapshotId);
 
-        Assert.Equal(
-            expectedBlobs,
-            restoredBlobs);
-
-        Assert.Equal(
-            expectedBlobs,
-            blobSystem.ListBlobs(Fuzzy.Default));
+        Assert.Equal(expectedBlobs, blobSystem.ListBlobs(Fuzzy.Default));
     }
 
     [Fact]

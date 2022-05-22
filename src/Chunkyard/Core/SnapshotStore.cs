@@ -116,21 +116,18 @@ public class SnapshotStore
             ChunkIdValid);
     }
 
-    public IReadOnlyCollection<Blob> RestoreSnapshot(
+    public void RestoreSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,
         Fuzzy includeFuzzy)
     {
-        var restoredBlob = FilterSnapshot(snapshotId, includeFuzzy)
+        _ = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
             .Select(br => RestoreBlob(blobSystem.NewWrite, br))
-            .OrderBy(blob => blob.Name)
             .ToArray();
 
         _probe.RestoredSnapshot(
             ResolveSnapshotId(snapshotId));
-
-        return restoredBlob;
     }
 
     public DiffSet MirrorSnapshotPreview(
@@ -149,7 +146,7 @@ public class SnapshotStore
             blob => blob.Name);
     }
 
-    public IReadOnlyCollection<Blob> MirrorSnapshot(
+    public void MirrorSnapshot(
         IBlobSystem blobSystem,
         Fuzzy excludeFuzzy,
         int snapshotId)
@@ -161,7 +158,6 @@ public class SnapshotStore
         var mirroredBlobs = snapshot.BlobReferences
             .AsParallel()
             .Select(br => MirrorBlob(blobSystem, br))
-            .OrderBy(blob => blob.Name)
             .ToArray();
 
         _probe.RestoredSnapshot(
@@ -176,8 +172,6 @@ public class SnapshotStore
             blobSystem.RemoveBlob(blobName);
             _probe.RemovedBlob(blobName);
         }
-
-        return mirroredBlobs;
     }
 
     public Snapshot GetSnapshot(int snapshotId)
@@ -232,7 +226,7 @@ public class SnapshotStore
         }
     }
 
-    public IReadOnlyCollection<int> KeepSnapshots(int latestCount)
+    public void KeepSnapshots(int latestCount)
     {
         var snapshotIds = ListSnapshotIds();
         var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
@@ -243,8 +237,6 @@ public class SnapshotStore
         {
             RemoveSnapshot(snapshotId);
         }
-
-        return snapshotIdsToRemove;
     }
 
     public void RestoreChunks(
