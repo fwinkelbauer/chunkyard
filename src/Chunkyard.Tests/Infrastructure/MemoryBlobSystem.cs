@@ -36,6 +36,7 @@ internal class MemoryBlobSystem : IBlobSystem
         {
             return _blobs.Values
                 .Where(b => !excludeFuzzy.IsExcludingMatch(b.Name))
+                .OrderBy(b => b.Name)
                 .ToArray();
         }
     }

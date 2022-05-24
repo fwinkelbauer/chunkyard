@@ -33,8 +33,9 @@ public class FileBlobSystem : IBlobSystem
     {
         return _paths
             .SelectMany(DirectoryUtils.ListFiles)
-            .Where(f => !excludeFuzzy.IsExcludingMatch(f))
+            .Where(file => !excludeFuzzy.IsExcludingMatch(file))
             .Distinct()
+            .OrderBy(file => file)
             .Select(ToBlob)
             .ToArray();
     }
