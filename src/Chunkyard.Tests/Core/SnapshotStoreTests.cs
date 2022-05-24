@@ -388,7 +388,6 @@ public static class SnapshotStoreTests
     {
         var fastCdc = new FastCdc(64, 256, 1024);
         var snapshotStore = Some.SnapshotStore(fastCdc: fastCdc);
-
         var blobs = Some.Blobs();
 
         // Create data that is large enough to create at least two chunks
@@ -429,7 +428,6 @@ public static class SnapshotStoreTests
     public static void RestoreSnapshot_Does_Not_Overwrite_Blob()
     {
         var snapshotStore = Some.SnapshotStore();
-
         var blobSystem = Some.BlobSystem(Some.Blobs());
 
         var snapshotId = snapshotStore.StoreSnapshot(
@@ -773,9 +771,7 @@ public static class SnapshotStoreTests
     public static void StoreSnapshotPreview_Shows_Preview()
     {
         var snapshotStore = Some.SnapshotStore();
-
-        var initialBlobSystem = Some.BlobSystem(
-            Some.Blobs("some blob"));
+        var initialBlobSystem = Some.BlobSystem(Some.Blobs("some blob"));
 
         var initialDiff = snapshotStore.StoreSnapshotPreview(
             initialBlobSystem,
