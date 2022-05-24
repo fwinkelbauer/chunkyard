@@ -392,7 +392,7 @@ public static class SnapshotStoreTests
         var blobs = Some.Blobs();
 
         // Create data that is large enough to create at least two chunks
-        var expectedBytes = GenerateRandomNumber(fastCdc.MaxSize + 1);
+        var expectedBytes = Some.RandomNumber(fastCdc.MaxSize + 1);
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(blobs, _ => expectedBytes),
@@ -831,15 +831,6 @@ public static class SnapshotStoreTests
             actualDiff);
     }
 
-    private static byte[] GenerateRandomNumber(int length)
-    {
-        using var randomGenerator = RandomNumberGenerator.Create();
-        var randomNumber = new byte[length];
-        randomGenerator.GetBytes(randomNumber);
-
-        return randomNumber;
-    }
-
     private static void Remove<T>(
         IRepository<T> repository,
         IEnumerable<T> keys)
@@ -858,13 +849,8 @@ public static class SnapshotStoreTests
         {
             var value = repository.RetrieveValue(key);
 
-            for (var i = 0; i < value.Length; i++)
-            {
-                value[i]++;
-            }
-
             repository.RemoveValue(key);
-            repository.StoreValue(key, value);
+            repository.StoreValue(key, value.Concat(value).ToArray());
         }
     }
 
