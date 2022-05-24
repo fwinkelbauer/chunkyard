@@ -749,7 +749,7 @@ public static class SnapshotStoreTests
             Fuzzy.Default,
             Some.UtcDate);
 
-        var blobToDelete = new Blob("blob to delete", Some.UtcDate);
+        var blobToDelete = Some.Blob("blob to delete");
 
         using (var writeStream = blobSystem.NewWrite(blobToDelete))
         {

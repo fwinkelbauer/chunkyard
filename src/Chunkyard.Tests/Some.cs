@@ -4,7 +4,10 @@ internal static class Some
 {
     public static readonly DateTime UtcDate = DateTime.UtcNow;
 
-    public static readonly Blob Blob = new Blob("some blob", UtcDate);
+    public static Blob Blob(string blobName)
+    {
+        return new Blob(blobName, UtcDate);
+    }
 
     public static Blob[] Blobs(params string[] blobNames)
     {
@@ -13,7 +16,7 @@ internal static class Some
             : new[] { "blob 1", "blob-2", "blob3" };
 
         return blobNames
-            .Select(b => new Blob(b, UtcDate))
+            .Select(Blob)
             .ToArray();
     }
 
