@@ -26,7 +26,7 @@ public static class BlobSystemTests
         var invalidBlobName = "../some-file";
         var invalidBlob = new Blob(
             invalidBlobName,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         Assert.Throws<ArgumentException>(
             () => blobSystem.BlobExists(invalidBlobName));
@@ -52,7 +52,7 @@ public static class BlobSystemTests
     {
         using var directory = new DisposableDirectory();
         var blobSystem = new FileBlobSystem(new[] { directory.Name });
-        var blob = new Blob("some-blob", DateTime.UtcNow);
+        var blob = Some.Blob;
 
         using (var writeStream = blobSystem.NewWrite(blob))
         {
@@ -78,7 +78,7 @@ public static class BlobSystemTests
     private static void BlobSystem_Can_Read_Write(
         IBlobSystem blobSystem)
     {
-        var blob = new Blob("some-blob", DateTime.UtcNow);
+        var blob = Some.Blob;
         var expectedBytes = new byte[] { 0x12, 0x34 };
 
         Assert.False(blobSystem.BlobExists(blob.Name));

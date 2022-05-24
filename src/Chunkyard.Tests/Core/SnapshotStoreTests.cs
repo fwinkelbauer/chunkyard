@@ -5,13 +5,13 @@ public static class SnapshotStoreTests
     [Fact]
     public static void StoreSnapshot_Creates_Snapshot()
     {
-        var snapshotStore = CreateSnapshotStore();
-        var expectedBlobs = CreateBlobs("some blob");
+        var snapshotStore = Some.SnapshotStore();
+        var expectedBlobs = Some.Blobs();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(expectedBlobs),
+            Some.BlobSystem(expectedBlobs),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var snapshot = snapshotStore.GetSnapshot(snapshotId);
 
@@ -27,13 +27,13 @@ public static class SnapshotStoreTests
     [Fact]
     public static void StoreSnapshot_Fuzzy_Excludes_Blobs()
     {
-        var snapshotStore = CreateSnapshotStore();
-        var blobs = CreateBlobs("some blob", "other blob");
+        var snapshotStore = Some.SnapshotStore();
+        var blobs = Some.Blobs("some blob", "other blob");
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(blobs),
+            Some.BlobSystem(blobs),
             new Fuzzy(new[] { "other" }),
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var snapshot = snapshotStore.GetSnapshot(snapshotId);
 
@@ -43,21 +43,23 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void StoreSnapshot_Deduplicates_Blobs_Using_Same_Nonce()
+    public static void StoreSnapshot_Deduplicates_Blobs_Using_Same_Nonce_When_LastWriteTimeUtc_Differs()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
+        var blobs = Some.Blobs();
 
         var snapshotId1 = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(
-                CreateBlobs("some blob")),
+            Some.BlobSystem(blobs),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var snapshotId2 = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(
-                CreateBlobs("some blob")),
+            Some.BlobSystem(
+                blobs.Select(b => new Blob(
+                    b.Name,
+                    b.LastWriteTimeUtc.AddHours(1)))),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var blobReferences1 = snapshotStore.GetSnapshot(snapshotId1)
             .BlobReferences;
@@ -85,26 +87,26 @@ public static class SnapshotStoreTests
     [Fact]
     public static void StoreSnapshot_Does_Not_Read_Blob_With_Unchanged_LastWriteTimeUtc()
     {
-        var snapshotStore = CreateSnapshotStore();
-        var blobs = CreateBlobs();
+        var snapshotStore = Some.SnapshotStore();
+        var blobs = Some.Blobs();
 
-        var blobSystem1 = CreateBlobSystem(
+        var blobSystem1 = Some.BlobSystem(
             blobs,
             blobName => new byte[] { 0x11, 0x11 });
 
         var snapshotId1 = snapshotStore.StoreSnapshot(
             blobSystem1,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
-        var blobSystem2 = CreateBlobSystem(
+        var blobSystem2 = Some.BlobSystem(
             blobs,
             blobName => new byte[] { 0x22, 0x22 });
 
         var snapshotId2 = snapshotStore.StoreSnapshot(
             blobSystem2,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
         var snapshot2 = snapshotStore.GetSnapshot(snapshotId2);
@@ -117,12 +119,12 @@ public static class SnapshotStoreTests
     [Fact]
     public static void StoreSnapshot_Can_Create_Snapshot_Without_Any_Data()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(),
+            Some.BlobSystem(),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var snapshot = snapshotStore.GetSnapshot(snapshotId);
 
@@ -130,21 +132,19 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void StoreSnapshot_Stores_Empty_Blob_Without_Chunks()
+    public static void StoreSnapshot_Stores_Blob_With_No_Chunks()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(
-                CreateBlobs("empty file"),
+            Some.BlobSystem(
+                Some.Blobs(),
                 blobName => Array.Empty<byte>()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
-        var chunkIds = snapshotStore.GetSnapshot(snapshotId)
-            .BlobReferences
-            .First()
-            .ChunkIds;
+        var chunkIds = snapshotStore.GetSnapshot(snapshotId).BlobReferences
+            .SelectMany(br => br.ChunkIds);
 
         Assert.Empty(chunkIds);
     }
@@ -152,16 +152,16 @@ public static class SnapshotStoreTests
     [Fact]
     public static void New_SnapshotStore_Can_Read_Existing_Snapshot()
     {
-        var repository = CreateRepository();
-        var expectedBlobs = CreateBlobs("some blob");
+        var repository = Some.Repository();
+        var expectedBlobs = Some.Blobs();
 
-        var snapshotId = CreateSnapshotStore(repository)
+        var snapshotId = Some.SnapshotStore(repository)
             .StoreSnapshot(
-                CreateBlobSystem(expectedBlobs),
+                Some.BlobSystem(expectedBlobs),
                 Fuzzy.Default,
-                DateTime.UtcNow);
+                Some.UtcDate);
 
-        var actualBlobs = CreateSnapshotStore(repository)
+        var actualBlobs = Some.SnapshotStore(repository)
             .GetSnapshot(snapshotId).BlobReferences
             .Select(br => br.Blob);
 
@@ -173,12 +173,12 @@ public static class SnapshotStoreTests
     [Fact]
     public static void GetSnapshot_Accepts_Negative_SnapshotIds()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         Assert.Equal(
             snapshotStore.GetSnapshot(snapshotId),
@@ -188,12 +188,12 @@ public static class SnapshotStoreTests
     [Fact]
     public static void GetSnapshot_Throws_If_Version_Does_Not_Exist()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.GetSnapshot(snapshotId + 1));
@@ -206,23 +206,23 @@ public static class SnapshotStoreTests
     [Fact]
     public static void GetSnapshot_Accepts_Negative_SnapshotIds_With_Gaps()
     {
-        var snapshotStore = CreateSnapshotStore();
-        var blobSystem = CreateBlobSystem(CreateBlobs());
+        var snapshotStore = Some.SnapshotStore();
+        var blobSystem = Some.BlobSystem(Some.Blobs());
 
         var snapshotId = snapshotStore.StoreSnapshot(
             blobSystem,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var snapshotIdToRemove = snapshotStore.StoreSnapshot(
             blobSystem,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         snapshotStore.StoreSnapshot(
             blobSystem,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         snapshotStore.RemoveSnapshot(snapshotIdToRemove);
 
@@ -235,7 +235,7 @@ public static class SnapshotStoreTests
     [Fact]
     public static void GetSnapshot_Throws_On_Empty_SnapshotStore()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.GetSnapshot(
@@ -245,12 +245,12 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CheckSnapshot_Detects_Valid_Snapshot()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         Assert.True(
             snapshotStore.CheckSnapshotExists(
@@ -266,13 +266,13 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CheckSnapshot_Throws_If_Snapshot_Missing()
     {
-        var repository = CreateRepository();
-        var snapshotStore = CreateSnapshotStore(repository);
+        var repository = Some.Repository();
+        var snapshotStore = Some.SnapshotStore(repository);
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         Remove(repository.Chunks, repository.Chunks.ListKeys());
 
@@ -290,13 +290,13 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CheckSnapshot_Throws_If_Snapshot_Invalid()
     {
-        var repository = CreateRepository();
-        var snapshotStore = CreateSnapshotStore(repository);
+        var repository = Some.Repository();
+        var snapshotStore = Some.SnapshotStore(repository);
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         Invalidate(repository.Chunks, repository.Chunks.ListKeys());
 
@@ -314,13 +314,13 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CheckSnapshot_Detects_Missing_Blob()
     {
-        var repository = CreateRepository();
-        var snapshotStore = CreateSnapshotStore(repository);
+        var repository = Some.Repository();
+        var snapshotStore = Some.SnapshotStore(repository);
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var chunkIds = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
@@ -342,13 +342,13 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CheckSnapshot_Detects_Invalid_Blob()
     {
-        var repository = CreateRepository();
-        var snapshotStore = CreateSnapshotStore(repository);
+        var repository = Some.Repository();
+        var snapshotStore = Some.SnapshotStore(repository);
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var chunkIds = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
@@ -370,7 +370,7 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CheckSnapshot_Throws_On_Empty_SnapshotStore()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
@@ -387,19 +387,19 @@ public static class SnapshotStoreTests
     public static void RestoreSnapshot_Writes_Ordered_Blob_Chunks_To_Stream()
     {
         var fastCdc = new FastCdc(64, 256, 1024);
-        var snapshotStore = CreateSnapshotStore(fastCdc: fastCdc);
+        var snapshotStore = Some.SnapshotStore(fastCdc: fastCdc);
 
-        var blobs = CreateBlobs("some blob");
+        var blobs = Some.Blobs();
 
         // Create data that is large enough to create at least two chunks
         var expectedBytes = GenerateRandomNumber(fastCdc.MaxSize + 1);
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(blobs, _ => expectedBytes),
+            Some.BlobSystem(blobs, _ => expectedBytes),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
-        var blobSystem = CreateBlobSystem();
+        var blobSystem = Some.BlobSystem();
 
         snapshotStore.RestoreSnapshot(
             blobSystem,
@@ -428,15 +428,14 @@ public static class SnapshotStoreTests
     [Fact]
     public static void RestoreSnapshot_Does_Not_Overwrite_Blob()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
-        var blobSystem = CreateBlobSystem(
-            CreateBlobs("some blob"));
+        var blobSystem = Some.BlobSystem(Some.Blobs());
 
         var snapshotId = snapshotStore.StoreSnapshot(
             blobSystem,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         Assert.Throws<AggregateException>(
             () => snapshotStore.RestoreSnapshot(
@@ -448,17 +447,17 @@ public static class SnapshotStoreTests
     [Fact]
     public static void RestoreSnapshot_Can_Write_Empty_Blobs()
     {
-        var snapshotStore = CreateSnapshotStore();
-        var blobs = CreateBlobs("some empty blob");
+        var snapshotStore = Some.SnapshotStore();
+        var blobs = Some.Blobs();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(
+            Some.BlobSystem(
                 blobs,
                 _ => Array.Empty<byte>()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
-        var blobSystem = CreateBlobSystem();
+        var blobSystem = Some.BlobSystem();
 
         snapshotStore.RestoreSnapshot(
             blobSystem,
@@ -480,11 +479,11 @@ public static class SnapshotStoreTests
     [Fact]
     public static void RestoreSnapshot_Throws_On_Empty_SnapshotStore()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.RestoreSnapshot(
-                CreateBlobSystem(),
+                Some.BlobSystem(),
                 SnapshotStore.LatestSnapshotId,
                 Fuzzy.Default));
     }
@@ -492,14 +491,14 @@ public static class SnapshotStoreTests
     [Fact]
     public static void RestoreSnapshot_Throws_Given_Wrong_Key()
     {
-        var snapshotId = CreateSnapshotStore(password: "a").StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+        var snapshotId = Some.SnapshotStore(password: "a").StoreSnapshot(
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         Assert.Throws<ChunkyardException>(
-            () => CreateSnapshotStore(password: "b").RestoreSnapshot(
-                CreateBlobSystem(),
+            () => Some.SnapshotStore(password: "b").RestoreSnapshot(
+                Some.BlobSystem(),
                 snapshotId,
                 Fuzzy.Default));
     }
@@ -507,13 +506,13 @@ public static class SnapshotStoreTests
     [Fact]
     public static void FilterSnapshot_Lists_Blobs()
     {
-        var snapshotStore = CreateSnapshotStore();
-        var expectedBlobs = CreateBlobs();
+        var snapshotStore = Some.SnapshotStore();
+        var expectedBlobs = Some.Blobs();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(expectedBlobs),
+            Some.BlobSystem(expectedBlobs),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var blobReferences = snapshotStore.FilterSnapshot(
             snapshotId,
@@ -527,7 +526,7 @@ public static class SnapshotStoreTests
     [Fact]
     public static void FilterSnapshot_Throws_On_Empty_SnapshotStore()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.FilterSnapshot(
@@ -538,12 +537,12 @@ public static class SnapshotStoreTests
     [Fact]
     public static void GarbageCollect_Keeps_Used_Ids()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         Assert.Empty(snapshotStore.GarbageCollect());
 
@@ -556,13 +555,13 @@ public static class SnapshotStoreTests
     [Fact]
     public static void GarbageCollect_Removes_Unused_Ids()
     {
-        var repository = CreateRepository();
-        var snapshotStore = CreateSnapshotStore(repository);
+        var repository = Some.Repository();
+        var snapshotStore = Some.SnapshotStore(repository);
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         snapshotStore.RemoveSnapshot(snapshotId);
 
@@ -574,18 +573,18 @@ public static class SnapshotStoreTests
     [Fact]
     public static void RemoveSnapshot_Removes_Existing_Snapshots()
     {
-        var snapshotStore = CreateSnapshotStore();
-        var blobSystem = CreateBlobSystem(CreateBlobs());
+        var snapshotStore = Some.SnapshotStore();
+        var blobSystem = Some.BlobSystem(Some.Blobs());
 
         var snapshotId = snapshotStore.StoreSnapshot(
             blobSystem,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         snapshotStore.StoreSnapshot(
             blobSystem,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         snapshotStore.RemoveSnapshot(snapshotId);
         snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
@@ -596,7 +595,7 @@ public static class SnapshotStoreTests
     [Fact]
     public static void RemoveSnapshot_Throws_On_Empty_SnapshotStore()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.RemoveSnapshot(
@@ -606,18 +605,18 @@ public static class SnapshotStoreTests
     [Fact]
     public static void KeepSnapshots_Removes_Previous_Snapshots()
     {
-        var snapshotStore = CreateSnapshotStore();
-        var blobSystem = CreateBlobSystem(CreateBlobs());
+        var snapshotStore = Some.SnapshotStore();
+        var blobSystem = Some.BlobSystem(Some.Blobs());
 
         snapshotStore.StoreSnapshot(
             blobSystem,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var snapshotId = snapshotStore.StoreSnapshot(
             blobSystem,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         snapshotStore.KeepSnapshots(1);
 
@@ -629,12 +628,12 @@ public static class SnapshotStoreTests
     [Fact]
     public static void KeepSnapshots_Does_Nothing_If_Equals_Or_Greater_Than_Current()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         snapshotStore.KeepSnapshots(1);
         snapshotStore.KeepSnapshots(2);
@@ -647,12 +646,12 @@ public static class SnapshotStoreTests
     [Fact]
     public static void KeepSnapshots_Zero_Input_Empties_Store()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         snapshotStore.KeepSnapshots(0);
 
@@ -662,12 +661,12 @@ public static class SnapshotStoreTests
     [Fact]
     public static void KeepSnapshots_Negative_Input_Empties_Store()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         snapshotStore.KeepSnapshots(-1);
 
@@ -677,19 +676,19 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CopyTo_Copies_Newer_Snapshots()
     {
-        var repository = CreateRepository();
-        var snapshotStore = CreateSnapshotStore(repository);
-        var otherRepository = CreateRepository();
+        var repository = Some.Repository();
+        var snapshotStore = Some.SnapshotStore(repository);
+        var otherRepository = Some.Repository();
 
         snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs("some blob")),
+            Some.BlobSystem(Some.Blobs("some blob")),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs("some blob", "another blob")),
+            Some.BlobSystem(Some.Blobs("some blob", "other blob")),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         snapshotStore.CopyTo(otherRepository);
 
@@ -705,61 +704,59 @@ public static class SnapshotStoreTests
     [Fact]
     public static void CopyTo_Throws_On_Invalid_Chunk()
     {
-        var repository = CreateRepository();
-        var snapshotStore = CreateSnapshotStore(repository);
+        var repository = Some.Repository();
+        var snapshotStore = Some.SnapshotStore(repository);
 
         snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         Invalidate(repository.Chunks, repository.Chunks.ListKeys());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(
-                CreateRepository()));
+                Some.Repository()));
     }
 
     [Fact]
     public static void CopyTo_Throws_On_Invalid_References()
     {
-        var repository = CreateRepository();
-        var snapshotStore = CreateSnapshotStore(repository);
+        var repository = Some.Repository();
+        var snapshotStore = Some.SnapshotStore(repository);
 
         snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs()),
+            Some.BlobSystem(Some.Blobs()),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         Invalidate(repository.Snapshots, repository.Snapshots.ListKeys());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(
-                CreateRepository()));
+                Some.Repository()));
     }
 
     [Fact]
     public static void Mirror_Restores_Blobs_And_Removes_Blobs_Not_In_Snapshot()
     {
-        var snapshotStore = CreateSnapshotStore();
-        var expectedBlobs = CreateBlobs("some blob", "some other blob");
-
-        var blobSystem = CreateBlobSystem(expectedBlobs);
+        var snapshotStore = Some.SnapshotStore();
+        var expectedBlobs = Some.Blobs();
+        var blobSystem = Some.BlobSystem(expectedBlobs);
 
         var snapshotId = snapshotStore.StoreSnapshot(
             blobSystem,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
-        var blobToDelete = new Blob("blob to delete", DateTime.UtcNow);
-        var otherBlob = new Blob("some other blob", DateTime.UtcNow);
+        var blobToDelete = new Blob("blob to delete", Some.UtcDate);
 
         using (var writeStream = blobSystem.NewWrite(blobToDelete))
         {
             writeStream.Write(new byte[] { 0x10, 0x11 });
         }
 
-        using (var writeStream = blobSystem.OpenWrite(otherBlob))
+        using (var writeStream = blobSystem.OpenWrite(expectedBlobs[1]))
         {
             writeStream.Write(new byte[] { 0x10, 0x11 });
         }
@@ -775,10 +772,10 @@ public static class SnapshotStoreTests
     [Fact]
     public static void StoreSnapshotPreview_Shows_Preview()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
-        var initialBlobSystem = CreateBlobSystem(
-            CreateBlobs("some blob"));
+        var initialBlobSystem = Some.BlobSystem(
+            Some.Blobs("some blob"));
 
         var initialDiff = snapshotStore.StoreSnapshotPreview(
             initialBlobSystem,
@@ -787,10 +784,10 @@ public static class SnapshotStoreTests
         snapshotStore.StoreSnapshot(
             initialBlobSystem,
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
-        var changedBlobSystem = CreateBlobSystem(
-            CreateBlobs("other blob"));
+        var changedBlobSystem = Some.BlobSystem(
+            Some.Blobs("other blob"));
 
         var changedDiff = snapshotStore.StoreSnapshotPreview(
             changedBlobSystem,
@@ -814,15 +811,15 @@ public static class SnapshotStoreTests
     [Fact]
     public static void MirrorSnapshotPreview_Shows_Preview()
     {
-        var snapshotStore = CreateSnapshotStore();
+        var snapshotStore = Some.SnapshotStore();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            CreateBlobSystem(CreateBlobs("some blob")),
+            Some.BlobSystem(Some.Blobs("some blob")),
             Fuzzy.Default,
-            DateTime.UtcNow);
+            Some.UtcDate);
 
         var actualDiff = snapshotStore.MirrorSnapshotPreview(
-            CreateBlobSystem(CreateBlobs("other blob")),
+            Some.BlobSystem(Some.Blobs("other blob")),
             Fuzzy.Default,
             snapshotId);
 
@@ -869,49 +866,6 @@ public static class SnapshotStoreTests
             repository.RemoveValue(key);
             repository.StoreValue(key, value);
         }
-    }
-
-    private static SnapshotStore CreateSnapshotStore(
-        IRepository? repository = null,
-        FastCdc? fastCdc = null,
-        string password = "secret")
-    {
-        return new SnapshotStore(
-            repository ?? CreateRepository(),
-            fastCdc ?? new FastCdc(),
-            new DummyPrompt(password),
-            new DummyProbe());
-    }
-
-    private static IRepository CreateRepository()
-    {
-        return new MemoryRepository();
-    }
-
-    private static Blob[] CreateBlobs(params string[] blobNames)
-    {
-        return (blobNames.Any() ? blobNames : new[] { "blob1", "blob2" })
-            .Select(b => new Blob(b, DateTime.UtcNow))
-            .ToArray();
-    }
-
-    private static IBlobSystem CreateBlobSystem(
-        IEnumerable<Blob>? blobs = null,
-        Func<string, byte[]>? generate = null)
-    {
-        blobs ??= Array.Empty<Blob>();
-        generate ??= (blobName => Encoding.UTF8.GetBytes(blobName));
-
-        var blobSystem = new MemoryBlobSystem();
-
-        foreach (var blob in blobs)
-        {
-            using var stream = blobSystem.NewWrite(blob);
-
-            stream.Write(generate(blob.Name));
-        }
-
-        return blobSystem;
     }
 
     private static byte[] ToBytes(Stream stream)
