@@ -3,7 +3,7 @@ namespace Chunkyard.Tests.Core;
 public static class SnapshotStoreTests
 {
     [Fact]
-    public static void StoreSnapshot_Creates_Snapshot()
+    public static void StoreSnapshot_Stores_Snapshot()
     {
         var snapshotStore = Some.SnapshotStore();
         var expectedBlobs = Some.Blobs();
@@ -117,7 +117,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void StoreSnapshot_Can_Create_Snapshot_Without_Any_Data()
+    public static void StoreSnapshot_Stores_Snapshot_Without_Any_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
 
@@ -132,7 +132,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void StoreSnapshot_Stores_Blob_With_No_Chunks()
+    public static void StoreSnapshot_Stores_Empty_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
 
@@ -233,7 +233,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void GetSnapshot_Throws_On_Empty_SnapshotStore()
+    public static void GetSnapshot_Throws_When_Empty()
     {
         var snapshotStore = Some.SnapshotStore();
 
@@ -368,7 +368,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void CheckSnapshot_Throws_On_Empty_SnapshotStore()
+    public static void CheckSnapshot_Throws_When_Empty()
     {
         var snapshotStore = Some.SnapshotStore();
 
@@ -475,7 +475,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void RestoreSnapshot_Throws_On_Empty_SnapshotStore()
+    public static void RestoreSnapshot_Throws_When_Empty()
     {
         var snapshotStore = Some.SnapshotStore();
 
@@ -522,7 +522,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void FilterSnapshot_Throws_On_Empty_SnapshotStore()
+    public static void FilterSnapshot_Throws_When_Empty()
     {
         var snapshotStore = Some.SnapshotStore();
 
@@ -591,7 +591,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void RemoveSnapshot_Throws_On_Empty_SnapshotStore()
+    public static void RemoveSnapshot_Throws_When_Empty()
     {
         var snapshotStore = Some.SnapshotStore();
 
