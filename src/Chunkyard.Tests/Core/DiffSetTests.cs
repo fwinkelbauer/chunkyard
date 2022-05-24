@@ -5,7 +5,7 @@ public static class DiffSetTests
     [Fact]
     public static void DiffSet_Outlines_Differences_Between_Collections()
     {
-        var date = Some.UtcDate;
+        var date = Some.DateUtc;
 
         var first = new[]
         {

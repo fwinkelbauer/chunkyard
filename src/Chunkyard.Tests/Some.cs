@@ -2,11 +2,11 @@ namespace Chunkyard.Tests;
 
 internal static class Some
 {
-    public static readonly DateTime UtcDate = DateTime.UtcNow;
+    public static readonly DateTime DateUtc = DateTime.UtcNow;
 
     public static Blob Blob(string blobName)
     {
-        return new Blob(blobName, UtcDate);
+        return new Blob(blobName, DateUtc);
     }
 
     public static Blob[] Blobs(params string[] blobNames)
