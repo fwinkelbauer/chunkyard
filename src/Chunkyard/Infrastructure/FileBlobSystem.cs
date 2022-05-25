@@ -7,14 +7,15 @@ public class FileBlobSystem : IBlobSystem
 {
     private readonly string[] _paths;
     private readonly string _parent;
+    private readonly Fuzzy _excludeFuzzy;
 
     public FileBlobSystem(
-        IEnumerable<string> paths)
+        IEnumerable<string> paths,
+        Fuzzy excludeFuzzy)
     {
-        _paths = paths.Select(Path.GetFullPath)
-            .ToArray();
-
+        _paths = paths.Select(Path.GetFullPath).ToArray();
         _parent = DirectoryUtils.FindCommonParent(_paths);
+        _excludeFuzzy = excludeFuzzy;
     }
 
     public bool BlobExists(string blobName)
@@ -29,11 +30,11 @@ public class FileBlobSystem : IBlobSystem
             ToFile(blobName));
     }
 
-    public IReadOnlyCollection<Blob> ListBlobs(Fuzzy excludeFuzzy)
+    public IReadOnlyCollection<Blob> ListBlobs()
     {
         return _paths
             .SelectMany(DirectoryUtils.ListFiles)
-            .Where(file => !excludeFuzzy.IsExcludingMatch(file))
+            .Where(file => !_excludeFuzzy.IsExcludingMatch(file))
             .Distinct()
             .OrderBy(file => file)
             .Select(ToBlob)
@@ -99,7 +100,16 @@ public class FileBlobSystem : IBlobSystem
 
     private string ToFile(string blobName)
     {
-        return DirectoryUtils.CombinePathSafe(_parent, blobName);
+        var file = DirectoryUtils.CombinePathSafe(_parent, blobName);
+
+        if (_excludeFuzzy.IsExcludingMatch(file))
+        {
+            throw new ArgumentException(
+                $"Blob {blobName} is excluded",
+                nameof(blobName));
+        }
+
+        return file;
     }
 
     private sealed class WriteStream : FileStream

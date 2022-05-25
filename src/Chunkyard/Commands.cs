@@ -8,20 +8,19 @@ internal static class Commands
     public static void StoreSnapshot(StoreOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
-        var blobSystem = new FileBlobSystem(o.Files);
-        var excludeFuzzy = new Fuzzy(o.ExcludePatterns);
+        var blobSystem = new FileBlobSystem(
+            o.Files,
+            new Fuzzy(o.ExcludePatterns));
 
         if (o.Preview)
         {
-            var diffSet = snapshotStore.StoreSnapshotPreview(
-                blobSystem,
-                excludeFuzzy);
+            var diffSet = snapshotStore.StoreSnapshotPreview(blobSystem);
 
             PrintDiff(diffSet);
         }
         else
         {
-            snapshotStore.StoreSnapshot(blobSystem, excludeFuzzy);
+            snapshotStore.StoreSnapshot(blobSystem);
         }
     }
 
@@ -77,7 +76,7 @@ internal static class Commands
         var snapshotStore = CreateSnapshotStore(o.Repository);
 
         snapshotStore.RestoreSnapshot(
-            new FileBlobSystem(new[] { o.Directory }),
+            new FileBlobSystem(new[] { o.Directory }, Fuzzy.Default),
             o.SnapshotId,
             new Fuzzy(o.IncludePatterns));
     }
@@ -95,14 +94,14 @@ internal static class Commands
             .Distinct()
             .Select(file => Path.Combine(o.Directory, file));
 
-        var blobSystem = new FileBlobSystem(paths);
-        var excludeFuzzy = new Fuzzy(o.ExcludePatterns);
+        var blobSystem = new FileBlobSystem(
+            paths,
+            new Fuzzy(o.ExcludePatterns));
 
         if (o.Preview)
         {
             var diffSet = snapshotStore.MirrorSnapshotPreview(
                 blobSystem,
-                excludeFuzzy,
                 o.SnapshotId);
 
             PrintDiff(diffSet);
@@ -111,7 +110,6 @@ internal static class Commands
         {
             snapshotStore.MirrorSnapshot(
                 blobSystem,
-                excludeFuzzy,
                 o.SnapshotId);
         }
     }

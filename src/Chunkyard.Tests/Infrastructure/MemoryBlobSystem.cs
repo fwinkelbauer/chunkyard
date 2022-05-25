@@ -30,12 +30,11 @@ internal class MemoryBlobSystem : IBlobSystem
         }
     }
 
-    public IReadOnlyCollection<Blob> ListBlobs(Fuzzy excludeFuzzy)
+    public IReadOnlyCollection<Blob> ListBlobs()
     {
         lock (_lock)
         {
             return _blobs.Values
-                .Where(b => !excludeFuzzy.IsExcludingMatch(b.Name))
                 .OrderBy(b => b.Name)
                 .ToArray();
         }

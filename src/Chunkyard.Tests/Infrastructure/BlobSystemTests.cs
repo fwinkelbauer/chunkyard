@@ -12,18 +12,24 @@ public static class BlobSystemTests
     public static void FileBlobSystem_Can_Read_Write()
     {
         using var directory = new DisposableDirectory();
-        var blobSystem = new FileBlobSystem(new[] { directory.Name });
+        var blobSystem = new FileBlobSystem(
+            new[] { directory.Name },
+            Fuzzy.Default);
 
         BlobSystem_Can_Read_Write(blobSystem);
     }
 
-    [Fact]
-    public static void FileBlobSystem_Prevents_Directory_Traversal_Attack()
+    [Theory]
+    [InlineData("../directory-traversal")]
+    [InlineData("excluded-blob")]
+    public static void FileBlobSystem_Prevents_Accessing_Invalid_Blobs(
+        string invalidBlobName)
     {
         using var directory = new DisposableDirectory();
-        var blobSystem = new FileBlobSystem(new[] { directory.Name });
+        var blobSystem = new FileBlobSystem(
+            new[] { directory.Name },
+            new Fuzzy(new[] { "excluded-blob" }));
 
-        var invalidBlobName = "../some-file";
         var invalidBlob = Some.Blob(invalidBlobName);
 
         Assert.Throws<ArgumentException>(
@@ -49,7 +55,10 @@ public static class BlobSystemTests
     public static void FileblobSystem_OpenWrite_Overwrites_Previous_Content()
     {
         using var directory = new DisposableDirectory();
-        var blobSystem = new FileBlobSystem(new[] { directory.Name });
+        var blobSystem = new FileBlobSystem(
+            new[] { directory.Name },
+            Fuzzy.Default);
+
         var blob = Some.Blob("some blob");
 
         using (var writeStream = blobSystem.NewWrite(blob))
@@ -94,7 +103,7 @@ public static class BlobSystemTests
 
         Assert.Equal(
             new[] { blob },
-            blobSystem.ListBlobs(Fuzzy.Default));
+            blobSystem.ListBlobs());
 
         using (var readStream = blobSystem.OpenRead(blob.Name))
         using (var memoryStream = new MemoryStream())
@@ -108,6 +117,6 @@ public static class BlobSystemTests
 
         blobSystem.RemoveBlob(blob.Name);
 
-        Assert.Empty(blobSystem.ListBlobs(Fuzzy.Default));
+        Assert.Empty(blobSystem.ListBlobs());
     }
 }

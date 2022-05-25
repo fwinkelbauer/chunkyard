@@ -56,9 +56,7 @@ public class SnapshotStore
         _locks = new ConcurrentDictionary<string, object>();
     }
 
-    public DiffSet StoreSnapshotPreview(
-        IBlobSystem blobSystem,
-        Fuzzy excludeFuzzy)
+    public DiffSet StoreSnapshotPreview(IBlobSystem blobSystem)
     {
         ArgumentNullException.ThrowIfNull(blobSystem);
 
@@ -66,7 +64,7 @@ public class SnapshotStore
             ? Array.Empty<BlobReference>()
             : GetSnapshot(_currentSnapshotId.Value).BlobReferences;
 
-        var blobs = blobSystem.ListBlobs(excludeFuzzy);
+        var blobs = blobSystem.ListBlobs();
 
         return DiffSet.Create(
             blobReferences.Select(br => br.Blob),
@@ -74,13 +72,13 @@ public class SnapshotStore
             blob => blob.Name);
     }
 
-    public int StoreSnapshot(IBlobSystem blobSystem, Fuzzy excludeFuzzy)
+    public int StoreSnapshot(IBlobSystem blobSystem)
     {
         ArgumentNullException.ThrowIfNull(blobSystem);
 
         var newSnapshot = new Snapshot(
             _clock.NowUtc(),
-            WriteBlobs(blobSystem, excludeFuzzy));
+            WriteBlobs(blobSystem));
 
         var newSnapshotReference = new SnapshotReference(
             _crypto.Value.Salt,
@@ -132,12 +130,11 @@ public class SnapshotStore
 
     public DiffSet MirrorSnapshotPreview(
         IBlobSystem blobSystem,
-        Fuzzy excludeFuzzy,
         int snapshotId)
     {
         ArgumentNullException.ThrowIfNull(blobSystem);
 
-        var blobs = blobSystem.ListBlobs(excludeFuzzy);
+        var blobs = blobSystem.ListBlobs();
         var blobReferences = GetSnapshot(snapshotId).BlobReferences;
 
         return DiffSet.Create(
@@ -148,7 +145,6 @@ public class SnapshotStore
 
     public void MirrorSnapshot(
         IBlobSystem blobSystem,
-        Fuzzy excludeFuzzy,
         int snapshotId)
     {
         ArgumentNullException.ThrowIfNull(blobSystem);
@@ -163,7 +159,7 @@ public class SnapshotStore
         _probe.RestoredSnapshot(
             ResolveSnapshotId(snapshotId));
 
-        var blobNamesToRemove = blobSystem.ListBlobs(excludeFuzzy)
+        var blobNamesToRemove = blobSystem.ListBlobs()
             .Select(blob => blob.Name)
             .Except(mirroredBlobs.Select(blob => blob.Name));
 
@@ -511,9 +507,7 @@ public class SnapshotStore
         return RestoreBlob(blobSystem.OpenWrite, blobReference);
     }
 
-    private BlobReference[] WriteBlobs(
-        IBlobSystem blobSystem,
-        Fuzzy excludeFuzzy)
+    private BlobReference[] WriteBlobs(IBlobSystem blobSystem)
     {
         _ = _crypto.Value;
 
@@ -550,7 +544,7 @@ public class SnapshotStore
             return blobReference;
         }
 
-        return blobSystem.ListBlobs(excludeFuzzy)
+        return blobSystem.ListBlobs()
             .AsParallel()
             .Select(WriteBlob)
             .OrderBy(br => br.Blob.Name)
