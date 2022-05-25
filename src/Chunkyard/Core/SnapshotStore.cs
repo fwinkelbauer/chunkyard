@@ -12,6 +12,7 @@ public class SnapshotStore
     private readonly IRepository _repository;
     private readonly FastCdc _fastCdc;
     private readonly IProbe _probe;
+    private readonly IClock _clock;
     private readonly Lazy<Crypto> _crypto;
     private readonly ConcurrentDictionary<string, object> _locks;
 
@@ -21,11 +22,13 @@ public class SnapshotStore
         IRepository repository,
         FastCdc fastCdc,
         IPrompt prompt,
-        IProbe probe)
+        IProbe probe,
+        IClock clock)
     {
         _repository = repository;
         _fastCdc = fastCdc;
         _probe = probe;
+        _clock = clock;
 
         _currentSnapshotId = FetchCurrentSnapshotId();
 
@@ -71,15 +74,12 @@ public class SnapshotStore
             blob => blob.Name);
     }
 
-    public int StoreSnapshot(
-        IBlobSystem blobSystem,
-        Fuzzy excludeFuzzy,
-        DateTime creationTimeUtc)
+    public int StoreSnapshot(IBlobSystem blobSystem, Fuzzy excludeFuzzy)
     {
         ArgumentNullException.ThrowIfNull(blobSystem);
 
         var newSnapshot = new Snapshot(
-            creationTimeUtc,
+            _clock.NowUtc(),
             WriteBlobs(blobSystem, excludeFuzzy));
 
         var newSnapshotReference = new SnapshotReference(

@@ -29,7 +29,8 @@ internal static class Some
             repository ?? Repository(),
             fastCdc ?? new FastCdc(),
             new DummyPrompt(password),
-            new DummyProbe());
+            new DummyProbe(),
+            new DummyClock(DateUtc));
     }
 
     public static IRepository Repository()

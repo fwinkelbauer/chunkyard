@@ -10,8 +10,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(expectedBlobs),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var snapshot = snapshotStore.GetSnapshot(snapshotId);
 
@@ -32,8 +31,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(blobs),
-            new Fuzzy(new[] { "other" }),
-            Some.DateUtc);
+            new Fuzzy(new[] { "other" }));
 
         var snapshot = snapshotStore.GetSnapshot(snapshotId);
 
@@ -50,16 +48,14 @@ public static class SnapshotStoreTests
 
         var snapshotId1 = snapshotStore.StoreSnapshot(
             Some.BlobSystem(blobs),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var snapshotId2 = snapshotStore.StoreSnapshot(
             Some.BlobSystem(
                 blobs.Select(b => new Blob(
                     b.Name,
                     b.LastWriteTimeUtc.AddHours(1)))),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var blobReferences1 = snapshotStore.GetSnapshot(snapshotId1)
             .BlobReferences;
@@ -96,8 +92,7 @@ public static class SnapshotStoreTests
 
         var snapshotId1 = snapshotStore.StoreSnapshot(
             blobSystem1,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var blobSystem2 = Some.BlobSystem(
             blobs,
@@ -105,8 +100,7 @@ public static class SnapshotStoreTests
 
         var snapshotId2 = snapshotStore.StoreSnapshot(
             blobSystem2,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
         var snapshot2 = snapshotStore.GetSnapshot(snapshotId2);
@@ -123,8 +117,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var snapshot = snapshotStore.GetSnapshot(snapshotId);
 
@@ -140,8 +133,7 @@ public static class SnapshotStoreTests
             Some.BlobSystem(
                 Some.Blobs(),
                 blobName => Array.Empty<byte>()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var chunkIds = snapshotStore.GetSnapshot(snapshotId).BlobReferences
             .SelectMany(br => br.ChunkIds);
@@ -158,8 +150,7 @@ public static class SnapshotStoreTests
         var snapshotId = Some.SnapshotStore(repository)
             .StoreSnapshot(
                 Some.BlobSystem(expectedBlobs),
-                Fuzzy.Default,
-                Some.DateUtc);
+                Fuzzy.Default);
 
         var actualBlobs = Some.SnapshotStore(repository)
             .GetSnapshot(snapshotId).BlobReferences
@@ -177,8 +168,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         Assert.Equal(
             snapshotStore.GetSnapshot(snapshotId),
@@ -192,8 +182,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.GetSnapshot(snapshotId + 1));
@@ -211,18 +200,15 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             blobSystem,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var snapshotIdToRemove = snapshotStore.StoreSnapshot(
             blobSystem,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         snapshotStore.StoreSnapshot(
             blobSystem,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         snapshotStore.RemoveSnapshot(snapshotIdToRemove);
 
@@ -249,8 +235,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         Assert.True(
             snapshotStore.CheckSnapshotExists(
@@ -271,8 +256,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         Remove(repository.Chunks, repository.Chunks.ListKeys());
 
@@ -295,8 +279,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         Invalidate(repository.Chunks, repository.Chunks.ListKeys());
 
@@ -319,8 +302,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var chunkIds = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
@@ -347,8 +329,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var chunkIds = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
@@ -395,8 +376,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(blobs, _ => expectedBytes),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var blobSystem = Some.BlobSystem();
 
@@ -432,8 +412,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             blobSystem,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         Assert.Throws<AggregateException>(
             () => snapshotStore.RestoreSnapshot(
@@ -452,8 +431,7 @@ public static class SnapshotStoreTests
             Some.BlobSystem(
                 blobs,
                 _ => Array.Empty<byte>()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var blobSystem = Some.BlobSystem();
 
@@ -491,8 +469,7 @@ public static class SnapshotStoreTests
     {
         var snapshotId = Some.SnapshotStore(password: "a").StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         Assert.Throws<ChunkyardException>(
             () => Some.SnapshotStore(password: "b").RestoreSnapshot(
@@ -509,8 +486,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(expectedBlobs),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var blobReferences = snapshotStore.FilterSnapshot(
             snapshotId,
@@ -539,8 +515,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         Assert.Empty(snapshotStore.GarbageCollect());
 
@@ -558,8 +533,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         snapshotStore.RemoveSnapshot(snapshotId);
 
@@ -576,13 +550,11 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             blobSystem,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         snapshotStore.StoreSnapshot(
             blobSystem,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         snapshotStore.RemoveSnapshot(snapshotId);
         snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
@@ -608,13 +580,11 @@ public static class SnapshotStoreTests
 
         snapshotStore.StoreSnapshot(
             blobSystem,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var snapshotId = snapshotStore.StoreSnapshot(
             blobSystem,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         snapshotStore.KeepSnapshots(1);
 
@@ -630,8 +600,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         snapshotStore.KeepSnapshots(1);
         snapshotStore.KeepSnapshots(2);
@@ -648,8 +617,7 @@ public static class SnapshotStoreTests
 
         snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         snapshotStore.KeepSnapshots(0);
 
@@ -663,8 +631,7 @@ public static class SnapshotStoreTests
 
         snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         snapshotStore.KeepSnapshots(-1);
 
@@ -680,13 +647,11 @@ public static class SnapshotStoreTests
 
         snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs("some blob")),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs("some blob", "other blob")),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         snapshotStore.CopyTo(otherRepository);
 
@@ -707,8 +672,7 @@ public static class SnapshotStoreTests
 
         snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         Invalidate(repository.Chunks, repository.Chunks.ListKeys());
 
@@ -725,8 +689,7 @@ public static class SnapshotStoreTests
 
         snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         Invalidate(repository.Snapshots, repository.Snapshots.ListKeys());
 
@@ -744,8 +707,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             blobSystem,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var blobToDelete = Some.Blob("blob to delete");
 
@@ -779,8 +741,7 @@ public static class SnapshotStoreTests
 
         snapshotStore.StoreSnapshot(
             initialBlobSystem,
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var changedBlobSystem = Some.BlobSystem(
             Some.Blobs("other blob"));
@@ -811,8 +772,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs("some blob")),
-            Fuzzy.Default,
-            Some.DateUtc);
+            Fuzzy.Default);
 
         var actualDiff = snapshotStore.MirrorSnapshotPreview(
             Some.BlobSystem(Some.Blobs("other blob")),

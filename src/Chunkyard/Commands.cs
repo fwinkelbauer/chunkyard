@@ -21,10 +21,7 @@ internal static class Commands
         }
         else
         {
-            snapshotStore.StoreSnapshot(
-                blobSystem,
-                excludeFuzzy,
-                DateTime.UtcNow);
+            snapshotStore.StoreSnapshot(blobSystem, excludeFuzzy);
         }
     }
 
@@ -236,7 +233,8 @@ internal static class Commands
                 new EnvironmentPrompt(),
                 new SecretToolPrompt(repositoryPath),
                 new ConsolePrompt()),
-            new ConsoleProbe());
+            new ConsoleProbe(),
+            new RealClock());
     }
 
     private static IRepository CreateRepository(string repositoryPath)
