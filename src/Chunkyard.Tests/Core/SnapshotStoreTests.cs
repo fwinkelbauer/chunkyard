@@ -432,20 +432,20 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void FilterSnapshot_Lists_Blobs()
+    public static void FilterSnapshot_Lists_Matching_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
-        var expectedBlobs = Some.Blobs();
+        var expectedBlob = Some.Blob("blob1");
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(expectedBlobs));
+            Some.BlobSystem(new[] { expectedBlob, Some.Blob("blob2") }));
 
         var blobReferences = snapshotStore.FilterSnapshot(
             snapshotId,
-            Fuzzy.Default);
+            new Fuzzy(new[] { expectedBlob.Name }));
 
         Assert.Equal(
-            expectedBlobs,
+            new[] { expectedBlob },
             blobReferences.Select(br => br.Blob));
     }
 
