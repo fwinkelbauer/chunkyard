@@ -362,7 +362,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void RestoreSnapshot_Does_Not_Overwrite_Blob()
+    public static void RestoreSnapshot_Does_Not_Overwrite_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
         var blobSystem = Some.BlobSystem(Some.Blobs());
@@ -468,7 +468,7 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Assert.Empty(snapshotStore.GarbageCollect());
+        snapshotStore.GarbageCollect();
 
         Assert.True(
             snapshotStore.CheckSnapshotValid(
@@ -487,7 +487,10 @@ public static class SnapshotStoreTests
 
         snapshotStore.RemoveSnapshot(snapshotId);
 
-        Assert.NotEmpty(snapshotStore.GarbageCollect());
+        Assert.NotEmpty(repository.Chunks.ListKeys());
+
+        snapshotStore.GarbageCollect();
+
         Assert.Empty(repository.Chunks.ListKeys());
         Assert.Empty(repository.Snapshots.ListKeys());
     }

@@ -193,20 +193,17 @@ public class SnapshotStore
             .ToArray();
     }
 
-    public IReadOnlyCollection<string> GarbageCollect()
+    public void GarbageCollect()
     {
         var usedChunkIds = ListChunkIds(_repository.Snapshots.ListKeys());
         var unusedChunkIds = _repository.Chunks.ListKeys()
-            .Except(usedChunkIds)
-            .ToArray();
+            .Except(usedChunkIds);
 
         foreach (var chunkId in unusedChunkIds)
         {
             _repository.Chunks.RemoveValue(chunkId);
             _probe.RemovedChunk(chunkId);
         }
-
-        return unusedChunkIds;
     }
 
     public void RemoveSnapshot(int snapshotId)
