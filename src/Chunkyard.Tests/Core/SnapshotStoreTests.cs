@@ -322,12 +322,12 @@ public static class SnapshotStoreTests
     [Fact]
     public static void RestoreSnapshot_Writes_Ordered_Blob_Chunks_To_Stream()
     {
-        var fastCdc = new FastCdc(64, 256, 1024);
+        var fastCdc = new FastCdc(256, 1024, 2048);
         var snapshotStore = Some.SnapshotStore(fastCdc: fastCdc);
         var blobs = Some.Blobs();
 
         // Create data that is large enough to create at least two chunks
-        var expectedBytes = Some.RandomNumber(fastCdc.MaxSize + 1);
+        var expectedBytes = Some.RandomNumber(2 * fastCdc.MaxSize);
 
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(blobs, _ => expectedBytes));
@@ -340,14 +340,17 @@ public static class SnapshotStoreTests
             Fuzzy.Default);
 
         var blobReferences = snapshotStore.GetSnapshot(snapshotId)
-            .BlobReferences;
+            .BlobReferences
+            .ToArray();
 
         Assert.Equal(blobs, blobSystem.ListBlobs());
         Assert.NotEmpty(blobReferences);
 
-        foreach (var blobReference in blobReferences)
+        for (var i = 0; i < blobReferences.Length; i++)
         {
-            using var blobStream = blobSystem.OpenRead(blobs[0].Name);
+            var blobReference = blobReferences[i];
+
+            using var blobStream = blobSystem.OpenRead(blobs[i].Name);
             using var memoryStream = new MemoryStream();
 
             snapshotStore.RestoreChunks(blobReference.ChunkIds, memoryStream);
