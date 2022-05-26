@@ -398,17 +398,9 @@ public class FastCdc
     private static int CenterSize(int average, int minimum, int sourceSize)
     {
         var offset = minimum + CeilDiv(minimum, 2);
+        var size = average - Math.Min(offset, average);
 
-        if (offset > average)
-        {
-            offset = average;
-        }
-
-        var size = average - offset;
-
-        return size > sourceSize
-            ? sourceSize
-            : size;
+        return Math.Min(size, sourceSize);
     }
 
     private static int CeilDiv(int x, int y)
