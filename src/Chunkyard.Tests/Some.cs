@@ -13,7 +13,7 @@ internal static class Some
     {
         blobNames = blobNames.Any()
             ? blobNames
-            : new[] { "blob 1", "blob-2", "dir/blob3" };
+            : new[] { "blob 1", "dir/blob-2" };
 
         return blobNames
             .Select(Blob)
