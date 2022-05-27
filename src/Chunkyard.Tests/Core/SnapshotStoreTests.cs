@@ -636,11 +636,12 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void Mirror_Restores_Blobs_And_Removes_Blobs_Not_In_Snapshot()
+    public static void Mirror_Updates_Known_Blobs_And_Removes_Unknown_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
         var expectedBlobs = Some.Blobs();
-        var blobSystem = Some.BlobSystem(expectedBlobs);
+        var expectedBytes = new byte[] { 0xAB, 0xCD, 0xEF };
+        var blobSystem = Some.BlobSystem(expectedBlobs, _ => expectedBytes);
 
         var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
         var blobToDelete = Some.Blob("blob to delete");
@@ -650,7 +651,11 @@ public static class SnapshotStoreTests
             writeStream.Write(new byte[] { 0x10, 0x11 });
         }
 
-        using (var writeStream = blobSystem.OpenWrite(expectedBlobs[1]))
+        var blobToUpdate = new Blob(
+            expectedBlobs.Last().Name,
+            expectedBlobs.Last().LastWriteTimeUtc.AddHours(1));
+
+        using (var writeStream = blobSystem.OpenWrite(blobToUpdate))
         {
             writeStream.Write(new byte[] { 0x10, 0x11 });
         }
@@ -658,6 +663,13 @@ public static class SnapshotStoreTests
         snapshotStore.MirrorSnapshot(blobSystem, snapshotId);
 
         Assert.Equal(expectedBlobs, blobSystem.ListBlobs());
+
+        foreach (var blob in expectedBlobs)
+        {
+            using var blobStream = blobSystem.OpenRead(blob.Name);
+
+            Assert.Equal(expectedBytes, ToBytes(blobStream));
+        }
     }
 
     [Fact]
