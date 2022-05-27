@@ -731,7 +731,9 @@ public static class SnapshotStoreTests
             var value = repository.RetrieveValue(key);
 
             repository.RemoveValue(key);
-            repository.StoreValue(key, value.Concat(value).ToArray());
+            repository.StoreValue(
+                key,
+                value.Concat(new byte[] { 0xFF }).ToArray());
         }
     }
 
