@@ -594,6 +594,11 @@ public static class SnapshotStoreTests
 
         snapshotStore.CopyTo(otherRepository);
 
+        snapshotStore.StoreSnapshot(
+            Some.BlobSystem(Some.Blobs("different blob")));
+
+        snapshotStore.CopyTo(otherRepository);
+
         Assert.Equal(
             repository.Chunks.ListKeys(),
             otherRepository.Chunks.ListKeys());
@@ -609,10 +614,14 @@ public static class SnapshotStoreTests
         var repository = Some.Repository();
         var snapshotStore = Some.SnapshotStore(repository);
 
-        snapshotStore.StoreSnapshot(
+        var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Invalidate(repository.Chunks, repository.Chunks.ListKeys());
+        var chunkIds = snapshotStore.GetSnapshot(snapshotId)
+            .BlobReferences
+            .SelectMany(b => b.ChunkIds);
+
+        Invalidate(repository.Chunks, chunkIds);
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(
