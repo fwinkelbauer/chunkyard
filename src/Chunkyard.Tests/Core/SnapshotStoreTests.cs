@@ -365,7 +365,8 @@ public static class SnapshotStoreTests
     public static void RestoreSnapshot_Does_Not_Overwrite_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
-        var blobSystem = Some.BlobSystem(Some.Blobs());
+        var expectedBlobs = Some.Blobs();
+        var blobSystem = Some.BlobSystem(expectedBlobs);
 
         var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
 
@@ -374,6 +375,8 @@ public static class SnapshotStoreTests
                 blobSystem,
                 snapshotId,
                 Fuzzy.Default));
+
+        Assert.Equal(expectedBlobs, blobSystem.ListBlobs());
     }
 
     [Fact]
