@@ -3,7 +3,7 @@ namespace Chunkyard.Tests.Core;
 public static class SnapshotStoreTests
 {
     [Fact]
-    public static void StoreSnapshot_Stores_Snapshot()
+    public static void StoreSnapshot_Stores_Snapshot_With_New_Nonce_For_All_Files()
     {
         var snapshotStore = Some.SnapshotStore();
         var expectedBlobs = Some.Blobs();
@@ -20,6 +20,11 @@ public static class SnapshotStoreTests
         Assert.Equal(
             expectedBlobs,
             snapshot.BlobReferences.Select(br => br.Blob));
+
+        var nonces = snapshot.BlobReferences.Select(br => br.Nonce)
+            .ToArray();
+
+        Assert.Equal(nonces, nonces.Distinct());
     }
 
     [Fact]
