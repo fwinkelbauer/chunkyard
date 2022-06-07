@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 16.5.0 - 2022-06-07
+
 ### Changed
 
 - All occurrences of `ChunkIds` by shortening them to 12 characters
