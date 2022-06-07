@@ -3,6 +3,35 @@ namespace Chunkyard.Tests.Core;
 public static class SnapshotStoreTests
 {
     [Fact]
+    public static void StoreSnapshot_Stores_Blobs_As_A_Snapshot()
+    {
+        var repository = Some.Repository();
+        var snapshotStore = Some.SnapshotStore(repository);
+        var expectedBlobs = Some.Blobs();
+
+        var snapshotId = snapshotStore.StoreSnapshot(
+            Some.BlobSystem(expectedBlobs));
+
+        var snapshot = snapshotStore.GetSnapshot(snapshotId);
+
+        var blobChunkIds = snapshot.BlobReferences
+            .SelectMany(br => br.ChunkIds);
+
+        var snapshotChunkIds = repository.Chunks.ListKeys()
+            .Except(blobChunkIds);
+
+        Assert.Equal(
+            new[] { snapshotId },
+            snapshotStore.ListSnapshotIds());
+
+        Assert.Equal(
+            expectedBlobs,
+            snapshot.BlobReferences.Select(br => br.Blob));
+
+        Assert.NotEmpty(snapshotChunkIds);
+    }
+
+    [Fact]
     public static void StoreSnapshot_Stores_Snapshot_With_New_Nonce_For_All_Files()
     {
         var snapshotStore = Some.SnapshotStore();
@@ -13,14 +42,6 @@ public static class SnapshotStoreTests
 
         var snapshot = snapshotStore.GetSnapshot(snapshotId);
 
-        Assert.Equal(
-            new[] { snapshotId },
-            snapshotStore.ListSnapshotIds());
-
-        Assert.Equal(
-            expectedBlobs,
-            snapshot.BlobReferences.Select(br => br.Blob));
-
         var nonces = snapshot.BlobReferences.Select(br => br.Nonce)
             .ToArray();
 
@@ -28,7 +49,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void StoreSnapshot_Deduplicates_Blobs_Using_Same_Nonce_When_LastWriteTimeUtc_Differs()
+    public static void StoreSnapshot_Uses_Same_Nonce_For_Known_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
         var blobs = Some.Blobs();
