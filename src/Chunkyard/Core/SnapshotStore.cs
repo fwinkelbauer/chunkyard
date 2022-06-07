@@ -251,7 +251,7 @@ public class SnapshotStore
             catch (CryptographicException e)
             {
                 throw new ChunkyardException(
-                    $"Could not decrypt chunk: {chunkId}",
+                    $"Could not decrypt chunk: {ChunkId.Shorten(chunkId)}",
                     e);
             }
         }
@@ -400,7 +400,7 @@ public class SnapshotStore
         catch (Exception e)
         {
             throw new ChunkyardException(
-                $"Could not read chunk: {chunkId}",
+                $"Could not read chunk: {ChunkId.Shorten(chunkId)}",
                 e);
         }
     }
@@ -426,7 +426,7 @@ public class SnapshotStore
         if (!ChunkId.Valid(chunkId, chunk))
         {
             throw new ChunkyardException(
-                $"Invalid chunk: {chunkId}");
+                $"Invalid chunk: {ChunkId.Shorten(chunkId)}");
         }
 
         return chunk;
