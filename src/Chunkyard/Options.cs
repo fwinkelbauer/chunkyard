@@ -4,20 +4,20 @@ namespace Chunkyard;
 public class CatOptions
 {
     public CatOptions(
-        string repository,
         IEnumerable<string> chunkIds,
+        string repository,
         string? export)
     {
-        Repository = repository;
         ChunkIds = chunkIds;
+        Repository = repository;
         Export = export;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
-    public string Repository { get; }
-
     [Option('c', "chunk", Required = true, HelpText = "The chunk IDs.")]
     public IEnumerable<string> ChunkIds { get; }
+
+    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
+    public string Repository { get; }
 
     [Option('e', "export", Required = false, HelpText = "The export path.", Default = "")]
     public string? Export { get; }
@@ -38,7 +38,7 @@ public class CheckOptions
         Shallow = shallow;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
+    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
     [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
@@ -73,22 +73,22 @@ public class CopyOptions
 public class StoreOptions
 {
     public StoreOptions(
-        string repository,
         IEnumerable<string> files,
+        string repository,
         IEnumerable<string> excludePatterns,
         bool preview)
     {
-        Repository = repository;
         Files = files;
+        Repository = repository;
         ExcludePatterns = excludePatterns;
         Preview = preview;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
-    public string Repository { get; }
-
     [Option('f', "files", Required = true, HelpText = "The files and directories to store.")]
     public IEnumerable<string> Files { get; }
+
+    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
+    public string Repository { get; }
 
     [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude.")]
     public IEnumerable<string> ExcludePatterns { get; }
@@ -114,7 +114,7 @@ public class DiffOptions
         ChunksOnly = chunksOnly;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
+    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
     [Option('f', "first", Required = false, HelpText = "The first snapshot ID.", Default = SnapshotStore.SecondLatestSnapshotId)]
@@ -138,7 +138,7 @@ public class GarbageCollectOptions
         Repository = repository;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
+    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 }
 
@@ -146,18 +146,18 @@ public class GarbageCollectOptions
 public class KeepOptions
 {
     public KeepOptions(
-        string repository,
-        int latestCount)
+        int latestCount,
+        string repository)
     {
-        Repository = repository;
         LatestCount = latestCount;
+        Repository = repository;
     }
-
-    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
-    public string Repository { get; }
 
     [Option("latest", Required = true, HelpText = "The count of the latest snapshots to keep.")]
     public int LatestCount { get; }
+
+    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
+    public string Repository { get; }
 }
 
 [Verb("list", HelpText = "List all snapshots.")]
@@ -168,7 +168,7 @@ public class ListOptions
         Repository = repository;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
+    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 }
 
@@ -176,18 +176,18 @@ public class ListOptions
 public class RemoveOptions
 {
     public RemoveOptions(
-        string repository,
-        int snapshotId)
+        int snapshotId,
+        string repository)
     {
-        Repository = repository;
         SnapshotId = snapshotId;
+        Repository = repository;
     }
-
-    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
-    public string Repository { get; }
 
     [Option('s', "snapshot", Required = true, HelpText = "The snapshot ID.")]
     public int SnapshotId { get; }
+
+    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
+    public string Repository { get; }
 }
 
 [Verb("restore", HelpText = "Restore a snapshot.")]
@@ -205,7 +205,7 @@ public class RestoreOptions
         IncludePatterns = includePatterns;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
+    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
     [Option('d', "directory", Required = false, HelpText = "The directory to restore into.", Default = ".")]
@@ -237,7 +237,7 @@ public class MirrorOptions
         IncludePatterns = includePatterns;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
+    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
     [Option('d', "directory", Required = false, HelpText = "The directory to mirror into.", Default = ".")]
@@ -271,7 +271,7 @@ public class ShowOptions
         ChunksOnly = chunksOnly;
     }
 
-    [Option('r', "repository", Required = true, HelpText = "The repository path.")]
+    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
     [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]

@@ -5,6 +5,8 @@ namespace Chunkyard;
 /// </summary>
 internal static class Commands
 {
+    public const string DefaultRepository = ".chunkyard";
+
     public static void StoreSnapshot(StoreOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
@@ -224,6 +226,8 @@ internal static class Commands
     private static SnapshotStore CreateSnapshotStore(
         string repositoryPath)
     {
+        Console.WriteLine($"Using repository: {repositoryPath}");
+
         return new SnapshotStore(
             CreateRepository(repositoryPath),
             new FastCdc(),
