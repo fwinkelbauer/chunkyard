@@ -350,41 +350,33 @@ public static class SnapshotStoreTests
     {
         var fastCdc = new FastCdc(256, 1024, 2048);
         var snapshotStore = Some.SnapshotStore(fastCdc: fastCdc);
-        var blobs = Some.Blobs();
 
         // Create data that is large enough to create at least two chunks
         var expectedBytes = Some.RandomNumber(2 * fastCdc.MaxSize);
+        var inputBlobSystem = Some.BlobSystem(Some.Blobs(), _ => expectedBytes);
+        var expectedContent = ToDictionary(inputBlobSystem);
 
-        var snapshotId = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(blobs, _ => expectedBytes));
+        var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
 
-        var blobSystem = Some.BlobSystem();
+        var outputBlobSystem = Some.BlobSystem();
 
         snapshotStore.RestoreSnapshot(
-            blobSystem,
+            outputBlobSystem,
             snapshotId,
             Fuzzy.Default);
+
+        Assert.Equal(
+            expectedContent,
+            ToDictionary(outputBlobSystem));
 
         var blobReferences = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
             .ToArray();
 
-        Assert.Equal(blobs, blobSystem.ListBlobs());
-        Assert.NotEmpty(blobReferences);
+        var chunks = blobReferences.SelectMany(br => br.ChunkIds).ToArray();
 
-        for (var i = 0; i < blobReferences.Length; i++)
-        {
-            var blobReference = blobReferences[i];
-
-            using var blobStream = blobSystem.OpenRead(blobs[i].Name);
-            using var memoryStream = new MemoryStream();
-
-            snapshotStore.RestoreChunks(blobReference.ChunkIds, memoryStream);
-
-            Assert.True(blobReference.ChunkIds.Count > 1);
-            Assert.Equal(expectedBytes, ToBytes(blobStream));
-            Assert.Equal(expectedBytes, memoryStream.ToArray());
-        }
+        Assert.True(blobReferences.Length > 0
+            && blobReferences.Length * 2 <= chunks.Length);
     }
 
     [Fact]
@@ -409,30 +401,24 @@ public static class SnapshotStoreTests
     public static void RestoreSnapshot_Can_Write_Empty_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
-        var blobs = Some.Blobs();
+        var inputBlobSystem = Some.BlobSystem(
+            Some.Blobs(),
+            _ => Array.Empty<byte>());
 
-        var snapshotId = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(
-                blobs,
-                _ => Array.Empty<byte>()));
+        var expectedContent = ToDictionary(inputBlobSystem);
 
-        var blobSystem = Some.BlobSystem();
+        var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
+
+        var outputBlobSystem = Some.BlobSystem();
 
         snapshotStore.RestoreSnapshot(
-            blobSystem,
+            outputBlobSystem,
             snapshotId,
             Fuzzy.Default);
 
-        var restoredBlobs = blobSystem.ListBlobs();
-
-        Assert.Equal(blobs, restoredBlobs);
-
-        foreach (var blob in restoredBlobs)
-        {
-            using var stream = blobSystem.OpenRead(blob.Name);
-
-            Assert.Empty(ToBytes(stream));
-        }
+        Assert.Equal(
+            expectedContent,
+            ToDictionary(outputBlobSystem));
     }
 
     [Fact]
@@ -677,9 +663,12 @@ public static class SnapshotStoreTests
     public static void Mirror_Updates_Known_Blobs_And_Removes_Unknown_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
-        var expectedBlobs = Some.Blobs();
-        var expectedBytes = new byte[] { 0xAB, 0xCD, 0xEF };
-        var blobSystem = Some.BlobSystem(expectedBlobs, _ => expectedBytes);
+        var blobs = Some.Blobs();
+        var blobSystem = Some.BlobSystem(
+            blobs,
+            _ => new byte[] { 0xAB, 0xCD, 0xEF });
+
+        var expectedContent = ToDictionary(blobSystem);
 
         var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
         var blobToDelete = Some.Blob("blob to delete");
@@ -690,8 +679,8 @@ public static class SnapshotStoreTests
         }
 
         var blobToUpdate = new Blob(
-            expectedBlobs.Last().Name,
-            expectedBlobs.Last().LastWriteTimeUtc.AddHours(1));
+            blobs.Last().Name,
+            blobs.Last().LastWriteTimeUtc.AddHours(1));
 
         using (var writeStream = blobSystem.OpenWrite(blobToUpdate))
         {
@@ -700,14 +689,9 @@ public static class SnapshotStoreTests
 
         snapshotStore.MirrorSnapshot(blobSystem, snapshotId);
 
-        Assert.Equal(expectedBlobs, blobSystem.ListBlobs());
-
-        foreach (var blob in expectedBlobs)
-        {
-            using var blobStream = blobSystem.OpenRead(blob.Name);
-
-            Assert.Equal(expectedBytes, ToBytes(blobStream));
-        }
+        Assert.Equal(
+            expectedContent,
+            ToDictionary(blobSystem));
     }
 
     [Fact]
@@ -787,12 +771,19 @@ public static class SnapshotStoreTests
         }
     }
 
-    private static byte[] ToBytes(Stream stream)
+    private static IReadOnlyDictionary<Blob, byte[]> ToDictionary(
+        IBlobSystem blobSystem)
     {
-        using var memoryStream = new MemoryStream();
+        return blobSystem.ListBlobs().ToDictionary(
+            blob => blob,
+            blob =>
+            {
+                using var memoryStream = new MemoryStream();
+                using var blobStream = blobSystem.OpenRead(blob.Name);
 
-        stream.CopyTo(memoryStream);
+                blobStream.CopyTo(memoryStream);
 
-        return memoryStream.ToArray();
+                return memoryStream.ToArray();
+            });
     }
 }

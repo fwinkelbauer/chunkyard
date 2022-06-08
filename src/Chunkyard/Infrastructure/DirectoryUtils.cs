@@ -51,7 +51,7 @@ internal static class DirectoryUtils
         else if (files.Length == 1)
         {
             return File.Exists(files[0])
-                ? DirectoryUtils.GetParent(files[0])
+                ? GetParent(files[0])
                 : files[0];
         }
 
