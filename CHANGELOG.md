@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 ### Changed
 
 - The `-r` and `--repository` option to have the default value `.chunkyard`
+- The `-f` and `--files` option of `store` to `-p` and `--paths`
 
 ## 16.5.0 - 2022-06-07
 

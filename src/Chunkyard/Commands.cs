@@ -11,7 +11,7 @@ internal static class Commands
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
         var blobSystem = new FileBlobSystem(
-            o.Files,
+            o.Paths,
             new Fuzzy(o.ExcludePatterns));
 
         if (o.Preview)

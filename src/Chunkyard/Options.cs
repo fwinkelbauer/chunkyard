@@ -73,19 +73,19 @@ public class CopyOptions
 public class StoreOptions
 {
     public StoreOptions(
-        IEnumerable<string> files,
+        IEnumerable<string> paths,
         string repository,
         IEnumerable<string> excludePatterns,
         bool preview)
     {
-        Files = files;
+        Paths = paths;
         Repository = repository;
         ExcludePatterns = excludePatterns;
         Preview = preview;
     }
 
-    [Option('f', "files", Required = true, HelpText = "The files and directories to store.")]
-    public IEnumerable<string> Files { get; }
+    [Option('p', "paths", Required = true, HelpText = "The files and directories to store.")]
+    public IEnumerable<string> Paths { get; }
 
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
