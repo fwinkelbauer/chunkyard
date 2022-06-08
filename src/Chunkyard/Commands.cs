@@ -226,8 +226,6 @@ internal static class Commands
     private static SnapshotStore CreateSnapshotStore(
         string repositoryPath)
     {
-        Console.WriteLine($"Using repository: {repositoryPath}");
-
         return new SnapshotStore(
             CreateRepository(repositoryPath),
             new FastCdc(),
