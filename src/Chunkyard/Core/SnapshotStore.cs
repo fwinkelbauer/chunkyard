@@ -270,7 +270,6 @@ public class SnapshotStore
 
         var snapshotIdsToCopy = localSnapshotIds
             .Where(id => id > otherSnapshotIdMax)
-            .OrderBy(id => id)
             .ToArray();
 
         var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
@@ -543,8 +542,8 @@ public class SnapshotStore
 
         return blobSystem.ListBlobs()
             .AsParallel()
+            .AsOrdered()
             .Select(WriteBlob)
-            .OrderBy(br => br.Blob.Name)
             .ToArray();
     }
 
