@@ -309,7 +309,7 @@ public static class SnapshotStoreTests
         // Create data that is large enough to create at least two chunks
         var expectedBytes = Some.RandomNumber(2 * fastCdc.MaxSize);
         var inputBlobSystem = Some.BlobSystem(Some.Blobs(), _ => expectedBytes);
-        var expectedContent = ToDictionary(inputBlobSystem);
+        var expectedContent = Content(inputBlobSystem);
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
 
@@ -322,7 +322,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             expectedContent,
-            ToDictionary(outputBlobSystem));
+            Content(outputBlobSystem));
 
         var blobReferences = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
@@ -342,7 +342,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
 
-        var expectedContent = ToDictionary(blobSystem);
+        var expectedContent = Content(blobSystem);
 
         Assert.Throws<AggregateException>(
             () => snapshotStore.RestoreSnapshot(
@@ -352,7 +352,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             expectedContent,
-            ToDictionary(blobSystem));
+            Content(blobSystem));
     }
 
     [Fact]
@@ -363,7 +363,7 @@ public static class SnapshotStoreTests
             Some.Blobs(),
             _ => Array.Empty<byte>());
 
-        var expectedContent = ToDictionary(inputBlobSystem);
+        var expectedContent = Content(inputBlobSystem);
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
 
@@ -376,7 +376,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             expectedContent,
-            ToDictionary(outputBlobSystem));
+            Content(outputBlobSystem));
     }
 
     [Fact]
@@ -602,7 +602,7 @@ public static class SnapshotStoreTests
             blobs,
             _ => new byte[] { 0xAB, 0xCD, 0xEF });
 
-        var expectedContent = ToDictionary(blobSystem);
+        var expectedContent = Content(blobSystem);
 
         var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
         var blobToDelete = Some.Blob("blob to delete");
@@ -619,7 +619,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             expectedContent,
-            ToDictionary(blobSystem));
+            Content(blobSystem));
     }
 
     [Fact]
@@ -718,7 +718,7 @@ public static class SnapshotStoreTests
         memoryStream.CopyTo(writeStream);
     }
 
-    private static IReadOnlyDictionary<Blob, byte[]> ToDictionary(
+    private static IReadOnlyDictionary<Blob, byte[]> Content(
         IBlobSystem blobSystem)
     {
         return blobSystem.ListBlobs().ToDictionary(
