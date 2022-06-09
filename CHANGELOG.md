@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 16.6.0 - 2022-06-09
+
 ### Changed
 
 - The `-r` and `--repository` option to have the default value `.chunkyard`
