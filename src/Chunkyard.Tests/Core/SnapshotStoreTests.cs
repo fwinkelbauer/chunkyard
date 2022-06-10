@@ -597,7 +597,11 @@ public static class SnapshotStoreTests
     public static void Mirror_Updates_Known_Blobs_And_Removes_Unknown_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
-        var blobs = Some.Blobs();
+        var blobs = Some.Blobs(
+            "blob to restore",
+            "unchanged blob",
+            "changed blob");
+
         var blobSystem = Some.BlobSystem(
             blobs,
             _ => new byte[] { 0xAB, 0xCD, 0xEF });
@@ -605,9 +609,9 @@ public static class SnapshotStoreTests
         var expectedContent = Content(blobSystem);
 
         var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
-        var blobToDelete = Some.Blob("blob to delete");
 
-        Change(blobSystem, blobToDelete);
+        blobSystem.RemoveBlob(blobs.First().Name);
+        Change(blobSystem, Some.Blob("blob to delete"));
 
         var blobToUpdate = new Blob(
             blobs.Last().Name,
@@ -703,19 +707,15 @@ public static class SnapshotStoreTests
         IBlobSystem blobSystem,
         Blob blob)
     {
-        using var memoryStream = new MemoryStream();
+        using var stream = blobSystem.BlobExists(blob.Name)
+            ? blobSystem.OpenRead(blob.Name)
+            : new MemoryStream();
 
-        if (blobSystem.BlobExists(blob.Name))
-        {
-            using var readStream = blobSystem.OpenRead(blob.Name);
-            memoryStream.CopyTo(readStream);
-        }
-
-        memoryStream.Write(new byte[] { 0xAB, 0xCD });
+        stream.Write(new byte[] { 0xAB, 0xCD });
 
         using var writeStream = blobSystem.OpenWrite(blob);
 
-        memoryStream.CopyTo(writeStream);
+        stream.CopyTo(writeStream);
     }
 
     private static IReadOnlyDictionary<Blob, byte[]> Content(
