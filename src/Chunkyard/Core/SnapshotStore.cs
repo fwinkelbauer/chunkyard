@@ -433,16 +433,10 @@ public class SnapshotStore
 
     private bool ChunkIdValid(string chunkId)
     {
-        try
-        {
-            return ChunkId.Valid(
+        return _repository.Chunks.ValueExists(chunkId)
+            && ChunkId.Valid(
                 chunkId,
                 _repository.Chunks.RetrieveValue(chunkId));
-        }
-        catch (Exception)
-        {
-            return false;
-        }
     }
 
     private bool CheckSnapshot(
