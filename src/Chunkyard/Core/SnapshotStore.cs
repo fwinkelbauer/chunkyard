@@ -241,19 +241,21 @@ public class SnapshotStore
 
         foreach (var chunkId in chunkIds)
         {
+            var encrypted = Retrieve(chunkId);
+            byte[]? decrypted = null;
+
             try
             {
-                var decrypted = _crypto.Value.Decrypt(
-                    Retrieve(chunkId));
-
-                outputStream.Write(decrypted);
+                decrypted = _crypto.Value.Decrypt(encrypted);
             }
-            catch (CryptographicException e)
+            catch (Exception e)
             {
                 throw new ChunkyardException(
                     $"Could not decrypt chunk: {ChunkId.Shorten(chunkId)}",
                     e);
             }
+
+            outputStream.Write(decrypted);
         }
     }
 
@@ -557,14 +559,14 @@ public class SnapshotStore
     {
         string WriteChunk(byte[] chunk)
         {
-            var encryptedData = _crypto.Value.Encrypt(nonce, chunk);
-            var chunkId = ChunkId.Compute(encryptedData);
+            var encrypted = _crypto.Value.Encrypt(nonce, chunk);
+            var chunkId = ChunkId.Compute(encrypted);
 
             lock (_locks.GetOrAdd(chunkId, _ => new object()))
             {
                 if (!_repository.Chunks.ValueExists(chunkId))
                 {
-                    _repository.Chunks.StoreValue(chunkId, encryptedData);
+                    _repository.Chunks.StoreValue(chunkId, encrypted);
                 }
             }
 
