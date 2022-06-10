@@ -175,8 +175,7 @@ public class SnapshotStore
         var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
 
         return GetSnapshot(
-            GetSnapshotReference(resolvedSnapshotId),
-            resolvedSnapshotId);
+            GetSnapshotReference(resolvedSnapshotId));
     }
 
     public IReadOnlyCollection<int> ListSnapshotIds()
@@ -305,7 +304,7 @@ public class SnapshotStore
         foreach (var snapshotId in snapshotIds)
         {
             var snapshotReference = GetSnapshotReference(snapshotId);
-            var snapshot = GetSnapshot(snapshotReference, snapshotId);
+            var snapshot = GetSnapshot(snapshotReference);
 
             chunkIds.UnionWith(
                 snapshotReference.ChunkIds);
@@ -370,9 +369,7 @@ public class SnapshotStore
         }
     }
 
-    private Snapshot GetSnapshot(
-        SnapshotReference snapshotReference,
-        int snapshotId)
+    private Snapshot GetSnapshot(SnapshotReference snapshotReference)
     {
         using var memoryStream = new MemoryStream();
 
@@ -387,8 +384,12 @@ public class SnapshotStore
         }
         catch (Exception e)
         {
+            var chunkIds = string.Join(
+                ' ',
+                snapshotReference.ChunkIds.Select(ChunkId.Shorten));
+
             throw new ChunkyardException(
-                $"Could not read snapshot: #{snapshotId}",
+                $"Could not read snapshot: {chunkIds}",
                 e);
         }
     }
