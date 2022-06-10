@@ -376,12 +376,12 @@ public class SnapshotStore
     {
         using var memoryStream = new MemoryStream();
 
-        RestoreChunks(
-            snapshotReference.ChunkIds,
-            memoryStream);
-
         try
         {
+            RestoreChunks(
+                snapshotReference.ChunkIds,
+                memoryStream);
+
             return Serialize.BytesToSnapshot(
                 memoryStream.ToArray());
         }
