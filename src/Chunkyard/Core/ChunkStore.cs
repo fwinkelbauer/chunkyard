@@ -61,7 +61,7 @@ public class ChunkStore
         return newLogId;
     }
 
-    public int RemoveLogReference(int logId)
+    public int RemoveLog(int logId)
     {
         var resolvedLogId = ResolveLogId(logId);
 
@@ -73,23 +73,6 @@ public class ChunkStore
         }
 
         return resolvedLogId;
-    }
-
-    public LogReference GetLogReference(int logId)
-    {
-        var resolvedLogId = ResolveLogId(logId);
-
-        try
-        {
-            return Serialize.BytesToLogReference(
-                _repository.Log.RetrieveValue(resolvedLogId));
-        }
-        catch (Exception e)
-        {
-            throw new ChunkyardException(
-                $"Could not read log reference: #{resolvedLogId}",
-                e);
-        }
     }
 
     public int ResolveLogId(int logId)
@@ -119,7 +102,7 @@ public class ChunkStore
         return logIds[position];
     }
 
-    public void CopyLogReference(IRepository repository, int logId)
+    public void CopyLog(IRepository repository, int logId)
     {
         ArgumentNullException.ThrowIfNull(repository);
 
@@ -132,6 +115,11 @@ public class ChunkStore
     public IReadOnlyCollection<int> ListLogIds()
     {
         return _repository.Log.ListKeys();
+    }
+
+    public IReadOnlyCollection<string> ListChunkIds(int logId)
+    {
+        return GetLogReference(logId).ChunkIds;
     }
 
     public IReadOnlyCollection<string> ListChunkIds()
@@ -221,6 +209,23 @@ public class ChunkStore
             }
 
             outputStream.Write(decrypted);
+        }
+    }
+
+    private LogReference GetLogReference(int logId)
+    {
+        var resolvedLogId = ResolveLogId(logId);
+
+        try
+        {
+            return Serialize.BytesToLogReference(
+                _repository.Log.RetrieveValue(resolvedLogId));
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not read log reference: #{resolvedLogId}",
+                e);
         }
     }
 

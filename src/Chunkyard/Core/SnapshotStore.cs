@@ -127,7 +127,7 @@ public class SnapshotStore
     public Snapshot GetSnapshot(int snapshotId)
     {
         return GetSnapshot(
-            _chunkStore.GetLogReference(snapshotId));
+            _chunkStore.ListChunkIds(snapshotId));
     }
 
     public IReadOnlyCollection<int> ListSnapshotIds()
@@ -159,7 +159,7 @@ public class SnapshotStore
 
     public void RemoveSnapshot(int logId)
     {
-        var removedLogId = _chunkStore.RemoveLogReference(logId);
+        var removedLogId = _chunkStore.RemoveLog(logId);
 
         _probe.RemovedSnapshot(removedLogId);
     }
@@ -211,7 +211,7 @@ public class SnapshotStore
 
         foreach (var snapshotId in snapshotIdsToCopy)
         {
-            _chunkStore.CopyLogReference(otherRepository, snapshotId);
+            _chunkStore.CopyLog(otherRepository, snapshotId);
             _probe.CopiedSnapshot(snapshotId);
         }
     }
@@ -222,38 +222,35 @@ public class SnapshotStore
 
         foreach (var snapshotId in snapshotIds)
         {
-            var logReference = _chunkStore.GetLogReference(snapshotId);
-            var snapshot = GetSnapshot(logReference);
+            var logChunkIds = _chunkStore.ListChunkIds(snapshotId);
+            var blobChunkIds = GetSnapshot(logChunkIds).BlobReferences
+                .SelectMany(br => br.ChunkIds);
 
-            chunkIds.UnionWith(
-                logReference.ChunkIds);
-
-            chunkIds.UnionWith(
-                snapshot.BlobReferences.SelectMany(
-                    br => br.ChunkIds));
+            chunkIds.UnionWith(logChunkIds);
+            chunkIds.UnionWith(blobChunkIds);
         }
 
         return chunkIds;
     }
 
-    private Snapshot GetSnapshot(LogReference logReference)
+    private Snapshot GetSnapshot(IReadOnlyCollection<string> chunkIds)
     {
         using var memoryStream = new MemoryStream();
 
         try
         {
-            RestoreChunks(logReference.ChunkIds, memoryStream);
+            _chunkStore.RestoreChunks(chunkIds, memoryStream);
 
             return Serialize.BytesToSnapshot(memoryStream.ToArray());
         }
         catch (Exception e)
         {
-            var chunkIds = string.Join(
+            var chunkIdsText = string.Join(
                 ' ',
-                logReference.ChunkIds.Select(ChunkId.Shorten));
+                chunkIds.Select(ChunkId.Shorten));
 
             throw new ChunkyardException(
-                $"Could not read snapshot: {chunkIds}",
+                $"Could not read snapshot: {chunkIdsText}",
                 e);
         }
     }
@@ -293,7 +290,7 @@ public class SnapshotStore
 
         using (var stream = createWriteStream(blob))
         {
-            RestoreChunks(blobReference.ChunkIds, stream);
+            _chunkStore.RestoreChunks(blobReference.ChunkIds, stream);
         }
 
         _probe.RestoredBlob(blobReference.Blob.Name);
