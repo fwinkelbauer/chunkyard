@@ -166,7 +166,7 @@ public class SnapshotStore
 
     public void KeepSnapshots(int latestCount)
     {
-        var snapshotIds = ListSnapshotIds();
+        var snapshotIds = _chunkStore.ListLogIds();
         var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
         var snapshotIdsToRemove = snapshotIds.Except(snapshotIdsToKeep)
             .ToArray();

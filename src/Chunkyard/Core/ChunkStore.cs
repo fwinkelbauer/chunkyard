@@ -180,9 +180,7 @@ public class ChunkStore
     public bool ChunkIdValid(string chunkId)
     {
         return _repository.Chunks.ValueExists(chunkId)
-            && ChunkId.Valid(
-                chunkId,
-                _repository.Chunks.RetrieveValue(chunkId));
+            && ChunkId.Valid(chunkId, GetChunk(chunkId));
     }
 
     public void RestoreChunks(
