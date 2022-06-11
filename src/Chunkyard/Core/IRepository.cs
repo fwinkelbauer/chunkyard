@@ -8,7 +8,7 @@ public interface IRepository
 {
     IRepository<string> Chunks { get; }
 
-    IRepository<int> Snapshots { get; }
+    IRepository<int> Log { get; }
 }
 
 public interface IRepository<T>

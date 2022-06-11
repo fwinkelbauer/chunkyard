@@ -8,7 +8,7 @@ public static class RepositoryTests
         var repository = new MemoryRepository();
 
         Repository_Can_Read_Write(repository.Chunks);
-        Repository_Can_Read_Write(repository.Snapshots);
+        Repository_Can_Read_Write(repository.Log);
     }
 
     [Fact]
@@ -18,7 +18,7 @@ public static class RepositoryTests
         var repository = new FileRepository(directory.Name);
 
         Repository_Can_Read_Write(repository.Chunks);
-        Repository_Can_Read_Write(repository.Snapshots);
+        Repository_Can_Read_Write(repository.Log);
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public static class RepositoryTests
             repository.Chunks);
 
         Repository_Throws_When_Writing_To_Same_Key<ArgumentException>(
-            repository.Snapshots);
+            repository.Log);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public static class RepositoryTests
             repository.Chunks);
 
         Repository_Throws_When_Writing_To_Same_Key<IOException>(
-            repository.Snapshots);
+            repository.Log);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public static class RepositoryTests
         var repository = new MemoryRepository();
 
         Repository_Sorts_Listed_Keys(repository.Chunks);
-        Repository_Sorts_Listed_Keys(repository.Snapshots);
+        Repository_Sorts_Listed_Keys(repository.Log);
     }
 
     [Fact]
@@ -82,7 +82,7 @@ public static class RepositoryTests
         var repository = new FileRepository(directory.Name);
 
         Repository_Sorts_Listed_Keys(repository.Chunks);
-        Repository_Sorts_Listed_Keys(repository.Snapshots);
+        Repository_Sorts_Listed_Keys(repository.Log);
     }
 
     private static void Repository_Sorts_Listed_Keys(IRepository<string> repository)

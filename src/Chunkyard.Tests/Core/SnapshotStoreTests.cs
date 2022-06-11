@@ -138,7 +138,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             snapshotStore.GetSnapshot(snapshotId),
-            snapshotStore.GetSnapshot(SnapshotStore.LatestSnapshotId));
+            snapshotStore.GetSnapshot(ChunkStore.LatestLogId));
     }
 
     [Fact]
@@ -153,8 +153,7 @@ public static class SnapshotStoreTests
             () => snapshotStore.GetSnapshot(snapshotId + 1));
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.GetSnapshot(
-                SnapshotStore.SecondLatestSnapshotId));
+            () => snapshotStore.GetSnapshot(ChunkStore.SecondLatestLogId));
     }
 
     [Fact]
@@ -171,8 +170,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             snapshotStore.GetSnapshot(snapshotId),
-            snapshotStore.GetSnapshot(
-                SnapshotStore.SecondLatestSnapshotId));
+            snapshotStore.GetSnapshot(ChunkStore.SecondLatestLogId));
     }
 
     [Fact]
@@ -181,8 +179,7 @@ public static class SnapshotStoreTests
         var snapshotStore = Some.SnapshotStore();
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.GetSnapshot(
-                SnapshotStore.LatestSnapshotId));
+            () => snapshotStore.GetSnapshot(ChunkStore.LatestLogId));
     }
 
     [Fact]
@@ -442,7 +439,7 @@ public static class SnapshotStoreTests
         snapshotStore.GarbageCollect();
 
         Assert.Empty(repository.Chunks.ListKeys());
-        Assert.Empty(repository.Snapshots.ListKeys());
+        Assert.Empty(repository.Log.ListKeys());
     }
 
     [Fact]
@@ -455,7 +452,7 @@ public static class SnapshotStoreTests
         _ = snapshotStore.StoreSnapshot(blobSystem);
 
         snapshotStore.RemoveSnapshot(snapshotId);
-        snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
+        snapshotStore.RemoveSnapshot(ChunkStore.LatestLogId);
 
         Assert.Empty(snapshotStore.ListSnapshotIds());
     }
@@ -466,8 +463,7 @@ public static class SnapshotStoreTests
         var snapshotStore = Some.SnapshotStore();
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.RemoveSnapshot(
-                SnapshotStore.LatestSnapshotId));
+            () => snapshotStore.RemoveSnapshot(ChunkStore.LatestLogId));
     }
 
     [Fact]
@@ -553,8 +549,8 @@ public static class SnapshotStoreTests
             otherRepository.Chunks.ListKeys());
 
         Assert.Equal(
-            repository.Snapshots.ListKeys(),
-            otherRepository.Snapshots.ListKeys());
+            repository.Log.ListKeys(),
+            otherRepository.Log.ListKeys());
     }
 
     [Fact]
@@ -586,7 +582,7 @@ public static class SnapshotStoreTests
         _ = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Change(repository.Snapshots, repository.Snapshots.ListKeys());
+        Change(repository.Log, repository.Log.ListKeys());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(

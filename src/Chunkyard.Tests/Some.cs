@@ -26,9 +26,10 @@ internal static class Some
         string password = "secret")
     {
         return new SnapshotStore(
-            repository ?? Repository(),
-            fastCdc ?? new FastCdc(),
-            new DummyPrompt(password),
+            new ChunkStore(
+                repository ?? Repository(),
+                fastCdc ?? new FastCdc(),
+                new DummyPrompt(password)),
             new DummyProbe(),
             new DummyClock(DateUtc));
     }

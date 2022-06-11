@@ -12,7 +12,7 @@ public class FileRepository : IRepository
             chunkId => Path.Combine(chunkId[..2], chunkId),
             file => Path.GetFileNameWithoutExtension(file));
 
-        Snapshots = new FileRepository<int>(
+        Log = new FileRepository<int>(
             Path.Combine(directory, "snapshots"),
             number => number.ToString(),
             file => Convert.ToInt32(file));
@@ -20,7 +20,7 @@ public class FileRepository : IRepository
 
     public IRepository<string> Chunks { get; }
 
-    public IRepository<int> Snapshots { get; }
+    public IRepository<int> Log { get; }
 }
 
 internal class FileRepository<T> : IRepository<T>

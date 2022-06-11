@@ -4,7 +4,7 @@ namespace Chunkyard.Core;
 /// A utility class to serialize objects into bytes and back.
 /// </summary>
 [JsonSerializable(typeof(Snapshot))]
-[JsonSerializable(typeof(SnapshotReference))]
+[JsonSerializable(typeof(LogReference))]
 public partial class Serialize : JsonSerializerContext
 {
     public static byte[] SnapshotToBytes(Snapshot snapshot)
@@ -14,12 +14,11 @@ public partial class Serialize : JsonSerializerContext
             Default.Snapshot);
     }
 
-    public static byte[] SnapshotReferenceToBytes(
-        SnapshotReference snapshotReference)
+    public static byte[] LogReferenceToBytes(LogReference logReference)
     {
         return JsonSerializer.SerializeToUtf8Bytes(
-            snapshotReference,
-            Default.SnapshotReference);
+            logReference,
+            Default.LogReference);
     }
 
     public static Snapshot BytesToSnapshot(byte[] json)
@@ -28,9 +27,9 @@ public partial class Serialize : JsonSerializerContext
             ?? throw new ArgumentNullException(nameof(json));
     }
 
-    public static SnapshotReference BytesToSnapshotReference(byte[] json)
+    public static LogReference BytesToLogReference(byte[] json)
     {
-        return JsonSerializer.Deserialize(json, Default.SnapshotReference)
+        return JsonSerializer.Deserialize(json, Default.LogReference)
             ?? throw new ArgumentNullException(nameof(json));
     }
 }

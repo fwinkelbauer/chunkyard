@@ -227,12 +227,13 @@ internal static class Commands
         string repositoryPath)
     {
         return new SnapshotStore(
-            CreateRepository(repositoryPath),
-            new FastCdc(),
-            new MultiPrompt(
-                new EnvironmentPrompt(),
-                new SecretToolPrompt(repositoryPath),
-                new ConsolePrompt()),
+            new ChunkStore(
+                CreateRepository(repositoryPath),
+                new FastCdc(),
+                new MultiPrompt(
+                    new EnvironmentPrompt(),
+                    new SecretToolPrompt(repositoryPath),
+                    new ConsolePrompt())),
             new ConsoleProbe(),
             new RealClock());
     }

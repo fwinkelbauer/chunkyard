@@ -41,7 +41,7 @@ public class CheckOptions
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = ChunkStore.LatestLogId)]
     public int SnapshotId { get; }
 
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
@@ -117,10 +117,10 @@ public class DiffOptions
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
-    [Option('f', "first", Required = false, HelpText = "The first snapshot ID.", Default = SnapshotStore.SecondLatestSnapshotId)]
+    [Option('f', "first", Required = false, HelpText = "The first snapshot ID.", Default = ChunkStore.SecondLatestLogId)]
     public int FirstSnapshotId { get; }
 
-    [Option('s', "second", Required = false, HelpText = "The second snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
+    [Option('s', "second", Required = false, HelpText = "The second snapshot ID.", Default = ChunkStore.LatestLogId)]
     public int SecondSnapshotId { get; }
 
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
@@ -211,7 +211,7 @@ public class RestoreOptions
     [Option('d', "directory", Required = false, HelpText = "The directory to restore into.", Default = ".")]
     public string Directory { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = ChunkStore.LatestLogId)]
     public int SnapshotId { get; }
 
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
@@ -246,7 +246,7 @@ public class MirrorOptions
     [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude.")]
     public IEnumerable<string> ExcludePatterns { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = ChunkStore.LatestLogId)]
     public int SnapshotId { get; }
 
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
@@ -274,7 +274,7 @@ public class ShowOptions
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId)]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = ChunkStore.LatestLogId)]
     public int SnapshotId { get; }
 
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
