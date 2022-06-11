@@ -151,7 +151,7 @@ public class SnapshotStore
 
         var snapshot = GetSnapshot(snapshotId);
 
-        var mirroredBlobs = snapshot.BlobReferences
+        _ = snapshot.BlobReferences
             .AsParallel()
             .Select(br => MirrorBlob(blobSystem, br))
             .ToArray();
@@ -161,7 +161,7 @@ public class SnapshotStore
 
         var blobNamesToRemove = blobSystem.ListBlobs()
             .Select(blob => blob.Name)
-            .Except(mirroredBlobs.Select(blob => blob.Name));
+            .Except(snapshot.BlobReferences.Select(br => br.Blob.Name));
 
         foreach (var blobName in blobNamesToRemove)
         {
