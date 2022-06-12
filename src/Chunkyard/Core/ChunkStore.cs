@@ -43,7 +43,7 @@ public class ChunkStore
 
     public int? CurrentLogId { get; private set; }
 
-    public int AppendToLog(IReadOnlyCollection<string> chunkIds)
+    public int WriteLog(IReadOnlyCollection<string> chunkIds)
     {
         var logReference = new LogReference(
             _crypto.Value.Salt,
@@ -172,12 +172,12 @@ public class ChunkStore
         repository.Chunks.StoreValue(chunkId, chunk);
     }
 
-    public bool ChunkIdExists(string chunkId)
+    public bool ChunkExists(string chunkId)
     {
         return _repository.Chunks.ValueExists(chunkId);
     }
 
-    public bool ChunkIdValid(string chunkId)
+    public bool ChunkValid(string chunkId)
     {
         return _repository.Chunks.ValueExists(chunkId)
             && ChunkId.Valid(chunkId, GetChunk(chunkId));

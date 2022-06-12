@@ -44,7 +44,7 @@ public class SnapshotStore
             _clock.NowUtc(),
             WriteBlobs(blobSystem));
 
-        var logId = _chunkStore.AppendToLog(
+        var logId = _chunkStore.WriteLog(
             WriteSnapshot(newSnapshot));
 
         _probe.StoredSnapshot(logId);
@@ -57,7 +57,7 @@ public class SnapshotStore
         return CheckSnapshot(
             snapshotId,
             includeFuzzy,
-            _chunkStore.ChunkIdExists);
+            _chunkStore.ChunkExists);
     }
 
     public bool CheckSnapshotValid(int snapshotId, Fuzzy includeFuzzy)
@@ -65,7 +65,7 @@ public class SnapshotStore
         return CheckSnapshot(
             snapshotId,
             includeFuzzy,
-            _chunkStore.ChunkIdValid);
+            _chunkStore.ChunkValid);
     }
 
     public void RestoreSnapshot(
