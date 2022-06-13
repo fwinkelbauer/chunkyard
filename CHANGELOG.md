@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 16.7.0 - 2022-06-13
+
 ### Added
 
 - The `-s` option to `cat` so that it can also print snapshots
