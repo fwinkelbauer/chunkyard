@@ -94,6 +94,7 @@ public static class SnapshotStoreTests
         var snapshot = snapshotStore.GetSnapshot(snapshotId);
 
         Assert.Empty(snapshot.BlobReferences);
+        Assert.NotEmpty(snapshotStore.ListChunkIds(snapshotId));
     }
 
     [Fact]

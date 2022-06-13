@@ -1,20 +1,25 @@
 namespace Chunkyard;
 
-[Verb("cat", HelpText = "Export or print the value of a set of chunk IDs.")]
+[Verb("cat", HelpText = "Export or print the value of a snapshot or a set of chunk IDs.")]
 public class CatOptions
 {
     public CatOptions(
         IEnumerable<string> chunkIds,
+        int snapshotId,
         string repository,
         string? export)
     {
         ChunkIds = chunkIds;
+        SnapshotId = snapshotId;
         Repository = repository;
         Export = export;
     }
 
-    [Option('c', "chunk", Required = true, HelpText = "The chunk IDs.")]
+    [Option('c', "chunk", Required = true, HelpText = "The chunk IDs.", SetName = "chunks")]
     public IEnumerable<string> ChunkIds { get; }
+
+    [Option('s', "snapshot", Required = true, HelpText = "The snapshot ID.", SetName = "snapshots")]
+    public int SnapshotId { get; }
 
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }

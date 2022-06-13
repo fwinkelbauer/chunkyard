@@ -185,11 +185,14 @@ internal static class Commands
     public static void Cat(CatOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
+        var chunkIds = o.ChunkIds.Any()
+            ? o.ChunkIds
+            : snapshotStore.ListChunkIds(o.SnapshotId);
 
         if (string.IsNullOrEmpty(o.Export))
         {
             using var stream = new MemoryStream();
-            snapshotStore.RestoreChunks(o.ChunkIds, stream);
+            snapshotStore.RestoreChunks(chunkIds, stream);
 
             Console.WriteLine(
                 Encoding.UTF8.GetString(stream.ToArray()));
@@ -201,7 +204,7 @@ internal static class Commands
                 FileMode.CreateNew,
                 FileAccess.Write);
 
-            snapshotStore.RestoreChunks(o.ChunkIds, stream);
+            snapshotStore.RestoreChunks(chunkIds, stream);
         }
     }
 

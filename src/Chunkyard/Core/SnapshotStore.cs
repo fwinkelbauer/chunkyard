@@ -135,6 +135,11 @@ public class SnapshotStore
         return _chunkStore.ListLogIds();
     }
 
+    public IReadOnlyCollection<string> ListChunkIds(int snapshotId)
+    {
+        return _chunkStore.ListChunkIds(snapshotId);
+    }
+
     public IReadOnlyCollection<BlobReference> FilterSnapshot(
         int snapshotId,
         Fuzzy includeFuzzy)
