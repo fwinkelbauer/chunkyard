@@ -10,10 +10,7 @@ public class SnapshotStore
     private readonly IProbe _probe;
     private readonly IClock _clock;
 
-    public SnapshotStore(
-        ChunkStore chunkStore,
-        IProbe probe,
-        IClock clock)
+    public SnapshotStore(ChunkStore chunkStore, IProbe probe, IClock clock)
     {
         _chunkStore = chunkStore;
         _probe = probe;
@@ -182,9 +179,7 @@ public class SnapshotStore
         }
     }
 
-    public void RestoreChunks(
-        IEnumerable<string> chunkIds,
-        Stream outputStream)
+    public void RestoreChunks(IEnumerable<string> chunkIds, Stream outputStream)
     {
         _chunkStore.RestoreChunks(chunkIds, outputStream);
     }
@@ -221,7 +216,8 @@ public class SnapshotStore
         }
     }
 
-    private IReadOnlyCollection<string> ListChunkIds(IEnumerable<int> snapshotIds)
+    private IReadOnlyCollection<string> ListChunkIds(
+        IEnumerable<int> snapshotIds)
     {
         var chunkIds = new HashSet<string>();
 
