@@ -15,10 +15,10 @@ public class CatOptions
         Export = export;
     }
 
-    [Option('c', "chunk", Required = true, HelpText = "The chunk IDs.", SetName = "chunks")]
+    [Option('c', "chunk", Required = false, HelpText = "The chunk IDs.", SetName = "chunks")]
     public IEnumerable<string> ChunkIds { get; }
 
-    [Option('s', "snapshot", Required = true, HelpText = "The snapshot ID.", SetName = "snapshots")]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = ChunkStore.LatestLogId, SetName = "snapshots")]
     public int SnapshotId { get; }
 
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
