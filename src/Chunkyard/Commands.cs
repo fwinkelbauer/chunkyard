@@ -55,21 +55,14 @@ internal static class Commands
             o.SnapshotId,
             new Fuzzy(o.IncludePatterns));
 
-        if (o.ChunksOnly)
-        {
-            var chunkIds = blobReferences.SelectMany(b => b.ChunkIds);
+        var contents = o.ChunksOnly
+            ? blobReferences.SelectMany(br => br.ChunkIds)
+                .Select(ChunkId.Shorten)
+            : blobReferences.Select(br => br.Blob.Name);
 
-            foreach (var chunkId in chunkIds)
-            {
-                Console.WriteLine(ChunkId.Shorten(chunkId));
-            }
-        }
-        else
+        foreach (var content in contents)
         {
-            foreach (var blobReference in blobReferences)
-            {
-                Console.WriteLine(blobReference.Blob.Name);
-            }
+            Console.WriteLine(content);
         }
     }
 
@@ -142,13 +135,13 @@ internal static class Commands
 
         var diff = o.ChunksOnly
             ? DiffSet.Create(
-                first.SelectMany(b => b.ChunkIds),
-                second.SelectMany(b => b.ChunkIds),
+                first.SelectMany(br => br.ChunkIds),
+                second.SelectMany(br => br.ChunkIds),
                 chunkId => ChunkId.Shorten(chunkId))
             : DiffSet.Create(
                 first,
                 second,
-                blobReference => blobReference.Blob.Name);
+                br => br.Blob.Name);
 
         PrintDiff(diff);
     }
