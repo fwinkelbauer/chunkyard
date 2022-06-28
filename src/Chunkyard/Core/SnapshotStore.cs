@@ -199,6 +199,11 @@ public class SnapshotStore
             .Where(id => id > otherSnapshotIdMax)
             .ToArray();
 
+        if (snapshotIdsToCopy.Length == 0)
+        {
+            return;
+        }
+
         var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
             .Except(otherRepository.Chunks.ListKeys())
             .ToArray();
