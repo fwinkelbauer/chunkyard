@@ -57,7 +57,6 @@ internal static class Commands
 
         var contents = o.ChunksOnly
             ? blobReferences.SelectMany(br => br.ChunkIds)
-                .Select(ChunkId.Shorten)
             : blobReferences.Select(br => br.Blob.Name);
 
         foreach (var content in contents)
@@ -137,7 +136,7 @@ internal static class Commands
             ? DiffSet.Create(
                 first.SelectMany(br => br.ChunkIds),
                 second.SelectMany(br => br.ChunkIds),
-                chunkId => ChunkId.Shorten(chunkId))
+                chunkId => chunkId)
             : DiffSet.Create(
                 first,
                 second,

@@ -16,11 +16,4 @@ public static class ChunkId
     {
         return Compute(chunk).Equals(chunkId);
     }
-
-    public static string Shorten(string chunkId)
-    {
-        ArgumentNullException.ThrowIfNull(chunkId);
-
-        return chunkId.Substring(0, 12);
-    }
 }

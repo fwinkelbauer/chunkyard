@@ -166,7 +166,7 @@ public class ChunkStore
         if (!ChunkId.Valid(chunkId, chunk))
         {
             throw new ChunkyardException(
-                $"Invalid chunk: {ChunkId.Shorten(chunkId)}");
+                $"Invalid chunk: {chunkId}");
         }
 
         repository.Chunks.StoreValue(chunkId, chunk);
@@ -202,7 +202,7 @@ public class ChunkStore
             catch (Exception e)
             {
                 throw new ChunkyardException(
-                    $"Could not decrypt chunk: {ChunkId.Shorten(chunkId)}",
+                    $"Could not decrypt chunk: {chunkId}",
                     e);
             }
 
@@ -236,7 +236,7 @@ public class ChunkStore
         catch (Exception e)
         {
             throw new ChunkyardException(
-                $"Could not read chunk: {ChunkId.Shorten(chunkId)}",
+                $"Could not read chunk: {chunkId}",
                 e);
         }
     }

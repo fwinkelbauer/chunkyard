@@ -251,9 +251,7 @@ public class SnapshotStore
         }
         catch (Exception e)
         {
-            var chunkIdsText = string.Join(
-                ' ',
-                chunkIds.Select(ChunkId.Shorten));
+            var chunkIdsText = string.Join(' ', chunkIds);
 
             throw new ChunkyardException(
                 $"Could not read snapshot: {chunkIdsText}",
