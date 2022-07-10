@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 16.8.0 - 2022-07-10
+
 ### Changed
 
 - All short occurrences of `ChunkIds`
