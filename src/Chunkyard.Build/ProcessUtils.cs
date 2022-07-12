@@ -30,18 +30,17 @@ internal static class ProcessUtils
         Run(new ProcessStartInfo(fileName, arguments), validExitCodes);
     }
 
-    public static string RunQuery(
+    public static void RunQuery(
         ProcessStartInfo startInfo,
+        Action<string> processOutput,
         int[]? validExitCodes = null)
     {
         using var process = Start(startInfo);
-
-        var builder = new StringBuilder();
         string? line;
 
         while ((line = process.StandardOutput.ReadLine()) != null)
         {
-            builder.Append(line);
+            processOutput(line);
         }
 
         process.WaitForExit();
@@ -53,8 +52,6 @@ internal static class ProcessUtils
             throw new InvalidOperationException(
                 $"Exit code of '{startInfo.FileName}' was {process.ExitCode}");
         }
-
-        return builder.ToString();
     }
 
     public static string RunQuery(
@@ -62,12 +59,17 @@ internal static class ProcessUtils
         string arguments,
         int[]? validExitCodes = null)
     {
-        return RunQuery(
+        var builder = new StringBuilder();
+
+        RunQuery(
             new ProcessStartInfo(fileName, arguments)
             {
                 RedirectStandardOutput = true
             },
+            line => builder.AppendLine(line),
             validExitCodes);
+
+        return builder.ToString();
     }
 
     private static Process Start(ProcessStartInfo startInfo)
