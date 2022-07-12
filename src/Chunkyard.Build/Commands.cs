@@ -13,11 +13,14 @@ internal static class Commands
 
     public static void Clean()
     {
+        var expressions = File.ReadLines(".cleanignore")
+            .Select(l => l.Trim())
+            .Where(l => !string.IsNullOrEmpty(l) && !l.StartsWith("#"))
+            .Select(l => $"-e {l}");
+
         Git(
             "clean -dfx",
-            "-e .vs",
-            "-e launchSettings.json",
-            "-e *.Build");
+            string.Join(' ', expressions));
     }
 
     public static void Build()
