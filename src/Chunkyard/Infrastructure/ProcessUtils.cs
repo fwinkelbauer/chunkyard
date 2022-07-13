@@ -7,13 +7,38 @@ public static class ProcessUtils
 {
     public static void Run(
         ProcessStartInfo startInfo,
-        int[]? validExitCodes = null)
+        int[]? validExitCodes = null,
+        Action<string>? processStandardOutput = null)
     {
         ArgumentNullException.ThrowIfNull(startInfo);
 
-        using var process = Start(startInfo);
+        using var process = Process.Start(startInfo);
 
-        EnsureValidExitCode(process, validExitCodes);
+        if (process == null)
+        {
+            throw new InvalidOperationException(
+                $"Could not run '{startInfo.FileName}'");
+        }
+
+        if (processStandardOutput != null)
+        {
+            string? line;
+
+            while ((line = process.StandardOutput.ReadLine()) != null)
+            {
+                processStandardOutput(line);
+            }
+        }
+
+        process.WaitForExit();
+
+        validExitCodes ??= new[] { 0 };
+
+        if (!validExitCodes.Contains(process.ExitCode))
+        {
+            throw new InvalidOperationException(
+                $"Exit code of '{startInfo.FileName}' was {process.ExitCode}");
+        }
     }
 
     public static void Run(
@@ -28,19 +53,12 @@ public static class ProcessUtils
         ProcessStartInfo startInfo,
         int[]? validExitCodes = null)
     {
-        ArgumentNullException.ThrowIfNull(startInfo);
-
-        using var process = Start(startInfo);
-
         var builder = new StringBuilder();
-        string? line;
 
-        while ((line = process.StandardOutput.ReadLine()) != null)
-        {
-            builder.Append(line);
-        }
-
-        EnsureValidExitCode(process, validExitCodes);
+        Run(
+            startInfo,
+            validExitCodes,
+            line => builder.AppendLine(line));
 
         return builder.ToString();
     }
@@ -56,33 +74,5 @@ public static class ProcessUtils
                 RedirectStandardOutput = true
             },
             validExitCodes);
-    }
-
-    private static void EnsureValidExitCode(
-        Process process,
-        int[]? validExitCodes)
-    {
-        process.WaitForExit();
-
-        validExitCodes ??= new[] { 0 };
-
-        if (!validExitCodes.Contains(process.ExitCode))
-        {
-            throw new InvalidOperationException(
-                $"Exit code of '{process.StartInfo.FileName}' was {process.ExitCode}");
-        }
-    }
-
-    private static Process Start(ProcessStartInfo startInfo)
-    {
-        var process = Process.Start(startInfo);
-
-        if (process == null)
-        {
-            throw new InvalidOperationException(
-                $"Could not run '{startInfo.FileName}'");
-        }
-
-        return process;
     }
 }

@@ -7,9 +7,28 @@ internal static class ProcessUtils
 {
     public static void Run(
         ProcessStartInfo startInfo,
-        int[]? validExitCodes = null)
+        int[]? validExitCodes = null,
+        Action<string>? processStandardOutput = null)
     {
-        using var process = Start(startInfo);
+        ArgumentNullException.ThrowIfNull(startInfo);
+
+        using var process = Process.Start(startInfo);
+
+        if (process == null)
+        {
+            throw new InvalidOperationException(
+                $"Could not run '{startInfo.FileName}'");
+        }
+
+        if (processStandardOutput != null)
+        {
+            string? line;
+
+            while ((line = process.StandardOutput.ReadLine()) != null)
+            {
+                processStandardOutput(line);
+            }
+        }
 
         process.WaitForExit();
 
@@ -30,28 +49,18 @@ internal static class ProcessUtils
         Run(new ProcessStartInfo(fileName, arguments), validExitCodes);
     }
 
-    public static void RunQuery(
+    public static string RunQuery(
         ProcessStartInfo startInfo,
-        Action<string> processOutput,
         int[]? validExitCodes = null)
     {
-        using var process = Start(startInfo);
-        string? line;
+        var builder = new StringBuilder();
 
-        while ((line = process.StandardOutput.ReadLine()) != null)
-        {
-            processOutput(line);
-        }
+        Run(
+            startInfo,
+            validExitCodes,
+            line => builder.AppendLine(line));
 
-        process.WaitForExit();
-
-        validExitCodes ??= new[] { 0 };
-
-        if (!validExitCodes.Contains(process.ExitCode))
-        {
-            throw new InvalidOperationException(
-                $"Exit code of '{startInfo.FileName}' was {process.ExitCode}");
-        }
+        return builder.ToString();
     }
 
     public static string RunQuery(
@@ -59,29 +68,11 @@ internal static class ProcessUtils
         string arguments,
         int[]? validExitCodes = null)
     {
-        var builder = new StringBuilder();
-
-        RunQuery(
+        return RunQuery(
             new ProcessStartInfo(fileName, arguments)
             {
                 RedirectStandardOutput = true
             },
-            line => builder.AppendLine(line),
             validExitCodes);
-
-        return builder.ToString();
-    }
-
-    private static Process Start(ProcessStartInfo startInfo)
-    {
-        var process = Process.Start(startInfo);
-
-        if (process == null)
-        {
-            throw new InvalidOperationException(
-                $"Could not run '{startInfo.FileName}'");
-        }
-
-        return process;
     }
 }
