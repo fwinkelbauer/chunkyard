@@ -1,4 +1,5 @@
+*.Build
+
 .vs/
 launchSettings.json
 *.user
-*.Build
