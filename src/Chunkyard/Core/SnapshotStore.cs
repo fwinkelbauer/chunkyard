@@ -188,14 +188,13 @@ public class SnapshotStore
     {
         ArgumentNullException.ThrowIfNull(otherRepository);
 
-        var localSnapshotIds = _chunkStore.ListLogIds();
         var otherSnapshotIds = otherRepository.Log.ListKeys();
 
         var otherSnapshotIdMax = otherSnapshotIds.Count == 0
             ? ChunkStore.LatestLogId
             : otherSnapshotIds.Max();
 
-        var snapshotIdsToCopy = localSnapshotIds
+        var snapshotIdsToCopy = _chunkStore.ListLogIds()
             .Where(id => id > otherSnapshotIdMax)
             .ToArray();
 
