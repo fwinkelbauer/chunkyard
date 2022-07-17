@@ -244,7 +244,7 @@ public class ChunkStore
     private int? FetchCurrentLogId()
     {
         return _repository.Log.ListKeys()
-            .Select(i => i as int?)
+            .Select(id => id as int?)
             .Max();
     }
 }
