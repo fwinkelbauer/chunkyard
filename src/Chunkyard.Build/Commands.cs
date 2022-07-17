@@ -9,11 +9,12 @@ internal static class Commands
     private const string Solution = "src/Chunkyard.sln";
     private const string MainProject = "src/Chunkyard/Chunkyard.csproj";
     private const string Changelog = "CHANGELOG.md";
+    private const string CleanIgnore = ".cleanignore";
     private const string Configuration = "Release";
 
     public static void Clean()
     {
-        var expressions = File.ReadLines(".cleanignore")
+        var expressions = File.ReadLines(CleanIgnore)
             .Select(l => l.Trim())
             .Where(l => !string.IsNullOrEmpty(l) && !l.StartsWith("#"))
             .Select(l => $"-e {l}");
