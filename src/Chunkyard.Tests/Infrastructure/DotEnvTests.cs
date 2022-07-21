@@ -20,7 +20,7 @@ public static class DotEnvTests
         using var directory = new DisposableDirectory();
         using var subDirectory = new DisposableDirectory(directory.Name);
 
-        subDirectory.Create();
+        Directory.CreateDirectory(subDirectory.Name);
 
         File.WriteAllLines(
             Path.Combine(directory.Name, DotEnv.FileName),

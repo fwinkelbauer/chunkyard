@@ -18,9 +18,4 @@ internal sealed class DisposableDirectory : IDisposable
             Directory.Delete(Name, true);
         }
     }
-
-    public void Create()
-    {
-        Directory.CreateDirectory(Name);
-    }
 }
