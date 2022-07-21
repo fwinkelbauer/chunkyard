@@ -8,7 +8,6 @@ public class ChunkStore
     private readonly IRepository _repository;
     private readonly FastCdc _fastCdc;
     private readonly Lazy<Crypto> _crypto;
-    private readonly ConcurrentDictionary<string, object> _locks;
 
     public ChunkStore(IRepository repository, FastCdc fastCdc, IPrompt prompt)
     {
@@ -35,8 +34,6 @@ public class ChunkStore
                     logReference.Iterations);
             }
         });
-
-        _locks = new ConcurrentDictionary<string, object>();
 
         CurrentLogId = FetchCurrentLogId();
     }
@@ -139,13 +136,7 @@ public class ChunkStore
             var encrypted = _crypto.Value.Encrypt(nonce, chunk);
             var chunkId = ChunkId.Compute(encrypted);
 
-            lock (_locks.GetOrAdd(chunkId, _ => new object()))
-            {
-                if (!_repository.Chunks.ValueExists(chunkId))
-                {
-                    _repository.Chunks.StoreValue(chunkId, encrypted);
-                }
-            }
+            _repository.Chunks.StoreValueIfNotExists(chunkId, encrypted);
 
             return chunkId;
         }

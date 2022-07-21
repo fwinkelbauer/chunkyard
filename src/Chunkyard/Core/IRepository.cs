@@ -15,6 +15,8 @@ public interface IRepository<T>
 {
     void StoreValue(T key, byte[] value);
 
+    void StoreValueIfNotExists(T key, byte[] value);
+
     byte[] RetrieveValue(T key);
 
     bool ValueExists(T key);

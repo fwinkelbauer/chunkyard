@@ -24,10 +24,12 @@ public class FileRepository : IRepository
 }
 
 internal class FileRepository<T> : IRepository<T>
+    where T : notnull
 {
     private readonly string _directory;
     private readonly Func<T, string> _toFile;
     private readonly Func<string, T> _toKey;
+    private readonly ConcurrentDictionary<T, object> _locks;
 
     public FileRepository(
         string directory,
@@ -37,6 +39,8 @@ internal class FileRepository<T> : IRepository<T>
         _directory = Path.GetFullPath(directory);
         _toFile = toFile;
         _toKey = toKey;
+
+        _locks = new ConcurrentDictionary<T, object>();
     }
 
     public void StoreValue(T key, byte[] value)
@@ -51,6 +55,17 @@ internal class FileRepository<T> : IRepository<T>
             FileAccess.Write);
 
         fileStream.Write(value);
+    }
+
+    public void StoreValueIfNotExists(T key, byte[] value)
+    {
+        lock (_locks.GetOrAdd(key, _ => new object()))
+        {
+            if (!ValueExists(key))
+            {
+                StoreValue(key, value);
+            }
+        }
     }
 
     public byte[] RetrieveValue(T key)

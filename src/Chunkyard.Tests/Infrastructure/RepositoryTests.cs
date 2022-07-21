@@ -23,29 +23,49 @@ public static class RepositoryTests
     }
 
     [Fact]
-    public static void MemoryRepository_Throws_When_Writing_To_Same_Key()
+    public static void MemoryRepository_StoreValue_Throws_When_Writing_To_Same_Key()
     {
         var repository = new MemoryRepository();
 
-        Repository_Throws_When_Writing_To_Same_Key<ArgumentException>(
+        Repository_StoreValue_Throws_When_Writing_To_Same_Key<ArgumentException>(
             repository.Chunks);
 
-        Repository_Throws_When_Writing_To_Same_Key<ArgumentException>(
+        Repository_StoreValue_Throws_When_Writing_To_Same_Key<ArgumentException>(
             repository.Log);
     }
 
     [Fact]
-    public static void FileRepository_Throws_When_Writing_To_Same_Key()
+    public static void FileRepository_StoreValue_Throws_When_Writing_To_Same_Key()
     {
         using var directory = new DisposableDirectory();
 
         var repository = new FileRepository(directory.Name);
 
-        Repository_Throws_When_Writing_To_Same_Key<IOException>(
+        Repository_StoreValue_Throws_When_Writing_To_Same_Key<IOException>(
             repository.Chunks);
 
-        Repository_Throws_When_Writing_To_Same_Key<IOException>(
+        Repository_StoreValue_Throws_When_Writing_To_Same_Key<IOException>(
             repository.Log);
+    }
+
+    [Fact]
+    public static void MemoryRepository_StoreValueIfNotExists_Writes_Key_Once()
+    {
+        var repository = new MemoryRepository();
+
+        Repository_StoreValueIfNotExists_Writes_Key_Once(repository.Chunks);
+        Repository_StoreValueIfNotExists_Writes_Key_Once(repository.Log);
+    }
+
+    [Fact]
+    public static void FileRepository_StoreValueIfNotExists_Writes_Key_Once()
+    {
+        using var directory = new DisposableDirectory();
+
+        var repository = new FileRepository(directory.Name);
+
+        Repository_StoreValueIfNotExists_Writes_Key_Once(repository.Chunks);
+        Repository_StoreValueIfNotExists_Writes_Key_Once(repository.Log);
     }
 
     [Fact]
@@ -117,7 +137,7 @@ public static class RepositoryTests
             repository.ListKeys());
     }
 
-    private static void Repository_Throws_When_Writing_To_Same_Key<TException>(
+    private static void Repository_StoreValue_Throws_When_Writing_To_Same_Key<TException>(
         IRepository<string> repository)
         where TException : Exception
     {
@@ -130,7 +150,7 @@ public static class RepositoryTests
             () => repository.StoreValue(key, bytes));
     }
 
-    private static void Repository_Throws_When_Writing_To_Same_Key<TException>(
+    private static void Repository_StoreValue_Throws_When_Writing_To_Same_Key<TException>(
         IRepository<int> repository)
         where TException : Exception
     {
@@ -141,6 +161,36 @@ public static class RepositoryTests
 
         Assert.Throws<TException>(
             () => repository.StoreValue(key, bytes));
+    }
+
+    private static void Repository_StoreValueIfNotExists_Writes_Key_Once(
+        IRepository<string> repository)
+    {
+        var key = "aa";
+        var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+
+        repository.StoreValueIfNotExists(key, expectedBytes);
+
+        repository.StoreValueIfNotExists(
+            key,
+            new byte[] { 0xAA, 0xAA, 0xAA, 0xAA });
+
+        Assert.Equal(expectedBytes, repository.RetrieveValue(key));
+    }
+
+    private static void Repository_StoreValueIfNotExists_Writes_Key_Once(
+        IRepository<int> repository)
+    {
+        var key = 15;
+        var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+
+        repository.StoreValueIfNotExists(key, expectedBytes);
+
+        repository.StoreValueIfNotExists(
+            key,
+            new byte[] { 0xAA, 0xAA, 0xAA, 0xAA });
+
+        Assert.Equal(expectedBytes, repository.RetrieveValue(key));
     }
 
     private static void Repository_Can_Read_Write(

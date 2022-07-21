@@ -33,6 +33,17 @@ internal class MemoryRepository<T> : IRepository<T>
         }
     }
 
+    public void StoreValueIfNotExists(T key, byte[] value)
+    {
+        lock (_lock)
+        {
+            if (!_valuesPerKey.ContainsKey(key))
+            {
+                _valuesPerKey.Add(key, value.ToArray());
+            }
+        }
+    }
+
     public byte[] RetrieveValue(T key)
     {
         lock (_lock)
