@@ -5,20 +5,6 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 internal static class DirectoryUtils
 {
-    public static string GetParent(string path)
-    {
-        var parent = Path.GetDirectoryName(path);
-
-        if (string.IsNullOrEmpty(parent))
-        {
-            throw new ArgumentException(
-                $"Path '{path}' does not have a parent directory",
-                nameof(path));
-        }
-
-        return parent;
-    }
-
     public static string GetRootParent(string path)
     {
         var parent = Path.GetDirectoryName(path);
@@ -133,5 +119,19 @@ internal static class DirectoryUtils
 
             currentDirectory = Path.GetDirectoryName(currentDirectory);
         } while (!string.IsNullOrEmpty(currentDirectory));
+    }
+
+    private static string GetParent(string path)
+    {
+        var parent = Path.GetDirectoryName(path);
+
+        if (string.IsNullOrEmpty(parent))
+        {
+            throw new ArgumentException(
+                $"Path '{path}' does not have a parent directory",
+                nameof(path));
+        }
+
+        return parent;
     }
 }
