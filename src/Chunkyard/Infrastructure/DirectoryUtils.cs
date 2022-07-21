@@ -7,11 +7,7 @@ internal static class DirectoryUtils
 {
     public static string GetRootParent(string path)
     {
-        var parent = Path.GetDirectoryName(path);
-
-        return string.IsNullOrEmpty(parent)
-            ? path
-            : GetRootParent(parent);
+        return Path.GetPathRoot(path) ?? path;
     }
 
     public static void EnsureParent(string path)
