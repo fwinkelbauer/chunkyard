@@ -60,7 +60,7 @@ public static class ProcessUtils
             validExitCodes,
             line => builder.AppendLine(line));
 
-        return builder.ToString();
+        return builder.ToString().Trim();
     }
 
     public static string RunQuery(
