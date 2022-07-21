@@ -8,7 +8,7 @@ public static class ProcessUtils
     public static void Run(
         ProcessStartInfo startInfo,
         int[]? validExitCodes = null,
-        Action<string>? processStandardOutput = null)
+        Action<string>? processOutput = null)
     {
         ArgumentNullException.ThrowIfNull(startInfo);
 
@@ -20,13 +20,26 @@ public static class ProcessUtils
                 $"Could not run '{startInfo.FileName}'");
         }
 
-        if (processStandardOutput != null)
+        if (processOutput != null)
         {
-            string? line;
-
-            while ((line = process.StandardOutput.ReadLine()) != null)
+            if (startInfo.RedirectStandardOutput)
             {
-                processStandardOutput(line);
+                string? line;
+
+                while ((line = process.StandardOutput.ReadLine()) != null)
+                {
+                    processOutput(line);
+                }
+            }
+
+            if (startInfo.RedirectStandardError)
+            {
+                string? line;
+
+                while ((line = process.StandardError.ReadLine()) != null)
+                {
+                    processOutput(line);
+                }
             }
         }
 

@@ -9,5 +9,6 @@ global using System.Linq;
 global using System.Security.Cryptography;
 global using System.Text;
 global using Xunit;
+global using Xunit.Abstractions;
 
 [assembly: CLSCompliant(false)]
