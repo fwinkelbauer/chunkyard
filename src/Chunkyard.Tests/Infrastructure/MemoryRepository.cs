@@ -25,7 +25,7 @@ internal class MemoryRepository<T> : IRepository<T>
         _valuesPerKey = new Dictionary<T, byte[]>();
     }
 
-    public void StoreValue(T key, byte[] value)
+    public void StoreValue(T key, ReadOnlySpan<byte> value)
     {
         lock (_lock)
         {
@@ -33,7 +33,7 @@ internal class MemoryRepository<T> : IRepository<T>
         }
     }
 
-    public void StoreValueIfNotExists(T key, byte[] value)
+    public void StoreValueIfNotExists(T key, ReadOnlySpan<byte> value)
     {
         lock (_lock)
         {

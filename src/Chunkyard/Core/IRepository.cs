@@ -13,9 +13,9 @@ public interface IRepository
 
 public interface IRepository<T>
 {
-    void StoreValue(T key, byte[] value);
+    void StoreValue(T key, ReadOnlySpan<byte> value);
 
-    void StoreValueIfNotExists(T key, byte[] value);
+    void StoreValueIfNotExists(T key, ReadOnlySpan<byte> value);
 
     byte[] RetrieveValue(T key);
 
