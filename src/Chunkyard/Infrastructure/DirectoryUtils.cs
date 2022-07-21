@@ -22,38 +22,38 @@ internal static class DirectoryUtils
         Directory.CreateDirectory(parent);
     }
 
-    public static string FindCommonParent(string[] files)
+    public static string FindCommonParent(string[] paths)
     {
-        if (files.Length == 0)
+        if (paths.Length == 0)
         {
             throw new ArgumentException(
-                "Cannot operate on empty file list",
-                nameof(files));
+                "Cannot operate on empty path list",
+                nameof(paths));
         }
-        else if (files.Length == 1)
+        else if (paths.Length == 1)
         {
-            return File.Exists(files[0])
-                ? GetParent(files[0])
-                : files[0];
+            return File.Exists(paths[0])
+                ? GetParent(paths[0])
+                : paths[0];
         }
 
         var parent = "";
-        var fileSegments = files
-            .OrderBy(file => file)
+        var segments = paths
+            .OrderBy(p => p)
             .Last()
             .Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries)
             .ToArray();
 
-        foreach (var fileSegment in fileSegments)
+        foreach (var segment in segments)
         {
-            var newParent = parent + Path.DirectorySeparatorChar + fileSegment;
+            var newParent = parent + Path.DirectorySeparatorChar + segment;
 
             if (parent.Length == 0
-                && files.All(file => file.StartsWith(fileSegment)))
+                && paths.All(p => p.StartsWith(segment)))
             {
-                parent = fileSegment;
+                parent = segment;
             }
-            else if (files.All(file => file.StartsWith(newParent)))
+            else if (paths.All(p => p.StartsWith(newParent)))
             {
                 parent = newParent;
             }
