@@ -28,14 +28,13 @@ public class ProgramTests
 
     private void Chunkyard(string arguments)
     {
-        var root = ProcessUtils.RunQuery("git", "rev-parse --show-toplevel");
-        var project = Path.Combine(root, "src/Chunkyard");
-
         var startInfo = new ProcessStartInfo(
             "dotnet",
-            $"run --project {project} -- {arguments}")
+            $"run --project src/Chunkyard -- {arguments}")
         {
-            WorkingDirectory = root,
+            WorkingDirectory = ProcessUtils.RunQuery(
+                "git",
+                "rev-parse --show-toplevel"),
             RedirectStandardOutput = true,
             RedirectStandardError = true
         };
