@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 16.8.1 - 2022-07-21
+
 ### Fixed
 
 - output processing when calling other processes
