@@ -2,11 +2,11 @@ namespace Chunkyard.Tests;
 
 public class ProgramTests
 {
-    private readonly ITestOutputHelper output;
+    private readonly ITestOutputHelper _output;
 
     public ProgramTests(ITestOutputHelper output)
     {
-        this.output = output;
+        _output = output;
     }
 
     [Theory]
@@ -43,6 +43,6 @@ public class ProgramTests
         ProcessUtils.Run(
             startInfo,
             new[] { 0 },
-            output.WriteLine);
+            _output.WriteLine);
     }
 }

@@ -84,7 +84,8 @@ internal static class ProcessUtils
         return RunQuery(
             new ProcessStartInfo(fileName, arguments)
             {
-                RedirectStandardOutput = true
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
             },
             validExitCodes);
     }
