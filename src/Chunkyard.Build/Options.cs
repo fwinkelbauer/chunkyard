@@ -38,4 +38,11 @@ public class ReleaseOptions
 [Verb("test", HelpText = "Test the solution.")]
 public class TestOptions
 {
+    public TestOptions(bool verbose)
+    {
+        Verbose = verbose;
+    }
+
+    [Option("verbose", Required = false, HelpText = "Print more details.", Default = false)]
+    public bool Verbose { get; }
 }

@@ -32,11 +32,16 @@ internal static class Commands
             "-warnaserror");
     }
 
-    public static void Test()
+    public static void Test(TestOptions? o = null)
     {
+        var logger = o != null && o.Verbose
+            ? "--logger console;verbosity=detailed"
+            : "";
+
         Dotnet(
             $"test {Solution}",
-            $"-c {Configuration}");
+            $"-c {Configuration}",
+            logger);
     }
 
     public static void Ci()
