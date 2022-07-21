@@ -73,7 +73,7 @@ internal static class ProcessUtils
             validExitCodes,
             line => builder.AppendLine(line));
 
-        return builder.ToString().Trim();
+        return builder.ToString().TrimEnd();
     }
 
     public static string RunQuery(
