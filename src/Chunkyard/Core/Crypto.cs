@@ -26,53 +26,41 @@ public class Crypto
 
     public int Iterations { get; }
 
-    public byte[] Encrypt(
-        ReadOnlySpan<byte> nonce,
-        ReadOnlySpan<byte> plainText)
+    public byte[] Encrypt(ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> plain)
     {
-        var cipherText = new byte[
-            nonce.Length + plainText.Length + TagBytes];
+        var cipher = new byte[nonce.Length + plain.Length + TagBytes];
 
-        nonce.CopyTo(
-            new Span<byte>(cipherText, 0, nonce.Length));
+        nonce.CopyTo(new Span<byte>(cipher, 0, nonce.Length));
 
-        var innerCiphertext = new Span<byte>(
-            cipherText,
+        var innerCipher = new Span<byte>(
+            cipher,
             nonce.Length,
-            plainText.Length);
+            plain.Length);
 
         var tag = new Span<byte>(
-            cipherText,
-            cipherText.Length - TagBytes,
+            cipher,
+            cipher.Length - TagBytes,
             TagBytes);
 
         using var aesGcm = new AesGcm(_key);
-        aesGcm.Encrypt(nonce, plainText, innerCiphertext, tag);
 
-        return cipherText;
+        aesGcm.Encrypt(nonce, plain, innerCipher, tag);
+
+        return cipher;
     }
 
-    public byte[] Decrypt(
-        ReadOnlySpan<byte> cipherText)
+    public byte[] Decrypt(ReadOnlySpan<byte> cipher)
     {
-        var plainText = new byte[
-            cipherText.Length - NonceBytes - TagBytes];
-
-        var nonce = cipherText[..NonceBytes];
-
-        var innerCipherText = cipherText.Slice(
-            nonce.Length,
-            plainText.Length);
-
-        var tag = cipherText.Slice(
-            cipherText.Length - TagBytes,
-            TagBytes);
+        var plain = new byte[cipher.Length - NonceBytes - TagBytes];
+        var nonce = cipher[..NonceBytes];
+        var innerCipher = cipher.Slice(nonce.Length, plain.Length);
+        var tag = cipher.Slice(cipher.Length - TagBytes, TagBytes);
 
         using var aesGcm = new AesGcm(_key);
 
-        aesGcm.Decrypt(nonce, innerCipherText, tag, plainText);
+        aesGcm.Decrypt(nonce, innerCipher, tag, plain);
 
-        return plainText;
+        return plain;
     }
 
     public static byte[] GenerateSalt()
