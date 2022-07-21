@@ -74,10 +74,10 @@ chunkyard --help
 chunkyard store --help
 
 # See which files chunkyard would backup
-chunkyard store -r "../repository" -f "Music" -e "Desktop\.ini" "thumbs\.db" --preview
+chunkyard store -r "../repository" -p "Music" -e "Desktop\.ini" "thumbs\.db" --preview
 
 # Store a backup
-chunkyard store -r "../repository" -f "Music" -e "Desktop\.ini" "thumbs\.db"
+chunkyard store -r "../repository" -p "Music" -e "Desktop\.ini" "thumbs\.db"
 
 # Check if the backup is valid
 chunkyard check -r "../repository"
@@ -103,7 +103,7 @@ directories=(
 # export CHUNKYARD_PASSWORD="my secret password"
 
 # Store backup
-chunkyard store -r "$repo" -f ${directories[*]}
+chunkyard store -r "$repo" -p ${directories[*]}
 
 # Keep the latest four backups
 chunkyard keep -r "$repo" --latest 4
@@ -125,7 +125,7 @@ $directories = @(
 # $env:CHUNKYARD_PASSWORD = 'my secret password'
 
 # Store backup
-chunkyard store --repository $repo --files $directories
+chunkyard store --repository $repo --paths $directories
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # Keep the latest four backups
