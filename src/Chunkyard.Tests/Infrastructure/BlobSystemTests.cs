@@ -12,6 +12,7 @@ public static class BlobSystemTests
     public static void FileBlobSystem_Can_Read_Write()
     {
         using var directory = new DisposableDirectory();
+
         var blobSystem = new FileBlobSystem(
             new[] { directory.Name },
             Fuzzy.Default);
@@ -26,6 +27,7 @@ public static class BlobSystemTests
         string invalidBlobName)
     {
         using var directory = new DisposableDirectory();
+
         var blobSystem = new FileBlobSystem(
             new[] { directory.Name },
             new Fuzzy(new[] { "excluded-blob" }));
@@ -55,6 +57,7 @@ public static class BlobSystemTests
     public static void FileblobSystem_OpenWrite_Overwrites_Previous_Content()
     {
         using var directory = new DisposableDirectory();
+
         var blobSystem = new FileBlobSystem(
             new[] { directory.Name },
             Fuzzy.Default);

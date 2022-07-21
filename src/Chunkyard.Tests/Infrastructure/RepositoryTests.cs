@@ -15,6 +15,7 @@ public static class RepositoryTests
     public static void FileRepository_Can_Read_Write()
     {
         using var directory = new DisposableDirectory();
+
         var repository = new FileRepository(directory.Name);
 
         Repository_Can_Read_Write(repository.Chunks);
@@ -37,6 +38,7 @@ public static class RepositoryTests
     public static void FileRepository_Throws_When_Writing_To_Same_Key()
     {
         using var directory = new DisposableDirectory();
+
         var repository = new FileRepository(directory.Name);
 
         Repository_Throws_When_Writing_To_Same_Key<IOException>(
@@ -50,6 +52,7 @@ public static class RepositoryTests
     public static void FileRepository_Prevents_Directory_Traversal_Attack()
     {
         using var directory = new DisposableDirectory();
+
         var repository = new FileRepository(directory.Name);
         var invalidKey = "../some-file";
 
@@ -79,6 +82,7 @@ public static class RepositoryTests
     public static void FileRepository_Sorts_Listed_Keys()
     {
         using var directory = new DisposableDirectory();
+
         var repository = new FileRepository(directory.Name);
 
         Repository_Sorts_Listed_Keys(repository.Chunks);
