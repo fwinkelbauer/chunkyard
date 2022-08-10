@@ -39,7 +39,9 @@ public class SimpleOrderedRepository<T> : IOrderedRepository<T>
 
     public IReadOnlyCollection<T> ListKeys()
     {
-        return _repository.ListKeys();
+        return _repository.ListKeys()
+            .OrderBy(key => key)
+            .ToArray();
     }
 
     public void RemoveValue(T key)

@@ -94,7 +94,6 @@ public static class RepositoryTests
     {
         var repository = new MemoryRepository();
 
-        Repository_Sorts_Listed_Keys(repository.Chunks);
         OrderedRepository_Sorts_Listed_Keys(repository.Log);
     }
 
@@ -105,24 +104,7 @@ public static class RepositoryTests
 
         var repository = new FileRepository(directory.Name);
 
-        Repository_Sorts_Listed_Keys(repository.Chunks);
         OrderedRepository_Sorts_Listed_Keys(repository.Log);
-    }
-
-    private static void Repository_Sorts_Listed_Keys(IRepository<string> repository)
-    {
-        Assert.Empty(repository.ListKeys());
-
-        var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-
-        repository.StoreValue("dd", bytes);
-        repository.StoreValue("cc", bytes);
-        repository.StoreValue("aa", bytes);
-        repository.StoreValue("bb", bytes);
-
-        Assert.Equal(
-            new[] { "aa", "bb", "cc", "dd" },
-            repository.ListKeys());
     }
 
     private static void OrderedRepository_Sorts_Listed_Keys(

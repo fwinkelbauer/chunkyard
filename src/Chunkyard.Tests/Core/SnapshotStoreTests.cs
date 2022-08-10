@@ -546,8 +546,8 @@ public static class SnapshotStoreTests
         snapshotStore.CopyTo(otherRepository);
 
         Assert.Equal(
-            repository.Chunks.ListKeys(),
-            otherRepository.Chunks.ListKeys());
+            repository.Chunks.ListKeys().OrderBy(k => k),
+            otherRepository.Chunks.ListKeys().OrderBy(k => k));
 
         Assert.Equal(
             repository.Log.ListKeys(),
