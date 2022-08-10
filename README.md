@@ -41,11 +41,11 @@ tools. Here's a list of [options][backup-tools].
 ## Build
 
 - Install the .NET 6 SDK
-- Run `./csake ci` to build and test the solution
+- Run `./make ci` to build and test the solution
 
-The `./csake` script runs the project `./src/Chunkyard.Build`, a CLI tool which
+The `./make` script runs the project `./src/Chunkyard.Build`, a CLI tool which
 can be used to build, test and publish Chunkyard. You can type commands such as
-`./csake help` or `./csake build --help` to learn more.
+`./make help` or `./make build --help` to learn more.
 
 **Note:** When running `Chunkyard.Build` from within Visual Studio, make sure
 that you set the working directory to the root directory of this repository.
@@ -53,11 +53,11 @@ that you set the working directory to the root directory of this repository.
 ## Publish
 
 - Commit all your work
-- Update `CHANGELOG.md` and add a new version header. Run `./csake release` to
+- Update `CHANGELOG.md` and add a new version header. Run `./make release` to
   create a tagged commit containing the latest version found in `CHANGELOG.md`
 - Run `git push --follow-tags`
-- Run `./csake publish` to create Linux and Windows binaries in the
-  `./artifacts` directory
+- Run `./make publish` to create Linux and Windows binaries in the `./artifacts`
+  directory
 
 ## Usage
 
