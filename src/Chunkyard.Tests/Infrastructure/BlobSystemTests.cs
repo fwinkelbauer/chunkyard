@@ -54,7 +54,7 @@ public static class BlobSystemTests
     }
 
     [Fact]
-    public static void FileblobSystem_OpenWrite_Overwrites_Previous_Content()
+    public static void FileBlobSystem_OpenWrite_Overwrites_Previous_Content()
     {
         using var directory = new DisposableDirectory();
 
@@ -83,6 +83,33 @@ public static class BlobSystemTests
                 new byte[] { 0x11 },
                 memoryStream.ToArray());
         }
+    }
+
+    [Fact]
+    public static void FileBlobSystem_Finds_Parent_Given_More_Paths()
+    {
+        using var directory = new DisposableDirectory();
+
+        var subDirectories = new[]
+        {
+            Path.Combine(directory.Name, "sub1"),
+            Path.Combine(directory.Name, "sub2")
+        };
+
+        foreach (var subDirectory in subDirectories)
+        {
+            Directory.CreateDirectory(subDirectory);
+
+            File.WriteAllText(
+                Path.Combine(subDirectory, "file.txt"),
+                "some text");
+        }
+
+        var blobSystem = new FileBlobSystem(subDirectories, Fuzzy.Default);
+
+        Assert.Equal(
+            new[] { "sub1/file.txt", "sub2/file.txt" },
+            blobSystem.ListBlobs().Select(b => b.Name));
     }
 
     private static void BlobSystem_Can_Read_Write(
