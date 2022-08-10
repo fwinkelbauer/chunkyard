@@ -8,7 +8,13 @@ public interface IRepository
 {
     IRepository<string> Chunks { get; }
 
-    IRepository<int> Log { get; }
+    IOrderedRepository<int> Log { get; }
+}
+
+public interface IOrderedRepository<T> : IRepository<T>
+    where T : struct
+{
+    T? RetrieveLastKey();
 }
 
 public interface IRepository<T>

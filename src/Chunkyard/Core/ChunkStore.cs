@@ -35,7 +35,7 @@ public class ChunkStore
             }
         });
 
-        CurrentLogId = FetchCurrentLogId();
+        CurrentLogId = _repository.Log.RetrieveLastKey();
     }
 
     public int? CurrentLogId { get; private set; }
@@ -66,7 +66,7 @@ public class ChunkStore
 
         if (CurrentLogId == resolvedLogId)
         {
-            CurrentLogId = FetchCurrentLogId();
+            CurrentLogId = _repository.Log.RetrieveLastKey();
         }
 
         return resolvedLogId;
@@ -230,12 +230,5 @@ public class ChunkStore
                 $"Could not read chunk: {chunkId}",
                 e);
         }
-    }
-
-    private int? FetchCurrentLogId()
-    {
-        return _repository.Log.ListKeys()
-            .Select(id => id as int?)
-            .Max();
     }
 }

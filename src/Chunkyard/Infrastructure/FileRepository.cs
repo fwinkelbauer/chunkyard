@@ -12,15 +12,16 @@ public class FileRepository : IRepository
             chunkId => Path.Combine(chunkId[..2], chunkId),
             file => Path.GetFileNameWithoutExtension(file));
 
-        Log = new FileRepository<int>(
-            Path.Combine(directory, "snapshots"),
-            number => number.ToString(),
-            file => Convert.ToInt32(file));
+        Log = new SimpleOrderedRepository<int>(
+            new FileRepository<int>(
+                Path.Combine(directory, "snapshots"),
+                number => number.ToString(),
+                file => Convert.ToInt32(file)));
     }
 
     public IRepository<string> Chunks { get; }
 
-    public IRepository<int> Log { get; }
+    public IOrderedRepository<int> Log { get; }
 }
 
 internal class FileRepository<T> : IRepository<T>

@@ -95,7 +95,7 @@ public static class RepositoryTests
         var repository = new MemoryRepository();
 
         Repository_Sorts_Listed_Keys(repository.Chunks);
-        Repository_Sorts_Listed_Keys(repository.Log);
+        OrderedRepository_Sorts_Listed_Keys(repository.Log);
     }
 
     [Fact]
@@ -106,11 +106,13 @@ public static class RepositoryTests
         var repository = new FileRepository(directory.Name);
 
         Repository_Sorts_Listed_Keys(repository.Chunks);
-        Repository_Sorts_Listed_Keys(repository.Log);
+        OrderedRepository_Sorts_Listed_Keys(repository.Log);
     }
 
     private static void Repository_Sorts_Listed_Keys(IRepository<string> repository)
     {
+        Assert.Empty(repository.ListKeys());
+
         var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
         repository.StoreValue("dd", bytes);
@@ -123,8 +125,12 @@ public static class RepositoryTests
             repository.ListKeys());
     }
 
-    private static void Repository_Sorts_Listed_Keys(IRepository<int> repository)
+    private static void OrderedRepository_Sorts_Listed_Keys(
+        IOrderedRepository<int> repository)
     {
+        Assert.Null(repository.RetrieveLastKey());
+        Assert.Empty(repository.ListKeys());
+
         var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
         repository.StoreValue(4, bytes);
@@ -135,6 +141,8 @@ public static class RepositoryTests
         Assert.Equal(
             new[] { 1, 2, 3, 4 },
             repository.ListKeys());
+
+        Assert.Equal(4, repository.RetrieveLastKey());
     }
 
     private static void Repository_StoreValue_Throws_When_Writing_To_Same_Key<TException>(

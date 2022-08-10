@@ -188,9 +188,7 @@ public class SnapshotStore
     {
         ArgumentNullException.ThrowIfNull(otherRepository);
 
-        var otherCurrentSnapshotId = otherRepository.Log.ListKeys()
-            .Select(id => id as int?)
-            .Max();
+        var otherCurrentSnapshotId = otherRepository.Log.RetrieveLastKey();
 
         var snapshotIdsToCopy = otherCurrentSnapshotId == null
             ? _chunkStore.ListLogIds()

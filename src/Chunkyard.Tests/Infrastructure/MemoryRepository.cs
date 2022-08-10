@@ -5,12 +5,12 @@ internal class MemoryRepository : IRepository
     public MemoryRepository()
     {
         Chunks = new MemoryRepository<string>();
-        Log = new MemoryRepository<int>();
+        Log = new SimpleOrderedRepository<int>(new MemoryRepository<int>());
     }
 
     public IRepository<string> Chunks { get; }
 
-    public IRepository<int> Log { get; }
+    public IOrderedRepository<int> Log { get; }
 }
 
 internal class MemoryRepository<T> : IRepository<T>
