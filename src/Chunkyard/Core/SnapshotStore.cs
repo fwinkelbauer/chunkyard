@@ -318,26 +318,18 @@ public class SnapshotStore
 
         BlobReference WriteBlob(Blob blob)
         {
-            currentBlobReferences.TryGetValue(
-                blob.Name,
-                out var current);
+            currentBlobReferences.TryGetValue(blob.Name, out var current);
 
-            if (current != null
-                && current.Blob.Equals(blob))
+            if (current != null && current.Blob.Equals(blob))
             {
                 return current;
             }
-
-            // Known blobs should be encrypted using the same nonce
-            var nonce = current?.Nonce
-                ?? Crypto.GenerateNonce();
 
             using var stream = blobSystem.OpenRead(blob.Name);
 
             var blobReference = new BlobReference(
                 blob,
-                nonce,
-                _chunkStore.WriteChunks(nonce, stream));
+                _chunkStore.WriteChunks(stream));
 
             _probe.StoredBlob(blobReference.Blob.Name);
 
@@ -356,8 +348,6 @@ public class SnapshotStore
         using var memoryStream = new MemoryStream(
             Serialize.SnapshotToBytes(snapshot));
 
-        return _chunkStore.WriteChunks(
-            Crypto.GenerateNonce(),
-            memoryStream);
+        return _chunkStore.WriteChunks(memoryStream);
     }
 }

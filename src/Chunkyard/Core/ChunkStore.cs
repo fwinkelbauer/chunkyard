@@ -129,11 +129,14 @@ public class ChunkStore
         _repository.Chunks.RemoveValue(chunkId);
     }
 
-    public IReadOnlyCollection<string> WriteChunks(byte[] nonce, Stream stream)
+    public IReadOnlyCollection<string> WriteChunks(Stream stream)
     {
         string WriteChunk(byte[] chunk)
         {
-            var encrypted = _crypto.Value.Encrypt(nonce, chunk);
+            var encrypted = _crypto.Value.Encrypt(
+                Crypto.GenerateNonce(),
+                chunk);
+
             var chunkId = ChunkId.Compute(encrypted);
 
             _repository.Chunks.StoreValueIfNotExists(chunkId, encrypted);

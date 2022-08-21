@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- Backup behavior by removing nonce-reuse, which decreases deduplication
+  capabilities
+
 ## 16.8.1 - 2022-07-21
 
 ### Fixed

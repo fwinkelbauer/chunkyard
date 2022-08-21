@@ -8,17 +8,13 @@ public class BlobReference
 {
     public BlobReference(
         Blob blob,
-        byte[] nonce,
         IReadOnlyCollection<string> chunkIds)
     {
         Blob = blob;
-        Nonce = nonce;
         ChunkIds = chunkIds;
     }
 
     public Blob Blob { get; }
-
-    public byte[] Nonce { get; }
 
     public IReadOnlyCollection<string> ChunkIds { get; }
 
@@ -26,12 +22,11 @@ public class BlobReference
     {
         return obj is BlobReference other
             && Blob.Equals(other.Blob)
-            && Nonce.SequenceEqual(other.Nonce)
             && ChunkIds.SequenceEqual(other.ChunkIds);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Blob, Nonce, ChunkIds);
+        return HashCode.Combine(Blob, ChunkIds);
     }
 }

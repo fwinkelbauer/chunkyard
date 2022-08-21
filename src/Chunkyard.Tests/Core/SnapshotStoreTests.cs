@@ -3,7 +3,7 @@ namespace Chunkyard.Tests.Core;
 public static class SnapshotStoreTests
 {
     [Fact]
-    public static void StoreSnapshot_Stores_A_Snapshot_Of_Blobs_With_Distinct_Nonces()
+    public static void StoreSnapshot_Stores_A_Snapshot_Of_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
         var expectedBlobs = Some.Blobs();
@@ -12,11 +12,6 @@ public static class SnapshotStoreTests
             Some.BlobSystem(expectedBlobs));
 
         var snapshot = snapshotStore.GetSnapshot(snapshotId);
-
-        var nonces = snapshot.BlobReferences.Select(br => br.Nonce)
-            .ToArray();
-
-        Assert.Equal(nonces, nonces.Distinct());
 
         Assert.Equal(
             new[] { snapshotId },
@@ -28,7 +23,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void StoreSnapshot_Deduplicates_Chunks_And_Reuses_Nonces_For_Known_Blobs()
+    public static void StoreSnapshot_Does_Not_Deduplicate_Chunks_For_Known_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
         var blobs = Some.Blobs();
@@ -48,19 +43,13 @@ public static class SnapshotStoreTests
         var blobReferences2 = snapshotStore.GetSnapshot(snapshotId2)
             .BlobReferences;
 
-        Assert.NotEqual(
-            blobReferences1,
-            blobReferences2);
+        Assert.NotEqual(blobReferences1, blobReferences2);
 
         Assert.Equal(
             blobReferences1.Select(br => br.Blob.Name),
             blobReferences2.Select(br => br.Blob.Name));
 
-        Assert.Equal(
-            blobReferences1.Select(br => br.Nonce),
-            blobReferences2.Select(br => br.Nonce));
-
-        Assert.Equal(
+        Assert.NotEqual(
             blobReferences1.SelectMany(br => br.ChunkIds),
             blobReferences2.SelectMany(br => br.ChunkIds));
     }
