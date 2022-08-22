@@ -11,6 +11,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - Backup behavior by removing nonce-reuse, which decreases deduplication
   capabilities
+- The `restore` command by adding an `--overwrite` option
+
+### Removed
+
+- The `mirror` command
 
 ## 16.8.1 - 2022-07-21
 

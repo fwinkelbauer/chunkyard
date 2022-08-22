@@ -305,7 +305,8 @@ public static class SnapshotStoreTests
         snapshotStore.RestoreSnapshot(
             outputBlobSystem,
             snapshotId,
-            Fuzzy.Default);
+            Fuzzy.Default,
+            false);
 
         Assert.Equal(
             expectedContent,
@@ -321,8 +322,11 @@ public static class SnapshotStoreTests
             && blobReferences.Length * 2 <= chunkIds.Length);
     }
 
-    [Fact]
-    public static void RestoreSnapshot_Does_Not_Overwrite_Blobs()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public static void RestoreSnapshot_Overwrite_Blobs_When_Asked(
+        bool overwrite)
     {
         var snapshotStore = Some.SnapshotStore();
         var blobSystem = Some.BlobSystem(Some.Blobs());
@@ -331,11 +335,23 @@ public static class SnapshotStoreTests
 
         var expectedContent = ToContent(blobSystem);
 
-        Assert.Throws<AggregateException>(
-            () => snapshotStore.RestoreSnapshot(
+        if (overwrite)
+        {
+            snapshotStore.RestoreSnapshot(
                 blobSystem,
                 snapshotId,
-                Fuzzy.Default));
+                Fuzzy.Default,
+                overwrite);
+        }
+        else
+        {
+            Assert.Throws<AggregateException>(
+                () => snapshotStore.RestoreSnapshot(
+                    blobSystem,
+                    snapshotId,
+                    Fuzzy.Default,
+                    overwrite));
+        }
 
         Assert.Equal(
             expectedContent,
@@ -359,7 +375,8 @@ public static class SnapshotStoreTests
         snapshotStore.RestoreSnapshot(
             outputBlobSystem,
             snapshotId,
-            Fuzzy.Default);
+            Fuzzy.Default,
+            false);
 
         Assert.Equal(
             expectedContent,
@@ -376,7 +393,29 @@ public static class SnapshotStoreTests
             () => Some.SnapshotStore(password: "b").RestoreSnapshot(
                 Some.BlobSystem(),
                 snapshotId,
-                Fuzzy.Default));
+                Fuzzy.Default,
+                false));
+    }
+
+    [Fact]
+    public static void RestoreSnapshotPreview_Shows_Preview()
+    {
+        var snapshotStore = Some.SnapshotStore();
+
+        var snapshotId = snapshotStore.StoreSnapshot(
+            Some.BlobSystem(Some.Blobs("some blob")));
+
+        var actualDiff = snapshotStore.RestoreSnapshotPreview(
+            Some.BlobSystem(Some.Blobs("new blob")),
+            snapshotId,
+            Fuzzy.Default);
+
+        Assert.Equal(
+            new DiffSet(
+                new[] { "some blob" },
+                Array.Empty<string>(),
+                Array.Empty<string>()),
+            actualDiff);
     }
 
     [Fact]
@@ -580,39 +619,6 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void Mirror_Updates_Known_Blobs_And_Removes_Unknown_Blobs()
-    {
-        var snapshotStore = Some.SnapshotStore();
-        var blobs = Some.Blobs(
-            "blob to restore",
-            "unchanged blob",
-            "changed blob");
-
-        var blobSystem = Some.BlobSystem(
-            blobs,
-            _ => new byte[] { 0xAB, 0xCD, 0xEF });
-
-        var expectedContent = ToContent(blobSystem);
-
-        var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
-
-        blobSystem.RemoveBlob(blobs.First().Name);
-        Change(blobSystem, Some.Blob("blob to delete"));
-
-        var blobToUpdate = new Blob(
-            blobs.Last().Name,
-            blobs.Last().LastWriteTimeUtc.AddHours(1));
-
-        Change(blobSystem, blobToUpdate);
-
-        snapshotStore.MirrorSnapshot(blobSystem, snapshotId);
-
-        Assert.Equal(
-            expectedContent,
-            ToContent(blobSystem));
-    }
-
-    [Fact]
     public static void StoreSnapshotPreview_Shows_Preview()
     {
         var snapshotStore = Some.SnapshotStore();
@@ -642,26 +648,6 @@ public static class SnapshotStoreTests
                 Array.Empty<string>(),
                 new[] { "some blob" }),
             changedDiff);
-    }
-
-    [Fact]
-    public static void MirrorSnapshotPreview_Shows_Preview()
-    {
-        var snapshotStore = Some.SnapshotStore();
-
-        var snapshotId = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(Some.Blobs("some blob")));
-
-        var actualDiff = snapshotStore.MirrorSnapshotPreview(
-            Some.BlobSystem(Some.Blobs("other blob")),
-            snapshotId);
-
-        Assert.Equal(
-            new DiffSet(
-                new[] { "some blob" },
-                Array.Empty<string>(),
-                new[] { "other blob" }),
-            actualDiff);
     }
 
     private static void Remove<T>(

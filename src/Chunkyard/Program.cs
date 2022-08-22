@@ -39,7 +39,6 @@ public static class Program
 
         Parser.Default.ParseArguments(args, optionTypes)
             .WithParsed<RestoreOptions>(Commands.RestoreSnapshot)
-            .WithParsed<MirrorOptions>(Commands.MirrorSnapshot)
             .WithParsed<StoreOptions>(Commands.StoreSnapshot)
             .WithParsed<CheckOptions>(Commands.CheckSnapshot)
             .WithParsed<ShowOptions>(Commands.ShowSnapshot)

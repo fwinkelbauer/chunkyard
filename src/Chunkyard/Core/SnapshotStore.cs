@@ -68,57 +68,43 @@ public class SnapshotStore
     public void RestoreSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,
-        Fuzzy includeFuzzy)
+        Fuzzy includeFuzzy,
+        bool overwrite)
     {
+        ArgumentNullException.ThrowIfNull(blobSystem);
+
+        Func<Blob, Stream> createWriteStream = overwrite
+            ? blobSystem.OpenWrite
+            : blobSystem.NewWrite;
+
         _ = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
-            .Select(br => RestoreBlob(blobSystem.NewWrite, br))
+            .Select(br => RestoreBlob(createWriteStream, br))
             .ToArray();
 
         _probe.RestoredSnapshot(
             _chunkStore.ResolveLogId(snapshotId));
     }
 
-    public DiffSet MirrorSnapshotPreview(
+    public DiffSet RestoreSnapshotPreview(
         IBlobSystem blobSystem,
-        int snapshotId)
+        int snapshotId,
+        Fuzzy includeFuzzy)
     {
         ArgumentNullException.ThrowIfNull(blobSystem);
 
         var blobs = blobSystem.ListBlobs();
-        var blobReferences = GetSnapshot(snapshotId).BlobReferences;
+        var blobReferences = FilterSnapshot(snapshotId, includeFuzzy);
 
-        return DiffSet.Create(
+        var diffSet = DiffSet.Create(
             blobs,
             blobReferences.Select(br => br.Blob),
             blob => blob.Name);
-    }
 
-    public void MirrorSnapshot(
-        IBlobSystem blobSystem,
-        int snapshotId)
-    {
-        ArgumentNullException.ThrowIfNull(blobSystem);
-
-        var snapshot = GetSnapshot(snapshotId);
-
-        _ = snapshot.BlobReferences
-            .AsParallel()
-            .Select(br => MirrorBlob(blobSystem, br))
-            .ToArray();
-
-        _probe.RestoredSnapshot(
-            _chunkStore.ResolveLogId(snapshotId));
-
-        var blobNamesToRemove = blobSystem.ListBlobs()
-            .Select(blob => blob.Name)
-            .Except(snapshot.BlobReferences.Select(br => br.Blob.Name));
-
-        foreach (var blobName in blobNamesToRemove)
-        {
-            blobSystem.RemoveBlob(blobName);
-            _probe.RemovedBlob(blobName);
-        }
+        return new DiffSet(
+            diffSet.Added,
+            diffSet.Changed,
+            Array.Empty<string>());
     }
 
     public Snapshot GetSnapshot(int snapshotId)
@@ -292,21 +278,6 @@ public class SnapshotStore
         _probe.RestoredBlob(blobReference.Blob.Name);
 
         return blob;
-    }
-
-    private Blob MirrorBlob(
-        IBlobSystem blobSystem,
-        BlobReference blobReference)
-    {
-        var blob = blobReference.Blob;
-
-        if (blobSystem.BlobExists(blob.Name)
-            && blobSystem.GetBlob(blob.Name).Equals(blob))
-        {
-            return blob;
-        }
-
-        return RestoreBlob(blobSystem.OpenWrite, blobReference);
     }
 
     private BlobReference[] WriteBlobs(IBlobSystem blobSystem)

@@ -202,12 +202,16 @@ public class RestoreOptions
         string repository,
         string directory,
         int snapshotId,
-        IEnumerable<string> includePatterns)
+        IEnumerable<string> includePatterns,
+        bool overwrite,
+        bool preview)
     {
         Repository = repository;
         Directory = directory;
         SnapshotId = snapshotId;
         IncludePatterns = includePatterns;
+        Overwrite = overwrite;
+        Preview = preview;
     }
 
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
@@ -221,41 +225,9 @@ public class RestoreOptions
 
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
     public IEnumerable<string> IncludePatterns { get; }
-}
 
-[Verb("mirror", HelpText = "Restore, overwrite and remove files to mirror a snapshot.")]
-public class MirrorOptions
-{
-    public MirrorOptions(
-        string repository,
-        string directory,
-        IEnumerable<string> excludePatterns,
-        int snapshotId,
-        IEnumerable<string> includePatterns,
-        bool preview)
-    {
-        Repository = repository;
-        Directory = directory;
-        ExcludePatterns = excludePatterns;
-        SnapshotId = snapshotId;
-        Preview = preview;
-        IncludePatterns = includePatterns;
-    }
-
-    [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
-    public string Repository { get; }
-
-    [Option('d', "directory", Required = false, HelpText = "The directory to mirror into.", Default = ".")]
-    public string Directory { get; }
-
-    [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude.")]
-    public IEnumerable<string> ExcludePatterns { get; }
-
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = ChunkStore.LatestLogId)]
-    public int SnapshotId { get; }
-
-    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
-    public IEnumerable<string> IncludePatterns { get; }
+    [Option("overwrite", Required = false, HelpText = "Overwrite existing files.")]
+    public bool Overwrite { get; }
 
     [Option("preview", Required = false, HelpText = "Show only a preview.")]
     public bool Preview { get; }
