@@ -305,8 +305,7 @@ public static class SnapshotStoreTests
         snapshotStore.RestoreSnapshot(
             outputBlobSystem,
             snapshotId,
-            Fuzzy.Default,
-            false);
+            Fuzzy.Default);
 
         Assert.Equal(
             expectedContent,
@@ -322,36 +321,35 @@ public static class SnapshotStoreTests
             && blobReferences.Length * 2 <= chunkIds.Length);
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public static void RestoreSnapshot_Overwrite_Blobs_When_Asked(
-        bool overwrite)
+    [Fact]
+    public static void RestoreSnapshot_Updates_Known_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
-        var blobSystem = Some.BlobSystem(Some.Blobs());
+        var blobs = Some.Blobs(
+            "blob to restore",
+            "unchanged blob",
+            "changed blob");
 
-        var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
+        var blobSystem = Some.BlobSystem(
+            blobs,
+            _ => new byte[] { 0xAB, 0xCD, 0xEF });
 
         var expectedContent = ToContent(blobSystem);
 
-        if (overwrite)
-        {
-            snapshotStore.RestoreSnapshot(
-                blobSystem,
-                snapshotId,
-                Fuzzy.Default,
-                overwrite);
-        }
-        else
-        {
-            Assert.Throws<AggregateException>(
-                () => snapshotStore.RestoreSnapshot(
-                    blobSystem,
-                    snapshotId,
-                    Fuzzy.Default,
-                    overwrite));
-        }
+        var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
+
+        blobSystem.RemoveBlob(blobs.First().Name);
+
+        var blobToUpdate = new Blob(
+            blobs.Last().Name,
+            blobs.Last().LastWriteTimeUtc.AddHours(1));
+
+        Change(blobSystem, blobToUpdate);
+
+        snapshotStore.RestoreSnapshot(
+            blobSystem,
+            snapshotId,
+            Fuzzy.Default);
 
         Assert.Equal(
             expectedContent,
@@ -375,8 +373,7 @@ public static class SnapshotStoreTests
         snapshotStore.RestoreSnapshot(
             outputBlobSystem,
             snapshotId,
-            Fuzzy.Default,
-            false);
+            Fuzzy.Default);
 
         Assert.Equal(
             expectedContent,
@@ -393,8 +390,7 @@ public static class SnapshotStoreTests
             () => Some.SnapshotStore(password: "b").RestoreSnapshot(
                 Some.BlobSystem(),
                 snapshotId,
-                Fuzzy.Default,
-                false));
+                Fuzzy.Default));
     }
 
     [Fact]

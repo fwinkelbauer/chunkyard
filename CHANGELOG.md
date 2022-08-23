@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - Backup behavior by removing nonce-reuse, which decreases deduplication
   capabilities
-- The `restore` command by adding an `--overwrite` option
+- The `restore` command to overwrite existing files
 
 ### Removed
 

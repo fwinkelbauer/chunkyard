@@ -68,18 +68,13 @@ public class SnapshotStore
     public void RestoreSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,
-        Fuzzy includeFuzzy,
-        bool overwrite)
+        Fuzzy includeFuzzy)
     {
         ArgumentNullException.ThrowIfNull(blobSystem);
 
-        Func<Blob, Stream> createWriteStream = overwrite
-            ? blobSystem.OpenWrite
-            : blobSystem.NewWrite;
-
         _ = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
-            .Select(br => RestoreBlob(createWriteStream, br))
+            .Select(br => RestoreBlob(blobSystem, br))
             .ToArray();
 
         _probe.RestoredSnapshot(
@@ -265,12 +260,18 @@ public class SnapshotStore
     }
 
     private Blob RestoreBlob(
-        Func<Blob, Stream> createWriteStream,
+        IBlobSystem blobSystem,
         BlobReference blobReference)
     {
         var blob = blobReference.Blob;
 
-        using (var stream = createWriteStream(blob))
+        if (blobSystem.BlobExists(blob.Name)
+            && blobSystem.GetBlob(blob.Name).Equals(blob))
+        {
+            return blob;
+        }
+
+        using (var stream = blobSystem.OpenWrite(blob))
         {
             _chunkStore.RestoreChunks(blobReference.ChunkIds, stream);
         }

@@ -89,8 +89,7 @@ internal static class Commands
             snapshotStore.RestoreSnapshot(
                 blobSystem,
                 o.SnapshotId,
-                fuzzy,
-                o.Overwrite);
+                fuzzy);
         }
     }
 

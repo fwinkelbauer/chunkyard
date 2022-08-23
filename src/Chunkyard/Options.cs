@@ -203,14 +203,12 @@ public class RestoreOptions
         string directory,
         int snapshotId,
         IEnumerable<string> includePatterns,
-        bool overwrite,
         bool preview)
     {
         Repository = repository;
         Directory = directory;
         SnapshotId = snapshotId;
         IncludePatterns = includePatterns;
-        Overwrite = overwrite;
         Preview = preview;
     }
 
@@ -225,9 +223,6 @@ public class RestoreOptions
 
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
     public IEnumerable<string> IncludePatterns { get; }
-
-    [Option("overwrite", Required = false, HelpText = "Overwrite existing files.")]
-    public bool Overwrite { get; }
 
     [Option("preview", Required = false, HelpText = "Show only a preview.")]
     public bool Preview { get; }
