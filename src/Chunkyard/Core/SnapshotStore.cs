@@ -65,22 +65,6 @@ public class SnapshotStore
             _chunkStore.ChunkValid);
     }
 
-    public void RestoreSnapshot(
-        IBlobSystem blobSystem,
-        int snapshotId,
-        Fuzzy includeFuzzy)
-    {
-        ArgumentNullException.ThrowIfNull(blobSystem);
-
-        _ = FilterSnapshot(snapshotId, includeFuzzy)
-            .AsParallel()
-            .Select(br => RestoreBlob(blobSystem, br))
-            .ToArray();
-
-        _probe.RestoredSnapshot(
-            _chunkStore.ResolveLogId(snapshotId));
-    }
-
     public DiffSet RestoreSnapshotPreview(
         IBlobSystem blobSystem,
         int snapshotId,
@@ -100,6 +84,22 @@ public class SnapshotStore
             diffSet.Added,
             diffSet.Changed,
             Array.Empty<string>());
+    }
+
+    public void RestoreSnapshot(
+        IBlobSystem blobSystem,
+        int snapshotId,
+        Fuzzy includeFuzzy)
+    {
+        ArgumentNullException.ThrowIfNull(blobSystem);
+
+        _ = FilterSnapshot(snapshotId, includeFuzzy)
+            .AsParallel()
+            .Select(br => RestoreBlob(blobSystem, br))
+            .ToArray();
+
+        _probe.RestoredSnapshot(
+            _chunkStore.ResolveLogId(snapshotId));
     }
 
     public Snapshot GetSnapshot(int snapshotId)
