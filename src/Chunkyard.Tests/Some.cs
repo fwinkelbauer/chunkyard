@@ -60,10 +60,6 @@ internal static class Some
 
     public static byte[] RandomNumber(int length)
     {
-        using var randomGenerator = RandomNumberGenerator.Create();
-        var randomNumber = new byte[length];
-        randomGenerator.GetBytes(randomNumber);
-
-        return randomNumber;
+        return RandomNumberGenerator.GetBytes(length);
     }
 }
