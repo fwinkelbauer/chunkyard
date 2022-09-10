@@ -615,6 +615,25 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
+    public static void CopyTo_Throws_On_Shared_LogReference_Mismatch()
+    {
+        var repository = Some.Repository();
+        var snapshotStore = Some.SnapshotStore(repository);
+
+        var otherRepository = Some.Repository();
+        var otherSnapshotStore = Some.SnapshotStore(otherRepository);
+
+        _ = snapshotStore.StoreSnapshot(
+            Some.BlobSystem(Some.Blobs("some blob")));
+
+        _ = otherSnapshotStore.StoreSnapshot(
+            Some.BlobSystem(Some.Blobs("other blob")));
+
+        Assert.Throws<ChunkyardException>(
+            () => snapshotStore.CopyTo(otherRepository));
+    }
+
+    [Fact]
     public static void StoreSnapshotPreview_Shows_Preview()
     {
         var snapshotStore = Some.SnapshotStore();

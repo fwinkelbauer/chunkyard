@@ -109,6 +109,20 @@ public class ChunkStore
                 GetLogReference(logId)));
     }
 
+    public void EnsureSameLog(IRepository repository, int logId)
+    {
+        ArgumentNullException.ThrowIfNull(repository);
+
+        var bytes = _repository.Log.RetrieveValue(logId);
+        var otherBytes = repository.Log.RetrieveValue(logId);
+
+        if (!bytes.SequenceEqual(otherBytes))
+        {
+            throw new ChunkyardException(
+                $"Log reference differs: #{logId}");
+        }
+    }
+
     public IReadOnlyCollection<int> ListLogIds()
     {
         return _repository.Log.ListKeys();

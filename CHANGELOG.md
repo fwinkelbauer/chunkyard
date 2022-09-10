@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- A check to ensure that the `copy` commands aborts if shared backups between
+  two repositories differ
+
 ## 17.0.0 - 2022-08-25
 
 ### Changed

@@ -169,12 +169,24 @@ public class SnapshotStore
     {
         ArgumentNullException.ThrowIfNull(otherRepository);
 
+        var logIds = _chunkStore.ListLogIds();
+        var otherLogIds = otherRepository.Log.ListKeys();
         var otherCurrentSnapshotId = otherRepository.Log.RetrieveLastKey();
 
+        var sharedSnapshotId = logIds.Intersect(otherLogIds)
+            .Select(id => id as int?)
+            .Max();
+
+        if (sharedSnapshotId != null)
+        {
+            _chunkStore.EnsureSameLog(
+                otherRepository,
+                sharedSnapshotId.Value);
+        }
+
         var snapshotIdsToCopy = otherCurrentSnapshotId == null
-            ? _chunkStore.ListLogIds()
-            : _chunkStore.ListLogIds()
-                .Where(id => id > otherCurrentSnapshotId)
+            ? logIds
+            : logIds.Where(id => id > otherCurrentSnapshotId)
                 .ToArray();
 
         var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
