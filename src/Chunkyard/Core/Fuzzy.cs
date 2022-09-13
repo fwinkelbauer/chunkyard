@@ -3,7 +3,7 @@ namespace Chunkyard.Core;
 /// <summary>
 /// A fuzzy pattern matcher.
 /// </summary>
-public class Fuzzy
+public sealed class Fuzzy
 {
     public static readonly Fuzzy Default = new Fuzzy(
         Array.Empty<string>());

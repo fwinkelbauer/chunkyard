@@ -5,7 +5,7 @@ namespace Chunkyard.Core;
 /// </summary>
 [JsonSerializable(typeof(Snapshot))]
 [JsonSerializable(typeof(LogReference))]
-public partial class Serialize : JsonSerializerContext
+public sealed partial class Serialize : JsonSerializerContext
 {
     public static byte[] SnapshotToBytes(Snapshot snapshot)
     {

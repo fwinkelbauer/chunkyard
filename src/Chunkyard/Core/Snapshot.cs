@@ -4,7 +4,7 @@ namespace Chunkyard.Core;
 /// A snapshot contains a list of references which describe the state of several
 /// blobs at a specific point in time.
 /// </summary>
-public class Snapshot
+public sealed class Snapshot
 {
     public Snapshot(
         DateTime creationTimeUtc,

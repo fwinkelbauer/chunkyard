@@ -4,7 +4,7 @@ namespace Chunkyard.Infrastructure;
 /// An <see cref="IPrompt"/> which retrieves a password from an environment
 /// variable.
 /// </summary>
-public class EnvironmentPrompt : IPrompt
+public sealed class EnvironmentPrompt : IPrompt
 {
     public const string PasswordVariable = "CHUNKYARD_PASSWORD";
 

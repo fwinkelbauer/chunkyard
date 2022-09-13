@@ -4,7 +4,7 @@ namespace Chunkyard.Core;
 /// Describes the difference between two instances of
 /// <see cref="IReadOnlyCollection{T}"/>.
 /// </summary>
-public class DiffSet
+public sealed class DiffSet
 {
     public DiffSet(
         IReadOnlyCollection<string> added,

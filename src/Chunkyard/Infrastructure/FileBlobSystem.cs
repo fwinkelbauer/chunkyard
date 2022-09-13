@@ -3,7 +3,7 @@ namespace Chunkyard.Infrastructure;
 /// <summary>
 /// An implementation of <see cref="IBlobSystem"/> using the file system.
 /// </summary>
-public class FileBlobSystem : IBlobSystem
+public sealed class FileBlobSystem : IBlobSystem
 {
     private readonly string[] _paths;
     private readonly string _parent;

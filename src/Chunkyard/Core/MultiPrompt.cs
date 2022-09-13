@@ -4,7 +4,7 @@ namespace Chunkyard.Core;
 /// A class to retrieve a user password using a set of <see cref="IPrompt"/>
 /// instances.
 /// </summary>
-public class MultiPrompt : IPrompt
+public sealed class MultiPrompt : IPrompt
 {
     private readonly IPrompt[] _prompts;
 

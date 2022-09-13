@@ -4,7 +4,7 @@ namespace Chunkyard.Core;
 /// A class which uses a <see cref="ChunkStore"/> to store snapshots of a set
 /// of blobs.
 /// </summary>
-public class SnapshotStore
+public sealed class SnapshotStore
 {
     private readonly ChunkStore _chunkStore;
     private readonly IProbe _probe;

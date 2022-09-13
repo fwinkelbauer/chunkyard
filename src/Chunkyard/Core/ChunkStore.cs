@@ -1,6 +1,6 @@
 namespace Chunkyard.Core;
 
-public class ChunkStore
+public sealed class ChunkStore
 {
     public const int LatestLogId = -1;
     public const int SecondLatestLogId = -2;

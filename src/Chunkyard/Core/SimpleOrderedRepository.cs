@@ -1,6 +1,6 @@
 namespace Chunkyard.Core;
 
-public class SimpleOrderedRepository<T> : IOrderedRepository<T>
+public sealed class SimpleOrderedRepository<T> : IOrderedRepository<T>
     where T : struct
 {
     private readonly IRepository<T> _repository;

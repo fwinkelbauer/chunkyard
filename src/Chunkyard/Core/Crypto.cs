@@ -3,7 +3,7 @@ namespace Chunkyard.Core;
 /// <summary>
 /// Contains methods to encrypt and decrypt data.
 /// </summary>
-public class Crypto
+public sealed class Crypto
 {
     public const int DefaultIterations = 100000;
 

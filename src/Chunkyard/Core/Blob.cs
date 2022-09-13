@@ -3,7 +3,7 @@ namespace Chunkyard.Core;
 /// <summary>
 /// Describes meta data of a binary data blob.
 /// </summary>
-public class Blob
+public sealed class Blob
 {
     public Blob(string name, DateTime lastWriteTimeUtc)
     {

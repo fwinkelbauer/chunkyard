@@ -7,7 +7,7 @@ namespace Chunkyard.Core;
 ///
 /// The FastCdc algorithm can be used to split data into chunks.
 /// </summary>
-public class FastCdc
+public sealed class FastCdc
 {
     private const int DefaultMin = 4 * 1024 * 1024;
     private const int DefaultAvg = 8 * 1024 * 1024;

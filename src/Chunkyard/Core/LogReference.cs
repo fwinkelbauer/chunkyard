@@ -4,7 +4,7 @@ namespace Chunkyard.Core;
 /// A reference which can be used to retrieve a set of chunks from a
 /// <see cref="ChunkStore"/> based on a password based encryption key.
 /// </summary>
-public class LogReference
+public sealed class LogReference
 {
     public LogReference(
         byte[] salt,

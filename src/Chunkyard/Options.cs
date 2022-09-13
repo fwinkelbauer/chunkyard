@@ -1,7 +1,7 @@
 namespace Chunkyard;
 
 [Verb("cat", HelpText = "Export or print the value of a snapshot or a set of chunk IDs.")]
-public class CatOptions
+public sealed class CatOptions
 {
     public CatOptions(
         IEnumerable<string> chunkIds,
@@ -29,7 +29,7 @@ public class CatOptions
 }
 
 [Verb("check", HelpText = "Check if a snapshot is valid.")]
-public class CheckOptions
+public sealed class CheckOptions
 {
     public CheckOptions(
         string repository,
@@ -57,7 +57,7 @@ public class CheckOptions
 }
 
 [Verb("copy", HelpText = "Copy snapshots from one repository to another.")]
-public class CopyOptions
+public sealed class CopyOptions
 {
     public CopyOptions(
         string sourceRepository,
@@ -75,7 +75,7 @@ public class CopyOptions
 }
 
 [Verb("store", HelpText = "Store a new snapshot.")]
-public class StoreOptions
+public sealed class StoreOptions
 {
     public StoreOptions(
         IEnumerable<string> paths,
@@ -103,7 +103,7 @@ public class StoreOptions
 }
 
 [Verb("diff", HelpText = "Show the difference between two snapshots.")]
-public class DiffOptions
+public sealed class DiffOptions
 {
     public DiffOptions(
         string repository,
@@ -136,7 +136,7 @@ public class DiffOptions
 }
 
 [Verb("gc", HelpText = "Remove unreferenced chunks.")]
-public class GarbageCollectOptions
+public sealed class GarbageCollectOptions
 {
     public GarbageCollectOptions(string repository)
     {
@@ -148,7 +148,7 @@ public class GarbageCollectOptions
 }
 
 [Verb("keep", HelpText = "Keep only the given list of snapshots.")]
-public class KeepOptions
+public sealed class KeepOptions
 {
     public KeepOptions(
         int latestCount,
@@ -166,7 +166,7 @@ public class KeepOptions
 }
 
 [Verb("list", HelpText = "List all snapshots.")]
-public class ListOptions
+public sealed class ListOptions
 {
     public ListOptions(string repository)
     {
@@ -178,7 +178,7 @@ public class ListOptions
 }
 
 [Verb("remove", HelpText = "Remove a snapshot.")]
-public class RemoveOptions
+public sealed class RemoveOptions
 {
     public RemoveOptions(
         int snapshotId,
@@ -196,7 +196,7 @@ public class RemoveOptions
 }
 
 [Verb("restore", HelpText = "Restore a snapshot.")]
-public class RestoreOptions
+public sealed class RestoreOptions
 {
     public RestoreOptions(
         string repository,
@@ -229,7 +229,7 @@ public class RestoreOptions
 }
 
 [Verb("show", HelpText = "Show the content of a snapshot.")]
-public class ShowOptions
+public sealed class ShowOptions
 {
     public ShowOptions(
         string repository,

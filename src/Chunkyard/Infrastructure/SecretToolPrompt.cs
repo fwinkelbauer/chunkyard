@@ -4,7 +4,7 @@ namespace Chunkyard.Infrastructure;
 /// An implementation of <see cref="IPrompt"/> using the Linux application
 /// secret-tool.
 /// </summary>
-internal class SecretToolPrompt : IPrompt
+internal sealed class SecretToolPrompt : IPrompt
 {
     private readonly string _repositoryPath;
 

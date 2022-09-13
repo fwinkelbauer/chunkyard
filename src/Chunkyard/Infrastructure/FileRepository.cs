@@ -3,7 +3,7 @@ namespace Chunkyard.Infrastructure;
 /// <summary>
 /// An implementation of <see cref="IRepository"/> using the file system.
 /// </summary>
-public class FileRepository : IRepository
+public sealed class FileRepository : IRepository
 {
     public FileRepository(string directory)
     {
@@ -24,7 +24,7 @@ public class FileRepository : IRepository
     public IOrderedRepository<int> Log { get; }
 }
 
-internal class FileRepository<T> : IRepository<T>
+internal sealed class FileRepository<T> : IRepository<T>
     where T : notnull
 {
     private readonly string _directory;
