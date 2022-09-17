@@ -164,7 +164,7 @@ internal static class Commands
         var snapshotStore = CreateSnapshotStore(o.Repository);
         var chunkIds = o.ChunkIds.Any()
             ? o.ChunkIds
-            : snapshotStore.ListChunkIds(o.SnapshotId);
+            : snapshotStore.GetSnapshotReference(o.SnapshotId).ChunkIds;
 
         if (string.IsNullOrEmpty(o.Export))
         {
@@ -207,19 +207,18 @@ internal static class Commands
         string repositoryPath)
     {
         return new SnapshotStore(
-            new ChunkStore(
-                CreateRepository(repositoryPath),
-                new FastCdc(),
-                new MultiPrompt(
-                    new EnvironmentPrompt(),
-                    new SecretToolPrompt(repositoryPath),
-                    new ConsolePrompt())),
+            CreateRepository(repositoryPath),
+            new FastCdc(),
             new ConsoleProbe(),
-            new RealClock());
+            new RealClock(),
+            new MultiPrompt(
+                new EnvironmentPrompt(),
+                new SecretToolPrompt(repositoryPath),
+                new ConsolePrompt()));
     }
 
-    private static IRepository CreateRepository(string repositoryPath)
+    private static Repository CreateRepository(string repositoryPath)
     {
-        return new FileRepository(repositoryPath);
+        return FileRepository.Create(repositoryPath);
     }
 }

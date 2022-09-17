@@ -1,29 +1,58 @@
 namespace Chunkyard.Core;
 
 /// <summary>
-/// A class which uses a <see cref="ChunkStore"/> to store snapshots of a set
-/// of blobs.
+/// A class which uses a <see cref="Repository"/> to store snapshots of a set of
+/// blobs.
 /// </summary>
 public sealed class SnapshotStore
 {
-    private readonly ChunkStore _chunkStore;
+    private readonly Repository _repository;
+    private readonly FastCdc _fastCdc;
     private readonly IProbe _probe;
     private readonly IClock _clock;
+    private readonly Lazy<Crypto> _crypto;
 
-    public SnapshotStore(ChunkStore chunkStore, IProbe probe, IClock clock)
+    public SnapshotStore(
+        Repository repository,
+        FastCdc fastCdc,
+        IProbe probe,
+        IClock clock,
+        IPrompt prompt)
     {
-        _chunkStore = chunkStore;
+        _repository = repository;
+        _fastCdc = fastCdc;
         _probe = probe;
         _clock = clock;
+
+        _crypto = new Lazy<Crypto>(() =>
+        {
+            if (_repository.CurrentReferenceId == null)
+            {
+                return new Crypto(
+                    prompt.NewPassword(),
+                    Crypto.GenerateSalt(),
+                    Crypto.DefaultIterations);
+            }
+            else
+            {
+                var snapshotReference = GetSnapshotReference(
+                    _repository.CurrentReferenceId.Value);
+
+                return new Crypto(
+                    prompt.ExistingPassword(),
+                    snapshotReference.Salt,
+                    snapshotReference.Iterations);
+            }
+        });
     }
 
     public DiffSet StoreSnapshotPreview(IBlobSystem blobSystem)
     {
         ArgumentNullException.ThrowIfNull(blobSystem);
 
-        var blobReferences = _chunkStore.CurrentLogId == null
+        var blobReferences = _repository.CurrentReferenceId == null
             ? Array.Empty<BlobReference>()
-            : GetSnapshot(_chunkStore.CurrentLogId.Value).BlobReferences;
+            : GetSnapshot(_repository.CurrentReferenceId.Value).BlobReferences;
 
         var blobs = blobSystem.ListBlobs();
 
@@ -37,16 +66,40 @@ public sealed class SnapshotStore
     {
         ArgumentNullException.ThrowIfNull(blobSystem);
 
-        var newSnapshot = new Snapshot(
+        var snapshot = new Snapshot(
             _clock.NowUtc(),
-            WriteBlobs(blobSystem));
+            StoreBlobs(blobSystem));
 
-        var logId = _chunkStore.WriteLog(
-            WriteSnapshot(newSnapshot));
+        var snapshotId = StoreSnapshotReference(
+            new SnapshotReference(
+                _crypto.Value.Salt,
+                _crypto.Value.Iterations,
+                StoreSnapshot(snapshot)));
 
-        _probe.StoredSnapshot(logId);
+        _probe.StoredSnapshot(snapshotId);
 
-        return logId;
+        return snapshotId;
+    }
+
+    public Snapshot GetSnapshot(int snapshotId)
+    {
+        return GetSnapshot(
+            GetSnapshotReference(snapshotId).ChunkIds);
+    }
+
+    public SnapshotReference GetSnapshotReference(int snapshotId)
+    {
+        try
+        {
+            return Serialize.BytesToSnapshotReference(
+                _repository.RetrieveReference(snapshotId));
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not read snapshot reference: #{snapshotId}",
+                e);
+        }
     }
 
     public bool CheckSnapshotExists(int snapshotId, Fuzzy includeFuzzy)
@@ -54,7 +107,7 @@ public sealed class SnapshotStore
         return CheckSnapshot(
             snapshotId,
             includeFuzzy,
-            _chunkStore.ChunkExists);
+            _repository.ChunkExists);
     }
 
     public bool CheckSnapshotValid(int snapshotId, Fuzzy includeFuzzy)
@@ -62,7 +115,16 @@ public sealed class SnapshotStore
         return CheckSnapshot(
             snapshotId,
             includeFuzzy,
-            _chunkStore.ChunkValid);
+            _repository.ChunkValid);
+    }
+
+    public IReadOnlyCollection<BlobReference> FilterSnapshot(
+        int snapshotId,
+        Fuzzy includeFuzzy)
+    {
+        return GetSnapshot(snapshotId).BlobReferences
+            .Where(br => includeFuzzy.IsIncludingMatch(br.Blob.Name))
+            .ToArray();
     }
 
     public DiffSet RestoreSnapshotPreview(
@@ -98,58 +160,36 @@ public sealed class SnapshotStore
             .Select(br => RestoreBlob(blobSystem, br))
             .ToArray();
 
-        _probe.RestoredSnapshot(
-            _chunkStore.ResolveLogId(snapshotId));
-    }
-
-    public Snapshot GetSnapshot(int snapshotId)
-    {
-        return GetSnapshot(
-            _chunkStore.ListChunkIds(snapshotId));
+        _probe.RestoredSnapshot(snapshotId);
     }
 
     public IReadOnlyCollection<int> ListSnapshotIds()
     {
-        return _chunkStore.ListLogIds();
-    }
-
-    public IReadOnlyCollection<string> ListChunkIds(int snapshotId)
-    {
-        return _chunkStore.ListChunkIds(snapshotId);
-    }
-
-    public IReadOnlyCollection<BlobReference> FilterSnapshot(
-        int snapshotId,
-        Fuzzy includeFuzzy)
-    {
-        return GetSnapshot(snapshotId).BlobReferences
-            .Where(br => includeFuzzy.IsIncludingMatch(br.Blob.Name))
-            .ToArray();
+        return _repository.ListReferenceIds();
     }
 
     public void GarbageCollect()
     {
-        var usedChunkIds = ListChunkIds(_chunkStore.ListLogIds());
-        var unusedChunkIds = _chunkStore.ListChunkIds()
+        var usedChunkIds = ListChunkIds(_repository.ListReferenceIds());
+        var unusedChunkIds = _repository.ListChunkIds()
             .Except(usedChunkIds);
 
         foreach (var chunkId in unusedChunkIds)
         {
-            _chunkStore.RemoveChunk(chunkId);
+            _repository.RemoveChunk(chunkId);
             _probe.RemovedChunk(chunkId);
         }
     }
 
-    public void RemoveSnapshot(int logId)
+    public void RemoveSnapshot(int snapshotId)
     {
-        var removedLogId = _chunkStore.RemoveLog(logId);
-
-        _probe.RemovedSnapshot(removedLogId);
+        _repository.RemoveReference(snapshotId);
+        _probe.RemovedSnapshot(snapshotId);
     }
 
     public void KeepSnapshots(int latestCount)
     {
-        var snapshotIds = _chunkStore.ListLogIds();
+        var snapshotIds = _repository.ListReferenceIds();
         var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
         var snapshotIdsToRemove = snapshotIds.Except(snapshotIdsToKeep)
             .ToArray();
@@ -160,88 +200,180 @@ public sealed class SnapshotStore
         }
     }
 
-    public void RestoreChunks(IEnumerable<string> chunkIds, Stream outputStream)
+    private Snapshot GetSnapshot(IReadOnlyCollection<string> chunkIds)
     {
-        _chunkStore.RestoreChunks(chunkIds, outputStream);
+        using var memoryStream = new MemoryStream();
+
+        RestoreChunks(chunkIds, memoryStream);
+
+        return Serialize.BytesToSnapshot(memoryStream.ToArray());
     }
 
-    public void CopyTo(IRepository otherRepository)
+    public void RestoreChunks(
+        IEnumerable<string> chunkIds,
+        Stream outputStream)
+    {
+        ArgumentNullException.ThrowIfNull(chunkIds);
+        ArgumentNullException.ThrowIfNull(outputStream);
+
+        foreach (var chunkId in chunkIds)
+        {
+            byte[]? decrypted = null;
+
+            try
+            {
+                decrypted = _crypto.Value.Decrypt(
+                    RetrieveChunk(chunkId));
+            }
+            catch (CryptographicException e)
+            {
+                throw new ChunkyardException(
+                    $"Could not decrypt chunk: {chunkId}",
+                    e);
+            }
+
+            outputStream.Write(decrypted);
+        }
+    }
+
+    private byte[] RetrieveChunk(string chunkId)
+    {
+        try
+        {
+            return _repository.RetrieveChunk(chunkId);
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not read chunk: {chunkId}",
+                e);
+        }
+    }
+
+    public void CopyTo(Repository otherRepository)
     {
         ArgumentNullException.ThrowIfNull(otherRepository);
 
-        var logIds = _chunkStore.ListLogIds();
-        var otherLogIds = otherRepository.Log.ListKeys();
-        var otherCurrentSnapshotId = otherRepository.Log.RetrieveLastKey();
+        var snapshotIds = _repository.ListReferenceIds();
+        var otherSnapshotIds = otherRepository.ListReferenceIds();
+        var otherCurrentSnapshotId = otherRepository.CurrentReferenceId;
 
-        var sharedSnapshotId = logIds.Intersect(otherLogIds)
+        var sharedSnapshotId = snapshotIds.Intersect(otherSnapshotIds)
             .Select(id => id as int?)
             .Max();
 
         if (sharedSnapshotId != null)
         {
-            _chunkStore.EnsureSameLog(
-                otherRepository,
+            var bytes = _repository.RetrieveReference(sharedSnapshotId.Value);
+            var otherBytes = otherRepository.RetrieveReference(
                 sharedSnapshotId.Value);
+
+            if (!bytes.SequenceEqual(otherBytes))
+            {
+                throw new ChunkyardException(
+                    $"Snapshot reference differs: #{sharedSnapshotId}");
+            }
         }
 
         var snapshotIdsToCopy = otherCurrentSnapshotId == null
-            ? logIds
-            : logIds.Where(id => id > otherCurrentSnapshotId)
+            ? snapshotIds
+            : snapshotIds.Where(id => id > otherCurrentSnapshotId)
                 .ToArray();
 
         var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
-            .Except(otherRepository.Chunks.ListKeys())
+            .Except(otherRepository.ListChunkIds())
             .ToArray();
 
         foreach (var chunkId in chunkIdsToCopy)
         {
-            _chunkStore.CopyChunk(otherRepository, chunkId);
+            var chunk = RetrieveChunk(chunkId);
+
+            if (!ChunkId.Valid(chunkId, chunk))
+            {
+                throw new ChunkyardException(
+                    $"Invalid chunk: {chunkId}");
+            }
+
+            otherRepository.StoreChunkUnsafe(chunkId, chunk);
             _probe.CopiedChunk(chunkId);
         }
 
         foreach (var snapshotId in snapshotIdsToCopy)
         {
-            _chunkStore.CopyLog(otherRepository, snapshotId);
+            var bytes = _repository.RetrieveReference(snapshotId);
+
+            // Check if these bytes are valid
+            _ = Serialize.BytesToSnapshotReference(bytes);
+
+            otherRepository.StoreReferenceUnsafe(snapshotId, bytes);
             _probe.CopiedSnapshot(snapshotId);
         }
     }
 
-    private IReadOnlyCollection<string> ListChunkIds(
-        IEnumerable<int> snapshotIds)
+    private BlobReference[] StoreBlobs(IBlobSystem blobSystem)
     {
-        var chunkIds = new HashSet<string>();
+        var currentBlobReferences = _repository.CurrentReferenceId == null
+            ? new Dictionary<string, BlobReference>()
+            : GetSnapshot(_repository.CurrentReferenceId.Value).BlobReferences
+                .ToDictionary(br => br.Blob.Name, br => br);
 
-        foreach (var snapshotId in snapshotIds)
+        BlobReference StoreBlob(Blob blob)
         {
-            var logChunkIds = _chunkStore.ListChunkIds(snapshotId);
-            var blobChunkIds = GetSnapshot(logChunkIds).BlobReferences
-                .SelectMany(br => br.ChunkIds);
+            currentBlobReferences.TryGetValue(blob.Name, out var current);
 
-            chunkIds.UnionWith(logChunkIds);
-            chunkIds.UnionWith(blobChunkIds);
+            if (current != null && current.Blob.Equals(blob))
+            {
+                return current;
+            }
+
+            using var stream = blobSystem.OpenRead(blob.Name);
+
+            var blobReference = new BlobReference(
+                blob,
+                StoreChunks(stream));
+
+            _probe.StoredBlob(blobReference.Blob.Name);
+
+            return blobReference;
         }
 
-        return chunkIds;
+        return blobSystem.ListBlobs()
+            .AsParallel()
+            .AsOrdered()
+            .Select(StoreBlob)
+            .ToArray();
     }
 
-    private Snapshot GetSnapshot(IReadOnlyCollection<string> chunkIds)
+    private IReadOnlyCollection<string> StoreSnapshot(Snapshot snapshot)
     {
-        using var memoryStream = new MemoryStream();
+        using var memoryStream = new MemoryStream(
+            Serialize.SnapshotToBytes(snapshot));
 
-        try
+        return StoreChunks(memoryStream);
+    }
+
+    private int StoreSnapshotReference(SnapshotReference snapshotReference)
+    {
+        return _repository.AppendReference(
+            Serialize.SnapshotReferenceToBytes(snapshotReference));
+    }
+
+    private IReadOnlyCollection<string> StoreChunks(Stream stream)
+    {
+        string StoreChunk(byte[] chunk)
         {
-            _chunkStore.RestoreChunks(chunkIds, memoryStream);
+            var encrypted = _crypto.Value.Encrypt(
+                Crypto.GenerateNonce(),
+                chunk);
 
-            return Serialize.BytesToSnapshot(memoryStream.ToArray());
+            return _repository.StoreChunk(encrypted);
         }
-        catch (Exception e)
-        {
-            var chunkIdsText = string.Join(' ', chunkIds);
 
-            throw new ChunkyardException(
-                $"Could not read snapshot: {chunkIdsText}",
-                e);
-        }
+        return _fastCdc.SplitIntoChunks(stream)
+            .AsParallel()
+            .AsOrdered()
+            .Select(StoreChunk)
+            .ToArray();
     }
 
     private bool CheckSnapshot(
@@ -253,9 +385,7 @@ public sealed class SnapshotStore
             .AsParallel()
             .All(br => CheckBlobReference(br, checkChunkIdFunc));
 
-        _probe.SnapshotValid(
-            _chunkStore.ResolveLogId(snapshotId),
-            snapshotValid);
+        _probe.SnapshotValid(snapshotId, snapshotValid);
 
         return snapshotValid;
     }
@@ -285,7 +415,7 @@ public sealed class SnapshotStore
 
         using (var stream = blobSystem.OpenWrite(blob))
         {
-            _chunkStore.RestoreChunks(blobReference.ChunkIds, stream);
+            RestoreChunks(blobReference.ChunkIds, stream);
         }
 
         _probe.RestoredBlob(blobReference.Blob.Name);
@@ -293,45 +423,21 @@ public sealed class SnapshotStore
         return blob;
     }
 
-    private BlobReference[] WriteBlobs(IBlobSystem blobSystem)
+    private IReadOnlyCollection<string> ListChunkIds(
+        IEnumerable<int> snapshotIds)
     {
-        var currentBlobReferences = _chunkStore.CurrentLogId == null
-            ? new Dictionary<string, BlobReference>()
-            : GetSnapshot(_chunkStore.CurrentLogId.Value).BlobReferences
-                .ToDictionary(br => br.Blob.Name, br => br);
+        var chunkIds = new HashSet<string>();
 
-        BlobReference WriteBlob(Blob blob)
+        foreach (var snapshotId in snapshotIds)
         {
-            currentBlobReferences.TryGetValue(blob.Name, out var current);
+            var snapshotChunkIds = GetSnapshotReference(snapshotId).ChunkIds;
+            var blobChunkIds = GetSnapshot(snapshotChunkIds).BlobReferences
+                .SelectMany(br => br.ChunkIds);
 
-            if (current != null && current.Blob.Equals(blob))
-            {
-                return current;
-            }
-
-            using var stream = blobSystem.OpenRead(blob.Name);
-
-            var blobReference = new BlobReference(
-                blob,
-                _chunkStore.WriteChunks(stream));
-
-            _probe.StoredBlob(blobReference.Blob.Name);
-
-            return blobReference;
+            chunkIds.UnionWith(snapshotChunkIds);
+            chunkIds.UnionWith(blobChunkIds);
         }
 
-        return blobSystem.ListBlobs()
-            .AsParallel()
-            .AsOrdered()
-            .Select(WriteBlob)
-            .ToArray();
-    }
-
-    private IReadOnlyCollection<string> WriteSnapshot(Snapshot snapshot)
-    {
-        using var memoryStream = new MemoryStream(
-            Serialize.SnapshotToBytes(snapshot));
-
-        return _chunkStore.WriteChunks(memoryStream);
+        return chunkIds;
     }
 }

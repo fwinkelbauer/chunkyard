@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The sub-directory of `FileRepository` from "snapshots" to "references"
+
 ## 17.1.0 - 2022-09-10
 
 ### Added

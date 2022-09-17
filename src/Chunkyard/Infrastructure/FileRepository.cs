@@ -3,25 +3,22 @@ namespace Chunkyard.Infrastructure;
 /// <summary>
 /// An implementation of <see cref="IRepository"/> using the file system.
 /// </summary>
-public sealed class FileRepository : IRepository
+public static class FileRepository
 {
-    public FileRepository(string directory)
+    public static Repository Create(string directory)
     {
-        Chunks = new FileRepository<string>(
+        var references = new FileRepository<int>(
+            Path.Combine(directory, "references"),
+            number => number.ToString(),
+            file => Convert.ToInt32(file));
+
+        var chunks = new FileRepository<string>(
             Path.Combine(directory, "chunks"),
             chunkId => Path.Combine(chunkId[..2], chunkId),
             file => Path.GetFileNameWithoutExtension(file));
 
-        Log = new SimpleOrderedRepository<int>(
-            new FileRepository<int>(
-                Path.Combine(directory, "snapshots"),
-                number => number.ToString(),
-                file => Convert.ToInt32(file)));
+        return new Repository(references, chunks);
     }
-
-    public IRepository<string> Chunks { get; }
-
-    public IOrderedRepository<int> Log { get; }
 }
 
 internal sealed class FileRepository<T> : IRepository<T>

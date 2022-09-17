@@ -83,7 +83,8 @@ public static class SnapshotStoreTests
         var snapshot = snapshotStore.GetSnapshot(snapshotId);
 
         Assert.Empty(snapshot.BlobReferences);
-        Assert.NotEmpty(snapshotStore.ListChunkIds(snapshotId));
+        Assert.NotEmpty(
+            snapshotStore.GetSnapshotReference(snapshotId).ChunkIds);
     }
 
     [Fact]
@@ -128,11 +129,11 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             snapshotStore.GetSnapshot(snapshotId),
-            snapshotStore.GetSnapshot(ChunkStore.LatestLogId));
+            snapshotStore.GetSnapshot(Repository.LatestReferenceId));
     }
 
     [Fact]
-    public static void GetSnapshot_Throws_If_Version_Does_Not_Exist()
+    public static void GetSnapshot_Throws_If_Snapshot_Does_Not_Exist()
     {
         var snapshotStore = Some.SnapshotStore();
 
@@ -143,7 +144,7 @@ public static class SnapshotStoreTests
             () => snapshotStore.GetSnapshot(snapshotId + 1));
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.GetSnapshot(ChunkStore.SecondLatestLogId));
+            () => snapshotStore.GetSnapshot(Repository.SecondLatestReferenceId));
     }
 
     [Fact]
@@ -160,7 +161,7 @@ public static class SnapshotStoreTests
 
         Assert.Equal(
             snapshotStore.GetSnapshot(snapshotId),
-            snapshotStore.GetSnapshot(ChunkStore.SecondLatestLogId));
+            snapshotStore.GetSnapshot(Repository.SecondLatestReferenceId));
     }
 
     [Fact]
@@ -169,7 +170,7 @@ public static class SnapshotStoreTests
         var snapshotStore = Some.SnapshotStore();
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.GetSnapshot(ChunkStore.LatestLogId));
+            () => snapshotStore.GetSnapshot(Repository.LatestReferenceId));
     }
 
     [Fact]
@@ -200,7 +201,7 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Remove(repository.Chunks, repository.Chunks.ListKeys());
+        Remove(repository, repository.ListChunkIds());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
@@ -222,7 +223,7 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Change(repository.Chunks, repository.Chunks.ListKeys());
+        Change(repository, repository.ListChunkIds());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
@@ -248,7 +249,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Remove(repository.Chunks, chunkIds);
+        Remove(repository, chunkIds);
 
         Assert.False(
             snapshotStore.CheckSnapshotExists(
@@ -274,7 +275,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Change(repository.Chunks, chunkIds);
+        Change(repository, chunkIds);
 
         Assert.True(
            snapshotStore.CheckSnapshotExists(
@@ -459,12 +460,12 @@ public static class SnapshotStoreTests
 
         snapshotStore.RemoveSnapshot(snapshotId);
 
-        Assert.NotEmpty(repository.Chunks.ListKeys());
+        Assert.NotEmpty(repository.ListChunkIds());
 
         snapshotStore.GarbageCollect();
 
-        Assert.Empty(repository.Chunks.ListKeys());
-        Assert.Empty(repository.Log.ListKeys());
+        Assert.Empty(repository.ListChunkIds());
+        Assert.Empty(repository.ListReferenceIds());
     }
 
     [Fact]
@@ -477,7 +478,7 @@ public static class SnapshotStoreTests
         _ = snapshotStore.StoreSnapshot(blobSystem);
 
         snapshotStore.RemoveSnapshot(snapshotId);
-        snapshotStore.RemoveSnapshot(ChunkStore.LatestLogId);
+        snapshotStore.RemoveSnapshot(Repository.LatestReferenceId);
 
         Assert.Empty(snapshotStore.ListSnapshotIds());
     }
@@ -488,7 +489,7 @@ public static class SnapshotStoreTests
         var snapshotStore = Some.SnapshotStore();
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.RemoveSnapshot(ChunkStore.LatestLogId));
+            () => snapshotStore.RemoveSnapshot(Repository.LatestReferenceId));
     }
 
     [Fact]
@@ -570,12 +571,12 @@ public static class SnapshotStoreTests
         snapshotStore.CopyTo(otherRepository);
 
         Assert.Equal(
-            repository.Chunks.ListKeys().OrderBy(k => k),
-            otherRepository.Chunks.ListKeys().OrderBy(k => k));
+            repository.ListChunkIds().OrderBy(k => k),
+            otherRepository.ListChunkIds().OrderBy(k => k));
 
         Assert.Equal(
-            repository.Log.ListKeys(),
-            otherRepository.Log.ListKeys());
+            repository.ListReferenceIds(),
+            otherRepository.ListReferenceIds());
     }
 
     [Fact]
@@ -591,7 +592,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Change(repository.Chunks, chunkIds);
+        Change(repository, chunkIds);
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(
@@ -607,7 +608,7 @@ public static class SnapshotStoreTests
         _ = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Change(repository.Log, repository.Log.ListKeys());
+        Change(repository, repository.ListReferenceIds());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(
@@ -665,27 +666,52 @@ public static class SnapshotStoreTests
             changedDiff);
     }
 
-    private static void Remove<T>(
-        IRepository<T> repository,
-        IEnumerable<T> keys)
+    private static void Remove(
+        Repository repository,
+        IEnumerable<string> chunkIds)
     {
-        foreach (var key in keys)
+        foreach (var chunkId in chunkIds)
         {
-            repository.RemoveValue(key);
+            repository.RemoveChunk(chunkId);
         }
     }
 
-    private static void Change<T>(
-        IRepository<T> repository,
-        IEnumerable<T> keys)
+    private static void Remove(
+        Repository repository,
+        IEnumerable<int> referenceIds)
     {
-        foreach (var key in keys)
+        foreach (var referenceId in referenceIds)
         {
-            var bytes = repository.RetrieveValue(key);
+            repository.RemoveReference(referenceId);
+        }
+    }
 
-            repository.RemoveValue(key);
-            repository.StoreValue(
-                key,
+    private static void Change(
+        Repository repository,
+        IEnumerable<string> chunkIds)
+    {
+        foreach (var chunkId in chunkIds)
+        {
+            var bytes = repository.RetrieveChunk(chunkId);
+
+            repository.RemoveChunk(chunkId);
+            repository.StoreChunkUnsafe(
+                chunkId,
+                bytes.Concat(new byte[] { 0xFF }).ToArray());
+        }
+    }
+
+    private static void Change(
+        Repository repository,
+        IEnumerable<int> referenceIds)
+    {
+        foreach (var referenceId in referenceIds)
+        {
+            var bytes = repository.RetrieveReference(referenceId);
+
+            repository.RemoveReference(referenceId);
+            repository.StoreReferenceUnsafe(
+                referenceId,
                 bytes.Concat(new byte[] { 0xFF }).ToArray());
         }
     }

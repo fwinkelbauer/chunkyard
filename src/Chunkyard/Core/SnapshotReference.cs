@@ -2,11 +2,11 @@ namespace Chunkyard.Core;
 
 /// <summary>
 /// A reference which can be used to retrieve a set of chunks from a
-/// <see cref="ChunkStore"/> based on a password based encryption key.
+/// <see cref="SnapshotStore"/> based on a password based encryption key.
 /// </summary>
-public sealed class LogReference
+public sealed class SnapshotReference
 {
-    public LogReference(
+    public SnapshotReference(
         byte[] salt,
         int iterations,
         IReadOnlyCollection<string> chunkIds)
@@ -24,7 +24,7 @@ public sealed class LogReference
 
     public override bool Equals(object? obj)
     {
-        return obj is LogReference other
+        return obj is SnapshotReference other
             && Salt.SequenceEqual(other.Salt)
             && Iterations == other.Iterations
             && ChunkIds.SequenceEqual(other.ChunkIds);

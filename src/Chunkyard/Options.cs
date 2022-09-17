@@ -18,7 +18,7 @@ public sealed class CatOptions
     [Option('c', "chunk", Required = false, HelpText = "The chunk IDs.", SetName = "chunks")]
     public IEnumerable<string> ChunkIds { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = ChunkStore.LatestLogId, SetName = "snapshots")]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = Chunkyard.Core.Repository.LatestReferenceId, SetName = "snapshots")]
     public int SnapshotId { get; }
 
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
@@ -46,7 +46,7 @@ public sealed class CheckOptions
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = ChunkStore.LatestLogId)]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = Chunkyard.Core.Repository.LatestReferenceId)]
     public int SnapshotId { get; }
 
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
@@ -122,10 +122,10 @@ public sealed class DiffOptions
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
-    [Option('f', "first", Required = false, HelpText = "The first snapshot ID.", Default = ChunkStore.SecondLatestLogId)]
+    [Option('f', "first", Required = false, HelpText = "The first snapshot ID.", Default = Chunkyard.Core.Repository.SecondLatestReferenceId)]
     public int FirstSnapshotId { get; }
 
-    [Option('s', "second", Required = false, HelpText = "The second snapshot ID.", Default = ChunkStore.LatestLogId)]
+    [Option('s', "second", Required = false, HelpText = "The second snapshot ID.", Default = Chunkyard.Core.Repository.LatestReferenceId)]
     public int SecondSnapshotId { get; }
 
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
@@ -218,7 +218,7 @@ public sealed class RestoreOptions
     [Option('d', "directory", Required = false, HelpText = "The directory to restore into.", Default = ".")]
     public string Directory { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = ChunkStore.LatestLogId)]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = Chunkyard.Core.Repository.LatestReferenceId)]
     public int SnapshotId { get; }
 
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
@@ -246,7 +246,7 @@ public sealed class ShowOptions
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
-    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = ChunkStore.LatestLogId)]
+    [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = Chunkyard.Core.Repository.LatestReferenceId)]
     public int SnapshotId { get; }
 
     [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]

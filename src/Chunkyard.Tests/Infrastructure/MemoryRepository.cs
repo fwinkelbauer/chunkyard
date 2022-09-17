@@ -1,16 +1,13 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-internal class MemoryRepository : IRepository
+internal static class MemoryRepository
 {
-    public MemoryRepository()
+    public static Repository Create()
     {
-        Chunks = new MemoryRepository<string>();
-        Log = new SimpleOrderedRepository<int>(new MemoryRepository<int>());
+        return new Repository(
+            new MemoryRepository<int>(),
+            new MemoryRepository<string>());
     }
-
-    public IRepository<string> Chunks { get; }
-
-    public IOrderedRepository<int> Log { get; }
 }
 
 internal class MemoryRepository<T> : IRepository<T>

@@ -21,22 +21,21 @@ internal static class Some
     }
 
     public static SnapshotStore SnapshotStore(
-        IRepository? repository = null,
+        Repository? repository = null,
         FastCdc? fastCdc = null,
         string password = "secret")
     {
         return new SnapshotStore(
-            new ChunkStore(
-                repository ?? Repository(),
-                fastCdc ?? new FastCdc(),
-                new DummyPrompt(password)),
+            repository ?? Repository(),
+            fastCdc ?? new FastCdc(),
             new DummyProbe(),
-            new DummyClock(DateUtc));
+            new DummyClock(DateUtc),
+            new DummyPrompt(password));
     }
 
-    public static IRepository Repository()
+    public static Repository Repository()
     {
-        return new MemoryRepository();
+        return MemoryRepository.Create();
     }
 
     public static IBlobSystem BlobSystem(
