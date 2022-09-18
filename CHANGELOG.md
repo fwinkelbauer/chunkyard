@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 18.0.0 - 2022-09-18
+
 ### Changed
 
 - The sub-directory of `FileRepository` from "snapshots" to "references"
