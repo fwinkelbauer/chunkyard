@@ -136,7 +136,6 @@ public sealed class Repository
 
     public bool ChunkValid(string chunkId)
     {
-        // TODO Try catch
         return ChunkExists(chunkId)
             && ChunkId.Valid(chunkId, RetrieveChunk(chunkId));
     }
