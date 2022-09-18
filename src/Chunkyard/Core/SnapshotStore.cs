@@ -145,7 +145,8 @@ public sealed class SnapshotStore
             .Select(br => RestoreBlob(blobSystem, br))
             .ToArray();
 
-        _probe.RestoredSnapshot(snapshotId);
+        _probe.RestoredSnapshot(
+            _repository.ResolveReferenceId(snapshotId));
     }
 
     public IReadOnlyCollection<int> ListSnapshotIds()
@@ -168,8 +169,10 @@ public sealed class SnapshotStore
 
     public void RemoveSnapshot(int snapshotId)
     {
-        _repository.RemoveReference(snapshotId);
-        _probe.RemovedSnapshot(snapshotId);
+        var resolvedSnapshotId = _repository.ResolveReferenceId(snapshotId);
+
+        _repository.RemoveReference(resolvedSnapshotId);
+        _probe.RemovedSnapshot(resolvedSnapshotId);
     }
 
     public void KeepSnapshots(int latestCount)
@@ -370,7 +373,9 @@ public sealed class SnapshotStore
             .AsParallel()
             .All(br => CheckBlobReference(br, checkChunkIdFunc));
 
-        _probe.SnapshotValid(snapshotId, snapshotValid);
+        _probe.SnapshotValid(
+            _repository.ResolveReferenceId(snapshotId),
+            snapshotValid);
 
         return snapshotValid;
     }
