@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 ### Changed
 
 - The sub-directory of `FileRepository` from "snapshots" to "references"
+- The `cat` command to be able to display references
 
 ## 17.1.0 - 2022-09-10
 

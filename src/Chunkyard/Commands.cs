@@ -161,27 +161,27 @@ internal static class Commands
 
     public static void Cat(CatOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
-        var chunkIds = o.ChunkIds.Any()
-            ? o.ChunkIds
-            : snapshotStore.GetSnapshotReference(o.SnapshotId).ChunkIds;
+        using Stream stream = string.IsNullOrEmpty(o.Export)
+            ? new MemoryStream()
+            : new FileStream(o.Export, FileMode.CreateNew, FileAccess.Write);
 
-        if (string.IsNullOrEmpty(o.Export))
+        if (o.ChunkIds.Any())
         {
-            using var stream = new MemoryStream();
-            snapshotStore.RestoreChunks(chunkIds, stream);
+            var snapshotStore = CreateSnapshotStore(o.Repository);
 
-            Console.WriteLine(
-                Encoding.UTF8.GetString(stream.ToArray()));
+            snapshotStore.RestoreChunks(o.ChunkIds, stream);
         }
         else
         {
-            using var stream = new FileStream(
-                o.Export,
-                FileMode.CreateNew,
-                FileAccess.Write);
+            var repository = CreateRepository(o.Repository);
 
-            snapshotStore.RestoreChunks(chunkIds, stream);
+            stream.Write(repository.RetrieveReference(o.SnapshotId));
+        }
+
+        if (stream is MemoryStream memoryStream)
+        {
+            Console.WriteLine(
+                Encoding.UTF8.GetString(memoryStream.ToArray()));
         }
     }
 

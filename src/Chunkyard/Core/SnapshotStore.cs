@@ -87,21 +87,6 @@ public sealed class SnapshotStore
             GetSnapshotReference(snapshotId).ChunkIds);
     }
 
-    public SnapshotReference GetSnapshotReference(int snapshotId)
-    {
-        try
-        {
-            return Serialize.BytesToSnapshotReference(
-                _repository.RetrieveReference(snapshotId));
-        }
-        catch (Exception e)
-        {
-            throw new ChunkyardException(
-                $"Could not read snapshot reference: #{snapshotId}",
-                e);
-        }
-    }
-
     public bool CheckSnapshotExists(int snapshotId, Fuzzy includeFuzzy)
     {
         return CheckSnapshot(
@@ -439,5 +424,20 @@ public sealed class SnapshotStore
         }
 
         return chunkIds;
+    }
+
+    private SnapshotReference GetSnapshotReference(int snapshotId)
+    {
+        try
+        {
+            return Serialize.BytesToSnapshotReference(
+                _repository.RetrieveReference(snapshotId));
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not read snapshot reference: #{snapshotId}",
+                e);
+        }
     }
 }
