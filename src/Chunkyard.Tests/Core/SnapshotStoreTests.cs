@@ -93,9 +93,10 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs(), _ => Array.Empty<byte>()));
 
-        var chunkIds = snapshotStore.GetSnapshot(snapshotId).BlobReferences
-            .SelectMany(br => br.ChunkIds);
+        var snapshot = snapshotStore.GetSnapshot(snapshotId);
+        var chunkIds = snapshot.BlobReferences.SelectMany(br => br.ChunkIds);
 
+        Assert.NotEmpty(snapshot.BlobReferences);
         Assert.Empty(chunkIds);
     }
 
@@ -306,15 +307,15 @@ public static class SnapshotStoreTests
             snapshotId,
             Fuzzy.Default);
 
-        Assert.Equal(
-            expectedContent,
-            ToContent(outputBlobSystem));
-
         var blobReferences = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
             .ToArray();
 
         var chunkIds = blobReferences.SelectMany(br => br.ChunkIds).ToArray();
+
+        Assert.Equal(
+            expectedContent,
+            ToContent(outputBlobSystem));
 
         Assert.True(blobReferences.Length > 0
             && blobReferences.Length * 2 <= chunkIds.Length);
