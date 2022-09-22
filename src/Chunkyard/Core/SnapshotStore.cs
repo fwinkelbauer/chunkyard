@@ -11,7 +11,6 @@ public sealed class SnapshotStore
     private readonly IProbe _probe;
     private readonly IClock _clock;
     private readonly Lazy<Crypto> _crypto;
-    private readonly Chunker _chunker;
 
     public SnapshotStore(
         Repository repository,
@@ -45,8 +44,6 @@ public sealed class SnapshotStore
                     snapshotReference.Iterations);
             }
         });
-
-        _chunker = new Chunker(_repository, _fastCdc, _crypto);
     }
 
     public DiffSet StoreSnapshotPreview(IBlobSystem blobSystem)
@@ -321,7 +318,7 @@ public sealed class SnapshotStore
 
             var blobReference = new BlobReference(
                 blob,
-                _chunker.StoreChunks(stream));
+                StoreChunks(stream));
 
             _probe.StoredBlob(blobReference.Blob.Name);
 
@@ -340,13 +337,31 @@ public sealed class SnapshotStore
         using var memoryStream = new MemoryStream(
             Serialize.SnapshotToBytes(snapshot));
 
-        return _chunker.StoreChunks(memoryStream);
+        return StoreChunks(memoryStream);
     }
 
     private int StoreSnapshotReference(SnapshotReference snapshotReference)
     {
         return _repository.AppendReference(
             Serialize.SnapshotReferenceToBytes(snapshotReference));
+    }
+
+    private IReadOnlyCollection<string> StoreChunks(Stream stream)
+    {
+        string StoreChunk(byte[] chunk)
+        {
+            var encrypted = _crypto.Value.Encrypt(
+                Crypto.GenerateNonce(),
+                chunk);
+
+            return _repository.StoreChunk(encrypted);
+        }
+
+        return _fastCdc.SplitIntoChunks(stream)
+            .AsParallel()
+            .AsOrdered()
+            .Select(StoreChunk)
+            .ToArray();
     }
 
     private bool CheckSnapshot(

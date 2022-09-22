@@ -49,23 +49,6 @@ public sealed class Crypto
         return cipher;
     }
 
-    public int Encrypt(
-        ReadOnlySpan<byte> nonce,
-        ReadOnlySpan<byte> plainText,
-        Span<byte> buffer)
-    {
-        nonce.CopyTo(buffer.Slice(0, nonce.Length));
-
-        var ciphertext = buffer.Slice(nonce.Length, plainText.Length);
-        var tag = buffer.Slice(nonce.Length + ciphertext.Length, TagBytes);
-
-        using var aesGcm = new AesGcm(_key);
-
-        aesGcm.Encrypt(nonce, plainText, ciphertext, tag);
-
-        return nonce.Length + plainText.Length + TagBytes;
-    }
-
     public byte[] Decrypt(ReadOnlySpan<byte> cipher)
     {
         var plain = new byte[cipher.Length - NonceBytes - TagBytes];
