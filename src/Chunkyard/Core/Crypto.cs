@@ -51,7 +51,14 @@ public sealed class Crypto
 
     public byte[] Decrypt(ReadOnlySpan<byte> cipher)
     {
-        var plain = new byte[cipher.Length - NonceBytes - TagBytes];
+        var plainLength = cipher.Length - NonceBytes - TagBytes;
+
+        if (plainLength < 0)
+        {
+            throw new ArgumentException("Invalid ciphertext", nameof(cipher));
+        }
+
+        var plain = new byte[plainLength];
         var nonce = cipher[..NonceBytes];
         var innerCipher = cipher.Slice(nonce.Length, plain.Length);
         var tag = cipher.Slice(cipher.Length - TagBytes, TagBytes);

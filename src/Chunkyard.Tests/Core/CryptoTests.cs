@@ -2,15 +2,17 @@ namespace Chunkyard.Tests.Core;
 
 public static class CryptoTests
 {
-    [Fact]
-    public static void Encrypt_And_Decrypt_Return_Input()
+    [Theory]
+    [InlineData("Hello!")]
+    [InlineData("")]
+    public static void Encrypt_And_Decrypt_Return_Input(string plain)
     {
         var crypto = new Crypto(
             "secret",
             Crypto.GenerateSalt(),
             Crypto.DefaultIterations);
 
-        var plainBytes = Encoding.UTF8.GetBytes("Hello!");
+        var plainBytes = Encoding.UTF8.GetBytes(plain);
         var encryptedBytes = crypto.Encrypt(Crypto.GenerateNonce(), plainBytes);
         var decryptedBytes = crypto.Decrypt(encryptedBytes);
 
