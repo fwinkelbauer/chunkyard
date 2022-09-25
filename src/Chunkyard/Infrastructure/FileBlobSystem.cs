@@ -14,11 +14,7 @@ public sealed class FileBlobSystem : IBlobSystem
         Fuzzy excludeFuzzy)
     {
         _paths = paths.Select(Path.GetFullPath).ToArray();
-
-        _parent = _paths.Length == 1
-            ? paths.First()
-            : DirectoryUtils.FindCommonParent(_paths);
-
+        _parent = DirectoryUtils.FindCommonParent(_paths);
         _excludeFuzzy = excludeFuzzy;
     }
 
