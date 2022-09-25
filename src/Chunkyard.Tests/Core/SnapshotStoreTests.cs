@@ -615,7 +615,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void CopyTo_Throws_On_Shared_LogReference_Mismatch()
+    public static void CopyTo_Throws_On_Shared_SnapshotReference_Mismatch()
     {
         var repository = Some.Repository();
         var snapshotStore = Some.SnapshotStore(repository);

@@ -13,7 +13,7 @@ This document should provide an overview of how Chunkyard is built.
   IRepository
 - **BlobReference:** Contains Chunk IDs and meta data which can be used to
   restore a Blob
-- **LogReference:** Contains Chunk IDs and meta data which can be used to
+- **SnapshotReference:** Contains Chunk IDs and meta data which can be used to
   restore a Snapshot
 
 ## Main Components
@@ -32,10 +32,10 @@ These classes contain the most important logic:
 - Split files into encrypted chunks, store them in a repository and return a
   list of BlobReferences
 - Bundle all BlobReferences into a Snapshot, store this Snapshot as encrypted
-  chunks and return a LogReference
+  chunks and return a SnapshotReference
 
 ## Restore Workflow
 
-- Retrieve a Snapshot using a LogReference
+- Retrieve a Snapshot using a SnapshotReference
 - Retrieve, decrypt and reassemble all files using their BlobReferences of the
   given Snapshot
