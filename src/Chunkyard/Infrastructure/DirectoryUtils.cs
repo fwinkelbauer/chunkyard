@@ -17,7 +17,7 @@ internal static class DirectoryUtils
         Directory.CreateDirectory(parent);
     }
 
-    public static string FindCommonParent(string[] paths)
+    public static string GetCommonParent(string[] paths)
     {
         if (paths.Length == 0)
         {
@@ -91,20 +91,21 @@ internal static class DirectoryUtils
         }
     }
 
-    public static IEnumerable<string> FindFilesUpwards(
+    public static IEnumerable<string> ListFilesUpwards(
         string directory,
         string fileName)
+    {
+        return GetDirectoriesUpwards(directory)
+            .SelectMany(d => Directory.GetFiles(d, fileName));
+    }
+
+    private static IEnumerable<string> GetDirectoriesUpwards(string directory)
     {
         var currentDirectory = directory;
 
         do
         {
-            var file = Path.Combine(currentDirectory, fileName);
-
-            if (File.Exists(file))
-            {
-                yield return file;
-            }
+            yield return currentDirectory;
 
             currentDirectory = Path.GetDirectoryName(currentDirectory);
         } while (!string.IsNullOrEmpty(currentDirectory));

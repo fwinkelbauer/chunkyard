@@ -12,7 +12,7 @@ public static class DotEnv
     public static void Populate(string directory)
     {
         var lines = DirectoryUtils
-            .FindFilesUpwards(directory, FileName)
+            .ListFilesUpwards(directory, FileName)
             .Reverse()
             .SelectMany(File.ReadAllLines);
 

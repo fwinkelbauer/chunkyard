@@ -21,12 +21,18 @@ internal sealed class SecretToolPrompt : IPrompt
             return "";
         }
 
-        if (string.IsNullOrEmpty(Lookup()))
+        var password = Lookup();
+
+        if (string.IsNullOrEmpty(password))
         {
             Store();
-        }
 
-        return Lookup();
+            return Lookup();
+        }
+        else
+        {
+            return password;
+        }
     }
 
     public string ExistingPassword()
