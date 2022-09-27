@@ -1,17 +1,24 @@
 namespace Chunkyard.Build;
 
-[Verb("build", HelpText = "Build the solution.")]
+[Verb("clean", HelpText = "Clean the repository.")]
+public class CleanOptions
+{
+}
+
+[Verb("build", HelpText = "Build the repository.")]
 public class BuildOptions
 {
+    public BuildOptions(bool verbose)
+    {
+        Verbose = verbose;
+    }
+
+    [Option("verbose", Required = false, HelpText = "Print more details.", Default = false)]
+    public bool Verbose { get; }
 }
 
-[Verb("ci", HelpText = "Build and test the solution.")]
-public class CiOptions
-{
-}
-
-[Verb("clean", HelpText = "Clean the solution.")]
-public class CleanOptions
+[Verb("publish", HelpText = "Publish the main project.")]
+public class PublishOptions
 {
 }
 
@@ -25,24 +32,7 @@ public class OutdatedOptions
 {
 }
 
-[Verb("publish", HelpText = "Publish the main project.")]
-public class PublishOptions
-{
-}
-
 [Verb("release", HelpText = "Create a release commit.")]
 public class ReleaseOptions
 {
-}
-
-[Verb("test", HelpText = "Test the solution.")]
-public class TestOptions
-{
-    public TestOptions(bool verbose)
-    {
-        Verbose = verbose;
-    }
-
-    [Option("verbose", Required = false, HelpText = "Print more details.", Default = false)]
-    public bool Verbose { get; }
 }

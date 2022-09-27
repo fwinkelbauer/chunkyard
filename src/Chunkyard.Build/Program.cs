@@ -37,9 +37,7 @@ public static class Program
 
         Parser.Default.ParseArguments(args, optionTypes)
             .WithParsed<CleanOptions>(_ => Commands.Clean())
-            .WithParsed<BuildOptions>(_ => Commands.Build())
-            .WithParsed<TestOptions>(Commands.Test)
-            .WithParsed<CiOptions>(_ => Commands.Ci())
+            .WithParsed<BuildOptions>(Commands.Build)
             .WithParsed<PublishOptions>(_ => Commands.Publish())
             .WithParsed<ReleaseOptions>(_ => Commands.Release())
             .WithParsed<FmtOptions>(_ => Commands.Fmt())

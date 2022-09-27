@@ -24,16 +24,13 @@ internal static class Commands
             string.Join(' ', expressions));
     }
 
-    public static void Build()
+    public static void Build(BuildOptions? o = null)
     {
         Dotnet(
             $"build {Solution}",
             $"-c {Configuration}",
             "-warnaserror");
-    }
 
-    public static void Test(TestOptions? o = null)
-    {
         var logger = o != null && o.Verbose
             ? "--logger console;verbosity=detailed"
             : "";
@@ -41,18 +38,14 @@ internal static class Commands
         Dotnet(
             $"test {Solution}",
             $"-c {Configuration}",
+            "--no-build",
+            "--nologo",
             logger);
-    }
-
-    public static void Ci()
-    {
-        Build();
-        Test();
     }
 
     public static void Publish()
     {
-        Ci();
+        Build();
 
         var version = FetchVersion();
         var commitId = GitQuery("rev-parse --short HEAD");
