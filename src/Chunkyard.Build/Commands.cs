@@ -52,7 +52,6 @@ internal static class Commands
 
     public static void Publish()
     {
-        Clean();
         Ci();
 
         var version = FetchVersion();
