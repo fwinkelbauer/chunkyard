@@ -59,27 +59,14 @@ internal class MemoryBlobSystem : IBlobSystem
 
     public Stream OpenWrite(Blob blob)
     {
-        return new WriteStream(this, blob, true);
+        return new WriteStream(this, blob);
     }
 
-    public Stream NewWrite(Blob blob)
-    {
-        return new WriteStream(this, blob, false);
-    }
-
-    private void Write(Blob blob, byte[] value, bool overwrite)
+    private void Write(Blob blob, byte[] value)
     {
         lock (_lock)
         {
-            if (overwrite)
-            {
-                _values[blob.Name] = value;
-            }
-            else
-            {
-                _values.Add(blob.Name, value);
-            }
-
+            _values[blob.Name] = value;
             _blobs[blob.Name] = blob;
         }
     }
@@ -88,21 +75,16 @@ internal class MemoryBlobSystem : IBlobSystem
     {
         private readonly MemoryBlobSystem _blobSystem;
         private readonly Blob _blob;
-        private readonly bool _overwrite;
 
-        public WriteStream(
-            MemoryBlobSystem blobSystem,
-            Blob blob,
-            bool overwrite)
+        public WriteStream(MemoryBlobSystem blobSystem, Blob blob)
         {
             _blobSystem = blobSystem;
             _blob = blob;
-            _overwrite = overwrite;
         }
 
         protected override void Dispose(bool disposing)
         {
-            _blobSystem.Write(_blob, ToArray(), _overwrite);
+            _blobSystem.Write(_blob, ToArray());
 
             base.Dispose(disposing);
         }

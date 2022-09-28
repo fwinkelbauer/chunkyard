@@ -16,6 +16,4 @@ public interface IBlobSystem
     Blob GetBlob(string blobName);
 
     Stream OpenWrite(Blob blob);
-
-    Stream NewWrite(Blob blob);
 }

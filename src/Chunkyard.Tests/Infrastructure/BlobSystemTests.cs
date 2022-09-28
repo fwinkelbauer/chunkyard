@@ -48,9 +48,6 @@ public static class BlobSystemTests
 
         Assert.Throws<ArgumentException>(
             () => blobSystem.OpenWrite(invalidBlob));
-
-        Assert.Throws<ArgumentException>(
-            () => blobSystem.NewWrite(invalidBlob));
     }
 
     [Fact]
@@ -64,7 +61,7 @@ public static class BlobSystemTests
 
         var blob = Some.Blob("some blob");
 
-        using (var writeStream = blobSystem.NewWrite(blob))
+        using (var writeStream = blobSystem.OpenWrite(blob))
         {
             writeStream.Write(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
         }
@@ -120,7 +117,7 @@ public static class BlobSystemTests
 
         Assert.False(blobSystem.BlobExists(blob.Name));
 
-        using (var writeStream = blobSystem.NewWrite(blob))
+        using (var writeStream = blobSystem.OpenWrite(blob))
         {
             writeStream.Write(expectedBytes);
         }

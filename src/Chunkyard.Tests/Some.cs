@@ -49,7 +49,7 @@ internal static class Some
 
         foreach (var blob in blobs)
         {
-            using var stream = blobSystem.NewWrite(blob);
+            using var stream = blobSystem.OpenWrite(blob);
 
             stream.Write(generate(blob.Name));
         }
