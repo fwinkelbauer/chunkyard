@@ -188,15 +188,6 @@ public sealed class SnapshotStore
         }
     }
 
-    private Snapshot GetSnapshot(IReadOnlyCollection<string> chunkIds)
-    {
-        using var memoryStream = new MemoryStream();
-
-        RestoreChunks(chunkIds, memoryStream);
-
-        return Serialize.BytesToSnapshot(memoryStream.ToArray());
-    }
-
     public void RestoreChunks(
         IEnumerable<string> chunkIds,
         Stream outputStream)
@@ -221,20 +212,6 @@ public sealed class SnapshotStore
             }
 
             outputStream.Write(decrypted);
-        }
-    }
-
-    private byte[] RetrieveChunk(string chunkId)
-    {
-        try
-        {
-            return _repository.RetrieveChunk(chunkId);
-        }
-        catch (Exception e)
-        {
-            throw new ChunkyardException(
-                $"Could not read chunk: {chunkId}",
-                e);
         }
     }
 
@@ -295,6 +272,29 @@ public sealed class SnapshotStore
 
             otherRepository.StoreReferenceUnsafe(snapshotId, bytes);
             _probe.CopiedSnapshot(snapshotId);
+        }
+    }
+
+    private Snapshot GetSnapshot(IReadOnlyCollection<string> chunkIds)
+    {
+        using var memoryStream = new MemoryStream();
+
+        RestoreChunks(chunkIds, memoryStream);
+
+        return Serialize.BytesToSnapshot(memoryStream.ToArray());
+    }
+
+    private byte[] RetrieveChunk(string chunkId)
+    {
+        try
+        {
+            return _repository.RetrieveChunk(chunkId);
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not read chunk: {chunkId}",
+                e);
         }
     }
 
