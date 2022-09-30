@@ -267,9 +267,6 @@ public sealed class SnapshotStore
         {
             var bytes = _repository.RetrieveReference(snapshotId);
 
-            // Check if these bytes are valid
-            _ = Serialize.BytesToSnapshotReference(bytes);
-
             otherRepository.StoreReferenceUnsafe(snapshotId, bytes);
             _probe.CopiedSnapshot(snapshotId);
         }
