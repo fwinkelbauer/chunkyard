@@ -296,7 +296,6 @@ public static class SnapshotStoreTests
         // Create data that is large enough to create at least two chunks
         var expectedBytes = Some.RandomNumber(2 * fastCdc.MaxSize);
         var inputBlobSystem = Some.BlobSystem(Some.Blobs(), _ => expectedBytes);
-        var expectedContent = ToContent(inputBlobSystem);
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
 
@@ -314,7 +313,7 @@ public static class SnapshotStoreTests
         var chunkIds = blobReferences.SelectMany(br => br.ChunkIds).ToArray();
 
         Assert.Equal(
-            expectedContent,
+            ToContent(inputBlobSystem),
             ToContent(outputBlobSystem));
 
         Assert.True(blobReferences.Length > 0
