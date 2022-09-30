@@ -91,14 +91,6 @@ internal static class DirectoryUtils
         }
     }
 
-    public static IEnumerable<string> ListFilesUpwards(
-        string directory,
-        string fileName)
-    {
-        return GetDirectoriesUpwards(directory)
-            .SelectMany(d => Directory.GetFiles(d, fileName));
-    }
-
     private static IEnumerable<string> GetDirectoriesUpwards(string directory)
     {
         var currentDirectory = directory;

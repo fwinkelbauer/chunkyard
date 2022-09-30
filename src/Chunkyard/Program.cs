@@ -6,8 +6,6 @@ public static class Program
     {
         try
         {
-            DotEnv.Populate(Directory.GetCurrentDirectory());
-
             ProcessArguments(args);
         }
         catch (Exception e)
