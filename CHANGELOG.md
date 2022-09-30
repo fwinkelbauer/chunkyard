@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 18.1.0 - 2022-09-30
+
 ### Removed
 
 - Support for `.env` files
