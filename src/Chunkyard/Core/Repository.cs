@@ -32,8 +32,6 @@ public sealed class Repository
 
         StoreReferenceUnsafe(referenceId, bytes);
 
-        CurrentReferenceId = referenceId;
-
         return referenceId;
     }
 
