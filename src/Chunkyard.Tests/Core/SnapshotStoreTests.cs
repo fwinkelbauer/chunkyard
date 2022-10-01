@@ -693,7 +693,7 @@ public static class SnapshotStoreTests
             var bytes = repository.RetrieveChunk(chunkId);
 
             repository.RemoveChunk(chunkId);
-            repository.StoreChunkUnsafe(
+            repository.StoreChunkUnchecked(
                 chunkId,
                 bytes.Concat(new byte[] { 0xFF }).ToArray());
         }
@@ -708,7 +708,7 @@ public static class SnapshotStoreTests
             var bytes = repository.RetrieveReference(referenceId);
 
             repository.RemoveReference(referenceId);
-            repository.StoreReferenceUnsafe(
+            repository.StoreReference(
                 referenceId,
                 bytes.Concat(new byte[] { 0xFF }).ToArray());
         }

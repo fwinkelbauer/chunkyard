@@ -30,12 +30,12 @@ public sealed class Repository
     {
         var referenceId = CurrentReferenceId + 1 ?? 0;
 
-        StoreReferenceUnsafe(referenceId, bytes);
+        StoreReference(referenceId, bytes);
 
         return referenceId;
     }
 
-    public void StoreReferenceUnsafe(int referenceId, ReadOnlySpan<byte> bytes)
+    public void StoreReference(int referenceId, ReadOnlySpan<byte> bytes)
     {
         _references.StoreValue(referenceId, bytes);
 
@@ -107,19 +107,28 @@ public sealed class Repository
     {
         var chunkId = ChunkId.Compute(bytes);
 
-        StoreChunkUnsafe(chunkId, bytes);
+        StoreChunkUnchecked(chunkId, bytes);
 
         return chunkId;
     }
 
-    public void StoreChunkUnsafe(string chunkId, ReadOnlySpan<byte> bytes)
+    public void StoreChunkUnchecked(string chunkId, ReadOnlySpan<byte> bytes)
     {
         _chunks.StoreValueIfNotExists(chunkId, bytes);
     }
 
     public byte[] RetrieveChunk(string chunkId)
     {
-        return _chunks.RetrieveValue(chunkId);
+        try
+        {
+            return _chunks.RetrieveValue(chunkId);
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not read chunk: {chunkId}",
+                e);
+        }
     }
 
     public void RemoveChunk(string chunkId)

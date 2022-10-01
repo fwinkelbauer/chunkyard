@@ -202,7 +202,7 @@ public sealed class SnapshotStore
             try
             {
                 decrypted = _crypto.Value.Decrypt(
-                    RetrieveChunk(chunkId));
+                    _repository.RetrieveChunk(chunkId));
             }
             catch (CryptographicException e)
             {
@@ -251,15 +251,15 @@ public sealed class SnapshotStore
 
         foreach (var chunkId in chunkIdsToCopy)
         {
-            var chunk = RetrieveChunk(chunkId);
+            var bytes = _repository.RetrieveChunk(chunkId);
 
-            if (!ChunkId.Valid(chunkId, chunk))
+            if (!ChunkId.Valid(chunkId, bytes))
             {
                 throw new ChunkyardException(
                     $"Invalid chunk: {chunkId}");
             }
 
-            otherRepository.StoreChunkUnsafe(chunkId, chunk);
+            otherRepository.StoreChunkUnchecked(chunkId, bytes);
             _probe.CopiedChunk(chunkId);
         }
 
@@ -267,7 +267,7 @@ public sealed class SnapshotStore
         {
             var bytes = _repository.RetrieveReference(snapshotId);
 
-            otherRepository.StoreReferenceUnsafe(snapshotId, bytes);
+            otherRepository.StoreReference(snapshotId, bytes);
             _probe.CopiedSnapshot(snapshotId);
         }
     }
@@ -279,20 +279,6 @@ public sealed class SnapshotStore
         RestoreChunks(chunkIds, memoryStream);
 
         return Serialize.BytesToSnapshot(memoryStream.ToArray());
-    }
-
-    private byte[] RetrieveChunk(string chunkId)
-    {
-        try
-        {
-            return _repository.RetrieveChunk(chunkId);
-        }
-        catch (Exception e)
-        {
-            throw new ChunkyardException(
-                $"Could not read chunk: {chunkId}",
-                e);
-        }
     }
 
     private BlobReference[] StoreBlobs(IBlobSystem blobSystem)
