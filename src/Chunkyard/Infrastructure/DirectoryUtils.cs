@@ -90,16 +90,4 @@ internal static class DirectoryUtils
             return Array.Empty<string>();
         }
     }
-
-    private static IEnumerable<string> GetDirectoriesUpwards(string directory)
-    {
-        var currentDirectory = directory;
-
-        do
-        {
-            yield return currentDirectory;
-
-            currentDirectory = Path.GetDirectoryName(currentDirectory);
-        } while (!string.IsNullOrEmpty(currentDirectory));
-    }
 }

@@ -27,7 +27,6 @@ public sealed class MultiPrompt : IPrompt
     {
         return _prompts
             .Select(passwordFunc)
-            .FirstOrDefault(password => !string.IsNullOrEmpty(password))
-            ?? throw new InvalidOperationException("Could not retrieve user password");
+            .First(password => !string.IsNullOrEmpty(password));
     }
 }

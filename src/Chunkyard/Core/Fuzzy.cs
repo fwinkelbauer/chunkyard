@@ -13,9 +13,10 @@ public sealed class Fuzzy
     public Fuzzy(IEnumerable<string> patterns)
     {
         _compiledRegex = patterns
-            .Select(p => new Regex(string.IsNullOrEmpty(p)
+            .Select(p => string.IsNullOrEmpty(p)
                 ? ".*"
-                : p.Replace(" ", ".*")))
+                : p.Replace(" ", ".*"))
+            .Select(p => new Regex(p))
             .ToArray();
     }
 
@@ -31,7 +32,7 @@ public sealed class Fuzzy
 
     private bool IsMatch(string input, bool initial)
     {
-        return initial
-            || _compiledRegex.Any(r => r.IsMatch(input));
+        return _compiledRegex.Any(r => r.IsMatch(input))
+            || initial;
     }
 }
