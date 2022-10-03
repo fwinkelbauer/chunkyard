@@ -14,6 +14,12 @@ internal static class Commands
 
     public static void Clean()
     {
+        if (!string.IsNullOrEmpty(GitQuery("status --porcelain")))
+        {
+            throw new InvalidOperationException(
+                $"Found untracked or uncommited files. Aborting cleanup");
+        }
+
         var expressions = File.ReadLines(CleanIgnore)
             .Select(l => l.Trim())
             .Where(l => !string.IsNullOrEmpty(l) && !l.StartsWith("#"))
