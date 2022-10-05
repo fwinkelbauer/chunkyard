@@ -220,6 +220,8 @@ internal static class Commands
 
     private static Repository CreateRepository(string repositoryPath)
     {
-        return FileRepository.Create(repositoryPath);
+        return Path.GetExtension(repositoryPath).Equals(".sqlite")
+            ? SqliteRepository.Create(repositoryPath)
+            : FileRepository.Create(repositoryPath);
     }
 }

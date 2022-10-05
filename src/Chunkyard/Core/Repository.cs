@@ -26,7 +26,7 @@ public sealed class Repository
 
     public int? CurrentReferenceId { get; private set; }
 
-    public int AppendReference(ReadOnlySpan<byte> bytes)
+    public int AppendReference(byte[] bytes)
     {
         var referenceId = CurrentReferenceId + 1 ?? 0;
 
@@ -35,7 +35,7 @@ public sealed class Repository
         return referenceId;
     }
 
-    public void StoreReference(int referenceId, ReadOnlySpan<byte> bytes)
+    public void StoreReference(int referenceId, byte[] bytes)
     {
         _references.StoreValue(referenceId, bytes);
 
@@ -107,7 +107,7 @@ public sealed class Repository
         return referenceIds[position];
     }
 
-    public string StoreChunk(ReadOnlySpan<byte> bytes)
+    public string StoreChunk(byte[] bytes)
     {
         var chunkId = ChunkId.Compute(bytes);
 
@@ -116,7 +116,7 @@ public sealed class Repository
         return chunkId;
     }
 
-    public void StoreChunkUnchecked(string chunkId, ReadOnlySpan<byte> bytes)
+    public void StoreChunkUnchecked(string chunkId, byte[] bytes)
     {
         _chunks.StoreValueIfNotExists(chunkId, bytes);
     }

@@ -1,6 +1,7 @@
 global using Chunkyard.Core;
 global using Chunkyard.Infrastructure;
 global using CommandLine;
+global using Microsoft.Data.Sqlite;
 global using System;
 global using System.Collections.Concurrent;
 global using System.Collections.Generic;
