@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Fixed
+
+- A naming bug when trying to store a single file
+
 ## 18.1.0 - 2022-09-30
 
 ### Removed

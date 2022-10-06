@@ -3,7 +3,7 @@ namespace Chunkyard.Infrastructure;
 /// <summary>
 /// A set of directory utility methods.
 /// </summary>
-internal static class DirectoryUtils
+public static class DirectoryUtils
 {
     public static void EnsureParent(string path)
     {
@@ -17,8 +17,10 @@ internal static class DirectoryUtils
         Directory.CreateDirectory(parent);
     }
 
-    public static string GetCommonParent(string[] paths)
+    public static string GetCommonParent(string[] paths, char separatorChar)
     {
+        ArgumentNullException.ThrowIfNull(paths);
+
         if (paths.Length == 0)
         {
             throw new ArgumentException(
@@ -27,19 +29,19 @@ internal static class DirectoryUtils
         }
         else if (paths.Length == 1)
         {
-            return paths.First();
+            return Path.GetDirectoryName(paths[0]) ?? "";
         }
 
         var parent = "";
         var segments = paths
             .OrderBy(p => p)
             .Last()
-            .Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries)
+            .Split(separatorChar, StringSplitOptions.RemoveEmptyEntries)
             .ToArray();
 
         foreach (var segment in segments)
         {
-            var newParent = parent + Path.DirectorySeparatorChar + segment;
+            var newParent = parent + separatorChar + segment;
 
             if (parent.Length == 0
                 && paths.All(p => p.StartsWith(segment)))
@@ -54,6 +56,12 @@ internal static class DirectoryUtils
             {
                 break;
             }
+        }
+
+        if (string.IsNullOrEmpty(parent)
+            && paths.All(p => p.StartsWith(separatorChar)))
+        {
+            parent += separatorChar;
         }
 
         return parent;
