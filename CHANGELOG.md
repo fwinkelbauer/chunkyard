@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 18.1.1 - 2022-10-07
+
 ### Fixed
 
 - A naming bug when trying to store a single file
