@@ -8,30 +8,34 @@ public static class FileRepository
     public static Repository Create(string directory)
     {
         return new Repository(
-            CreateReferenceRepository(directory),
-            CreateChunkRepository(directory));
-    }
-
-    public static FileRepository<int> CreateReferenceRepository(
-        string directory)
-    {
-        return new FileRepository<int>(
-            Path.Combine(directory, "references"),
-            number => number.ToString(),
-            file => Convert.ToInt32(file));
-    }
-
-    public static FileRepository<string> CreateChunkRepository(
-        string directory)
-    {
-        return new FileRepository<string>(
-            Path.Combine(directory, "chunks"),
-            chunkId => Path.Combine(chunkId[..2], chunkId),
-            file => Path.GetFileNameWithoutExtension(file));
+            new IntFileRepository(Path.Combine(directory, "references")),
+            new StringFileRepository(Path.Combine(directory, "chunks")));
     }
 }
 
-public sealed class FileRepository<T> : IRepository<T>
+public sealed class StringFileRepository : FileRepository<string>
+{
+    public StringFileRepository(string directory)
+        : base(
+            directory,
+            chunkId => Path.Combine(chunkId[..2], chunkId),
+            file => Path.GetFileNameWithoutExtension(file))
+    {
+    }
+}
+
+public sealed class IntFileRepository : FileRepository<int>
+{
+    public IntFileRepository(string directory)
+        : base(
+            directory,
+            number => number.ToString(),
+            file => Convert.ToInt32(file))
+    {
+    }
+}
+
+public abstract class FileRepository<T> : IRepository<T>
     where T : notnull
 {
     private readonly string _directory;
@@ -39,7 +43,7 @@ public sealed class FileRepository<T> : IRepository<T>
     private readonly Func<string, T> _toKey;
     private readonly ConcurrentDictionary<T, object> _locks;
 
-    public FileRepository(
+    internal FileRepository(
         string directory,
         Func<T, string> toFile,
         Func<string, T> toKey)

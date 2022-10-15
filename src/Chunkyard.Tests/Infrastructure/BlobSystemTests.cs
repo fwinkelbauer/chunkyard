@@ -1,57 +1,52 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-public static class BlobSystemTests
+public sealed class MemoryBlobSystemTests : BlobSystemTests
 {
-    [Fact]
-    public static void MemoryBlobSystem_Can_Read_Write()
+    public MemoryBlobSystemTests()
+        : base(new MemoryBlobSystem())
     {
-        BlobSystem_Can_Read_Write(new MemoryBlobSystem());
+    }
+}
+
+public sealed class FileBlobSystemTests
+    : BlobSystemTests, IDisposable
+{
+    private static DisposableDirectory? TempDirectory;
+
+    public FileBlobSystemTests()
+        : base(CreateBlobSystem())
+    {
     }
 
     [Fact]
-    public static void FileBlobSystem_Can_Read_Write()
-    {
-        using var directory = new DisposableDirectory();
-
-        var blobSystem = new FileBlobSystem(
-            new[] { directory.Name },
-            Fuzzy.Default);
-
-        BlobSystem_Can_Read_Write(blobSystem);
-    }
-
-    [Theory]
-    [InlineData("../directory-traversal")]
-    [InlineData("excluded-blob")]
-    public static void FileBlobSystem_Prevents_Accessing_Invalid_Blobs(
-        string invalidBlobName)
+    public static void Constructor_Finds_Parent_Given_More_Paths()
     {
         using var directory = new DisposableDirectory();
 
-        var blobSystem = new FileBlobSystem(
-            new[] { directory.Name },
-            new Fuzzy(new[] { "excluded-blob" }));
+        var subDirectories = new[]
+        {
+            Path.Combine(directory.Name, "sub1"),
+            Path.Combine(directory.Name, "sub2")
+        };
 
-        var invalidBlob = Some.Blob(invalidBlobName);
+        foreach (var subDirectory in subDirectories)
+        {
+            Directory.CreateDirectory(subDirectory);
 
-        Assert.Throws<ArgumentException>(
-            () => blobSystem.BlobExists(invalidBlobName));
+            File.WriteAllText(
+                Path.Combine(subDirectory, "file.txt"),
+                "some text");
+        }
 
-        Assert.Throws<ArgumentException>(
-            () => blobSystem.RemoveBlob(invalidBlobName));
+        var blobSystem = new FileBlobSystem(subDirectories, Fuzzy.Default);
 
-        Assert.Throws<ArgumentException>(
-            () => blobSystem.GetBlob(invalidBlobName));
-
-        Assert.Throws<ArgumentException>(
-            () => blobSystem.OpenRead(invalidBlobName));
-
-        Assert.Throws<ArgumentException>(
-            () => blobSystem.OpenWrite(invalidBlob));
+        Assert.Equal(
+            new[] { "sub1/file.txt", "sub2/file.txt" },
+            blobSystem.ListBlobs().Select(b => b.Name));
     }
 
     [Fact]
-    public static void FileBlobSystem_OpenWrite_Overwrites_Previous_Content()
+    public static void OpenWrite_Overwrites_Previous_Content()
     {
         using var directory = new DisposableDirectory();
 
@@ -82,57 +77,85 @@ public static class BlobSystemTests
         }
     }
 
-    [Fact]
-    public static void FileBlobSystem_Finds_Parent_Given_More_Paths()
+    [Theory]
+    [InlineData("../directory-traversal")]
+    [InlineData("excluded-blob")]
+    public static void Methods_Prevent_Accessing_Invalid_Blobs(
+        string invalidBlobName)
     {
         using var directory = new DisposableDirectory();
 
-        var subDirectories = new[]
-        {
-            Path.Combine(directory.Name, "sub1"),
-            Path.Combine(directory.Name, "sub2")
-        };
+        var blobSystem = new FileBlobSystem(
+            new[] { directory.Name },
+            new Fuzzy(new[] { "excluded-blob" }));
 
-        foreach (var subDirectory in subDirectories)
-        {
-            Directory.CreateDirectory(subDirectory);
+        var invalidBlob = Some.Blob(invalidBlobName);
 
-            File.WriteAllText(
-                Path.Combine(subDirectory, "file.txt"),
-                "some text");
-        }
+        Assert.Throws<ArgumentException>(
+            () => blobSystem.BlobExists(invalidBlobName));
 
-        var blobSystem = new FileBlobSystem(subDirectories, Fuzzy.Default);
+        Assert.Throws<ArgumentException>(
+            () => blobSystem.RemoveBlob(invalidBlobName));
 
-        Assert.Equal(
-            new[] { "sub1/file.txt", "sub2/file.txt" },
-            blobSystem.ListBlobs().Select(b => b.Name));
+        Assert.Throws<ArgumentException>(
+            () => blobSystem.GetBlob(invalidBlobName));
+
+        Assert.Throws<ArgumentException>(
+            () => blobSystem.OpenRead(invalidBlobName));
+
+        Assert.Throws<ArgumentException>(
+            () => blobSystem.OpenWrite(invalidBlob));
     }
 
-    private static void BlobSystem_Can_Read_Write(
-        IBlobSystem blobSystem)
+    public void Dispose()
+    {
+        TempDirectory?.Dispose();
+        TempDirectory = null;
+    }
+
+    private static IBlobSystem CreateBlobSystem()
+    {
+        TempDirectory = new DisposableDirectory();
+
+        return new FileBlobSystem(
+            new[] { TempDirectory.Name },
+            Fuzzy.Default);
+    }
+}
+
+public abstract class BlobSystemTests
+{
+    internal BlobSystemTests(IBlobSystem blobSystem)
+    {
+        BlobSystem = blobSystem;
+    }
+
+    public IBlobSystem BlobSystem { get; }
+
+    [Fact]
+    public void BlobSystem_Can_Read_Write()
     {
         var blob = Some.Blob("some blob");
         var expectedBytes = new byte[] { 0x12, 0x34 };
 
-        Assert.False(blobSystem.BlobExists(blob.Name));
+        Assert.False(BlobSystem.BlobExists(blob.Name));
 
-        using (var writeStream = blobSystem.OpenWrite(blob))
+        using (var writeStream = BlobSystem.OpenWrite(blob))
         {
             writeStream.Write(expectedBytes);
         }
 
-        Assert.True(blobSystem.BlobExists(blob.Name));
+        Assert.True(BlobSystem.BlobExists(blob.Name));
 
         Assert.Equal(
             blob,
-            blobSystem.GetBlob(blob.Name));
+            BlobSystem.GetBlob(blob.Name));
 
         Assert.Equal(
             new[] { blob },
-            blobSystem.ListBlobs());
+            BlobSystem.ListBlobs());
 
-        using (var readStream = blobSystem.OpenRead(blob.Name))
+        using (var readStream = BlobSystem.OpenRead(blob.Name))
         using (var memoryStream = new MemoryStream())
         {
             readStream.CopyTo(memoryStream);
@@ -142,8 +165,8 @@ public static class BlobSystemTests
                 memoryStream.ToArray());
         }
 
-        blobSystem.RemoveBlob(blob.Name);
+        BlobSystem.RemoveBlob(blob.Name);
 
-        Assert.Empty(blobSystem.ListBlobs());
+        Assert.Empty(BlobSystem.ListBlobs());
     }
 }

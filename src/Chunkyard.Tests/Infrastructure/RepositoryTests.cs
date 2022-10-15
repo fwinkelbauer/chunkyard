@@ -1,200 +1,174 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-public static class RepositoryTests
+public sealed class StringMemoryRepositoryTests
+    : StringRepositoryTests
 {
-    [Fact]
-    public static void MemoryRepository_Can_Read_Write()
+    public StringMemoryRepositoryTests()
+        : base(new MemoryRepository<string>())
     {
-        Repository_Can_Read_Write(new MemoryRepository<string>());
-        Repository_Can_Read_Write(new MemoryRepository<int>());
+    }
+}
+
+public sealed class IntMemoryRepositoryTests
+    : IntRepositoryTests
+{
+    public IntMemoryRepositoryTests()
+        : base(new MemoryRepository<int>())
+    {
+    }
+}
+
+public sealed class StringFileRepositoryTests
+    : StringRepositoryTests, IDisposable
+{
+    private static DisposableDirectory? TempDirectory;
+
+    public StringFileRepositoryTests()
+        : base(CreateRepository())
+    {
     }
 
     [Fact]
-    public static void FileRepository_Can_Read_Write()
+    public void Methods_Prevent_Directory_Traversal_Attack()
     {
-        using var directory = new DisposableDirectory();
-
-        Repository_Can_Read_Write(
-            FileRepository.CreateChunkRepository(directory.Name));
-
-        Repository_Can_Read_Write(
-            FileRepository.CreateReferenceRepository(directory.Name));
-    }
-
-    [Fact]
-    public static void MemoryRepository_StoreValue_Throws_When_Writing_To_Same_Key()
-    {
-        Repository_StoreValue_Throws_When_Writing_To_Same_Key<ArgumentException>(
-            new MemoryRepository<string>());
-
-        Repository_StoreValue_Throws_When_Writing_To_Same_Key<ArgumentException>(
-            new MemoryRepository<int>());
-    }
-
-    [Fact]
-    public static void FileRepository_StoreValue_Throws_When_Writing_To_Same_Key()
-    {
-        using var directory = new DisposableDirectory();
-
-        Repository_StoreValue_Throws_When_Writing_To_Same_Key<IOException>(
-            FileRepository.CreateChunkRepository(directory.Name));
-
-        Repository_StoreValue_Throws_When_Writing_To_Same_Key<IOException>(
-            FileRepository.CreateReferenceRepository(directory.Name));
-    }
-
-    [Fact]
-    public static void MemoryRepository_StoreValueIfNotExists_Writes_Key_Once()
-    {
-        Repository_StoreValueIfNotExists_Writes_Key_Once(
-            new MemoryRepository<string>());
-
-        Repository_StoreValueIfNotExists_Writes_Key_Once(
-            new MemoryRepository<int>());
-    }
-
-    [Fact]
-    public static void FileRepository_StoreValueIfNotExists_Writes_Key_Once()
-    {
-        using var directory = new DisposableDirectory();
-
-        Repository_StoreValueIfNotExists_Writes_Key_Once(
-            FileRepository.CreateChunkRepository(directory.Name));
-
-        Repository_StoreValueIfNotExists_Writes_Key_Once(
-            FileRepository.CreateReferenceRepository(directory.Name));
-    }
-
-    [Fact]
-    public static void FileRepository_Prevents_Directory_Traversal_Attack()
-    {
-        using var directory = new DisposableDirectory();
-
-        var repository = FileRepository.CreateChunkRepository(directory.Name);
         var invalidKey = "../some-file";
 
         Assert.Throws<ArgumentException>(
-            () => repository.StoreValue(invalidKey, new byte[] { 0xFF }));
+            () => Repository.StoreValue(invalidKey, new byte[] { 0xFF }));
 
         Assert.Throws<ArgumentException>(
-            () => repository.RetrieveValue(invalidKey));
+            () => Repository.RetrieveValue(invalidKey));
 
         Assert.Throws<ArgumentException>(
-            () => repository.ValueExists(invalidKey));
+            () => Repository.ValueExists(invalidKey));
 
         Assert.Throws<ArgumentException>(
-            () => repository.RemoveValue(invalidKey));
+            () => Repository.RemoveValue(invalidKey));
     }
 
-    private static void Repository_StoreValue_Throws_When_Writing_To_Same_Key<TException>(
-        IRepository<string> repository)
-        where TException : Exception
+    public void Dispose()
     {
-        var key = "aa";
-        var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-
-        repository.StoreValue(key, bytes);
-
-        Assert.Throws<TException>(
-            () => repository.StoreValue(key, bytes));
+        TempDirectory?.Dispose();
+        TempDirectory = null;
     }
 
-    private static void Repository_StoreValue_Throws_When_Writing_To_Same_Key<TException>(
-        IRepository<int> repository)
-        where TException : Exception
+    private static IRepository<string> CreateRepository()
     {
-        var key = 15;
-        var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+        TempDirectory = new DisposableDirectory();
 
-        repository.StoreValue(key, bytes);
+        return new StringFileRepository(TempDirectory.Name);
+    }
+}
 
-        Assert.Throws<TException>(
-            () => repository.StoreValue(key, bytes));
+public sealed class IntFileRepositoryTests
+    : IntRepositoryTests, IDisposable
+{
+    private static DisposableDirectory? TempDirectory;
+
+    public IntFileRepositoryTests()
+        : base(CreateRepository())
+    {
     }
 
-    private static void Repository_StoreValueIfNotExists_Writes_Key_Once(
-        IRepository<string> repository)
+    public void Dispose()
     {
-        var key = "aa";
+        TempDirectory?.Dispose();
+        TempDirectory = null;
+    }
+
+    private static IRepository<int> CreateRepository()
+    {
+        TempDirectory = new DisposableDirectory();
+
+        return new IntFileRepository(TempDirectory.Name);
+    }
+}
+
+public abstract class IntRepositoryTests : RepositoryTests<int>
+{
+    internal IntRepositoryTests(IRepository<int> repository)
+        : base(repository, new[] { 1, 2, 3 })
+    {
+    }
+}
+
+public abstract class StringRepositoryTests : RepositoryTests<string>
+{
+    internal StringRepositoryTests(IRepository<string> repository)
+        : base(repository, new[] { "aa", "bb", "cc" })
+    {
+    }
+}
+
+public abstract class RepositoryTests<T>
+    where T : notnull
+{
+    internal RepositoryTests(
+        IRepository<T> repository,
+        IReadOnlyCollection<T> keys)
+    {
+        Repository = repository;
+        Keys = keys;
+    }
+
+    internal IRepository<T> Repository { get; }
+
+    internal IReadOnlyCollection<T> Keys { get; }
+
+    [Fact]
+    public void Repository_Can_Read_Write()
+    {
+        Assert.NotEmpty(Keys);
+        Assert.Empty(Repository.ListKeys());
+
+        var dict = Keys.ToDictionary(
+            k => k,
+            k => SHA256.HashData(Encoding.UTF8.GetBytes(k.ToString()!)));
+
+        foreach (var pair in dict)
+        {
+            Repository.StoreValue(pair.Key, pair.Value);
+
+            Assert.True(Repository.ValueExists(pair.Key));
+            Assert.Equal(pair.Value, Repository.RetrieveValue(pair.Key));
+        }
+
+        Assert.Equal(Keys, Repository.ListKeys().OrderBy(k => k));
+
+        foreach (var pair in dict)
+        {
+            Repository.RemoveValue(pair.Key);
+
+            Assert.False(Repository.ValueExists(pair.Key));
+        }
+
+        Assert.Empty(Repository.ListKeys());
+    }
+
+    [Fact]
+    public void Repository_StoreValueIfNotExists_Writes_Key_Once()
+    {
+        var key = Keys.First();
         var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
-        repository.StoreValueIfNotExists(key, expectedBytes);
+        Repository.StoreValueIfNotExists(key, expectedBytes);
 
-        repository.StoreValueIfNotExists(
+        Repository.StoreValueIfNotExists(
             key,
             new byte[] { 0xAA, 0xAA, 0xAA, 0xAA });
 
-        Assert.Equal(expectedBytes, repository.RetrieveValue(key));
+        Assert.Equal(expectedBytes, Repository.RetrieveValue(key));
     }
 
-    private static void Repository_StoreValueIfNotExists_Writes_Key_Once(
-        IRepository<int> repository)
+    [Fact]
+    public void Repository_StoreValue_Throws_When_Writing_To_Same_Key()
     {
-        var key = 15;
-        var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+        var key = Keys.First();
+        var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
-        repository.StoreValueIfNotExists(key, expectedBytes);
+        Repository.StoreValue(key, bytes);
 
-        repository.StoreValueIfNotExists(
-            key,
-            new byte[] { 0xAA, 0xAA, 0xAA, 0xAA });
-
-        Assert.Equal(expectedBytes, repository.RetrieveValue(key));
-    }
-
-    private static void Repository_Can_Read_Write(
-        IRepository<string> repository)
-    {
-        var expectedBytes1 = new byte[] { 0xAA, 0xAA, 0xAA, 0xAA };
-        var expectedBytes2 = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-        var key1 = "aa";
-        var key2 = "bb";
-
-        Assert.Empty(repository.ListKeys());
-
-        repository.StoreValue(key1, expectedBytes1);
-        repository.StoreValue(key2, expectedBytes2);
-
-        Assert.Equal(new[] { key1, key2 }, repository.ListKeys());
-
-        Assert.True(repository.ValueExists(key1));
-        Assert.True(repository.ValueExists(key2));
-
-        Assert.Equal(expectedBytes1, repository.RetrieveValue(key1));
-        Assert.Equal(expectedBytes2, repository.RetrieveValue(key2));
-
-        repository.RemoveValue(key1);
-        repository.RemoveValue(key2);
-
-        Assert.Empty(repository.ListKeys());
-        Assert.False(repository.ValueExists(key1));
-        Assert.False(repository.ValueExists(key2));
-    }
-
-    private static void Repository_Can_Read_Write(
-        IRepository<int> repository)
-    {
-        var expectedBytes1 = new byte[] { 0xAA, 0xAA, 0xAA, 0xAA };
-        var expectedBytes2 = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-
-        Assert.Empty(repository.ListKeys());
-
-        repository.StoreValue(1, expectedBytes1);
-        repository.StoreValue(2, expectedBytes2);
-
-        Assert.Equal(new[] { 1, 2 }, repository.ListKeys().OrderBy(k => k));
-
-        Assert.True(repository.ValueExists(1));
-        Assert.True(repository.ValueExists(2));
-
-        Assert.Equal(expectedBytes1, repository.RetrieveValue(1));
-        Assert.Equal(expectedBytes2, repository.RetrieveValue(2));
-
-        repository.RemoveValue(1);
-        repository.RemoveValue(2);
-
-        Assert.Empty(repository.ListKeys());
-        Assert.False(repository.ValueExists(1));
-        Assert.False(repository.ValueExists(2));
+        Assert.ThrowsAny<Exception>(
+            () => Repository.StoreValue(key, bytes));
     }
 }
