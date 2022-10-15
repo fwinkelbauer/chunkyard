@@ -21,9 +21,7 @@ public class ProgramTests
     [Fact]
     public void Chunkyard_Runs_Verb()
     {
-        using var directory = new DisposableDirectory();
-
-        Chunkyard($"list -r {directory.Name}");
+        Chunkyard("list");
     }
 
     private void Chunkyard(string arguments)
