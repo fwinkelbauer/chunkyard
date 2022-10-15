@@ -7,21 +7,31 @@ public static class FileRepository
 {
     public static Repository Create(string directory)
     {
-        var references = new FileRepository<int>(
+        return new Repository(
+            CreateReferenceRepository(directory),
+            CreateChunkRepository(directory));
+    }
+
+    public static FileRepository<int> CreateReferenceRepository(
+        string directory)
+    {
+        return new FileRepository<int>(
             Path.Combine(directory, "references"),
             number => number.ToString(),
             file => Convert.ToInt32(file));
+    }
 
-        var chunks = new FileRepository<string>(
+    public static FileRepository<string> CreateChunkRepository(
+        string directory)
+    {
+        return new FileRepository<string>(
             Path.Combine(directory, "chunks"),
             chunkId => Path.Combine(chunkId[..2], chunkId),
             file => Path.GetFileNameWithoutExtension(file));
-
-        return new Repository(references, chunks);
     }
 }
 
-internal sealed class FileRepository<T> : IRepository<T>
+public sealed class FileRepository<T> : IRepository<T>
     where T : notnull
 {
     private readonly string _directory;
