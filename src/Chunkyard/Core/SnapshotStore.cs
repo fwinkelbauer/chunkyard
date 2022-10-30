@@ -11,6 +11,7 @@ public sealed class SnapshotStore
     private readonly IProbe _probe;
     private readonly IClock _clock;
     private readonly Lazy<Crypto> _crypto;
+    private readonly Lazy<uint[]> _table;
 
     public SnapshotStore(
         Repository repository,
@@ -44,6 +45,9 @@ public sealed class SnapshotStore
                     snapshotReference.Iterations);
             }
         });
+
+        _table = new Lazy<uint[]>(
+            () => FastCdc.GenerateGearTable(_crypto.Value));
     }
 
     public DiffSet StoreSnapshotPreview(IBlobSystem blobSystem)
@@ -340,7 +344,7 @@ public sealed class SnapshotStore
             return _repository.StoreChunk(encrypted);
         }
 
-        return _fastCdc.SplitIntoChunks(stream)
+        return _fastCdc.SplitIntoChunks(stream, _table.Value)
             .AsParallel()
             .AsOrdered()
             .Select(StoreChunk)
