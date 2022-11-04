@@ -52,8 +52,6 @@ public sealed class SnapshotStore
 
     public DiffSet StoreSnapshotPreview(IBlobSystem blobSystem)
     {
-        ArgumentNullException.ThrowIfNull(blobSystem);
-
         var blobReferences = _repository.CurrentReferenceId == null
             ? Array.Empty<BlobReference>()
             : GetSnapshot(_repository.CurrentReferenceId.Value).BlobReferences;
@@ -68,8 +66,6 @@ public sealed class SnapshotStore
 
     public int StoreSnapshot(IBlobSystem blobSystem)
     {
-        ArgumentNullException.ThrowIfNull(blobSystem);
-
         var snapshot = new Snapshot(
             _clock.NowUtc(),
             StoreBlobs(blobSystem));
@@ -121,8 +117,6 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy includeFuzzy)
     {
-        ArgumentNullException.ThrowIfNull(blobSystem);
-
         var blobs = blobSystem.ListBlobs();
         var blobReferences = FilterSnapshot(snapshotId, includeFuzzy);
 
@@ -142,8 +136,6 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy includeFuzzy)
     {
-        ArgumentNullException.ThrowIfNull(blobSystem);
-
         _ = FilterSnapshot(snapshotId, includeFuzzy)
             .AsParallel()
             .Select(br => RestoreBlob(blobSystem, br))
@@ -196,9 +188,6 @@ public sealed class SnapshotStore
         IEnumerable<string> chunkIds,
         Stream outputStream)
     {
-        ArgumentNullException.ThrowIfNull(chunkIds);
-        ArgumentNullException.ThrowIfNull(outputStream);
-
         foreach (var chunkId in chunkIds)
         {
             byte[]? decrypted = null;
@@ -221,8 +210,6 @@ public sealed class SnapshotStore
 
     public void CopyTo(Repository otherRepository)
     {
-        ArgumentNullException.ThrowIfNull(otherRepository);
-
         var snapshotIds = _repository.ListReferenceIds();
         var otherSnapshotIds = otherRepository.ListReferenceIds();
         var otherCurrentSnapshotId = otherRepository.CurrentReferenceId;

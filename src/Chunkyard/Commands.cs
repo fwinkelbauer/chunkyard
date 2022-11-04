@@ -10,6 +10,7 @@ internal static class Commands
     public static void StoreSnapshot(StoreOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o.Repository);
+
         var blobSystem = new FileBlobSystem(
             o.Paths,
             new Fuzzy(o.ExcludePatterns));

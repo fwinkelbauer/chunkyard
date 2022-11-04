@@ -10,8 +10,6 @@ public static class ProcessUtils
         int[]? validExitCodes = null,
         Action<string>? processOutput = null)
     {
-        ArgumentNullException.ThrowIfNull(startInfo);
-
         using var process = Process.Start(startInfo);
 
         if (process == null)

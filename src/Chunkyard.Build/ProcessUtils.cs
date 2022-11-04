@@ -3,15 +3,13 @@ namespace Chunkyard.Build;
 /// <summary>
 /// A set of process utility methods.
 /// </summary>
-internal static class ProcessUtils
+public static class ProcessUtils
 {
     public static void Run(
         ProcessStartInfo startInfo,
         int[]? validExitCodes = null,
         Action<string>? processOutput = null)
     {
-        ArgumentNullException.ThrowIfNull(startInfo);
-
         using var process = Process.Start(startInfo);
 
         if (process == null)

@@ -284,8 +284,6 @@ public static class FastCdcTests
     [Theory, MemberData(nameof(TheoryData))]
     public static void SplitIntoChunks(FastCdc fastCdc, int[] chunkSizes)
     {
-        ArgumentNullException.ThrowIfNull(fastCdc);
-
         using var stream = new MemoryStream(_pictureBytes);
         var chunks = fastCdc.SplitIntoChunks(stream, _table).ToArray();
 

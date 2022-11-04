@@ -24,13 +24,11 @@ public sealed partial class Serialize : JsonSerializerContext
 
     public static Snapshot BytesToSnapshot(byte[] json)
     {
-        return JsonSerializer.Deserialize(json, Default.Snapshot)
-            ?? throw new ArgumentNullException(nameof(json));
+        return JsonSerializer.Deserialize(json, Default.Snapshot)!;
     }
 
     public static SnapshotReference BytesToSnapshotReference(byte[] json)
     {
-        return JsonSerializer.Deserialize(json, Default.SnapshotReference)
-            ?? throw new ArgumentNullException(nameof(json));
+        return JsonSerializer.Deserialize(json, Default.SnapshotReference)!;
     }
 }

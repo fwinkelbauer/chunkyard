@@ -63,8 +63,6 @@ public sealed class FileBlobSystem : IBlobSystem
 
     public Stream OpenWrite(Blob blob)
     {
-        ArgumentNullException.ThrowIfNull(blob);
-
         var file = ToFile(blob.Name);
 
         DirectoryUtils.EnsureParent(file);

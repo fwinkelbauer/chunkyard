@@ -19,8 +19,6 @@ public static class DirectoryUtils
 
     public static string GetCommonParent(string[] paths, char separatorChar)
     {
-        ArgumentNullException.ThrowIfNull(paths);
-
         if (paths.Length == 0)
         {
             throw new ArgumentException(

@@ -69,8 +69,6 @@ public sealed class FastCdc
 
     public static uint[] GenerateGearTable(Crypto crypto)
     {
-        ArgumentNullException.ThrowIfNull(crypto);
-
         var nonce = new byte[Crypto.NonceBytes];
         var input = new byte[1024];
 
@@ -93,9 +91,6 @@ public sealed class FastCdc
 
     public IEnumerable<byte[]> SplitIntoChunks(Stream stream, uint[] table)
     {
-        ArgumentNullException.ThrowIfNull(stream);
-        ArgumentNullException.ThrowIfNull(table);
-
         var buffer = new byte[MaxSize];
         var bytesCarryOver = 0;
         long bytesProcessed = 0;
