@@ -27,7 +27,8 @@ public static class DirectoryUtils
         }
         else if (paths.Length == 1)
         {
-            return Path.GetDirectoryName(paths[0]) ?? "";
+            return (Path.GetDirectoryName(paths[0]) ?? "")
+                .Replace(Path.DirectorySeparatorChar, separatorChar);
         }
 
         var parent = "";
