@@ -19,7 +19,7 @@ public sealed class StringFileRepository : FileRepository<string>
         : base(
             directory,
             chunkId => Path.Combine(chunkId[..2], chunkId),
-            file => Path.GetFileNameWithoutExtension(file))
+            Path.GetFileNameWithoutExtension)
     {
     }
 }
@@ -30,7 +30,7 @@ public sealed class IntFileRepository : FileRepository<int>
         : base(
             directory,
             number => number.ToString(),
-            file => Convert.ToInt32(file))
+            Convert.ToInt32)
     {
     }
 }

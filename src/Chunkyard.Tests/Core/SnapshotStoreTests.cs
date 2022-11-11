@@ -674,16 +674,6 @@ public static class SnapshotStoreTests
         }
     }
 
-    private static void Remove(
-        Repository repository,
-        IEnumerable<int> referenceIds)
-    {
-        foreach (var referenceId in referenceIds)
-        {
-            repository.RemoveReference(referenceId);
-        }
-    }
-
     private static void Change(
         Repository repository,
         IEnumerable<string> chunkIds)
