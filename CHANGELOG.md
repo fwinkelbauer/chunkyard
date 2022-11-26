@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 18.2.0 - 2022-11-26
+
 ### Changed
 
 - The FastCDC lookup table by generating it based on a repository password
