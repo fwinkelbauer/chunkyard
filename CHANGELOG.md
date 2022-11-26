@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The FastCDC lookup table by generating it based on a repository password
 
+### Fixed
+
+- A bug when using accessing snapshots using negative IDs
+
 ## 18.1.1 - 2022-10-07
 
 ### Fixed

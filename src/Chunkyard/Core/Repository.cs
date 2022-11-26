@@ -91,7 +91,11 @@ public sealed class Repository
             return CurrentReferenceId.Value;
         }
 
-        var referenceIds = _references.ListKeys().ToArray();
+        var referenceIds = _references.ListKeys()
+            .ToArray();
+
+        Array.Sort(referenceIds);
+
         var position = referenceIds.Length + referenceId;
 
         if (position < 0)
