@@ -31,11 +31,7 @@ public static class Program
 
     private static void ProcessArguments(string[] args)
     {
-        var optionTypes = Assembly.GetExecutingAssembly().GetTypes()
-            .Where(t => t.GetCustomAttribute<VerbAttribute>() != null)
-            .ToArray();
-
-        Parser.Default.ParseArguments(args, optionTypes)
+        Parser.Default.ParseArguments<RestoreOptions, StoreOptions, CheckOptions, ShowOptions, RemoveOptions, KeepOptions, ListOptions, DiffOptions, GarbageCollectOptions, CopyOptions, CatOptions>(args)
             .WithParsed<RestoreOptions>(Commands.RestoreSnapshot)
             .WithParsed<StoreOptions>(Commands.StoreSnapshot)
             .WithParsed<CheckOptions>(Commands.CheckSnapshot)

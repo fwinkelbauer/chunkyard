@@ -31,11 +31,7 @@ public static class Program
 
     private static void ProcessArguments(string[] args)
     {
-        var optionTypes = Assembly.GetExecutingAssembly().GetTypes()
-            .Where(t => t.GetCustomAttribute<VerbAttribute>() != null)
-            .ToArray();
-
-        Parser.Default.ParseArguments(args, optionTypes)
+        Parser.Default.ParseArguments<CleanOptions, BuildOptions, PublishOptions, ReleaseOptions, FmtOptions, OutdatedOptions>(args)
             .WithParsed<CleanOptions>(_ => Commands.Clean())
             .WithParsed<BuildOptions>(Commands.Build)
             .WithParsed<PublishOptions>(_ => Commands.Publish())
