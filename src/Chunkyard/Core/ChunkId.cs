@@ -9,7 +9,8 @@ public static class ChunkId
 {
     public static string Compute(ReadOnlySpan<byte> chunk)
     {
-        return Convert.ToHexString(SHA256.HashData(chunk)).ToLower();
+        return Convert.ToHexString(SHA256.HashData(chunk))
+            .ToLowerInvariant();
     }
 
     public static bool Valid(string chunkId, ReadOnlySpan<byte> chunk)
