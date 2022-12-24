@@ -1,6 +1,6 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-internal class DummyPrompt : IPrompt
+internal sealed class DummyPrompt : IPrompt
 {
     private readonly string _password;
 

@@ -1,6 +1,6 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-internal class MemoryBlobSystem : IBlobSystem
+internal sealed class MemoryBlobSystem : IBlobSystem
 {
     private readonly Dictionary<string, Blob> _blobs;
     private readonly Dictionary<string, byte[]> _values;
@@ -71,7 +71,7 @@ internal class MemoryBlobSystem : IBlobSystem
         }
     }
 
-    private class WriteStream : MemoryStream
+    private sealed class WriteStream : MemoryStream
     {
         private readonly MemoryBlobSystem _blobSystem;
         private readonly Blob _blob;

@@ -1,6 +1,6 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-internal class DummyClock : IClock
+internal sealed class DummyClock : IClock
 {
     private DateTime _nowUtc;
 

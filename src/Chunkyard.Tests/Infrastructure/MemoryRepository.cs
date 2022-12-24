@@ -10,7 +10,7 @@ internal static class MemoryRepository
     }
 }
 
-internal class MemoryRepository<T> : IRepository<T>
+internal sealed class MemoryRepository<T> : IRepository<T>
     where T : notnull
 {
     private readonly object _lock;
