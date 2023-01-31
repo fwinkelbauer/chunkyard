@@ -12,7 +12,7 @@ public static class FuzzyTests
     }
 
     [Fact]
-    public static void IsMatch_Matches_Empty_Collection_Based_On_Type()
+    public static void IsMatch_Includes_All_And_Excludes_Nothing_For_Empty_Collection()
     {
         var fuzzy = Fuzzy.Default;
 
@@ -35,5 +35,18 @@ public static class FuzzyTests
 
         Assert.Equal(expected, fuzzy.IsIncludingMatch(input));
         Assert.Equal(expected, fuzzy.IsExcludingMatch(input));
+    }
+
+    [Fact]
+    public static void IsMatch_Treats_Lowercase_As_Ignore_Case()
+    {
+        var lowerFuzzy = new Fuzzy(new[] { "hello" });
+        var upperFuzzy = new Fuzzy(new[] { "Hello" });
+
+        Assert.True(lowerFuzzy.IsIncludingMatch("hello"));
+        Assert.True(lowerFuzzy.IsExcludingMatch("Hello"));
+
+        Assert.False(upperFuzzy.IsIncludingMatch("hello"));
+        Assert.True(upperFuzzy.IsExcludingMatch("Hello"));
     }
 }

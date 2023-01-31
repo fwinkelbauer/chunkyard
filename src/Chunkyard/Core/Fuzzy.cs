@@ -16,6 +16,9 @@ public sealed class Fuzzy
             .Select(p => string.IsNullOrEmpty(p)
                 ? ".*"
                 : p.Replace(" ", ".*"))
+            .Select(p => p.Any(char.IsUpper)
+                ? p
+                : $"(?i){p}")
             .Select(p => new Regex(p))
             .ToArray();
     }
