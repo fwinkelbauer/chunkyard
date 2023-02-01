@@ -190,12 +190,12 @@ public sealed class SnapshotStore
     {
         foreach (var chunkId in chunkIds)
         {
-            byte[]? decrypted = null;
-
             try
             {
-                decrypted = _crypto.Value.Decrypt(
+                var decrypted = _crypto.Value.Decrypt(
                     _repository.RetrieveChunk(chunkId));
+
+                outputStream.Write(decrypted);
             }
             catch (CryptographicException e)
             {
@@ -203,8 +203,6 @@ public sealed class SnapshotStore
                     $"Could not decrypt chunk: {chunkId}",
                     e);
             }
-
-            outputStream.Write(decrypted);
         }
     }
 
