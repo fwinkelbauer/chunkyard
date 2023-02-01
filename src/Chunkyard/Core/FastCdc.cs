@@ -72,10 +72,8 @@ public sealed class FastCdc
         var nonce = new byte[Crypto.NonceBytes];
         var input = new byte[1024];
 
-        var random = new Span<byte>(
-            crypto.Encrypt(nonce, input),
-            Crypto.NonceBytes,
-            input.Length);
+        var random = crypto.Encrypt(nonce, input)
+            .AsSpan(Crypto.NonceBytes, input.Length);
 
         var table = new uint[256];
         var mask = Mask(31);
@@ -105,11 +103,10 @@ public sealed class FastCdc
             var bytesTotal = bytesCarryOver + bytesRead;
 
             var chunkSize = Cut(
-                new ReadOnlySpan<byte>(buffer, 0, bytesTotal),
+                buffer.AsSpan(0, bytesTotal),
                 table);
 
-            yield return new Span<byte>(buffer, 0, chunkSize)
-                .ToArray();
+            yield return buffer.AsSpan(0, chunkSize).ToArray();
 
             bytesProcessed += chunkSize;
             bytesCarryOver = bytesTotal - chunkSize;
