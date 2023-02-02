@@ -9,7 +9,8 @@ public static class DirectoryUtils
     {
         var parent = Path.GetDirectoryName(path);
 
-        if (string.IsNullOrEmpty(parent))
+        if (string.IsNullOrEmpty(parent)
+            || parent.Equals(Path.GetPathRoot(parent)))
         {
             return;
         }
