@@ -1,29 +1,20 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-public sealed class StringMemoryRepositoryTests
-    : StringRepositoryTests
+public sealed class MemoryRepositoryTests
+    : RepositoryTests
 {
-    public StringMemoryRepositoryTests()
+    public MemoryRepositoryTests()
         : base(new MemoryRepository<string>())
     {
     }
 }
 
-public sealed class IntMemoryRepositoryTests
-    : IntRepositoryTests
-{
-    public IntMemoryRepositoryTests()
-        : base(new MemoryRepository<int>())
-    {
-    }
-}
-
-public sealed class StringFileRepositoryTests
-    : StringRepositoryTests, IDisposable
+public sealed class FileRepositoryTests
+    : RepositoryTests, IDisposable
 {
     private static DisposableDirectory? TempDirectory;
 
-    public StringFileRepositoryTests()
+    public FileRepositoryTests()
         : base(CreateRepository())
     {
     }
@@ -63,68 +54,21 @@ public sealed class StringFileRepositoryTests
     }
 }
 
-public sealed class IntFileRepositoryTests
-    : IntRepositoryTests, IDisposable
+public abstract class RepositoryTests
 {
-    private static DisposableDirectory? TempDirectory;
-
-    public IntFileRepositoryTests()
-        : base(CreateRepository())
-    {
-    }
-
-    public void Dispose()
-    {
-        TempDirectory?.Dispose();
-        TempDirectory = null;
-    }
-
-    private static IRepository<int> CreateRepository()
-    {
-        TempDirectory = new DisposableDirectory();
-
-        return new FileRepository<int>(
-            TempDirectory.Name,
-            key => key.ToString(),
-            Convert.ToInt32);
-    }
-}
-
-public abstract class IntRepositoryTests : RepositoryTests<int>
-{
-    internal IntRepositoryTests(IRepository<int> repository)
-        : base(repository, new[] { 1, 2, 3 })
-    {
-    }
-}
-
-public abstract class StringRepositoryTests : RepositoryTests<string>
-{
-    internal StringRepositoryTests(IRepository<string> repository)
-        : base(repository, new[] { "aa", "bb", "cc" })
-    {
-    }
-}
-
-public abstract class RepositoryTests<T>
-    where T : notnull
-{
-    internal RepositoryTests(
-        IRepository<T> repository,
-        IReadOnlyCollection<T> keys)
+    internal RepositoryTests(IRepository<string> repository)
     {
         Repository = repository;
-        Keys = keys;
+        Keys = new[] { "aa", "bb", "cc" };
     }
 
-    internal IRepository<T> Repository { get; }
+    internal IRepository<string> Repository { get; }
 
-    internal IReadOnlyCollection<T> Keys { get; }
+    internal IReadOnlyCollection<string> Keys { get; }
 
     [Fact]
     public void Repository_Can_Read_Write()
     {
-        Assert.NotEmpty(Keys);
         Assert.Empty(Repository.ListKeys());
 
         var dict = Keys.ToDictionary(
