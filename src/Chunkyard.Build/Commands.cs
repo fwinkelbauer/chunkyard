@@ -69,8 +69,7 @@ internal static class Commands
                 $"-p:Version={version}",
                 $"-p:SourceRevisionId={commitId}",
                 "-p:PublishSingleFile=true",
-                "-p:PublishTrimmed=true",
-                "-p:IncludeNativeLibrariesForSelfExtract=true");
+                "-p:PublishTrimmed=true");
         }
     }
 

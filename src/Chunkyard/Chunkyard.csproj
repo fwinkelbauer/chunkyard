@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="commandlineparser" Version="2.9.1" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.9" />
   </ItemGroup>
 
 </Project>
