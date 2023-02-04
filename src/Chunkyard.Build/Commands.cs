@@ -106,13 +106,9 @@ internal static class Commands
             File.ReadAllText(Changelog),
             @"##\s+(\d+\.\d+\.\d+)");
 
-        if (match.Groups.Count < 2)
-        {
-            throw new IOException(
-                $"Could not fetch version from {Changelog}");
-        }
-
-        return match.Groups[1].Value;
+        return match.Groups.Count < 2
+            ? "0.1.0"
+            : match.Groups[1].Value;
     }
 
     private static void Dotnet(params string[] arguments)
