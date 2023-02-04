@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 18.3.0 - 2023-02-04
+
+### Changed
+
+- Fuzzy patterns to ignore case if the pattern is lower cased
+
 ## 18.2.0 - 2022-11-26
 
 ### Changed
