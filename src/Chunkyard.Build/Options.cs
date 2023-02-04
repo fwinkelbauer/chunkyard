@@ -8,13 +8,6 @@ public class CleanOptions
 [Verb("build", HelpText = "Build the repository.")]
 public class BuildOptions
 {
-    public BuildOptions(bool verbose)
-    {
-        Verbose = verbose;
-    }
-
-    [Option("verbose", Required = false, HelpText = "Print more details.", Default = false)]
-    public bool Verbose { get; }
 }
 
 [Verb("publish", HelpText = "Publish the main project.")]

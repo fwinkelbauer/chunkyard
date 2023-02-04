@@ -33,7 +33,7 @@ public static class Program
     {
         Parser.Default.ParseArguments<CleanOptions, BuildOptions, PublishOptions, ReleaseOptions, FmtOptions, OutdatedOptions>(args)
             .WithParsed<CleanOptions>(_ => Commands.Clean())
-            .WithParsed<BuildOptions>(Commands.Build)
+            .WithParsed<BuildOptions>(_ => Commands.Build())
             .WithParsed<PublishOptions>(_ => Commands.Publish())
             .WithParsed<ReleaseOptions>(_ => Commands.Release())
             .WithParsed<FmtOptions>(_ => Commands.Fmt())

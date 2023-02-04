@@ -30,23 +30,19 @@ internal static class Commands
             string.Join(' ', expressions));
     }
 
-    public static void Build(BuildOptions? o = null)
+    public static void Build()
     {
         Dotnet(
             $"build {Solution}",
             $"-c {Configuration}",
             "-warnaserror");
 
-        var logger = o != null && o.Verbose
-            ? "--logger console;verbosity=detailed"
-            : "";
-
         Dotnet(
             $"test {Solution}",
             $"-c {Configuration}",
             "--no-build",
             "--nologo",
-            logger);
+            "--logger console;verbosity=detailed");
     }
 
     public static void Publish()
