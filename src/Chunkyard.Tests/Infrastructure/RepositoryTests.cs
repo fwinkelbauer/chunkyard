@@ -56,7 +56,10 @@ public sealed class StringFileRepositoryTests
     {
         TempDirectory = new DisposableDirectory();
 
-        return new StringFileRepository(TempDirectory.Name);
+        return new FileRepository<string>(
+            TempDirectory.Name,
+            key => key,
+            file => file);
     }
 }
 
@@ -80,7 +83,10 @@ public sealed class IntFileRepositoryTests
     {
         TempDirectory = new DisposableDirectory();
 
-        return new IntFileRepository(TempDirectory.Name);
+        return new FileRepository<int>(
+            TempDirectory.Name,
+            number => number.ToString(),
+            Convert.ToInt32);
     }
 }
 
