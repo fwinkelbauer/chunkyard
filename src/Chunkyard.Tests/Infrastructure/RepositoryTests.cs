@@ -85,7 +85,7 @@ public sealed class IntFileRepositoryTests
 
         return new FileRepository<int>(
             TempDirectory.Name,
-            number => number.ToString(),
+            key => key.ToString(),
             Convert.ToInt32);
     }
 }

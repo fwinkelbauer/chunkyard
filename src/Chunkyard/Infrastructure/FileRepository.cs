@@ -10,11 +10,11 @@ public static class FileRepository
         return new Repository(
             new FileRepository<int>(
                 Path.Combine(directory, "references"),
-                number => number.ToString(),
+                key => key.ToString(),
                 Convert.ToInt32),
             new FileRepository<string>(
                 Path.Combine(directory, "chunks"),
-                chunkId => Path.Combine(chunkId[..2], chunkId),
+                key => Path.Combine(key[..2], key),
                 Path.GetFileNameWithoutExtension));
     }
 }
