@@ -3,21 +3,12 @@ namespace Chunkyard.Tests.Core;
 public static class FuzzyTests
 {
     [Fact]
-    public static void IsMatch_Returns_True_For_Empty_String()
+    public static void IsMatch_Returns_True_For_Empty_String_Or_Collection()
     {
-        var fuzzy = new Fuzzy(new[] { "" });
+        var text = "some text!";
 
-        Assert.True(fuzzy.IsIncludingMatch("some text!"));
-        Assert.True(fuzzy.IsExcludingMatch("some text!"));
-    }
-
-    [Fact]
-    public static void IsMatch_Includes_All_And_Excludes_Nothing_For_Empty_Collection()
-    {
-        var fuzzy = Fuzzy.Default;
-
-        Assert.True(fuzzy.IsIncludingMatch("some text!"));
-        Assert.False(fuzzy.IsExcludingMatch("some text!"));
+        Assert.True(new Fuzzy(new[] { "" }).IsMatch(text));
+        Assert.True(Fuzzy.Default.IsMatch(text));
     }
 
     [Theory]
@@ -33,8 +24,7 @@ public static class FuzzyTests
         var fuzzy = new Fuzzy(
             new[] { "He ld", "HE LD" });
 
-        Assert.Equal(expected, fuzzy.IsIncludingMatch(input));
-        Assert.Equal(expected, fuzzy.IsExcludingMatch(input));
+        Assert.Equal(expected, fuzzy.IsMatch(input));
     }
 
     [Fact]
@@ -43,10 +33,27 @@ public static class FuzzyTests
         var lowerFuzzy = new Fuzzy(new[] { "hello" });
         var upperFuzzy = new Fuzzy(new[] { "Hello" });
 
-        Assert.True(lowerFuzzy.IsIncludingMatch("hello"));
-        Assert.True(lowerFuzzy.IsExcludingMatch("Hello"));
+        Assert.True(lowerFuzzy.IsMatch("hello"));
+        Assert.False(upperFuzzy.IsMatch("hello"));
+    }
 
-        Assert.False(upperFuzzy.IsIncludingMatch("hello"));
-        Assert.True(upperFuzzy.IsExcludingMatch("Hello"));
+    [Fact]
+    public static void IsMatch_Excludes_Exclamated_Pattern()
+    {
+        var fuzzy1 = new Fuzzy(new[] { "hello", "!world" });
+        var fuzzy2 = new Fuzzy(new[] { "!world", "!something" });
+        var fuzzy3 = new Fuzzy(new[] { ".*", "!world", "!something" });
+
+        Assert.True(fuzzy1.IsMatch("Hello planet"));
+        Assert.False(fuzzy1.IsMatch("Hello world"));
+        Assert.False(fuzzy1.IsMatch("Goodbye"));
+
+        Assert.True(fuzzy2.IsMatch("Hello planet"));
+        Assert.False(fuzzy2.IsMatch("Hello world"));
+        Assert.True(fuzzy2.IsMatch("Goodbye"));
+
+        Assert.True(fuzzy3.IsMatch("Hello planet"));
+        Assert.False(fuzzy3.IsMatch("Hello world"));
+        Assert.True(fuzzy3.IsMatch("Goodbye"));
     }
 }

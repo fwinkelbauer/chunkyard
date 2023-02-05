@@ -87,38 +87,38 @@ public sealed class SnapshotStore
             GetSnapshotReference(snapshotId).ChunkIds);
     }
 
-    public bool CheckSnapshotExists(int snapshotId, Fuzzy includeFuzzy)
+    public bool CheckSnapshotExists(int snapshotId, Fuzzy fuzzy)
     {
         return CheckSnapshot(
             snapshotId,
-            includeFuzzy,
+            fuzzy,
             _repository.ChunkExists);
     }
 
-    public bool CheckSnapshotValid(int snapshotId, Fuzzy includeFuzzy)
+    public bool CheckSnapshotValid(int snapshotId, Fuzzy fuzzy)
     {
         return CheckSnapshot(
             snapshotId,
-            includeFuzzy,
+            fuzzy,
             _repository.ChunkValid);
     }
 
     public IReadOnlyCollection<BlobReference> FilterSnapshot(
         int snapshotId,
-        Fuzzy includeFuzzy)
+        Fuzzy fuzzy)
     {
         return GetSnapshot(snapshotId).BlobReferences
-            .Where(br => includeFuzzy.IsIncludingMatch(br.Blob.Name))
+            .Where(br => fuzzy.IsMatch(br.Blob.Name))
             .ToArray();
     }
 
     public DiffSet RestoreSnapshotPreview(
         IBlobSystem blobSystem,
         int snapshotId,
-        Fuzzy includeFuzzy)
+        Fuzzy fuzzy)
     {
         var blobs = blobSystem.ListBlobs();
-        var blobReferences = FilterSnapshot(snapshotId, includeFuzzy);
+        var blobReferences = FilterSnapshot(snapshotId, fuzzy);
 
         var diffSet = DiffSet.Create(
             blobs,
@@ -134,9 +134,9 @@ public sealed class SnapshotStore
     public void RestoreSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,
-        Fuzzy includeFuzzy)
+        Fuzzy fuzzy)
     {
-        _ = FilterSnapshot(snapshotId, includeFuzzy)
+        _ = FilterSnapshot(snapshotId, fuzzy)
             .AsParallel()
             .Select(br => RestoreBlob(blobSystem, br))
             .ToArray();
@@ -338,10 +338,10 @@ public sealed class SnapshotStore
 
     private bool CheckSnapshot(
         int snapshotId,
-        Fuzzy includeFuzzy,
+        Fuzzy fuzzy,
         Func<string, bool> checkChunkIdFunc)
     {
-        var snapshotValid = FilterSnapshot(snapshotId, includeFuzzy)
+        var snapshotValid = FilterSnapshot(snapshotId, fuzzy)
             .AsParallel()
             .All(br => CheckBlobReference(br, checkChunkIdFunc));
 

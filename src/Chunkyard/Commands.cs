@@ -13,7 +13,7 @@ internal static class Commands
 
         var blobSystem = new FileBlobSystem(
             o.Paths,
-            new Fuzzy(o.ExcludePatterns));
+            new Fuzzy(o.IncludePatterns));
 
         if (o.Preview)
         {

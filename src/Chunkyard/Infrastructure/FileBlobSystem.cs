@@ -7,11 +7,11 @@ public sealed class FileBlobSystem : IBlobSystem
 {
     private readonly string[] _paths;
     private readonly string _parent;
-    private readonly Fuzzy _excludeFuzzy;
+    private readonly Fuzzy _fuzzy;
 
     public FileBlobSystem(
         IEnumerable<string> paths,
-        Fuzzy excludeFuzzy)
+        Fuzzy fuzzy)
     {
         _paths = paths.Select(Path.GetFullPath).ToArray();
 
@@ -21,7 +21,7 @@ public sealed class FileBlobSystem : IBlobSystem
                 _paths,
                 Path.DirectorySeparatorChar);
 
-        _excludeFuzzy = excludeFuzzy;
+        _fuzzy = fuzzy;
     }
 
     public bool BlobExists(string blobName)
@@ -40,7 +40,7 @@ public sealed class FileBlobSystem : IBlobSystem
     {
         return _paths
             .SelectMany(DirectoryUtils.ListFiles)
-            .Where(file => !_excludeFuzzy.IsExcludingMatch(file))
+            .Where(file => _fuzzy.IsMatch(file))
             .Distinct()
             .OrderBy(file => file)
             .Select(ToBlob)
@@ -94,7 +94,7 @@ public sealed class FileBlobSystem : IBlobSystem
     {
         var file = DirectoryUtils.CombinePathSafe(_parent, blobName);
 
-        if (_excludeFuzzy.IsExcludingMatch(file))
+        if (!_fuzzy.IsMatch(file))
         {
             throw new ArgumentException(
                 $"Blob {blobName} is excluded",

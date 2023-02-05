@@ -80,23 +80,23 @@ public sealed class StoreOptions
     public StoreOptions(
         IEnumerable<string> paths,
         string repository,
-        IEnumerable<string> excludePatterns,
+        IEnumerable<string> includePatterns,
         bool preview)
     {
         Paths = paths;
         Repository = repository;
-        ExcludePatterns = excludePatterns;
+        IncludePatterns = includePatterns;
         Preview = preview;
     }
 
-    [Option('p', "paths", Required = true, HelpText = "The files and directories to store.")]
+    [Option('p', "paths", Required = true, HelpText = "The files and directories (blobs) to store.")]
     public IEnumerable<string> Paths { get; }
 
     [Option('r', "repository", Required = false, HelpText = "The repository path.", Default = Commands.DefaultRepository)]
     public string Repository { get; }
 
-    [Option('e', "exclude", Required = false, HelpText = "The fuzzy patterns for files to exclude.")]
-    public IEnumerable<string> ExcludePatterns { get; }
+    [Option('i', "include", Required = false, HelpText = "The fuzzy patterns for blobs to include.")]
+    public IEnumerable<string> IncludePatterns { get; }
 
     [Option("preview", Required = false, HelpText = "Show only a preview.")]
     public bool Preview { get; }

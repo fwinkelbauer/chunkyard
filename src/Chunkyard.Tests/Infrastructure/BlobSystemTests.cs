@@ -66,15 +66,14 @@ public sealed class FileBlobSystemTests
             writeStream.Write(new byte[] { 0x11 });
         }
 
-        using (var readStream = blobSystem.OpenRead(blob.Name))
-        using (var memoryStream = new MemoryStream())
-        {
-            readStream.CopyTo(memoryStream);
+        using var readStream = blobSystem.OpenRead(blob.Name);
+        using var memoryStream = new MemoryStream();
 
-            Assert.Equal(
-                new byte[] { 0x11 },
-                memoryStream.ToArray());
-        }
+        readStream.CopyTo(memoryStream);
+
+        Assert.Equal(
+            new byte[] { 0x11 },
+            memoryStream.ToArray());
     }
 
     [Theory]
@@ -87,7 +86,7 @@ public sealed class FileBlobSystemTests
 
         var blobSystem = new FileBlobSystem(
             new[] { directory.Name },
-            new Fuzzy(new[] { "excluded-blob" }));
+            new Fuzzy(new[] { "!excluded-blob" }));
 
         var invalidBlob = Some.Blob(invalidBlobName);
 

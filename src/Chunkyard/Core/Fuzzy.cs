@@ -5,37 +5,54 @@ namespace Chunkyard.Core;
 /// </summary>
 public sealed class Fuzzy
 {
-    public static readonly Fuzzy Default = new Fuzzy(
+    public static readonly Fuzzy Default = new(
         Array.Empty<string>());
 
-    private readonly Regex[] _compiledRegex;
+    private record FuzzyExpression(Regex Regex, bool Negated);
+
+    private readonly List<FuzzyExpression> _expressions;
 
     public Fuzzy(IEnumerable<string> patterns)
     {
-        _compiledRegex = patterns
-            .Select(p => string.IsNullOrEmpty(p)
-                ? ".*"
-                : p.Replace(" ", ".*"))
-            .Select(p => p.Any(char.IsUpper)
-                ? p
-                : $"(?i){p}")
-            .Select(p => new Regex(p))
-            .ToArray();
+        _expressions = new List<FuzzyExpression>();
+
+        foreach (var pattern in patterns)
+        {
+            var tmp = pattern.Trim();
+            var negated = tmp.StartsWith("!");
+
+            tmp = negated
+                ? tmp[1..]
+                : tmp;
+
+            tmp = tmp.Replace(" ", ".*");
+
+            tmp = tmp.Any(char.IsUpper)
+                ? tmp
+                : $"(?i){tmp}";
+
+            _expressions.Add(
+                new FuzzyExpression(new Regex(tmp), negated));
+        }
     }
 
-    public bool IsIncludingMatch(string input)
+    public bool IsMatch(string input)
     {
-        return IsMatch(input, _compiledRegex.Length == 0);
-    }
+        var match = _expressions.Count == 0
+            || _expressions.Count > 1 && _expressions.First().Negated;
 
-    public bool IsExcludingMatch(string input)
-    {
-        return IsMatch(input, false);
-    }
+        foreach (var expression in _expressions)
+        {
+            if (expression.Negated && expression.Regex.IsMatch(input))
+            {
+                match = false;
+            }
+            else if (expression.Regex.IsMatch(input))
+            {
+                match = true;
+            }
+        }
 
-    private bool IsMatch(string input, bool initial)
-    {
-        return _compiledRegex.Any(r => r.IsMatch(input))
-            || initial;
+        return match;
     }
 }

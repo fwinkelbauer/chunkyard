@@ -71,10 +71,10 @@ chunkyard --help
 chunkyard store --help
 
 # See which files chunkyard would backup
-chunkyard store -r "../repository" -p "Music" -e "Desktop\.ini" "thumbs\.db" --preview
+chunkyard store -r "../repository" -p "Music" -i "!Desktop\.ini" "!thumbs\.db" --preview
 
 # Store a backup
-chunkyard store -r "../repository" -p "Music" -e "Desktop\.ini" "thumbs\.db"
+chunkyard store -r "../repository" -p "Music" -i "!Desktop\.ini" "!thumbs\.db"
 
 # Check if the backup is valid
 chunkyard check -r "../repository"

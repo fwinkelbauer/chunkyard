@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- Fuzzy patterns to always be inclusive. An exclusive pattern needs to be
+  prefixed with an exclamation mark
+
 ## 18.3.0 - 2023-02-04
 
 ### Changed
