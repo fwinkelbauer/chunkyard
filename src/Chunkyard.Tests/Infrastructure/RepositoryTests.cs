@@ -73,7 +73,7 @@ public abstract class RepositoryTests
 
         var dict = Keys.ToDictionary(
             k => k,
-            k => SHA256.HashData(Encoding.UTF8.GetBytes(k.ToString()!)));
+            k => SHA256.HashData(Encoding.UTF8.GetBytes(k)));
 
         foreach (var pair in dict)
         {
@@ -120,5 +120,28 @@ public abstract class RepositoryTests
 
         Assert.ThrowsAny<Exception>(
             () => Repository.StoreValue(key, bytes));
+    }
+
+    [Fact]
+    public void Repository_Handles_Concurent_Operations()
+    {
+        var input = new ConcurrentDictionary<string, byte[]>();
+
+        for (var i = 0; i < 100; i++)
+        {
+            input.TryAdd($"{i}", Some.RandomNumber(i));
+        }
+
+        Parallel.ForEach(
+            input,
+            pair => Repository.StoreValue(pair.Key, pair.Value));
+
+        var output = new ConcurrentDictionary<string, byte[]>();
+
+        Parallel.ForEach(
+            Repository.ListKeys(),
+            key => output.TryAdd(key, Repository.RetrieveValue(key)));
+
+        Assert.Equal(input, output);
     }
 }
