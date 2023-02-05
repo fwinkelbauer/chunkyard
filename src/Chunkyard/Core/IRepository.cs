@@ -2,7 +2,7 @@ namespace Chunkyard.Core;
 
 /// <summary>
 /// Defines a basic contract to store and retrieve bytes. Stored data can be
-/// referenced using a key.
+/// referenced using a key. An IRepository can handle parallel operations.
 /// </summary>
 public interface IRepository<T>
 {

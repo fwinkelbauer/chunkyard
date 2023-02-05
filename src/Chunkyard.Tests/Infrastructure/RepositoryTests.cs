@@ -123,7 +123,7 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public void Repository_Handles_Concurent_Operations()
+    public void Repository_Handles_Parallel_Operations()
     {
         var input = new ConcurrentDictionary<string, byte[]>();
 
