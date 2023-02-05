@@ -47,9 +47,6 @@ The `./make` script runs the project `./src/Chunkyard.Build`, a CLI tool which
 can be used to build, test and publish Chunkyard. You can type commands such as
 `./make help` or `./make build --help` to learn more.
 
-**Note:** When running `Chunkyard.Build` from within Visual Studio, make sure
-that you set the working directory to the root directory of this repository.
-
 ## Publish
 
 - Commit all your work

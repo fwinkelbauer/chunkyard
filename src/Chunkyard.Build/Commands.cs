@@ -12,6 +12,12 @@ internal static class Commands
     private const string CleanIgnore = ".cleanignore";
     private const string Configuration = "Release";
 
+    static Commands()
+    {
+        Directory.SetCurrentDirectory(
+            GitQuery("rev-parse --show-toplevel"));
+    }
+
     public static void Clean()
     {
         if (GitQuery("status --porcelain").Contains("??"))
