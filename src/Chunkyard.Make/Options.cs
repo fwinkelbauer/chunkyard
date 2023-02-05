@@ -1,4 +1,4 @@
-namespace Chunkyard.Build;
+namespace Chunkyard.Make;
 
 [Verb("clean", HelpText = "Clean the repository.")]
 public class CleanOptions

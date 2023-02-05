@@ -1,7 +1,7 @@
-namespace Chunkyard.Build;
+namespace Chunkyard.Make;
 
 /// <summary>
-/// Describes every available command line verb of the Chunkyard.Build assembly.
+/// Describes every available command line verb of the Chunkyard.Make assembly.
 /// </summary>
 internal static class Commands
 {

@@ -1,2 +1,2 @@
-dotnet run --project 'src/Chunkyard.Build/Chunkyard.Build.csproj' -- $args
+dotnet run --project 'src/Chunkyard.Make/Chunkyard.Make.csproj' -- $args
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

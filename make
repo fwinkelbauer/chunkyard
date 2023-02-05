@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-dotnet run --project 'src/Chunkyard.Build/Chunkyard.Build.csproj' -- "$@"
+dotnet run --project 'src/Chunkyard.Make/Chunkyard.Make.csproj' -- "$@"
