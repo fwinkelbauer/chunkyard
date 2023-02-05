@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 19.0.0 - 2023-02-05
+
 ### Changed
 
 - Fuzzy patterns to always be inclusive. An exclusive pattern needs to be
