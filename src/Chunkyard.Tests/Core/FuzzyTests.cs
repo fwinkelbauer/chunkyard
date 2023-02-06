@@ -34,7 +34,10 @@ public static class FuzzyTests
         var upperFuzzy = new Fuzzy(new[] { "Hello" });
 
         Assert.True(lowerFuzzy.IsMatch("hello"));
+        Assert.True(lowerFuzzy.IsMatch("Hello"));
+
         Assert.False(upperFuzzy.IsMatch("hello"));
+        Assert.True(upperFuzzy.IsMatch("Hello"));
     }
 
     [Fact]
@@ -55,5 +58,14 @@ public static class FuzzyTests
         Assert.True(fuzzy3.IsMatch("Hello planet"));
         Assert.False(fuzzy3.IsMatch("Hello world"));
         Assert.True(fuzzy3.IsMatch("Goodbye"));
+    }
+
+    [Fact]
+    public static void IsMatch_Lets_Pattern_Overwrite_Previous_Pattern()
+    {
+        var fuzzy = new Fuzzy(new[] { "!mp3", "cool mp3" });
+
+        Assert.False(fuzzy.IsMatch("some.mp3"));
+        Assert.True(fuzzy.IsMatch("cool.mp3"));
     }
 }

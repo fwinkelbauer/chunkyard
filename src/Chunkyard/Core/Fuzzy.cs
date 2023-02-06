@@ -2,6 +2,14 @@ namespace Chunkyard.Core;
 
 /// <summary>
 /// A fuzzy pattern matcher.
+///
+/// "Fuzzy" expressions are regular expressions with extra features:
+/// - Lowercase expressions are treated as "ignore case"
+/// - Spaces are treated as "match all"
+/// - A "!" prefix is treated as an exclude expressions
+/// - Later expressions can overwrite previous expressions
+///
+/// The test suite contains a few examples.
 /// </summary>
 public sealed class Fuzzy
 {
