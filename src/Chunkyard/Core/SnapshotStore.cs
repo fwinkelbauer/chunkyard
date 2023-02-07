@@ -190,19 +190,10 @@ public sealed class SnapshotStore
     {
         foreach (var chunkId in chunkIds)
         {
-            try
-            {
-                var decrypted = _crypto.Value.Decrypt(
-                    _repository.RetrieveChunk(chunkId));
+            var decrypted = _crypto.Value.Decrypt(
+                _repository.RetrieveChunk(chunkId));
 
-                outputStream.Write(decrypted);
-            }
-            catch (CryptographicException e)
-            {
-                throw new ChunkyardException(
-                    $"Could not decrypt chunk: {chunkId}",
-                    e);
-            }
+            outputStream.Write(decrypted);
         }
     }
 
@@ -405,16 +396,7 @@ public sealed class SnapshotStore
 
     private SnapshotReference GetSnapshotReference(int snapshotId)
     {
-        try
-        {
-            return Serialize.BytesToSnapshotReference(
-                _repository.RetrieveReference(snapshotId));
-        }
-        catch (Exception e)
-        {
-            throw new ChunkyardException(
-                $"Could not read snapshot reference: #{snapshotId}",
-                e);
-        }
+        return Serialize.BytesToSnapshotReference(
+            _repository.RetrieveReference(snapshotId));
     }
 }

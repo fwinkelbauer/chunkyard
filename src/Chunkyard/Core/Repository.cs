@@ -123,16 +123,7 @@ public sealed class Repository
 
     public byte[] RetrieveChunk(string chunkId)
     {
-        try
-        {
-            return _chunks.RetrieveValue(chunkId);
-        }
-        catch (Exception e)
-        {
-            throw new ChunkyardException(
-                $"Could not read chunk: {chunkId}",
-                e);
-        }
+        return _chunks.RetrieveValue(chunkId);
     }
 
     public void RemoveChunk(string chunkId)
