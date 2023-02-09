@@ -6,15 +6,15 @@ namespace Chunkyard.Core;
 /// </summary>
 public interface IRepository<T>
 {
-    void StoreValue(T key, ReadOnlySpan<byte> value);
+    void Store(T key, ReadOnlySpan<byte> value);
 
-    void StoreValueIfNotExists(T key, ReadOnlySpan<byte> value);
+    void StoreIfNotExists(T key, ReadOnlySpan<byte> value);
 
-    byte[] RetrieveValue(T key);
+    byte[] Retrieve(T key);
 
-    bool ValueExists(T key);
+    bool Exists(T key);
 
-    IReadOnlyCollection<T> ListKeys();
+    IReadOnlyCollection<T> List();
 
-    void RemoveValue(T key);
+    void Remove(T key);
 }

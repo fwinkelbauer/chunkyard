@@ -22,7 +22,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         _valuesPerKey = new Dictionary<T, byte[]>();
     }
 
-    public void StoreValue(T key, ReadOnlySpan<byte> value)
+    public void Store(T key, ReadOnlySpan<byte> value)
     {
         lock (_lock)
         {
@@ -30,7 +30,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         }
     }
 
-    public void StoreValueIfNotExists(T key, ReadOnlySpan<byte> value)
+    public void StoreIfNotExists(T key, ReadOnlySpan<byte> value)
     {
         lock (_lock)
         {
@@ -41,7 +41,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         }
     }
 
-    public byte[] RetrieveValue(T key)
+    public byte[] Retrieve(T key)
     {
         lock (_lock)
         {
@@ -50,7 +50,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         }
     }
 
-    public bool ValueExists(T key)
+    public bool Exists(T key)
     {
         lock (_lock)
         {
@@ -58,7 +58,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         }
     }
 
-    public IReadOnlyCollection<T> ListKeys()
+    public IReadOnlyCollection<T> List()
     {
         lock (_lock)
         {
@@ -66,7 +66,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         }
     }
 
-    public void RemoveValue(T key)
+    public void Remove(T key)
     {
         lock (_lock)
         {

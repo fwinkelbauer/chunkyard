@@ -19,7 +19,7 @@ public sealed class Repository
         _references = references;
         _chunks = chunks;
 
-        CurrentReferenceId = _references.ListKeys()
+        CurrentReferenceId = _references.List()
             .Select(id => id as int?)
             .Max();
     }
@@ -37,7 +37,7 @@ public sealed class Repository
 
     public void StoreReference(int referenceId, ReadOnlySpan<byte> bytes)
     {
-        _references.StoreValue(referenceId, bytes);
+        _references.Store(referenceId, bytes);
 
         if (CurrentReferenceId == null
             || CurrentReferenceId < referenceId)
@@ -48,7 +48,7 @@ public sealed class Repository
 
     public byte[] RetrieveReference(int referenceId)
     {
-        return _references.RetrieveValue(
+        return _references.Retrieve(
             ResolveReferenceId(referenceId));
     }
 
@@ -56,11 +56,11 @@ public sealed class Repository
     {
         var resolvedReferenceId = ResolveReferenceId(referenceId);
 
-        _references.RemoveValue(resolvedReferenceId);
+        _references.Remove(resolvedReferenceId);
 
         if (CurrentReferenceId == resolvedReferenceId)
         {
-            CurrentReferenceId = _references.ListKeys()
+            CurrentReferenceId = _references.List()
                 .Select(id => id as int?)
                 .Max();
         }
@@ -68,7 +68,7 @@ public sealed class Repository
 
     public IReadOnlyCollection<int> ListReferenceIds()
     {
-        var referenceIds = _references.ListKeys()
+        var referenceIds = _references.List()
             .ToArray();
 
         Array.Sort(referenceIds);
@@ -91,7 +91,7 @@ public sealed class Repository
             return CurrentReferenceId.Value;
         }
 
-        var referenceIds = _references.ListKeys()
+        var referenceIds = _references.List()
             .ToArray();
 
         Array.Sort(referenceIds);
@@ -118,22 +118,22 @@ public sealed class Repository
 
     public void StoreChunkUnchecked(string chunkId, ReadOnlySpan<byte> bytes)
     {
-        _chunks.StoreValueIfNotExists(chunkId, bytes);
+        _chunks.StoreIfNotExists(chunkId, bytes);
     }
 
     public byte[] RetrieveChunk(string chunkId)
     {
-        return _chunks.RetrieveValue(chunkId);
+        return _chunks.Retrieve(chunkId);
     }
 
     public void RemoveChunk(string chunkId)
     {
-        _chunks.RemoveValue(chunkId);
+        _chunks.Remove(chunkId);
     }
 
     public bool ChunkExists(string chunkId)
     {
-        return _chunks.ValueExists(chunkId);
+        return _chunks.Exists(chunkId);
     }
 
     public bool ChunkValid(string chunkId)
@@ -144,6 +144,6 @@ public sealed class Repository
 
     public IReadOnlyCollection<string> ListChunkIds()
     {
-        return _chunks.ListKeys();
+        return _chunks.List();
     }
 }

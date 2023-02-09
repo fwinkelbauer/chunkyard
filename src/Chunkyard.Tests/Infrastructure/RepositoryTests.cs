@@ -25,16 +25,16 @@ public sealed class FileRepositoryTests
         var invalidKey = "../some-file";
 
         Assert.Throws<ArgumentException>(
-            () => Repository.StoreValue(invalidKey, new byte[] { 0xFF }));
+            () => Repository.Store(invalidKey, new byte[] { 0xFF }));
 
         Assert.Throws<ArgumentException>(
-            () => Repository.RetrieveValue(invalidKey));
+            () => Repository.Retrieve(invalidKey));
 
         Assert.Throws<ArgumentException>(
-            () => Repository.ValueExists(invalidKey));
+            () => Repository.Exists(invalidKey));
 
         Assert.Throws<ArgumentException>(
-            () => Repository.RemoveValue(invalidKey));
+            () => Repository.Remove(invalidKey));
     }
 
     public void Dispose()
@@ -69,7 +69,7 @@ public abstract class RepositoryTests
     [Fact]
     public void Repository_Can_Read_Write()
     {
-        Assert.Empty(Repository.ListKeys());
+        Assert.Empty(Repository.List());
 
         var dict = Keys.ToDictionary(
             k => k,
@@ -77,49 +77,49 @@ public abstract class RepositoryTests
 
         foreach (var pair in dict)
         {
-            Repository.StoreValue(pair.Key, pair.Value);
+            Repository.Store(pair.Key, pair.Value);
 
-            Assert.True(Repository.ValueExists(pair.Key));
-            Assert.Equal(pair.Value, Repository.RetrieveValue(pair.Key));
+            Assert.True(Repository.Exists(pair.Key));
+            Assert.Equal(pair.Value, Repository.Retrieve(pair.Key));
         }
 
-        Assert.Equal(Keys, Repository.ListKeys().OrderBy(k => k));
+        Assert.Equal(Keys, Repository.List().OrderBy(k => k));
 
         foreach (var pair in dict)
         {
-            Repository.RemoveValue(pair.Key);
+            Repository.Remove(pair.Key);
 
-            Assert.False(Repository.ValueExists(pair.Key));
+            Assert.False(Repository.Exists(pair.Key));
         }
 
-        Assert.Empty(Repository.ListKeys());
+        Assert.Empty(Repository.List());
     }
 
     [Fact]
-    public void Repository_StoreValueIfNotExists_Writes_Key_Once()
+    public void Repository_StoreIfNotExists_Writes_Key_Once()
     {
         var key = Keys.First();
         var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
-        Repository.StoreValueIfNotExists(key, expectedBytes);
+        Repository.StoreIfNotExists(key, expectedBytes);
 
-        Repository.StoreValueIfNotExists(
+        Repository.StoreIfNotExists(
             key,
             new byte[] { 0xAA, 0xAA, 0xAA, 0xAA });
 
-        Assert.Equal(expectedBytes, Repository.RetrieveValue(key));
+        Assert.Equal(expectedBytes, Repository.Retrieve(key));
     }
 
     [Fact]
-    public void Repository_StoreValue_Throws_When_Writing_To_Same_Key()
+    public void Repository_Store_Throws_When_Writing_To_Same_Key()
     {
         var key = Keys.First();
         var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
-        Repository.StoreValue(key, bytes);
+        Repository.Store(key, bytes);
 
         Assert.ThrowsAny<Exception>(
-            () => Repository.StoreValue(key, bytes));
+            () => Repository.Store(key, bytes));
     }
 
     [Fact]
@@ -134,13 +134,13 @@ public abstract class RepositoryTests
 
         Parallel.ForEach(
             input,
-            pair => Repository.StoreValue(pair.Key, pair.Value));
+            pair => Repository.Store(pair.Key, pair.Value));
 
         var output = new ConcurrentDictionary<string, byte[]>();
 
         Parallel.ForEach(
-            Repository.ListKeys(),
-            key => output.TryAdd(key, Repository.RetrieveValue(key)));
+            Repository.List(),
+            key => output.TryAdd(key, Repository.Retrieve(key)));
 
         Assert.Equal(input, output);
     }

@@ -39,7 +39,7 @@ public sealed class FileRepository<T> : IRepository<T>
         _locks = new ConcurrentDictionary<T, object>();
     }
 
-    public void StoreValue(T key, ReadOnlySpan<byte> value)
+    public void Store(T key, ReadOnlySpan<byte> value)
     {
         var file = ToFile(key);
 
@@ -53,30 +53,30 @@ public sealed class FileRepository<T> : IRepository<T>
         fileStream.Write(value);
     }
 
-    public void StoreValueIfNotExists(T key, ReadOnlySpan<byte> value)
+    public void StoreIfNotExists(T key, ReadOnlySpan<byte> value)
     {
         lock (_locks.GetOrAdd(key, _ => new object()))
         {
-            if (!ValueExists(key))
+            if (!Exists(key))
             {
-                StoreValue(key, value);
+                Store(key, value);
             }
         }
     }
 
-    public byte[] RetrieveValue(T key)
+    public byte[] Retrieve(T key)
     {
         return File.ReadAllBytes(
             ToFile(key));
     }
 
-    public bool ValueExists(T key)
+    public bool Exists(T key)
     {
         return File.Exists(
             ToFile(key));
     }
 
-    public IReadOnlyCollection<T> ListKeys()
+    public IReadOnlyCollection<T> List()
     {
         if (!Directory.Exists(_directory))
         {
@@ -88,7 +88,7 @@ public sealed class FileRepository<T> : IRepository<T>
             .ToArray();
     }
 
-    public void RemoveValue(T key)
+    public void Remove(T key)
     {
         File.Delete(
             ToFile(key));
