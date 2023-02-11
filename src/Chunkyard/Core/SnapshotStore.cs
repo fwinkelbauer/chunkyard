@@ -1,12 +1,15 @@
 namespace Chunkyard.Core;
 
 /// <summary>
-/// A class which uses a <see cref="Repository"/> to store snapshots of a set of
-/// blobs.
+/// A class which uses an <see cref="IRepository"/> to store snapshots of a set
+/// of blobs.
 /// </summary>
 public sealed class SnapshotStore
 {
-    private readonly Repository _repository;
+    public const int LatestSnapshotId = -1;
+    public const int SecondLatestSnapshotId = -2;
+
+    private readonly IRepository _repository;
     private readonly FastCdc _fastCdc;
     private readonly IProbe _probe;
     private readonly IClock _clock;
@@ -14,7 +17,7 @@ public sealed class SnapshotStore
     private readonly Lazy<uint[]> _table;
 
     public SnapshotStore(
-        Repository repository,
+        IRepository repository,
         FastCdc fastCdc,
         IProbe probe,
         IClock clock,
@@ -27,22 +30,21 @@ public sealed class SnapshotStore
 
         _crypto = new Lazy<Crypto>(() =>
         {
-            if (_repository.CurrentReferenceId == null)
+            if (_repository.References.TryLast(out var snapshotId))
             {
-                return new Crypto(
-                    prompt.NewPassword(),
-                    Crypto.GenerateSalt(),
-                    Crypto.DefaultIterations);
-            }
-            else
-            {
-                var snapshotReference = GetSnapshotReference(
-                    _repository.CurrentReferenceId.Value);
+                var snapshotReference = GetSnapshotReference(snapshotId);
 
                 return new Crypto(
                     prompt.ExistingPassword(),
                     snapshotReference.Salt,
                     snapshotReference.Iterations);
+            }
+            else
+            {
+                return new Crypto(
+                    prompt.NewPassword(),
+                    Crypto.GenerateSalt(),
+                    Crypto.DefaultIterations);
             }
         });
 
@@ -52,9 +54,9 @@ public sealed class SnapshotStore
 
     public DiffSet StoreSnapshotPreview(IBlobSystem blobSystem)
     {
-        var blobReferences = _repository.CurrentReferenceId == null
-            ? Array.Empty<BlobReference>()
-            : GetSnapshot(_repository.CurrentReferenceId.Value).BlobReferences;
+        var blobReferences = _repository.References.TryLast(out var snapshotId)
+            ? GetSnapshot(snapshotId).BlobReferences
+            : Array.Empty<BlobReference>();
 
         var blobs = blobSystem.ListBlobs();
 
@@ -92,15 +94,23 @@ public sealed class SnapshotStore
         return CheckSnapshot(
             snapshotId,
             fuzzy,
-            _repository.ChunkExists);
+            _repository.Chunks.Exists);
     }
 
     public bool CheckSnapshotValid(int snapshotId, Fuzzy fuzzy)
     {
+        bool ChunkValid(string chunkId)
+        {
+            return _repository.Chunks.Exists(chunkId)
+                && ChunkId.Valid(
+                    chunkId,
+                    _repository.Chunks.Retrieve(chunkId));
+        }
+
         return CheckSnapshot(
             snapshotId,
             fuzzy,
-            _repository.ChunkValid);
+            ChunkValid);
     }
 
     public IReadOnlyCollection<BlobReference> FilterSnapshot(
@@ -142,38 +152,38 @@ public sealed class SnapshotStore
             .ToArray();
 
         _probe.RestoredSnapshot(
-            _repository.ResolveReferenceId(snapshotId));
+            ResolveSnapshotId(snapshotId));
     }
 
     public IReadOnlyCollection<int> ListSnapshotIds()
     {
-        return _repository.ListReferenceIds();
+        return _repository.References.List();
     }
 
     public void GarbageCollect()
     {
-        var usedChunkIds = ListChunkIds(_repository.ListReferenceIds());
-        var unusedChunkIds = _repository.ListChunkIds()
+        var usedChunkIds = ListChunkIds(_repository.References.List());
+        var unusedChunkIds = _repository.Chunks.List()
             .Except(usedChunkIds);
 
         foreach (var chunkId in unusedChunkIds)
         {
-            _repository.RemoveChunk(chunkId);
+            _repository.Chunks.Remove(chunkId);
             _probe.RemovedChunk(chunkId);
         }
     }
 
     public void RemoveSnapshot(int snapshotId)
     {
-        var resolvedSnapshotId = _repository.ResolveReferenceId(snapshotId);
+        var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
 
-        _repository.RemoveReference(resolvedSnapshotId);
+        _repository.References.Remove(resolvedSnapshotId);
         _probe.RemovedSnapshot(resolvedSnapshotId);
     }
 
     public void KeepSnapshots(int latestCount)
     {
-        var snapshotIds = _repository.ListReferenceIds();
+        var snapshotIds = _repository.References.List();
         var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
         var snapshotIdsToRemove = snapshotIds.Except(snapshotIdsToKeep)
             .ToArray();
@@ -193,7 +203,7 @@ public sealed class SnapshotStore
             try
             {
                 var decrypted = _crypto.Value.Decrypt(
-                    _repository.RetrieveChunk(chunkId));
+                    _repository.Chunks.Retrieve(chunkId));
 
                 outputStream.Write(decrypted);
             }
@@ -206,11 +216,16 @@ public sealed class SnapshotStore
         }
     }
 
-    public void CopyTo(Repository otherRepository)
+    public byte[] RestoreSnapshotReference(int snapshotId)
     {
-        var snapshotIds = _repository.ListReferenceIds();
-        var otherSnapshotIds = otherRepository.ListReferenceIds();
-        var otherCurrentSnapshotId = otherRepository.CurrentReferenceId;
+        return _repository.References.Retrieve(
+            ResolveSnapshotId(snapshotId));
+    }
+
+    public void CopyTo(IRepository otherRepository)
+    {
+        var snapshotIds = _repository.References.List();
+        var otherSnapshotIds = otherRepository.References.List();
 
         var sharedSnapshotId = snapshotIds.Intersect(otherSnapshotIds)
             .Select(id => id as int?)
@@ -218,8 +233,8 @@ public sealed class SnapshotStore
 
         if (sharedSnapshotId != null)
         {
-            var bytes = _repository.RetrieveReference(sharedSnapshotId.Value);
-            var otherBytes = otherRepository.RetrieveReference(
+            var bytes = _repository.References.Retrieve(sharedSnapshotId.Value);
+            var otherBytes = otherRepository.References.Retrieve(
                 sharedSnapshotId.Value);
 
             if (!bytes.SequenceEqual(otherBytes))
@@ -229,18 +244,18 @@ public sealed class SnapshotStore
             }
         }
 
-        var snapshotIdsToCopy = otherCurrentSnapshotId == null
-            ? snapshotIds
-            : snapshotIds.Where(id => id > otherCurrentSnapshotId)
-                .ToArray();
+        var snapshotIdsToCopy = otherRepository.References.TryLast(out var otherSnapshotId)
+            ? snapshotIds.Where(id => id > otherSnapshotId)
+                .ToArray()
+            : snapshotIds;
 
         var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
-            .Except(otherRepository.ListChunkIds())
+            .Except(otherRepository.Chunks.List())
             .ToArray();
 
         foreach (var chunkId in chunkIdsToCopy)
         {
-            var bytes = _repository.RetrieveChunk(chunkId);
+            var bytes = _repository.Chunks.Retrieve(chunkId);
 
             if (!ChunkId.Valid(chunkId, bytes))
             {
@@ -248,15 +263,15 @@ public sealed class SnapshotStore
                     $"Invalid chunk: {chunkId}");
             }
 
-            otherRepository.StoreChunkUnchecked(chunkId, bytes);
+            otherRepository.Chunks.Store(chunkId, bytes);
             _probe.CopiedChunk(chunkId);
         }
 
         foreach (var snapshotId in snapshotIdsToCopy)
         {
-            var bytes = _repository.RetrieveReference(snapshotId);
+            var bytes = _repository.References.Retrieve(snapshotId);
 
-            otherRepository.StoreReference(snapshotId, bytes);
+            otherRepository.References.Store(snapshotId, bytes);
             _probe.CopiedSnapshot(snapshotId);
         }
     }
@@ -272,10 +287,10 @@ public sealed class SnapshotStore
 
     private BlobReference[] StoreBlobs(IBlobSystem blobSystem)
     {
-        var currentBlobReferences = _repository.CurrentReferenceId == null
-            ? new Dictionary<string, BlobReference>()
-            : GetSnapshot(_repository.CurrentReferenceId.Value).BlobReferences
-                .ToDictionary(br => br.Blob.Name, br => br);
+        var currentBlobReferences = _repository.References.TryLast(out var snapshotId)
+            ? GetSnapshot(snapshotId).BlobReferences
+                .ToDictionary(br => br.Blob.Name, br => br)
+            : new Dictionary<string, BlobReference>();
 
         BlobReference StoreBlob(Blob blob)
         {
@@ -314,8 +329,15 @@ public sealed class SnapshotStore
 
     private int StoreSnapshotReference(SnapshotReference snapshotReference)
     {
-        return _repository.AppendReference(
+        var nextId = _repository.References.TryLast(out var snapshotId)
+            ? snapshotId + 1
+            : 0;
+
+        _repository.References.Store(
+            nextId,
             Serialize.SnapshotReferenceToBytes(snapshotReference));
+
+        return nextId;
     }
 
     private IReadOnlyCollection<string> StoreChunks(Stream stream)
@@ -326,7 +348,11 @@ public sealed class SnapshotStore
                 Crypto.GenerateNonce(),
                 chunk);
 
-            return _repository.StoreChunk(encrypted);
+            var chunkId = ChunkId.Compute(encrypted);
+
+            _repository.Chunks.Store(chunkId, encrypted);
+
+            return chunkId;
         }
 
         return _fastCdc.SplitIntoChunks(stream, _table.Value)
@@ -346,7 +372,7 @@ public sealed class SnapshotStore
             .All(br => CheckBlobReference(br, checkChunkIdFunc));
 
         _probe.SnapshotValid(
-            _repository.ResolveReferenceId(snapshotId),
+            ResolveSnapshotId(snapshotId),
             snapshotValid);
 
         return snapshotValid;
@@ -405,16 +431,49 @@ public sealed class SnapshotStore
 
     private SnapshotReference GetSnapshotReference(int snapshotId)
     {
+        var bytes = RestoreSnapshotReference(snapshotId);
+
         try
         {
-            return Serialize.BytesToSnapshotReference(
-                _repository.RetrieveReference(snapshotId));
+            return Serialize.BytesToSnapshotReference(bytes);
         }
         catch (Exception e)
         {
             throw new ChunkyardException(
-                $"Could not read snapshot reference: #{snapshotId}",
+                $"Could not deserialize snapshot reference: #{snapshotId}",
                 e);
         }
+    }
+
+    private int ResolveSnapshotId(int snapshotId)
+    {
+        //  0: the first element
+        //  1: the second element
+        // -1: the last element
+        // -2: the second-last element
+        if (snapshotId >= 0)
+        {
+            return snapshotId;
+        }
+        else if (snapshotId == LatestSnapshotId
+            && _repository.References.TryLast(out var lastId))
+        {
+            return lastId;
+        }
+
+        var snapshotIds = _repository.References.List()
+            .ToArray();
+
+        Array.Sort(snapshotIds);
+
+        var position = snapshotIds.Length + snapshotId;
+
+        if (position < 0)
+        {
+            throw new ChunkyardException(
+                $"Could not resolve snapshot reference: #{snapshotId}");
+        }
+
+        return snapshotIds[position];
     }
 }

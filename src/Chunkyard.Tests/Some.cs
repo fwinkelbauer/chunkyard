@@ -21,7 +21,7 @@ internal static class Some
     }
 
     public static SnapshotStore SnapshotStore(
-        Repository? repository = null,
+        IRepository? repository = null,
         FastCdc? fastCdc = null,
         string password = "secret")
     {
@@ -33,9 +33,9 @@ internal static class Some
             new DummyPrompt(password));
     }
 
-    public static Repository Repository()
+    public static IRepository Repository()
     {
-        return MemoryRepository.Create();
+        return new MemoryRepository();
     }
 
     public static IBlobSystem BlobSystem(

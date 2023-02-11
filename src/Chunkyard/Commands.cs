@@ -162,21 +162,20 @@ internal static class Commands
 
     public static void Cat(CatOptions o)
     {
+        var snapshotStore = CreateSnapshotStore(o.Repository);
+
         using Stream stream = string.IsNullOrEmpty(o.Export)
             ? new MemoryStream()
             : new FileStream(o.Export, FileMode.CreateNew, FileAccess.Write);
 
         if (o.ChunkIds.Any())
         {
-            var snapshotStore = CreateSnapshotStore(o.Repository);
-
             snapshotStore.RestoreChunks(o.ChunkIds, stream);
         }
         else
         {
-            var repository = CreateRepository(o.Repository);
-
-            stream.Write(repository.RetrieveReference(o.SnapshotId));
+            stream.Write(
+                snapshotStore.RestoreSnapshotReference(o.SnapshotId));
         }
 
         if (stream is MemoryStream memoryStream)
@@ -218,8 +217,8 @@ internal static class Commands
                 new ConsolePrompt()));
     }
 
-    private static Repository CreateRepository(string repositoryPath)
+    private static IRepository CreateRepository(string repositoryPath)
     {
-        return FileRepository.Create(repositoryPath);
+        return new FileRepository(repositoryPath);
     }
 }

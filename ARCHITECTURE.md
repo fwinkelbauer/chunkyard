@@ -7,10 +7,9 @@ This document should provide an overview of how Chunkyard is built.
 - **Blob:** Binary data (e.g. the content of a file) with some meta data
 - **Snapshot:** A set of BlobReferences. It describes the current state of a set
   of Blobs at a specific point in time
-- **Repository:** A key/value store which Chunkyard uses to persist data
+- **Repository:** A store which Chunkyard uses to persist data
 - **Chunk:** An encrypted piece of a Blob or a Snapshot
-- **Chunk ID:** A hash address which can be used to retrieve Chunks from an
-  IRepository
+- **Chunk ID:** A hash address which can be used to retrieve Chunks
 - **BlobReference:** Contains Chunk IDs and meta data which can be used to
   restore a Blob
 - **SnapshotReference:** Contains Chunk IDs and meta data which can be used to
@@ -20,7 +19,7 @@ This document should provide an overview of how Chunkyard is built.
 
 These classes contain the most important logic:
 
-- **IRepository.cs:** Provides a key/value store
+- **IRepository.cs:** Defines the underlying backup storage
 - **IBlobSystem.cs:** Provides an abstraction to read and write Blobs
 - **SnapshotStore.cs:** Chunks, encrypts, deduplicates and stores Blobs in an
   IRepository

@@ -3,20 +3,24 @@ namespace Chunkyard.Infrastructure;
 /// <summary>
 /// An implementation of <see cref="IRepository"/> using the file system.
 /// </summary>
-public static class FileRepository
+public sealed class FileRepository : IRepository
 {
-    public static Repository Create(string directory)
+    public FileRepository(string directory)
     {
-        return new Repository(
-            new FileRepository<int>(
-                Path.Combine(directory, "references"),
-                key => key.ToString(),
-                Convert.ToInt32),
-            new FileRepository<string>(
-                Path.Combine(directory, "chunks"),
-                key => Path.Combine(key[..2], key),
-                Path.GetFileNameWithoutExtension));
+        References = new FileRepository<int>(
+            Path.Combine(directory, "references"),
+            key => key.ToString(),
+            Convert.ToInt32);
+
+        Chunks = new FileRepository<string>(
+            Path.Combine(directory, "chunks"),
+            key => Path.Combine(key[..2], key),
+            Path.GetFileNameWithoutExtension);
     }
+
+    public IRepository<int> References { get; }
+
+    public IRepository<string> Chunks { get; }
 }
 
 public sealed class FileRepository<T> : IRepository<T>
@@ -86,6 +90,22 @@ public sealed class FileRepository<T> : IRepository<T>
         return Directory.GetFiles(_directory, "*", SearchOption.AllDirectories)
             .Select(ToKey)
             .ToArray();
+    }
+
+    public bool TryLast(out T? key)
+    {
+        var keys = List();
+
+        if (keys.Any())
+        {
+            key = keys.Max();
+            return true;
+        }
+        else
+        {
+            key = default(T);
+            return false;
+        }
     }
 
     public void Remove(T key)

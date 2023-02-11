@@ -1,8 +1,18 @@
 namespace Chunkyard.Core;
 
 /// <summary>
+/// This interface describes how Chunkyard stores its data.
+/// </summary>
+public interface IRepository
+{
+    IRepository<int> References { get; }
+
+    IRepository<string> Chunks { get; }
+}
+
+/// <summary>
 /// Defines a basic contract to store and retrieve bytes. Stored data can be
-/// referenced using a key. An IRepository can handle parallel operations.
+/// referenced using a key. A repository can handle parallel operations.
 /// </summary>
 public interface IRepository<T>
 {
@@ -15,6 +25,8 @@ public interface IRepository<T>
     bool Exists(T key);
 
     IReadOnlyCollection<T> List();
+
+    bool TryLast(out T? key);
 
     void Remove(T key);
 }

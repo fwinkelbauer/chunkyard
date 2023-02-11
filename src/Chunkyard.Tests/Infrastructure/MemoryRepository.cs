@@ -1,13 +1,16 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-internal static class MemoryRepository
+internal sealed class MemoryRepository : IRepository
 {
-    public static Repository Create()
+    public MemoryRepository()
     {
-        return new Repository(
-            new MemoryRepository<int>(),
-            new MemoryRepository<string>());
+        References = new MemoryRepository<int>();
+        Chunks = new MemoryRepository<string>();
     }
+
+    public IRepository<int> References { get; }
+
+    public IRepository<string> Chunks { get; }
 }
 
 internal sealed class MemoryRepository<T> : IRepository<T>
@@ -63,6 +66,22 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         lock (_lock)
         {
             return _valuesPerKey.Keys.ToArray();
+        }
+    }
+
+    public bool TryLast(out T? key)
+    {
+        var keys = List();
+
+        if (keys.Any())
+        {
+            key = keys.Max();
+            return true;
+        }
+        else
+        {
+            key = default(T);
+            return false;
         }
     }
 
