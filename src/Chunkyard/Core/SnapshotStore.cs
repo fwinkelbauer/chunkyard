@@ -30,7 +30,7 @@ public sealed class SnapshotStore
 
         _crypto = new Lazy<Crypto>(() =>
         {
-            if (_repository.References.TryLast(out var snapshotId))
+            if (_repository.Snapshots.TryLast(out var snapshotId))
             {
                 var snapshotReference = GetSnapshotReference(snapshotId);
 
@@ -54,7 +54,7 @@ public sealed class SnapshotStore
 
     public DiffSet StoreSnapshotPreview(IBlobSystem blobSystem)
     {
-        var blobReferences = _repository.References.TryLast(out var snapshotId)
+        var blobReferences = _repository.Snapshots.TryLast(out var snapshotId)
             ? GetSnapshot(snapshotId).BlobReferences
             : Array.Empty<BlobReference>();
 
@@ -157,12 +157,12 @@ public sealed class SnapshotStore
 
     public IReadOnlyCollection<int> ListSnapshotIds()
     {
-        return _repository.References.List();
+        return _repository.Snapshots.List();
     }
 
     public void GarbageCollect()
     {
-        var usedChunkIds = ListChunkIds(_repository.References.List());
+        var usedChunkIds = ListChunkIds(_repository.Snapshots.List());
         var unusedChunkIds = _repository.Chunks.List()
             .Except(usedChunkIds);
 
@@ -177,13 +177,13 @@ public sealed class SnapshotStore
     {
         var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
 
-        _repository.References.Remove(resolvedSnapshotId);
+        _repository.Snapshots.Remove(resolvedSnapshotId);
         _probe.RemovedSnapshot(resolvedSnapshotId);
     }
 
     public void KeepSnapshots(int latestCount)
     {
-        var snapshotIds = _repository.References.List();
+        var snapshotIds = _repository.Snapshots.List();
         var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
         var snapshotIdsToRemove = snapshotIds.Except(snapshotIdsToKeep)
             .ToArray();
@@ -218,14 +218,14 @@ public sealed class SnapshotStore
 
     public byte[] RestoreSnapshotReference(int snapshotId)
     {
-        return _repository.References.Retrieve(
+        return _repository.Snapshots.Retrieve(
             ResolveSnapshotId(snapshotId));
     }
 
     public void CopyTo(IRepository otherRepository)
     {
-        var snapshotIds = _repository.References.List();
-        var otherSnapshotIds = otherRepository.References.List();
+        var snapshotIds = _repository.Snapshots.List();
+        var otherSnapshotIds = otherRepository.Snapshots.List();
 
         var sharedSnapshotId = snapshotIds.Intersect(otherSnapshotIds)
             .Select(id => id as int?)
@@ -233,8 +233,8 @@ public sealed class SnapshotStore
 
         if (sharedSnapshotId != null)
         {
-            var bytes = _repository.References.Retrieve(sharedSnapshotId.Value);
-            var otherBytes = otherRepository.References.Retrieve(
+            var bytes = _repository.Snapshots.Retrieve(sharedSnapshotId.Value);
+            var otherBytes = otherRepository.Snapshots.Retrieve(
                 sharedSnapshotId.Value);
 
             if (!bytes.SequenceEqual(otherBytes))
@@ -244,7 +244,7 @@ public sealed class SnapshotStore
             }
         }
 
-        var snapshotIdsToCopy = otherRepository.References.TryLast(out var otherSnapshotId)
+        var snapshotIdsToCopy = otherRepository.Snapshots.TryLast(out var otherSnapshotId)
             ? snapshotIds.Where(id => id > otherSnapshotId)
                 .ToArray()
             : snapshotIds;
@@ -269,9 +269,9 @@ public sealed class SnapshotStore
 
         foreach (var snapshotId in snapshotIdsToCopy)
         {
-            var bytes = _repository.References.Retrieve(snapshotId);
+            var bytes = _repository.Snapshots.Retrieve(snapshotId);
 
-            otherRepository.References.Store(snapshotId, bytes);
+            otherRepository.Snapshots.Store(snapshotId, bytes);
             _probe.CopiedSnapshot(snapshotId);
         }
     }
@@ -287,7 +287,7 @@ public sealed class SnapshotStore
 
     private BlobReference[] StoreBlobs(IBlobSystem blobSystem)
     {
-        var currentBlobReferences = _repository.References.TryLast(out var snapshotId)
+        var currentBlobReferences = _repository.Snapshots.TryLast(out var snapshotId)
             ? GetSnapshot(snapshotId).BlobReferences
                 .ToDictionary(br => br.Blob.Name, br => br)
             : new Dictionary<string, BlobReference>();
@@ -329,11 +329,11 @@ public sealed class SnapshotStore
 
     private int StoreSnapshotReference(SnapshotReference snapshotReference)
     {
-        var nextId = _repository.References.TryLast(out var snapshotId)
+        var nextId = _repository.Snapshots.TryLast(out var snapshotId)
             ? snapshotId + 1
             : 0;
 
-        _repository.References.Store(
+        _repository.Snapshots.Store(
             nextId,
             Serialize.SnapshotReferenceToBytes(snapshotReference));
 
@@ -456,12 +456,12 @@ public sealed class SnapshotStore
             return snapshotId;
         }
         else if (snapshotId == LatestSnapshotId
-            && _repository.References.TryLast(out var lastId))
+            && _repository.Snapshots.TryLast(out var lastId))
         {
             return lastId;
         }
 
-        var snapshotIds = _repository.References.List()
+        var snapshotIds = _repository.Snapshots.List()
             .ToArray();
 
         Array.Sort(snapshotIds);

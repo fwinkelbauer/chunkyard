@@ -4,11 +4,11 @@ internal sealed class MemoryRepository : IRepository
 {
     public MemoryRepository()
     {
-        References = new MemoryRepository<int>();
+        Snapshots = new MemoryRepository<int>();
         Chunks = new MemoryRepository<string>();
     }
 
-    public IRepository<int> References { get; }
+    public IRepository<int> Snapshots { get; }
 
     public IRepository<string> Chunks { get; }
 }

@@ -7,7 +7,7 @@ public sealed class FileRepository : IRepository
 {
     public FileRepository(string directory)
     {
-        References = new FileRepository<int>(
+        Snapshots = new FileRepository<int>(
             Path.Combine(directory, "references"),
             key => key.ToString(),
             Convert.ToInt32);
@@ -18,7 +18,7 @@ public sealed class FileRepository : IRepository
             Path.GetFileNameWithoutExtension);
     }
 
-    public IRepository<int> References { get; }
+    public IRepository<int> Snapshots { get; }
 
     public IRepository<string> Chunks { get; }
 }

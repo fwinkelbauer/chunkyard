@@ -468,7 +468,7 @@ public static class SnapshotStoreTests
         snapshotStore.GarbageCollect();
 
         Assert.Empty(repository.Chunks.List());
-        Assert.Empty(repository.References.List());
+        Assert.Empty(repository.Snapshots.List());
     }
 
     [Fact]
@@ -578,8 +578,8 @@ public static class SnapshotStoreTests
             otherRepository.Chunks.List().OrderBy(k => k));
 
         Assert.Equal(
-            repository.References.List(),
-            otherRepository.References.List());
+            repository.Snapshots.List(),
+            otherRepository.Snapshots.List());
     }
 
     [Fact]
@@ -611,7 +611,7 @@ public static class SnapshotStoreTests
         _ = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Change(repository, repository.References.List());
+        Change(repository, repository.Snapshots.List());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(
@@ -700,10 +700,10 @@ public static class SnapshotStoreTests
     {
         foreach (var snapshotId in snapshotIds)
         {
-            var bytes = repository.References.Retrieve(snapshotId);
+            var bytes = repository.Snapshots.Retrieve(snapshotId);
 
-            repository.References.Remove(snapshotId);
-            repository.References.Store(
+            repository.Snapshots.Remove(snapshotId);
+            repository.Snapshots.Store(
                 snapshotId,
                 bytes.Concat(new byte[] { 0xFF }).ToArray());
         }
