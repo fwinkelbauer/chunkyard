@@ -496,12 +496,36 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
+    public static void ListSnapshotIds_Lists_Sorted_Ids()
+    {
+        var snapshotStore = Some.SnapshotStore();
+        var blobSystem = Some.BlobSystem(Some.Blobs());
+
+        var snapshotIds = new[]
+        {
+            snapshotStore.StoreSnapshot(blobSystem),
+            snapshotStore.StoreSnapshot(blobSystem),
+            snapshotStore.StoreSnapshot(blobSystem),
+            snapshotStore.StoreSnapshot(blobSystem),
+            snapshotStore.StoreSnapshot(blobSystem)
+        };
+
+        Assert.Equal(
+            snapshotIds,
+            snapshotStore.ListSnapshotIds());
+    }
+
+    [Fact]
     public static void KeepSnapshots_Removes_Older_Snapshots()
     {
         var snapshotStore = Some.SnapshotStore();
         var blobSystem = Some.BlobSystem(Some.Blobs());
 
-        _ = snapshotStore.StoreSnapshot(blobSystem);
+        for (var i = 0; i < 5; i++)
+        {
+            _ = snapshotStore.StoreSnapshot(blobSystem);
+        }
+
         var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
 
         snapshotStore.KeepSnapshots(1);
@@ -578,8 +602,8 @@ public static class SnapshotStoreTests
             otherRepository.Chunks.List().OrderBy(k => k));
 
         Assert.Equal(
-            repository.Snapshots.List(),
-            otherRepository.Snapshots.List());
+            repository.Snapshots.List().OrderBy(k => k),
+            otherRepository.Snapshots.List().OrderBy(k => k));
     }
 
     [Fact]

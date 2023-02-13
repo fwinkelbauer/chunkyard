@@ -157,7 +157,12 @@ public sealed class SnapshotStore
 
     public IReadOnlyCollection<int> ListSnapshotIds()
     {
-        return _repository.Snapshots.List();
+        var snapshotIds = _repository.Snapshots.List()
+            .ToArray();
+
+        Array.Sort(snapshotIds);
+
+        return snapshotIds;
     }
 
     public void GarbageCollect()
@@ -183,7 +188,7 @@ public sealed class SnapshotStore
 
     public void KeepSnapshots(int latestCount)
     {
-        var snapshotIds = _repository.Snapshots.List();
+        var snapshotIds = ListSnapshotIds();
         var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
         var snapshotIdsToRemove = snapshotIds.Except(snapshotIdsToKeep)
             .ToArray();
@@ -224,8 +229,12 @@ public sealed class SnapshotStore
 
     public void CopyTo(IRepository otherRepository)
     {
-        var snapshotIds = _repository.Snapshots.List();
+        var snapshotIds = ListSnapshotIds();
         var otherSnapshotIds = otherRepository.Snapshots.List();
+
+        var otherSnapshotId = otherSnapshotIds
+            .Select(id => id as int?)
+            .Max();
 
         var sharedSnapshotId = snapshotIds.Intersect(otherSnapshotIds)
             .Select(id => id as int?)
@@ -244,7 +253,7 @@ public sealed class SnapshotStore
             }
         }
 
-        var snapshotIdsToCopy = otherRepository.Snapshots.TryLast(out var otherSnapshotId)
+        var snapshotIdsToCopy = otherSnapshotId != null
             ? snapshotIds.Where(id => id > otherSnapshotId)
                 .ToArray()
             : snapshotIds;

@@ -65,7 +65,10 @@ internal sealed class MemoryRepository<T> : IRepository<T>
     {
         lock (_lock)
         {
-            return _valuesPerKey.Keys.ToArray();
+            return _valuesPerKey.Keys
+                .OrderBy(_ => RandomNumberGenerator.GetInt32(
+                    _valuesPerKey.Count))
+                .ToArray();
         }
     }
 
