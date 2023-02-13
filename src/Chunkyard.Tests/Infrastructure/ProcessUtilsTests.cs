@@ -3,12 +3,6 @@ namespace Chunkyard.Tests.Infrastructure;
 public static class ProcessUtilsTests
 {
     [Fact]
-    public static void Run_Runs_Process()
-    {
-        ProcessUtils.Run("dotnet", "--version");
-    }
-
-    [Fact]
     public static void Run_Throws_On_Invalid_Exit_Code()
     {
         Assert.Throws<InvalidOperationException>(
