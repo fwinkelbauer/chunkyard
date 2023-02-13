@@ -6,6 +6,8 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 internal sealed class SecretToolPrompt : IPrompt
 {
+    private const string SecretTool = "/usr/bin/secret-tool";
+
     private readonly string _repositoryPath;
 
     public SecretToolPrompt(string repositoryPath)
@@ -42,21 +44,13 @@ internal sealed class SecretToolPrompt : IPrompt
 
     private static bool Installed()
     {
-        try
-        {
-            return File.Exists(
-                ProcessUtils.RunQuery("which", "secret-tool", new[] { 0, 1 }));
-        }
-        catch (Exception)
-        {
-            return false;
-        }
+        return File.Exists(SecretTool);
     }
 
     private string Lookup()
     {
         return ProcessUtils.RunQuery(
-            "secret-tool",
+            SecretTool,
             $"lookup chunkyard-repository {_repositoryPath}",
             new[] { 0, 1 });
     }
@@ -65,7 +59,7 @@ internal sealed class SecretToolPrompt : IPrompt
     {
         var startInfo = new ProcessStartInfo
         {
-            FileName = "secret-tool",
+            FileName = SecretTool,
             Arguments = $"store --label=\"Chunkyard\" chunkyard-repository {_repositoryPath}",
             UseShellExecute = true
         };
