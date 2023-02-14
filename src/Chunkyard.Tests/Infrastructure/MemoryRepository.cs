@@ -83,7 +83,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         }
         else
         {
-            key = default(T);
+            key = default;
             return false;
         }
     }

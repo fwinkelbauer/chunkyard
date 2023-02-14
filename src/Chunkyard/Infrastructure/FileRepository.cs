@@ -103,7 +103,7 @@ public sealed class FileRepository<T> : IRepository<T>
         }
         else
         {
-            key = default(T);
+            key = default;
             return false;
         }
     }
