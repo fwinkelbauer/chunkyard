@@ -7,12 +7,19 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 19.1.0 - 2023-02-14
+
+### Added
+
+- Timeouts to all regular expressions
+
 ## 19.0.0 - 2023-02-05
 
 ### Changed
 
 - Fuzzy patterns to always be inclusive. An exclusive pattern needs to be
   prefixed with an exclamation mark
+- The publish process to produce reproducible binaries
 
 ## 18.3.0 - 2023-02-04
 
