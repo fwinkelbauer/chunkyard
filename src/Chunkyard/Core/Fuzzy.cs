@@ -40,7 +40,9 @@ public sealed class Fuzzy
                 : $"(?i){tmp}";
 
             _expressions.Add(
-                new FuzzyExpression(new Regex(tmp), negated));
+                new FuzzyExpression(
+                    new Regex(tmp, RegexOptions.None, TimeSpan.FromSeconds(1)),
+                    negated));
         }
     }
 

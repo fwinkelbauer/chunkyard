@@ -111,7 +111,9 @@ internal static class Commands
     {
         var match = Regex.Match(
             File.ReadAllText(Changelog),
-            @"##\s+(\d+\.\d+\.\d+)");
+            @"##\s+(\d+\.\d+\.\d+)",
+            RegexOptions.None,
+            TimeSpan.FromSeconds(1));
 
         return match.Groups.Count < 2
             ? "0.1.0"
