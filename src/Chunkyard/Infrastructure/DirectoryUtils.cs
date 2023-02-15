@@ -89,13 +89,9 @@ public static class DirectoryUtils
         {
             return Directory.GetFiles(path, "*", SearchOption.AllDirectories);
         }
-        else if (File.Exists(path))
-        {
-            return new[] { path };
-        }
         else
         {
-            return Array.Empty<string>();
+            return new[] { path };
         }
     }
 }
