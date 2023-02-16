@@ -9,6 +9,8 @@ public static class DirectoryUtilsTests
         { new[] { "/foo/bar", "/foo/baz" }, "/foo" },
         { new[] { "foo/bar", "foo/baz" }, "foo" },
         { new[] { "foo/bar/hurr", "foo/baz" }, "foo" },
+        { new[] { "foo/bar", "foo/bar" }, "foo/bar" },
+        { new[] { "foo/bar/hurr", "foo/bar/durr" }, "foo/bar" },
         { new[] { "foo", "bar" }, "" },
         { new[] { "/foo", "/bar" }, "/" },
         { new[] { "C:/foo", "D:/bar" }, "" },

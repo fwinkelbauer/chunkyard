@@ -41,7 +41,7 @@ public static class FuzzyTests
     }
 
     [Fact]
-    public static void IsMatch_Excludes_Exclamated_Pattern()
+    public static void IsMatch_Excludes_Inverted_Pattern()
     {
         var fuzzy1 = new Fuzzy(new[] { "hello", "!world" });
         var fuzzy2 = new Fuzzy(new[] { "!world", "!something" });

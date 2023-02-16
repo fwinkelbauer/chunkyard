@@ -16,14 +16,16 @@ public static class EnvironmentPromptTests
         Assert.Equal(password, prompt.ExistingPassword());
     }
 
-    [Fact]
-    public static void EnvironmentPrompt_Returns_Empty_String_If_No_Environment_Variable()
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
+    public static void EnvironmentPrompt_Returns_Empty_String_If_No_Or_Empty_Environment_Variable(string? password)
     {
         var prompt = new EnvironmentPrompt();
 
         Environment.SetEnvironmentVariable(
             EnvironmentPrompt.PasswordVariable,
-            null);
+            password);
 
         Assert.Empty(prompt.NewPassword());
         Assert.Empty(prompt.ExistingPassword());

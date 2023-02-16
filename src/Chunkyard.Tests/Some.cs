@@ -40,10 +40,10 @@ internal static class Some
 
     public static IBlobSystem BlobSystem(
         IEnumerable<Blob>? blobs = null,
-        Func<string, byte[]>? generate = null)
+        Func<string, byte[]>? generator = null)
     {
         blobs ??= Array.Empty<Blob>();
-        generate ??= (blobName => Encoding.UTF8.GetBytes(blobName));
+        generator ??= (blobName => Encoding.UTF8.GetBytes(blobName));
 
         var blobSystem = new MemoryBlobSystem();
 
@@ -51,7 +51,7 @@ internal static class Some
         {
             using var stream = blobSystem.OpenWrite(blob);
 
-            stream.Write(generate(blob.Name));
+            stream.Write(generator(blob.Name));
         }
 
         return blobSystem;
