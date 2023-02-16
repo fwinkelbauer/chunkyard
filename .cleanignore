@@ -1,5 +1,0 @@
-*.Build
-
-.vs/
-launchSettings.json
-*.user

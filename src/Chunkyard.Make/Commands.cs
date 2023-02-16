@@ -5,11 +5,8 @@ namespace Chunkyard.Make;
 /// </summary>
 internal static class Commands
 {
-    private const string Artifacts = "artifacts";
     private const string Solution = "src/Chunkyard.sln";
-    private const string MainProject = "src/Chunkyard/Chunkyard.csproj";
     private const string Changelog = "CHANGELOG.md";
-    private const string CleanIgnore = ".cleanignore";
     private const string Configuration = "Release";
 
     static Commands()
@@ -26,14 +23,12 @@ internal static class Commands
                 $"Found untracked files. Aborting cleanup");
         }
 
-        var expressions = File.ReadLines(CleanIgnore)
-            .Select(l => l.Trim())
-            .Where(l => !string.IsNullOrEmpty(l) && !l.StartsWith("#"))
-            .Select(l => $"-e {l}");
-
         Git(
             "clean -dfx",
-            string.Join(' ', expressions));
+            "-e *.Make",
+            "-e .vs/",
+            "-e launchSettings.json",
+            "-e *.user");
     }
 
     public static void Build()
@@ -60,10 +55,10 @@ internal static class Commands
 
         foreach (var runtime in new[] { "linux-x64", "win-x64" })
         {
-            var directory = Path.Combine(Artifacts, runtime);
+            var directory = Path.Combine("artifacts", runtime);
 
             Dotnet(
-                $"publish {MainProject}",
+                "publish src/Chunkyard/Chunkyard.csproj",
                 $"-c {Configuration}",
                 $"-r {runtime}",
                 "--self-contained",
@@ -96,7 +91,10 @@ internal static class Commands
         var tag = $"v{version}";
         var message = $"Prepare Chunkyard release {tag}";
 
-        if (!GitQuery("status --porcelain").Equals($" M {Changelog}"))
+        var status = GitQuery("status --porcelain");
+
+        if (!status.Equals($" M {Changelog}")
+            && !status.Equals($"M  {Changelog}"))
         {
             throw new InvalidOperationException(
                 $"A release commit should only contain changes to {Changelog}");
