@@ -232,10 +232,6 @@ public sealed class SnapshotStore
         var snapshotIds = ListSnapshotIds();
         var otherSnapshotIds = otherRepository.Snapshots.List();
 
-        var otherSnapshotId = otherSnapshotIds
-            .Select(id => id as int?)
-            .Max();
-
         var sharedSnapshotId = snapshotIds.Intersect(otherSnapshotIds)
             .Select(id => id as int?)
             .Max();
@@ -252,6 +248,10 @@ public sealed class SnapshotStore
                     $"Snapshot reference differs: #{sharedSnapshotId}");
             }
         }
+
+        var otherSnapshotId = otherSnapshotIds
+            .Select(id => id as int?)
+            .Max();
 
         var snapshotIdsToCopy = otherSnapshotId != null
             ? snapshotIds.Where(id => id > otherSnapshotId)
