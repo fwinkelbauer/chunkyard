@@ -205,7 +205,7 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Remove(repository, repository.Chunks.List());
+        Remove(repository.Chunks, repository.Chunks.List());
 
         Assert.ThrowsAny<Exception>(
             () => snapshotStore.CheckSnapshotExists(
@@ -227,7 +227,7 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Change(repository, repository.Chunks.List());
+        Change(repository.Chunks, repository.Chunks.List());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
@@ -253,7 +253,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Remove(repository, chunkIds);
+        Remove(repository.Chunks, chunkIds);
 
         Assert.False(
             snapshotStore.CheckSnapshotExists(
@@ -279,7 +279,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Change(repository, chunkIds);
+        Change(repository.Chunks, chunkIds);
 
         Assert.True(
            snapshotStore.CheckSnapshotExists(
@@ -619,7 +619,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Change(repository, chunkIds);
+        Change(repository.Chunks, chunkIds);
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(
@@ -635,7 +635,7 @@ public static class SnapshotStoreTests
         _ = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Change(repository, repository.Snapshots.List());
+        Change(repository.Snapshots, repository.Snapshots.List());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(
@@ -693,42 +693,27 @@ public static class SnapshotStoreTests
             changedDiff);
     }
 
-    private static void Remove(
-        IRepository repository,
-        IEnumerable<string> chunkIds)
+    private static void Remove<T>(
+        IRepository<T> repository,
+        IEnumerable<T> keys)
     {
-        foreach (var chunkId in chunkIds)
+        foreach (var key in keys)
         {
-            repository.Chunks.Remove(chunkId);
+            repository.Remove(key);
         }
     }
 
-    private static void Change(
-        IRepository repository,
-        IEnumerable<string> chunkIds)
+    private static void Change<T>(
+        IRepository<T> repository,
+        IEnumerable<T> keys)
     {
-        foreach (var chunkId in chunkIds)
+        foreach (var key in keys)
         {
-            var bytes = repository.Chunks.Retrieve(chunkId);
+            var bytes = repository.Retrieve(key);
 
-            repository.Chunks.Remove(chunkId);
-            repository.Chunks.Store(
-                chunkId,
-                bytes.Concat(new byte[] { 0xFF }).ToArray());
-        }
-    }
-
-    private static void Change(
-        IRepository repository,
-        IEnumerable<int> snapshotIds)
-    {
-        foreach (var snapshotId in snapshotIds)
-        {
-            var bytes = repository.Snapshots.Retrieve(snapshotId);
-
-            repository.Snapshots.Remove(snapshotId);
-            repository.Snapshots.Store(
-                snapshotId,
+            repository.Remove(key);
+            repository.Store(
+                key,
                 bytes.Concat(new byte[] { 0xFF }).ToArray());
         }
     }
