@@ -25,7 +25,7 @@ internal static class Commands
 
         Git(
             "clean -dfx",
-            "-e *.Make",
+            $"-e {nameof(Chunkyard.Make)}",
             "-e .vs/",
             "-e launchSettings.json",
             "-e *.user");
