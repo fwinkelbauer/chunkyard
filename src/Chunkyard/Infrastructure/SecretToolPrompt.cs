@@ -18,7 +18,7 @@ internal sealed class SecretToolPrompt : IPrompt
 
     public string NewPassword()
     {
-        if (!Installed())
+        if (!File.Exists(SecretTool))
         {
             return "";
         }
@@ -40,11 +40,6 @@ internal sealed class SecretToolPrompt : IPrompt
     public string ExistingPassword()
     {
         return NewPassword();
-    }
-
-    private static bool Installed()
-    {
-        return File.Exists(SecretTool);
     }
 
     private string Lookup()
