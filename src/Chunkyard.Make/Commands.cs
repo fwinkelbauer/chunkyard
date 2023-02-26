@@ -68,6 +68,8 @@ internal static class Commands
                 "-p:PublishSingleFile=true",
                 "-p:PublishTrimmed=true",
                 "-p:DebugType=none");
+
+            GenerateChecksumFile(directory);
         }
     }
 
@@ -116,6 +118,34 @@ internal static class Commands
         return match.Groups.Count < 2
             ? "0.1.0"
             : match.Groups[1].Value;
+    }
+
+    private static void GenerateChecksumFile(string directory)
+    {
+        var files = Directory.GetFiles(
+            directory,
+            "*",
+            SearchOption.AllDirectories);
+
+        var hashLines = new StringBuilder();
+
+        foreach (var file in files)
+        {
+            var bytes = File.ReadAllBytes(file);
+
+            var hash = Convert.ToHexString(SHA256.HashData(bytes))
+                .ToLowerInvariant();
+
+            var relativeFile = Path.GetRelativePath(directory, file);
+
+            // The sha256sum binary expects two spaces between a hash and the
+            // file name
+            hashLines.AppendLine($"{hash}  {relativeFile}");
+        }
+
+        File.WriteAllText(
+            Path.Combine(directory, "SHA256SUMS"),
+            hashLines.ToString());
     }
 
     private static void Dotnet(params string[] arguments)
