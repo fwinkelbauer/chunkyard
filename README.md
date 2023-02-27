@@ -86,6 +86,8 @@ chunkyard restore -r "../repository" -d . -i "mp3$"
 Here's an example of a bash script:
 
 ``` shell
+#!/bin/bash
+
 set -euo pipefail
 
 repo=/backup/location
@@ -97,10 +99,10 @@ directories=(
 )
 
 # Optional: Prevent password prompts
-# export CHUNKYARD_PASSWORD="my secret password"
+# export CHUNKYARD_PASSWORD='my secret password'
 
 # Store backup
-chunkyard store -r "$repo" -p ${directories[*]}
+chunkyard store -r "$repo" -p "${directories[@]}"
 
 # Keep the latest four backups
 chunkyard keep -r "$repo" --latest 4
