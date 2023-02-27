@@ -138,9 +138,7 @@ internal static class Commands
 
             var relativeFile = Path.GetRelativePath(directory, file);
 
-            // The sha256sum binary expects two spaces between a hash and the
-            // file name
-            hashLines.AppendLine($"{hash}  {relativeFile}");
+            hashLines.AppendLine($"{hash} *{relativeFile}");
         }
 
         File.WriteAllText(
