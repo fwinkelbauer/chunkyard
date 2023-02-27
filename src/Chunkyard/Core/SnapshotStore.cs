@@ -157,8 +157,7 @@ public sealed class SnapshotStore
 
     public IReadOnlyCollection<int> ListSnapshotIds()
     {
-        var snapshotIds = _repository.Snapshots.List()
-            .ToArray();
+        var snapshotIds = _repository.Snapshots.List();
 
         Array.Sort(snapshotIds);
 
@@ -470,8 +469,7 @@ public sealed class SnapshotStore
             return lastId;
         }
 
-        var snapshotIds = _repository.Snapshots.List()
-            .ToArray();
+        var snapshotIds = _repository.Snapshots.List();
 
         Array.Sort(snapshotIds);
 

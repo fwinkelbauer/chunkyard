@@ -80,7 +80,7 @@ public sealed class FileRepository<T> : IRepository<T>
             ToFile(key));
     }
 
-    public IReadOnlyCollection<T> List()
+    public T[] List()
     {
         if (!Directory.Exists(_directory))
         {

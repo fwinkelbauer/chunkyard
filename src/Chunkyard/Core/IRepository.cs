@@ -24,7 +24,7 @@ public interface IRepository<T>
 
     bool Exists(T key);
 
-    IReadOnlyCollection<T> List();
+    T[] List();
 
     bool TryLast(out T? key);
 

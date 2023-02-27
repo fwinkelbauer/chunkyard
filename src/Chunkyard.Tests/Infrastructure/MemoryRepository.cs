@@ -61,7 +61,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         }
     }
 
-    public IReadOnlyCollection<T> List()
+    public T[] List()
     {
         lock (_lock)
         {
