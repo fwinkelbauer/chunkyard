@@ -25,7 +25,7 @@ internal static class Commands
 
         Git(
             "clean -dfx",
-            $"-e {nameof(Chunkyard.Make)}",
+            $"-e *{nameof(Chunkyard.Make)}",
             "-e .vs/",
             "-e launchSettings.json",
             "-e *.user");
@@ -138,7 +138,9 @@ internal static class Commands
 
             var relativeFile = Path.GetRelativePath(directory, file);
 
-            hashLines.AppendLine($"{hash} *{relativeFile}");
+            // The sha256sum binary expects Linux-style line endings
+            hashLines.Append($"{hash} *{relativeFile}");
+            hashLines.Append('\n');
         }
 
         File.WriteAllText(
