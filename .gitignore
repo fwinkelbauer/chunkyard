@@ -1,6 +1,7 @@
 artifacts/
 bin/
 obj/
+BenchmarkDotNet.Artifacts/
 
 .vs/
 launchSettings.json
