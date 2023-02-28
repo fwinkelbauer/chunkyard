@@ -48,6 +48,7 @@ internal static class Commands
 
     public static void Publish()
     {
+        Clean();
         Build();
 
         var version = FetchVersion();
