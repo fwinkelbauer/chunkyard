@@ -33,17 +33,6 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         }
     }
 
-    public void StoreIfNotExists(T key, ReadOnlySpan<byte> value)
-    {
-        lock (_lock)
-        {
-            if (!_valuesPerKey.ContainsKey(key))
-            {
-                _valuesPerKey.Add(key, value.ToArray());
-            }
-        }
-    }
-
     public byte[] Retrieve(T key)
     {
         lock (_lock)

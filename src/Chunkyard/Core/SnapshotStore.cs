@@ -358,7 +358,7 @@ public sealed class SnapshotStore
 
             var chunkId = ChunkId.Compute(encrypted);
 
-            _repository.Chunks.StoreIfNotExists(chunkId, encrypted);
+            _repository.Chunks.Store(chunkId, encrypted);
 
             return chunkId;
         }

@@ -99,21 +99,6 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public void Repository_StoreIfNotExists_Writes_Key_Once()
-    {
-        var key = Keys.First();
-        var expectedBytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-
-        Repository.StoreIfNotExists(key, expectedBytes);
-
-        Repository.StoreIfNotExists(
-            key,
-            new byte[] { 0xAA, 0xAA, 0xAA, 0xAA });
-
-        Assert.Equal(expectedBytes, Repository.Retrieve(key));
-    }
-
-    [Fact]
     public void Repository_Store_Throws_When_Writing_To_Same_Key()
     {
         var key = Keys.First();

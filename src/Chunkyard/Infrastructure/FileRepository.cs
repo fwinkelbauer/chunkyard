@@ -29,7 +29,6 @@ public sealed class FileRepository<T> : IRepository<T>
     private readonly string _directory;
     private readonly Func<T, string> _toFile;
     private readonly Func<string, T> _toKey;
-    private readonly ConcurrentDictionary<T, object> _locks;
 
     public FileRepository(
         string directory,
@@ -39,8 +38,6 @@ public sealed class FileRepository<T> : IRepository<T>
         _directory = Path.GetFullPath(directory);
         _toFile = toFile;
         _toKey = toKey;
-
-        _locks = new ConcurrentDictionary<T, object>();
     }
 
     public void Store(T key, ReadOnlySpan<byte> value)
@@ -55,17 +52,6 @@ public sealed class FileRepository<T> : IRepository<T>
             FileAccess.Write);
 
         fileStream.Write(value);
-    }
-
-    public void StoreIfNotExists(T key, ReadOnlySpan<byte> value)
-    {
-        lock (_locks.GetOrAdd(key, _ => new object()))
-        {
-            if (!Exists(key))
-            {
-                Store(key, value);
-            }
-        }
     }
 
     public byte[] Retrieve(T key)

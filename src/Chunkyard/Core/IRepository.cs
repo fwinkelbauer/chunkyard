@@ -18,8 +18,6 @@ public interface IRepository<T>
 {
     void Store(T key, ReadOnlySpan<byte> value);
 
-    void StoreIfNotExists(T key, ReadOnlySpan<byte> value);
-
     byte[] Retrieve(T key);
 
     bool Exists(T key);
