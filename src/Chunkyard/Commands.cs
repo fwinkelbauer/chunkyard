@@ -213,7 +213,6 @@ internal static class Commands
             new RealClock(),
             new MultiPrompt(
                 new EnvironmentPrompt(),
-                new WindowsProtectPrompt(repositoryPath),
                 new SecretToolPrompt(repositoryPath),
                 new ConsolePrompt()));
     }

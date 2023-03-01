@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="commandlineparser" Version="2.9.1" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
   </ItemGroup>
 
 </Project>
