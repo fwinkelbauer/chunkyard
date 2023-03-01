@@ -1,6 +1,6 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-public sealed class DummyProbe : IProbe
+internal sealed class DummyProbe : IProbe
 {
     public void StoredBlob(string blobName)
     {

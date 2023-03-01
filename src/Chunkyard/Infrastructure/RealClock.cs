@@ -3,7 +3,7 @@ namespace Chunkyard.Infrastructure;
 /// <summary>
 /// An implementation of <see cref="IClock"/> using the current time.
 /// </summary>
-public sealed class RealClock : IClock
+internal sealed class RealClock : IClock
 {
     public DateTime NowUtc()
     {

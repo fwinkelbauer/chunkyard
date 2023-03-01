@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard.Tests", "Chunkyar
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard.Make", "Chunkyard.Make\Chunkyard.Make.csproj", "{2CFC370A-5780-430E-B60B-FB9852F13DFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chunkyard.Benchmarks", "Chunkyard.Benchmarks\Chunkyard.Benchmarks.csproj", "{0A20CF38-C465-4685-A596-05B67B903E37}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,18 +55,6 @@ Global
 		{2CFC370A-5780-430E-B60B-FB9852F13DFC}.Release|x64.Build.0 = Release|Any CPU
 		{2CFC370A-5780-430E-B60B-FB9852F13DFC}.Release|x86.ActiveCfg = Release|Any CPU
 		{2CFC370A-5780-430E-B60B-FB9852F13DFC}.Release|x86.Build.0 = Release|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Debug|x64.Build.0 = Debug|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Debug|x86.Build.0 = Debug|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Release|x64.ActiveCfg = Release|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Release|x64.Build.0 = Release|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Release|x86.ActiveCfg = Release|Any CPU
-		{0A20CF38-C465-4685-A596-05B67B903E37}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

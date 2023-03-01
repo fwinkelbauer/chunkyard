@@ -3,7 +3,7 @@ namespace Chunkyard.Infrastructure;
 /// <summary>
 /// An implementation of <see cref="IProbe"/> which writes to the console.
 /// </summary>
-public sealed class ConsoleProbe : IProbe
+internal sealed class ConsoleProbe : IProbe
 {
     public void StoredBlob(string blobName)
     {
