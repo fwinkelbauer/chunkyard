@@ -15,7 +15,7 @@ public sealed class FileRepository : IRepository
         Chunks = new FileRepository<string>(
             Path.Combine(directory, "chunks"),
             key => Path.Combine(key[..2], key),
-            Path.GetFileNameWithoutExtension);
+            Path.GetFileName);
     }
 
     public IRepository<int> Snapshots { get; }
