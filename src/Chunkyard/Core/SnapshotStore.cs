@@ -9,6 +9,8 @@ public sealed class SnapshotStore
     public const int LatestSnapshotId = -1;
     public const int SecondLatestSnapshotId = -2;
 
+    private const int _degree = 4;
+
     private readonly IRepository _repository;
     private readonly FastCdc _fastCdc;
     private readonly IProbe _probe;
@@ -148,6 +150,7 @@ public sealed class SnapshotStore
     {
         _ = FilterSnapshot(snapshotId, fuzzy)
             .AsParallel()
+            .WithDegreeOfParallelism(_degree)
             .Select(br => RestoreBlob(blobSystem, br))
             .ToArray();
 
@@ -261,27 +264,38 @@ public sealed class SnapshotStore
             .Except(otherRepository.Chunks.List())
             .ToArray();
 
-        foreach (var chunkId in chunkIdsToCopy)
+        var options = new ParallelOptions()
         {
-            var bytes = _repository.Chunks.Retrieve(chunkId);
+            MaxDegreeOfParallelism = _degree
+        };
 
-            if (!ChunkId.Valid(chunkId, bytes))
+        Parallel.ForEach(
+            chunkIdsToCopy,
+            options,
+            chunkId =>
             {
-                throw new ChunkyardException(
-                    $"Invalid chunk: {chunkId}");
-            }
+                var bytes = _repository.Chunks.Retrieve(chunkId);
 
-            otherRepository.Chunks.Store(chunkId, bytes);
-            _probe.CopiedChunk(chunkId);
-        }
+                if (!ChunkId.Valid(chunkId, bytes))
+                {
+                    throw new ChunkyardException(
+                        $"Invalid chunk: {chunkId}");
+                }
 
-        foreach (var snapshotId in snapshotIdsToCopy)
-        {
-            var bytes = _repository.Snapshots.Retrieve(snapshotId);
+                otherRepository.Chunks.Store(chunkId, bytes);
+                _probe.CopiedChunk(chunkId);
+            });
 
-            otherRepository.Snapshots.Store(snapshotId, bytes);
-            _probe.CopiedSnapshot(snapshotId);
-        }
+        Parallel.ForEach(
+            snapshotIdsToCopy,
+            options,
+            snapshotId =>
+            {
+                var bytes = _repository.Snapshots.Retrieve(snapshotId);
+
+                otherRepository.Snapshots.Store(snapshotId, bytes);
+                _probe.CopiedSnapshot(snapshotId);
+            });
     }
 
     private Snapshot GetSnapshot(IReadOnlyCollection<string> chunkIds)
@@ -323,6 +337,7 @@ public sealed class SnapshotStore
         return blobSystem.ListBlobs()
             .AsParallel()
             .AsOrdered()
+            .WithDegreeOfParallelism(_degree)
             .Select(StoreBlob)
             .ToArray();
     }
@@ -366,6 +381,7 @@ public sealed class SnapshotStore
         return _fastCdc.SplitIntoChunks(stream, _table.Value)
             .AsParallel()
             .AsOrdered()
+            .WithDegreeOfParallelism(_degree)
             .Select(StoreChunk)
             .ToArray();
     }
@@ -377,6 +393,7 @@ public sealed class SnapshotStore
     {
         var snapshotValid = FilterSnapshot(snapshotId, fuzzy)
             .AsParallel()
+            .WithDegreeOfParallelism(_degree)
             .All(br => CheckBlobReference(br, checkChunkIdFunc));
 
         _probe.SnapshotValid(

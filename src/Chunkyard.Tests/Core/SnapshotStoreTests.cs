@@ -621,7 +621,7 @@ public static class SnapshotStoreTests
 
         Change(repository.Chunks, chunkIds);
 
-        Assert.Throws<ChunkyardException>(
+        Assert.Throws<AggregateException>(
             () => snapshotStore.CopyTo(
                 Some.Repository()));
     }
