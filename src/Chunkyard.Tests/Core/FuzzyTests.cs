@@ -61,11 +61,21 @@ public static class FuzzyTests
     }
 
     [Fact]
+    public static void IsMatch_Includes_All_When_First_Pattern_Is_Negated()
+    {
+        var fuzzy = new Fuzzy(new[] { "!mp3" });
+
+        Assert.True(fuzzy.IsMatch("picture.jpg"));
+        Assert.False(fuzzy.IsMatch("music.mp3"));
+    }
+
+    [Fact]
     public static void IsMatch_Lets_Pattern_Overwrite_Previous_Pattern()
     {
         var fuzzy = new Fuzzy(new[] { "!mp3", "cool mp3" });
 
-        Assert.False(fuzzy.IsMatch("some.mp3"));
-        Assert.True(fuzzy.IsMatch("cool.mp3"));
+        Assert.True(fuzzy.IsMatch("picture.jpg"));
+        Assert.False(fuzzy.IsMatch("music.mp3"));
+        Assert.True(fuzzy.IsMatch("cool-music.mp3"));
     }
 }

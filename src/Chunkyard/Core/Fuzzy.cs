@@ -19,6 +19,7 @@ public sealed class Fuzzy
     private sealed record FuzzyExpression(Regex Regex, bool Negated);
 
     private readonly List<FuzzyExpression> _expressions;
+    private readonly bool _initialMatch;
 
     public Fuzzy(IEnumerable<string> patterns)
     {
@@ -44,12 +45,14 @@ public sealed class Fuzzy
                     new Regex(tmp, RegexOptions.None, TimeSpan.FromSeconds(1)),
                     negated));
         }
+
+        _initialMatch = _expressions.Count == 0
+            || _expressions.First().Negated;
     }
 
     public bool IsMatch(string input)
     {
-        var match = _expressions.Count == 0
-            || _expressions.Count > 1 && _expressions.First().Negated;
+        var match = _initialMatch;
 
         foreach (var expression in _expressions)
         {

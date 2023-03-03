@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Fixed
+
+- A bug when using include/exclude expressions with only a single negated
+  pattern
+
 ## 19.1.0 - 2023-02-14
 
 ### Added
