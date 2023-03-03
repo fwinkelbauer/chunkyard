@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- The environment variable `CHUNKYARD_PARALLELISM` to control the degree of
+  parallelism
+
 ### Fixed
 
 - A bug when using include/exclude expressions with only a single negated

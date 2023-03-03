@@ -30,7 +30,8 @@ internal static class Some
             fastCdc ?? new FastCdc(),
             new DummyProbe(),
             new DummyClock(DateUtc),
-            new DummyPrompt(password));
+            new DummyPrompt(password),
+            Environment.ProcessorCount);
     }
 
     public static IRepository Repository()

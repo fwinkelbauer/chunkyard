@@ -206,6 +206,13 @@ internal static class Commands
     private static SnapshotStore CreateSnapshotStore(
         string repositoryPath)
     {
+        var envParallelism = Environment.GetEnvironmentVariable(
+            "CHUNKYARD_PARALLELISM");
+
+        var parallelism = string.IsNullOrEmpty(envParallelism)
+            ? Environment.ProcessorCount
+            : Convert.ToInt32(envParallelism);
+
         return new SnapshotStore(
             CreateRepository(repositoryPath),
             new FastCdc(),
@@ -214,7 +221,8 @@ internal static class Commands
             new MultiPrompt(
                 new EnvironmentPrompt(),
                 new SecretToolPrompt(repositoryPath),
-                new ConsolePrompt()));
+                new ConsolePrompt()),
+            parallelism);
     }
 
     private static IRepository CreateRepository(string repositoryPath)
