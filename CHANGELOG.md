@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 19.2.0 - 2023-03-03
+
 ### Added
 
 - The environment variable `CHUNKYARD_PARALLELISM` to control the degree of
