@@ -5,11 +5,9 @@ namespace Chunkyard;
 /// </summary>
 internal static class Commands
 {
-    public const string DefaultRepository = ".chunkyard";
-
     public static void StoreSnapshot(StoreOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
+        var snapshotStore = CreateSnapshotStore(o);
 
         var blobSystem = new FileBlobSystem(
             o.Paths,
@@ -29,7 +27,7 @@ internal static class Commands
 
     public static void CheckSnapshot(CheckOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
+        var snapshotStore = CreateSnapshotStore(o);
 
         var fuzzy = new Fuzzy(o.IncludePatterns);
 
@@ -50,7 +48,7 @@ internal static class Commands
 
     public static void ShowSnapshot(ShowOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
+        var snapshotStore = CreateSnapshotStore(o);
 
         var blobReferences = snapshotStore.FilterSnapshot(
             o.SnapshotId,
@@ -68,7 +66,7 @@ internal static class Commands
 
     public static void RestoreSnapshot(RestoreOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
+        var snapshotStore = CreateSnapshotStore(o);
 
         var blobSystem = new FileBlobSystem(
             new[] { o.Directory },
@@ -96,7 +94,7 @@ internal static class Commands
 
     public static void ListSnapshots(ListOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
+        var snapshotStore = CreateSnapshotStore(o);
 
         foreach (var snapshotId in snapshotStore.ListSnapshotIds())
         {
@@ -112,7 +110,7 @@ internal static class Commands
 
     public static void DiffSnapshots(DiffOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
+        var snapshotStore = CreateSnapshotStore(o);
 
         var fuzzy = new Fuzzy(o.IncludePatterns);
         var first = snapshotStore.FilterSnapshot(o.FirstSnapshotId, fuzzy);
@@ -133,28 +131,28 @@ internal static class Commands
 
     public static void RemoveSnapshot(RemoveOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
+        var snapshotStore = CreateSnapshotStore(o);
 
         snapshotStore.RemoveSnapshot(o.SnapshotId);
     }
 
     public static void KeepSnapshots(KeepOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
+        var snapshotStore = CreateSnapshotStore(o);
 
         snapshotStore.KeepSnapshots(o.LatestCount);
     }
 
     public static void GarbageCollect(GarbageCollectOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
+        var snapshotStore = CreateSnapshotStore(o);
 
         snapshotStore.GarbageCollect();
     }
 
     public static void Copy(CopyOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.SourceRepository);
+        var snapshotStore = CreateSnapshotStore(o);
         var otherRepository = CreateRepository(o.DestinationRepository);
 
         snapshotStore.CopyTo(otherRepository);
@@ -162,7 +160,7 @@ internal static class Commands
 
     public static void Cat(CatOptions o)
     {
-        var snapshotStore = CreateSnapshotStore(o.Repository);
+        var snapshotStore = CreateSnapshotStore(o);
 
         using Stream stream = string.IsNullOrEmpty(o.Export)
             ? new MemoryStream()
@@ -204,24 +202,27 @@ internal static class Commands
     }
 
     private static SnapshotStore CreateSnapshotStore(
-        string repositoryPath)
+        Options o)
     {
-        var envParallelism = Environment.GetEnvironmentVariable(
-            "CHUNKYARD_PARALLELISM");
-
-        var parallelism = string.IsNullOrEmpty(envParallelism)
+        var parallelism = o.Parallel < 1
             ? Environment.ProcessorCount
-            : Convert.ToInt32(envParallelism);
+            : o.Parallel;
+
+        IPrompt prompt = o.Prompt switch
+        {
+            Prompt.Console => new ConsolePrompt(),
+            Prompt.Environment => new EnvironmentPrompt(),
+            Prompt.SecretTool => new SecretToolPrompt(o.Repository),
+            _ => throw new NotSupportedException(
+                $"Not supported --prompt: {o.Prompt}")
+        };
 
         return new SnapshotStore(
-            CreateRepository(repositoryPath),
+            CreateRepository(o.Repository),
             new FastCdc(),
             new ConsoleProbe(),
             new RealClock(),
-            new MultiPrompt(
-                new EnvironmentPrompt(),
-                new SecretToolPrompt(repositoryPath),
-                new ConsolePrompt()),
+            prompt,
             parallelism);
     }
 

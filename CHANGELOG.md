@@ -7,6 +7,13 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The `--source` parameter of `copy` to `--repository`
+- How parallelism is controlled. Replaced `CHUNKYARD_PARALLELISM` with a
+  `--parallel` command line parameter
+- The `--repository` parameter to be required
+
 ## 19.2.0 - 2023-03-03
 
 ### Added

@@ -98,11 +98,12 @@ directories=(
     ~/Videos
 )
 
-# Optional: Prevent password prompts
-# export CHUNKYARD_PASSWORD='my secret password'
-
 # Store backup
 chunkyard store -r "$repo" -p "${directories[@]}"
+
+# Optional: Prevent password prompts
+# export CHUNKYARD_PASSWORD='my secret password'
+# chunkyard store -r "$repo" -p "${directories[@]}" --prompt Environment
 
 # Keep the latest four backups
 chunkyard keep -r "$repo" --latest 4
@@ -120,18 +121,20 @@ $directories = @(
     "$env:UserProfile\Videos"
 )
 
+# Store backup
+chunkyard store -r $repo -p $directories
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
 # Optional: Prevent password prompts
 # $env:CHUNKYARD_PASSWORD = 'my secret password'
-
-# Store backup
-chunkyard store --repository $repo --paths $directories
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+# chunkyard store -r $repo -p $directories --prompt Environment
+# if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # Keep the latest four backups
-chunkyard keep --repository $repo --latest 4
+chunkyard keep -r $repo --latest 4
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-chunkyard gc --repository $repo
+chunkyard gc -r $repo
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 ```
 
