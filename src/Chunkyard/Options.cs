@@ -15,7 +15,7 @@ public abstract class Options
     [Option('r', "repository", Required = true, HelpText = "The repository path.")]
     public string Repository { get; }
 
-    [Option("parallel", Required = false, HelpText = "The degree of parallelism.", Default = -1)]
+    [Option("parallel", Required = false, HelpText = "The degree of parallelism.", Default = 1)]
     public int Parallel { get; }
 
     [Option("prompt", Required = false, HelpText = "The password prompt method.", Default = Prompt.Console)]
