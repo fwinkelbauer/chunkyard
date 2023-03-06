@@ -1,7 +1,8 @@
 # Chunkyard
 
-Chunkyard is a backup application for Windows and Linux which stores files in a
-content addressable storage with support for dynamic chunking and encryption.
+Chunkyard is a fast backup application for Windows and Linux which stores files
+in a content addressable storage with support for dynamic chunking and
+encryption.
 
 The [FastCDC][fastcdc] chunking algorithm is a C# port of these libraries:
 
@@ -14,7 +15,8 @@ tools. Here's a list of [options][backup-tools].
 ## Goals
 
 - Cross platform support
-- Favor simplicity and readability over features and performance
+- Favor simplicity and readability over features and elaborate performance
+  tricks
 - Strong symmetric encryption (AES Galois/Counter Mode using a 256 bit key)
 - Ability to copy from/to other repositories
 - Verifiable backups
