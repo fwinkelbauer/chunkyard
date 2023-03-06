@@ -26,5 +26,5 @@ public interface IRepository<T>
 
     bool TryLast(out T? key);
 
-    void Remove(T key);
+    bool Remove(T key);
 }

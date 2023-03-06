@@ -94,10 +94,14 @@ public sealed class FileRepository<T> : IRepository<T>
         }
     }
 
-    public void Remove(T key)
+    public bool Remove(T key)
     {
-        File.Delete(
-            ToFile(key));
+        var file = ToFile(key);
+        var exists = File.Exists(file);
+
+        File.Delete(file);
+
+        return exists;
     }
 
     private string ToFile(T key)

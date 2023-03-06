@@ -90,8 +90,8 @@ public abstract class RepositoryTests
 
         foreach (var pair in dict)
         {
-            Repository.Remove(pair.Key);
-
+            Assert.True(Repository.Remove(pair.Key));
+            Assert.False(Repository.Remove(pair.Key));
             Assert.False(Repository.Exists(pair.Key));
         }
 
