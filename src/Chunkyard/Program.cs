@@ -38,13 +38,13 @@ public static class Program
             .WithParsed<StoreOptions>(Commands.StoreSnapshot)
             .WithParsed<CheckOptions>(Commands.CheckSnapshot)
             .WithParsed<ShowOptions>(Commands.ShowSnapshot)
-            .WithParsed<RemoveOptions>(Commands.RemoveSnapshot)
             .WithParsed<KeepOptions>(Commands.KeepSnapshots)
             .WithParsed<ListOptions>(Commands.ListSnapshots)
             .WithParsed<DiffOptions>(Commands.DiffSnapshots)
             .WithParsed<GarbageCollectOptions>(Commands.GarbageCollect)
             .WithParsed<CopyOptions>(Commands.Copy)
             .WithParsed<CatOptions>(Commands.Cat)
+            .WithParsed<RemoveOptions>(Commands.Remove)
             .WithNotParsed(_ => Environment.ExitCode = 1);
     }
 }

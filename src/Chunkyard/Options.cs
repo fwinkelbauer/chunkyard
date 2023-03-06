@@ -26,24 +26,24 @@ public abstract class Options
 public sealed class CatOptions : Options
 {
     public CatOptions(
-        IEnumerable<string> chunkIds,
         int snapshotId,
+        IEnumerable<string> chunkIds,
         string? export,
         string repository,
         int parallel,
         Prompt prompt)
         : base(repository, parallel, prompt)
     {
-        ChunkIds = chunkIds;
         SnapshotId = snapshotId;
+        ChunkIds = chunkIds;
         Export = export;
     }
 
-    [Option('c', "chunk", Required = false, HelpText = "The chunk IDs.", SetName = "chunks")]
-    public IEnumerable<string> ChunkIds { get; }
-
     [Option('s', "snapshot", Required = false, HelpText = "The snapshot ID.", Default = SnapshotStore.LatestSnapshotId, SetName = "snapshots")]
     public int SnapshotId { get; }
+
+    [Option('c', "chunk", Required = false, HelpText = "The chunk IDs.", SetName = "chunks")]
+    public IEnumerable<string> ChunkIds { get; }
 
     [Option('e', "export", Required = false, HelpText = "The export path.", Default = "")]
     public string? Export { get; }
@@ -193,21 +193,26 @@ public sealed class ListOptions : Options
     }
 }
 
-[Verb("remove", HelpText = "Remove a snapshot.")]
+[Verb("remove", HelpText = "Remove a snapshot or a set of chunk IDs.")]
 public sealed class RemoveOptions : Options
 {
     public RemoveOptions(
         int snapshotId,
+        IEnumerable<string> chunkIds,
         string repository,
         int parallel,
         Prompt prompt)
         : base(repository, parallel, prompt)
     {
         SnapshotId = snapshotId;
+        ChunkIds = chunkIds;
     }
 
-    [Option('s', "snapshot", Required = true, HelpText = "The snapshot ID.")]
+    [Option('s', "snapshot", Required = true, HelpText = "The snapshot ID.", SetName = "snapshots")]
     public int SnapshotId { get; }
+
+    [Option('c', "chunk", Required = true, HelpText = "The chunk IDs.", SetName = "chunks")]
+    public IEnumerable<string> ChunkIds { get; }
 }
 
 [Verb("restore", HelpText = "Restore a snapshot.")]

@@ -129,11 +129,18 @@ internal static class Commands
         PrintDiff(diff);
     }
 
-    public static void RemoveSnapshot(RemoveOptions o)
+    public static void Remove(RemoveOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o);
 
-        snapshotStore.RemoveSnapshot(o.SnapshotId);
+        if (o.ChunkIds.Any())
+        {
+            snapshotStore.RemoveChunks(o.ChunkIds);
+        }
+        else
+        {
+            snapshotStore.RemoveSnapshot(o.SnapshotId);
+        }
     }
 
     public static void KeepSnapshots(KeepOptions o)

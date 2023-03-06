@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 - How parallelism is controlled. Replaced `CHUNKYARD_PARALLELISM` with a
   `--parallel` command line parameter
 - The `--repository` parameter to be required
+- The `remove` command to now be usable for snapshots and chunks
 
 ## 19.2.0 - 2023-03-03
 
