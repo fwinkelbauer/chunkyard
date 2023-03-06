@@ -51,13 +51,12 @@ internal static class Commands
         Clean();
         Build();
 
+        var directory = "artifacts";
         var version = FetchVersion();
         var commitId = GitQuery("rev-parse --short HEAD");
 
         foreach (var runtime in new[] { "linux-x64", "win-x64" })
         {
-            var directory = Path.Combine("artifacts", runtime);
-
             Dotnet(
                 "publish src/Chunkyard/Chunkyard.csproj",
                 $"-c {Configuration}",
@@ -69,9 +68,9 @@ internal static class Commands
                 "-p:PublishSingleFile=true",
                 "-p:PublishTrimmed=true",
                 "-p:DebugType=none");
-
-            GenerateChecksumFile(directory);
         }
+
+        GenerateChecksumFile(directory);
     }
 
     public static void Fmt()
