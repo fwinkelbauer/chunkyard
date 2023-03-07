@@ -77,11 +77,11 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         }
     }
 
-    public bool Remove(T key)
+    public void Remove(T key)
     {
         lock (_lock)
         {
-            return _valuesPerKey.Remove(key);
+            _valuesPerKey.Remove(key);
         }
     }
 }

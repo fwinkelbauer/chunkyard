@@ -182,10 +182,8 @@ public sealed class SnapshotStore
     {
         foreach (var chunkId in chunkIds)
         {
-            if (_repository.Chunks.Remove(chunkId))
-            {
-                _probe.RemovedChunk(chunkId);
-            }
+            _repository.Chunks.Remove(chunkId);
+            _probe.RemovedChunk(chunkId);
         }
     }
 
@@ -193,10 +191,8 @@ public sealed class SnapshotStore
     {
         var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
 
-        if (_repository.Snapshots.Remove(resolvedSnapshotId))
-        {
-            _probe.RemovedSnapshot(resolvedSnapshotId);
-        }
+        _repository.Snapshots.Remove(resolvedSnapshotId);
+        _probe.RemovedSnapshot(resolvedSnapshotId);
     }
 
     public void KeepSnapshots(int latestCount)
