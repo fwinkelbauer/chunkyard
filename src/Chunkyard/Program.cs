@@ -10,25 +10,11 @@ public static class Program
         }
         catch (Exception e)
         {
-            WriteError(e.Message);
+            Console.Error.WriteLine($"Error: {e.Message}");
+            Environment.ExitCode = 1;
         }
 
         return Environment.ExitCode;
-    }
-
-    private static void WriteError(string message)
-    {
-        Environment.ExitCode = 1;
-
-        try
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Error: {message}");
-        }
-        finally
-        {
-            Console.ResetColor();
-        }
     }
 
     private static void ProcessArguments(string[] args)
