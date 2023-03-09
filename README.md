@@ -47,7 +47,7 @@ tools. Here's a list of [options][backup-tools].
 
 The `./make` script runs the project `./src/Chunkyard.Make`, a CLI tool which
 can be used to build, test and publish Chunkyard. You can type commands such as
-`./make --help` or `./make build --help` to learn more.
+`./make help` or `./make build --help` to learn more.
 
 ## Publish
 
