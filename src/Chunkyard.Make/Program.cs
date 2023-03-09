@@ -6,26 +6,33 @@ public static class Program
     {
         try
         {
-            ProcessArguments(args);
+            return ProcessArguments(args);
         }
         catch (Exception e)
         {
             Console.Error.WriteLine($"Error: {e.Message}");
-            Environment.ExitCode = 1;
+            return 1;
         }
-
-        return Environment.ExitCode;
     }
 
-    private static void ProcessArguments(string[] args)
+    private static int ProcessArguments(string[] args)
     {
-        Parser.Default.ParseArguments<CleanOptions, BuildOptions, PublishOptions, ReleaseOptions, FmtOptions, OutdatedOptions>(args)
-            .WithParsed<CleanOptions>(_ => Commands.Clean())
-            .WithParsed<BuildOptions>(_ => Commands.Build())
-            .WithParsed<PublishOptions>(_ => Commands.Publish())
-            .WithParsed<ReleaseOptions>(_ => Commands.Release())
-            .WithParsed<FmtOptions>(_ => Commands.Fmt())
-            .WithParsed<OutdatedOptions>(_ => Commands.Outdated())
-            .WithNotParsed(_ => Environment.ExitCode = 1);
+        var rootCommand = new RootCommand("A tool to build and publish Chunkyard");
+
+        void Command(string name, string description, Action handler)
+        {
+            var command = new Command(name, description);
+            command.SetHandler(handler);
+            rootCommand.Add(command);
+        }
+
+        Command("clean", "Clean the repository", Commands.Clean);
+        Command("build", "Build the repository", Commands.Build);
+        Command("publish", "Publish the main project", Commands.Publish);
+        Command("format", "Run the formatter", Commands.Format);
+        Command("outdated", "Search for outdated dependencies", Commands.Outdated);
+        Command("release", "Create a release commit", Commands.Release);
+
+        return rootCommand.Invoke(args);
     }
 }

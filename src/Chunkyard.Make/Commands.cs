@@ -73,7 +73,7 @@ internal static class Commands
         GenerateChecksumFile(directory);
     }
 
-    public static void Fmt()
+    public static void Format()
     {
         Dotnet($"format {Solution}");
     }
