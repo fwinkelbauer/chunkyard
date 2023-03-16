@@ -69,16 +69,6 @@ public sealed class Crypto
         return plain;
     }
 
-    public static byte[] GenerateSalt()
-    {
-        return RandomNumberGenerator.GetBytes(SaltBytes);
-    }
-
-    public static byte[] GenerateNonce()
-    {
-        return RandomNumberGenerator.GetBytes(NonceBytes);
-    }
-
     private static byte[] PasswordToKey(
         string password,
         byte[] salt,

@@ -299,7 +299,7 @@ public static class FastCdcTests
     [Fact]
     public static void GenerateGearTable_Generates_Semi_Random_Data()
     {
-        var salt = Crypto.GenerateSalt();
+        var salt = RandomNumberGenerator.GetBytes(Crypto.SaltBytes);
         var iterations = Crypto.DefaultIterations;
         var crypto1 = new Crypto("my-password", salt, iterations);
         var crypto2 = new Crypto("my-other-password", salt, iterations);

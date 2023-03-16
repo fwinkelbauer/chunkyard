@@ -228,7 +228,7 @@ internal static class Commands
             CreateRepository(o.Repository),
             new FastCdc(),
             new ConsoleProbe(),
-            new RealClock(),
+            new RealWorld(),
             prompt,
             parallelism);
     }

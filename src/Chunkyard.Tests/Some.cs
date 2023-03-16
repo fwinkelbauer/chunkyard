@@ -29,7 +29,7 @@ internal static class Some
             repository ?? Repository(),
             fastCdc ?? new FastCdc(),
             new DummyProbe(),
-            new DummyClock(DateUtc),
+            new DummyWorld(DateUtc),
             new DummyPrompt(password),
             Environment.ProcessorCount);
     }

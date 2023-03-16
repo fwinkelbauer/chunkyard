@@ -12,7 +12,7 @@ public sealed class SnapshotStore
     private readonly IRepository _repository;
     private readonly FastCdc _fastCdc;
     private readonly IProbe _probe;
-    private readonly IClock _clock;
+    private readonly IWorld _world;
     private readonly Lazy<Crypto> _crypto;
     private readonly Lazy<uint[]> _table;
     private readonly int _parallelism;
@@ -21,14 +21,14 @@ public sealed class SnapshotStore
         IRepository repository,
         FastCdc fastCdc,
         IProbe probe,
-        IClock clock,
+        IWorld world,
         IPrompt prompt,
         int parallelism)
     {
         _repository = repository;
         _fastCdc = fastCdc;
         _probe = probe;
-        _clock = clock;
+        _world = world;
 
         _crypto = new Lazy<Crypto>(() =>
         {
@@ -45,7 +45,7 @@ public sealed class SnapshotStore
             {
                 return new Crypto(
                     prompt.NewPassword(),
-                    Crypto.GenerateSalt(),
+                    _world.GenerateSalt(),
                     Crypto.DefaultIterations);
             }
         });
@@ -73,7 +73,7 @@ public sealed class SnapshotStore
     public int StoreSnapshot(IBlobSystem blobSystem)
     {
         var snapshot = new Snapshot(
-            _clock.NowUtc(),
+            _world.NowUtc(),
             StoreBlobs(blobSystem));
 
         var snapshotId = StoreSnapshotReference(
@@ -375,7 +375,7 @@ public sealed class SnapshotStore
         string StoreChunk(byte[] chunk)
         {
             var encrypted = _crypto.Value.Encrypt(
-                Crypto.GenerateNonce(),
+                _world.GenerateNonce(),
                 chunk);
 
             var chunkId = ChunkId.Compute(encrypted);

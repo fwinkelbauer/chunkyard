@@ -9,11 +9,15 @@ public static class CryptoTests
     {
         var crypto = new Crypto(
             "secret",
-            Crypto.GenerateSalt(),
+            RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
             Crypto.DefaultIterations);
 
         var plainBytes = Encoding.UTF8.GetBytes(plain);
-        var encryptedBytes = crypto.Encrypt(Crypto.GenerateNonce(), plainBytes);
+
+        var encryptedBytes = crypto.Encrypt(
+            RandomNumberGenerator.GetBytes(Crypto.NonceBytes),
+            plainBytes);
+
         var decryptedBytes = crypto.Decrypt(encryptedBytes);
 
         Assert.NotEqual(plainBytes, encryptedBytes);
@@ -25,18 +29,18 @@ public static class CryptoTests
     {
         var someCrypto = new Crypto(
             "some secret",
-            Crypto.GenerateSalt(),
+            RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
             Crypto.DefaultIterations);
 
         var otherCrypto = new Crypto(
             "other secret",
-            Crypto.GenerateSalt(),
+            RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
             Crypto.DefaultIterations);
 
         var plainBytes = Encoding.UTF8.GetBytes("Hello!");
 
         var encryptedBytes = someCrypto.Encrypt(
-            Crypto.GenerateNonce(),
+            RandomNumberGenerator.GetBytes(Crypto.NonceBytes),
             Encoding.UTF8.GetBytes("Hello!"));
 
         Assert.Throws<CryptographicException>(
@@ -52,7 +56,7 @@ public static class CryptoTests
         Assert.Throws<ArgumentException>(
             () => new Crypto(
                 password,
-                Crypto.GenerateSalt(),
+                RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
                 Crypto.DefaultIterations));
     }
 }
