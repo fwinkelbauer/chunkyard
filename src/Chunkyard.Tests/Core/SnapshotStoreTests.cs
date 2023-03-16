@@ -299,7 +299,7 @@ public static class SnapshotStoreTests
         var snapshotStore = Some.SnapshotStore(fastCdc: fastCdc);
 
         // Create data that is large enough to create at least two chunks
-        var expectedBytes = Some.RandomNumber(2 * fastCdc.MaxSize);
+        var expectedBytes = RandomNumberGenerator.GetBytes(2 * fastCdc.MaxSize);
         var inputBlobSystem = Some.BlobSystem(Some.Blobs(), _ => expectedBytes);
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);

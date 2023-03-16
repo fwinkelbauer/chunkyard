@@ -117,7 +117,7 @@ public abstract class RepositoryTests
 
         for (var i = 0; i < 100; i++)
         {
-            input.TryAdd($"{i}", Some.RandomNumber(i));
+            input.TryAdd($"{i}", RandomNumberGenerator.GetBytes(i));
         }
 
         Parallel.ForEach(

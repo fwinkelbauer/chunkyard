@@ -57,9 +57,4 @@ internal static class Some
 
         return blobSystem;
     }
-
-    public static byte[] RandomNumber(int length)
-    {
-        return RandomNumberGenerator.GetBytes(length);
-    }
 }
