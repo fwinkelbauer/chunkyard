@@ -8,12 +8,11 @@ internal sealed class SecretToolPrompt : IPrompt
 {
     private const string SecretTool = "/usr/bin/secret-tool";
 
-    private readonly string _repositoryPath;
+    private readonly string _repositoryId;
 
-    public SecretToolPrompt(string repositoryPath)
+    public SecretToolPrompt(string repositoryId)
     {
-        _repositoryPath = Path.TrimEndingDirectorySeparator(
-            Path.GetFullPath(repositoryPath));
+        _repositoryId = repositoryId;
     }
 
     public string NewPassword()
@@ -46,7 +45,7 @@ internal sealed class SecretToolPrompt : IPrompt
     {
         return ProcessUtils.RunQuery(
             SecretTool,
-            $"lookup chunkyard-repository {_repositoryPath}",
+            $"lookup chunkyard-repository {_repositoryId}",
             new[] { 0, 1 });
     }
 
@@ -54,6 +53,6 @@ internal sealed class SecretToolPrompt : IPrompt
     {
         ProcessUtils.Run(
             SecretTool,
-            $"store --label=\"Chunkyard\" chunkyard-repository {_repositoryPath}");
+            $"store --label=\"Chunkyard\" chunkyard-repository {_repositoryId}");
     }
 }

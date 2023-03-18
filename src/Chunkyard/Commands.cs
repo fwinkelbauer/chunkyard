@@ -211,21 +211,23 @@ internal static class Commands
     private static SnapshotStore CreateSnapshotStore(
         Options o)
     {
-        var parallelism = o.Parallel < 1
-            ? Environment.ProcessorCount
-            : o.Parallel;
+        var repository = CreateRepository(o.Repository);
 
         IPrompt prompt = o.Prompt switch
         {
             Prompt.Console => new ConsolePrompt(),
             Prompt.Environment => new EnvironmentPrompt(),
-            Prompt.SecretTool => new SecretToolPrompt(o.Repository),
+            Prompt.SecretTool => new SecretToolPrompt(repository.Id),
             _ => throw new NotSupportedException(
                 $"Not supported --prompt: {o.Prompt}")
         };
 
+        var parallelism = o.Parallel < 1
+            ? Environment.ProcessorCount
+            : o.Parallel;
+
         return new SnapshotStore(
-            CreateRepository(o.Repository),
+            repository,
             new FastCdc(),
             new ConsoleProbe(),
             new RealWorld(),

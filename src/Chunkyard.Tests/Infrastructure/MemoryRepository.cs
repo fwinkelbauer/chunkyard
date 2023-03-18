@@ -4,9 +4,12 @@ internal sealed class MemoryRepository : IRepository
 {
     public MemoryRepository()
     {
+        Id = "memory";
         Snapshots = new MemoryRepository<int>();
         Chunks = new MemoryRepository<string>();
     }
+
+    public string Id { get; }
 
     public IRepository<int> Snapshots { get; }
 
