@@ -7,11 +7,13 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 19.3.0 - 2023-03-18
+
 ### Changed
 
 - The `--source` parameter of `copy` to `--repository`
 - How parallelism is controlled. Replaced `CHUNKYARD_PARALLELISM` with a
-  `--parallel` command line parameter
+  `--parallel` command line parameter and set its default to one
 - The `--repository` parameter to be required
 - The `remove` command to now be usable for snapshots and chunks
 
