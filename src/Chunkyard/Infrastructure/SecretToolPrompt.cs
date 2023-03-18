@@ -52,13 +52,8 @@ internal sealed class SecretToolPrompt : IPrompt
 
     private void Store()
     {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = SecretTool,
-            Arguments = $"store --label=\"Chunkyard\" chunkyard-repository {_repositoryPath}",
-            UseShellExecute = true
-        };
-
-        ProcessUtils.Run(startInfo);
+        ProcessUtils.Run(
+            SecretTool,
+            $"store --label=\"Chunkyard\" chunkyard-repository {_repositoryPath}");
     }
 }
