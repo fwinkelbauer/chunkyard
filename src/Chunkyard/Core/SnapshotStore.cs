@@ -103,14 +103,6 @@ public sealed class SnapshotStore
 
     public bool CheckSnapshotValid(int snapshotId, Fuzzy fuzzy)
     {
-        bool ChunkValid(string chunkId)
-        {
-            return _repository.Chunks.Exists(chunkId)
-                && ChunkId.Valid(
-                    chunkId,
-                    _repository.Chunks.Retrieve(chunkId));
-        }
-
         return CheckSnapshot(
             snapshotId,
             fuzzy,
@@ -171,9 +163,8 @@ public sealed class SnapshotStore
 
     public void GarbageCollect()
     {
-        var usedChunkIds = ListChunkIds(_repository.Snapshots.List());
         var unusedChunkIds = _repository.Chunks.List()
-            .Except(usedChunkIds);
+            .Except(ListChunkIds(_repository.Snapshots.List()));
 
         RemoveChunks(unusedChunkIds);
     }
@@ -242,8 +233,7 @@ public sealed class SnapshotStore
         var otherSnapshotIds = otherRepository.Snapshots.List();
 
         var sharedSnapshotId = snapshotIds.Intersect(otherSnapshotIds)
-            .Select(id => id as int?)
-            .Max();
+            .Max(id => id as int?);
 
         if (sharedSnapshotId != null)
         {
@@ -259,8 +249,7 @@ public sealed class SnapshotStore
         }
 
         var otherSnapshotId = otherSnapshotIds
-            .Select(id => id as int?)
-            .Max();
+            .Max(id => id as int?);
 
         var snapshotIdsToCopy = otherSnapshotId != null
             ? snapshotIds.Where(id => id > otherSnapshotId)
@@ -372,25 +361,25 @@ public sealed class SnapshotStore
 
     private IReadOnlyCollection<string> StoreChunks(Stream stream)
     {
-        string StoreChunk(byte[] chunk)
-        {
-            var encrypted = _crypto.Value.Encrypt(
-                _world.GenerateNonce(),
-                chunk);
-
-            var chunkId = ChunkId.Compute(encrypted);
-
-            _repository.Chunks.Store(chunkId, encrypted);
-
-            return chunkId;
-        }
-
         return _fastCdc.SplitIntoChunks(stream, _table.Value)
             .AsParallel()
             .AsOrdered()
             .WithDegreeOfParallelism(_parallelism)
             .Select(StoreChunk)
             .ToArray();
+    }
+
+    private string StoreChunk(byte[] chunk)
+    {
+        var encrypted = _crypto.Value.Encrypt(
+            _world.GenerateNonce(),
+            chunk);
+
+        var chunkId = ChunkId.Compute(encrypted);
+
+        _repository.Chunks.Store(chunkId, encrypted);
+
+        return chunkId;
     }
 
     private bool CheckSnapshot(
@@ -408,6 +397,12 @@ public sealed class SnapshotStore
             snapshotValid);
 
         return snapshotValid;
+    }
+
+    private bool ChunkValid(string chunkId)
+    {
+        return _repository.Chunks.Exists(chunkId)
+            && ChunkId.Valid(chunkId, _repository.Chunks.Retrieve(chunkId));
     }
 
     private bool CheckBlobReference(
