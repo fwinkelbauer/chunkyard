@@ -307,14 +307,12 @@ public sealed class SnapshotStore
     {
         var currentBlobReferences = _repository.Snapshots.TryLast(out var snapshotId)
             ? GetSnapshot(snapshotId).BlobReferences
-                .ToDictionary(br => br.Blob.Name, br => br)
-            : new Dictionary<string, BlobReference>();
+                .ToDictionary(br => br.Blob, br => br)
+            : new Dictionary<Blob, BlobReference>();
 
         BlobReference StoreBlob(Blob blob)
         {
-            currentBlobReferences.TryGetValue(blob.Name, out var current);
-
-            if (current != null && current.Blob.Equals(blob))
+            if (currentBlobReferences.TryGetValue(blob, out var current))
             {
                 return current;
             }
