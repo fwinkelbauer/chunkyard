@@ -10,10 +10,6 @@ internal sealed class DummyProbe : IProbe
     {
     }
 
-    public void RemovedBlob(Blob blob)
-    {
-    }
-
     public void BlobValid(Blob blob, bool valid)
     {
     }

@@ -94,9 +94,6 @@ public sealed class FileBlobSystemTests
             () => blobSystem.BlobExists(invalidBlobName));
 
         Assert.Throws<ArgumentException>(
-            () => blobSystem.RemoveBlob(invalidBlobName));
-
-        Assert.Throws<ArgumentException>(
             () => blobSystem.GetBlob(invalidBlobName));
 
         Assert.Throws<ArgumentException>(
@@ -163,9 +160,5 @@ public abstract class BlobSystemTests
                 expectedBytes,
                 memoryStream.ToArray());
         }
-
-        BlobSystem.RemoveBlob(blob.Name);
-
-        Assert.Empty(BlobSystem.ListBlobs());
     }
 }

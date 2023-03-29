@@ -30,12 +30,6 @@ public sealed class FileBlobSystem : IBlobSystem
             ToFile(blobName));
     }
 
-    public void RemoveBlob(string blobName)
-    {
-        File.Delete(
-            ToFile(blobName));
-    }
-
     public IReadOnlyCollection<Blob> ListBlobs()
     {
         return _paths

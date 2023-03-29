@@ -15,11 +15,6 @@ internal sealed class ConsoleProbe : IProbe
         Console.WriteLine($"Restored blob: {blob.Name}");
     }
 
-    public void RemovedBlob(Blob blob)
-    {
-        Console.WriteLine($"Removed blob: {blob.Name}");
-    }
-
     public void BlobValid(Blob blob, bool valid)
     {
         Console.WriteLine(valid

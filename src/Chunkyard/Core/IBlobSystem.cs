@@ -7,8 +7,6 @@ public interface IBlobSystem
 {
     bool BlobExists(string blobName);
 
-    void RemoveBlob(string blobName);
-
     IReadOnlyCollection<Blob> ListBlobs();
 
     Stream OpenRead(string blobName);

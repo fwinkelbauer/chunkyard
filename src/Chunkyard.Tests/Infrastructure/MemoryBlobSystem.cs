@@ -21,15 +21,6 @@ internal sealed class MemoryBlobSystem : IBlobSystem
         }
     }
 
-    public void RemoveBlob(string blobName)
-    {
-        lock (_lock)
-        {
-            _values.Remove(blobName);
-            _blobs.Remove(blobName);
-        }
-    }
-
     public IReadOnlyCollection<Blob> ListBlobs()
     {
         lock (_lock)

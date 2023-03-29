@@ -334,30 +334,29 @@ public static class SnapshotStoreTests
             "unchanged blob",
             "changed blob");
 
-        var blobSystem = Some.BlobSystem(
-            blobs,
-            _ => new byte[] { 0xAB, 0xCD, 0xEF });
+        static byte[] generator(string _) => new byte[] { 0xAB, 0xCD, 0xEF };
 
-        var expectedContent = ToContent(blobSystem);
+        var inputBlobSystem = Some.BlobSystem(blobs, generator);
+        var outputBlobSystem = Some.BlobSystem(
+            new[]
+            {
+                blobs[1],
+                new Blob(
+                    blobs[2].Name,
+                    blobs[2].LastWriteTimeUtc.AddHours(1))
+            },
+            generator);
 
-        var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
-
-        blobSystem.RemoveBlob(blobs.First().Name);
-
-        var blobToUpdate = new Blob(
-            blobs.Last().Name,
-            blobs.Last().LastWriteTimeUtc.AddHours(1));
-
-        Change(blobSystem, blobToUpdate);
+        var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
 
         snapshotStore.RestoreSnapshot(
-            blobSystem,
+            outputBlobSystem,
             snapshotId,
             Fuzzy.Default);
 
         Assert.Equal(
-            expectedContent,
-            ToContent(blobSystem));
+            ToContent(inputBlobSystem),
+            ToContent(outputBlobSystem));
     }
 
     [Fact]
@@ -716,21 +715,6 @@ public static class SnapshotStoreTests
                 key,
                 bytes.Concat(new byte[] { 0xFF }).ToArray());
         }
-    }
-
-    private static void Change(
-        IBlobSystem blobSystem,
-        Blob blob)
-    {
-        using var stream = blobSystem.BlobExists(blob.Name)
-            ? blobSystem.OpenRead(blob.Name)
-            : new MemoryStream();
-
-        stream.Write(new byte[] { 0xAB, 0xCD });
-
-        using var writeStream = blobSystem.OpenWrite(blob);
-
-        stream.CopyTo(writeStream);
     }
 
     private static IReadOnlyDictionary<Blob, byte[]> ToContent(

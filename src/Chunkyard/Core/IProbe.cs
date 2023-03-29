@@ -10,8 +10,6 @@ public interface IProbe
 
     void RestoredBlob(Blob blob);
 
-    void RemovedBlob(Blob blob);
-
     void BlobValid(Blob blob, bool valid);
 
     void CopiedChunk(string chunkId);
