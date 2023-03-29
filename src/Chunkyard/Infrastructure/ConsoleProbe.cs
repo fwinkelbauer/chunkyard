@@ -5,26 +5,26 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 internal sealed class ConsoleProbe : IProbe
 {
-    public void StoredBlob(string blobName)
+    public void StoredBlob(Blob blob)
     {
-        Console.WriteLine($"Stored blob: {blobName}");
+        Console.WriteLine($"Stored blob: {blob.Name}");
     }
 
-    public void RestoredBlob(string blobName)
+    public void RestoredBlob(Blob blob)
     {
-        Console.WriteLine($"Restored blob: {blobName}");
+        Console.WriteLine($"Restored blob: {blob.Name}");
     }
 
-    public void RemovedBlob(string blobName)
+    public void RemovedBlob(Blob blob)
     {
-        Console.WriteLine($"Removed blob: {blobName}");
+        Console.WriteLine($"Removed blob: {blob.Name}");
     }
 
-    public void BlobValid(string blobName, bool valid)
+    public void BlobValid(Blob blob, bool valid)
     {
         Console.WriteLine(valid
-            ? $"Valid blob: {blobName}"
-            : $"Invalid blob: {blobName}");
+            ? $"Valid blob: {blob.Name}"
+            : $"Invalid blob: {blob.Name}");
     }
 
     public void CopiedChunk(string chunkId)

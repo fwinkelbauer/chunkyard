@@ -323,7 +323,7 @@ public sealed class SnapshotStore
                 blob,
                 StoreChunks(stream));
 
-            _probe.StoredBlob(blobReference.Blob.Name);
+            _probe.StoredBlob(blobReference.Blob);
 
             return blobReference;
         }
@@ -409,7 +409,7 @@ public sealed class SnapshotStore
     {
         var blobValid = blobReference.ChunkIds.All(checkChunkIdFunc);
 
-        _probe.BlobValid(blobReference.Blob.Name, blobValid);
+        _probe.BlobValid(blobReference.Blob, blobValid);
 
         return blobValid;
     }
@@ -431,7 +431,7 @@ public sealed class SnapshotStore
             RestoreChunks(blobReference.ChunkIds, stream);
         }
 
-        _probe.RestoredBlob(blobReference.Blob.Name);
+        _probe.RestoredBlob(blobReference.Blob);
 
         return blob;
     }

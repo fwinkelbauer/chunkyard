@@ -6,13 +6,13 @@ namespace Chunkyard.Core;
 /// </summary>
 public interface IProbe
 {
-    void StoredBlob(string blobName);
+    void StoredBlob(Blob blob);
 
-    void RestoredBlob(string blobName);
+    void RestoredBlob(Blob blob);
 
-    void RemovedBlob(string blobName);
+    void RemovedBlob(Blob blob);
 
-    void BlobValid(string blobName, bool valid);
+    void BlobValid(Blob blob, bool valid);
 
     void CopiedChunk(string chunkId);
 
