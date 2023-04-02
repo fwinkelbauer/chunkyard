@@ -127,6 +127,8 @@ internal static class Commands
             "*",
             SearchOption.AllDirectories);
 
+        Array.Sort(files);
+
         var hashLines = new StringBuilder();
 
         foreach (var file in files)
