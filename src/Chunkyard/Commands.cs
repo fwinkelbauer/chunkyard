@@ -15,9 +15,9 @@ internal static class Commands
 
         if (o.Preview)
         {
-            var diffSet = snapshotStore.StoreSnapshotPreview(blobSystem);
+            var diff = snapshotStore.StoreSnapshotPreview(blobSystem);
 
-            PrintDiff(diffSet);
+            PrintDiff(diff);
         }
         else
         {
@@ -32,12 +32,8 @@ internal static class Commands
         var fuzzy = new Fuzzy(o.IncludePatterns);
 
         var ok = o.Shallow
-            ? snapshotStore.CheckSnapshotExists(
-                o.SnapshotId,
-                fuzzy)
-            : snapshotStore.CheckSnapshotValid(
-                o.SnapshotId,
-                fuzzy);
+            ? snapshotStore.CheckSnapshotExists(o.SnapshotId, fuzzy)
+            : snapshotStore.CheckSnapshotValid(o.SnapshotId, fuzzy);
 
         if (!ok)
         {
@@ -76,12 +72,12 @@ internal static class Commands
 
         if (o.Preview)
         {
-            var diffSet = snapshotStore.RestoreSnapshotPreview(
+            var diff = snapshotStore.RestoreSnapshotPreview(
                 blobSystem,
                 o.SnapshotId,
                 fuzzy);
 
-            PrintDiff(diffSet);
+            PrintDiff(diff);
         }
         else
         {
@@ -98,8 +94,7 @@ internal static class Commands
 
         foreach (var snapshotId in snapshotStore.ListSnapshotIds())
         {
-            var snapshot = snapshotStore.GetSnapshot(snapshotId);
-            var isoDate = snapshot.CreationTimeUtc
+            var isoDate = snapshotStore.GetSnapshot(snapshotId).CreationTimeUtc
                 .ToLocalTime()
                 .ToString("yyyy-MM-dd HH:mm:ss");
 
@@ -208,8 +203,7 @@ internal static class Commands
         }
     }
 
-    private static SnapshotStore CreateSnapshotStore(
-        Options o)
+    private static SnapshotStore CreateSnapshotStore(Options o)
     {
         var repository = CreateRepository(o.Repository);
 

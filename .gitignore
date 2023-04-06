@@ -1,7 +1,6 @@
 artifacts/
 bin/
 obj/
-
 .vs/
 launchSettings.json
 *.user
