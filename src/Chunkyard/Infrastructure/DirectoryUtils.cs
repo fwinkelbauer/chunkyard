@@ -85,13 +85,8 @@ public static class DirectoryUtils
 
     public static IReadOnlyCollection<string> ListFiles(string path)
     {
-        if (Directory.Exists(path))
-        {
-            return Directory.GetFiles(path, "*", SearchOption.AllDirectories);
-        }
-        else
-        {
-            return new[] { path };
-        }
+        return Directory.Exists(path)
+            ? Directory.GetFiles(path, "*", SearchOption.AllDirectories)
+            : new[] { path };
     }
 }
