@@ -86,7 +86,7 @@ public sealed class FileBlobSystemTests
 
         var blobSystem = new FileBlobSystem(
             new[] { directory.Name },
-            new Fuzzy(new[] { "!excluded-blob" }));
+            new Fuzzy("!excluded-blob"));
 
         var invalidBlob = Some.Blob(invalidBlobName);
 

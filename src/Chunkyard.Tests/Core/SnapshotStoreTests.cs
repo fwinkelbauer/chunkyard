@@ -428,7 +428,7 @@ public static class SnapshotStoreTests
 
         var blobReferences = snapshotStore.FilterSnapshot(
             snapshotId,
-            new Fuzzy(new[] { expectedBlob.Name }));
+            new Fuzzy(expectedBlob.Name));
 
         Assert.Equal(
             new[] { expectedBlob },

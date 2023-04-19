@@ -13,13 +13,17 @@ namespace Chunkyard.Core;
 /// </summary>
 public sealed class Fuzzy
 {
-    public static readonly Fuzzy Default = new(
-        Array.Empty<string>());
+    public static readonly Fuzzy Default = new();
 
     private sealed record FuzzyExpression(Regex Regex, bool Negated);
 
     private readonly List<FuzzyExpression> _expressions;
     private readonly bool _initialMatch;
+
+    public Fuzzy(params string[] patterns)
+        : this((IEnumerable<string>) patterns)
+    {
+    }
 
     public Fuzzy(IEnumerable<string> patterns)
     {
