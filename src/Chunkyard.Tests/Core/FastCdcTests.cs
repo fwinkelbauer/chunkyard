@@ -297,24 +297,29 @@ public static class FastCdcTests
     }
 
     [Fact]
-    public static void GenerateGearTable_Generates_Semi_Random_Data()
+    public static void GenerateGearTable_Generates_Reproducable_Semi_Random_Data_Based_On_Crypto_Parameter()
+    {
+        var crypto = new Crypto(
+            "my-password",
+            RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
+            Crypto.DefaultIterations);
+
+        Assert.Equal(
+            FastCdc.GenerateGearTable(crypto),
+            FastCdc.GenerateGearTable(crypto));
+    }
+
+    [Fact]
+    public static void GenerateGearTable_Generates_Different_Data_Based_On_Crypto_Parameter()
     {
         var salt = RandomNumberGenerator.GetBytes(Crypto.SaltBytes);
         var iterations = Crypto.DefaultIterations;
+
         var crypto1 = new Crypto("my-password", salt, iterations);
         var crypto2 = new Crypto("my-other-password", salt, iterations);
 
-        var table1 = FastCdc.GenerateGearTable(crypto1);
-        var table2 = FastCdc.GenerateGearTable(crypto2);
-
-        Assert.Equal(
-            table1,
-            FastCdc.GenerateGearTable(crypto1));
-
-        Assert.Equal(
-            table2,
+        Assert.NotEqual(
+            FastCdc.GenerateGearTable(crypto1),
             FastCdc.GenerateGearTable(crypto2));
-
-        Assert.NotEqual(table1, table2);
     }
 }
