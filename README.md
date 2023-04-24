@@ -14,7 +14,9 @@ tools. Here's a list of [options][backup-tools].
 
 ## Goals
 
-- Cross platform support
+- Cross platform support. Chunkyard is shipped as two binaries `chunkyard`
+  (Linux) and `chunkyard.exe` (Windows) and they work without having to install
+  .NET on your computer
 - Favor simplicity and readability over features and elaborate performance
   tricks
 - Strong symmetric encryption (AES Galois/Counter Mode using a 256 bit key)
