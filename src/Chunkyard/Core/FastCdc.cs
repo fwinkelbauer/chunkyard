@@ -67,6 +67,10 @@ public sealed class FastCdc
 
     public int MaxSize { get; }
 
+    // We encrypt an array of zeros using a given key to create reproducible
+    // "random" data. This means that the same cryptographic key will always
+    // produce the same "random" data, while another key will produce totally
+    // different "random" data.
     public static uint[] GenerateGearTable(Crypto crypto)
     {
         var nonce = new byte[Crypto.NonceBytes];
