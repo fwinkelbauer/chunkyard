@@ -27,8 +27,7 @@ internal static class Commands
             "clean -dfx",
             $"-e *{typeof(Commands).Namespace}",
             "-e .vs/",
-            "-e launchSettings.json",
-            "-e *.user");
+            "-e launchSettings.json");
     }
 
     public static void Build()
