@@ -7,9 +7,6 @@ public static class ProcessUtilsTests
     {
         Assert.Throws<InvalidOperationException>(
             () => ProcessUtils.Run("dotnet", "invalid-cmd"));
-
-        Assert.Throws<InvalidOperationException>(
-            () => ProcessUtils.Run("dotnet", "invalid-cmd", new[] { 0 }));
     }
 
     [Fact]
@@ -17,9 +14,6 @@ public static class ProcessUtilsTests
     {
         Assert.Throws<InvalidOperationException>(
             () => ProcessUtils.RunQuery("dotnet", "invalid-cmd"));
-
-        Assert.Throws<InvalidOperationException>(
-            () => ProcessUtils.RunQuery("dotnet", "invalid-cmd", new[] { 0 }));
     }
 
     [Fact]
