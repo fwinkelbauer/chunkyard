@@ -2,10 +2,10 @@ namespace Chunkyard.Tests.Infrastructure;
 
 internal sealed class DisposableDirectory : IDisposable
 {
-    public DisposableDirectory(string? directory = null)
+    public DisposableDirectory()
     {
         Name = Path.Combine(
-            directory ?? Path.GetTempPath(),
+            Path.GetTempPath(),
             $"chunkyard-test-{Path.GetRandomFileName()}");
     }
 
