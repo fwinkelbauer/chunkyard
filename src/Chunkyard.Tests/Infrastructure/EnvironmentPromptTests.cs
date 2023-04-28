@@ -8,9 +8,7 @@ public static class EnvironmentPromptTests
         var password = "super-secret";
         var prompt = new EnvironmentPrompt();
 
-        Environment.SetEnvironmentVariable(
-            EnvironmentPrompt.PasswordVariable,
-            password);
+        using var environment = CreateEnvironment(password);
 
         Assert.Equal(password, prompt.NewPassword());
         Assert.Equal(password, prompt.ExistingPassword());
@@ -23,11 +21,18 @@ public static class EnvironmentPromptTests
     {
         var prompt = new EnvironmentPrompt();
 
-        Environment.SetEnvironmentVariable(
-            EnvironmentPrompt.PasswordVariable,
-            password);
+        using var environment = CreateEnvironment(password);
 
         Assert.Empty(prompt.NewPassword());
         Assert.Empty(prompt.ExistingPassword());
+    }
+
+    private static DisposableEnvironment CreateEnvironment(string? password)
+    {
+        return new DisposableEnvironment(
+            new Dictionary<string, string?>
+            {
+                { EnvironmentPrompt.PasswordVariable, password },
+            });
     }
 }
