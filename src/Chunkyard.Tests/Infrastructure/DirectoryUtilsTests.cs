@@ -37,7 +37,7 @@ public static class DirectoryUtilsTests
         string relativePath)
     {
         Assert.Equal(
-            "/some/dir/structure",
+            Path.Combine(directory, relativePath),
             DirectoryUtils.CombinePathSafe(directory, relativePath));
     }
 

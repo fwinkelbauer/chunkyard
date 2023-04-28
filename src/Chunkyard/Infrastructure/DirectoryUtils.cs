@@ -69,18 +69,18 @@ public static class DirectoryUtils
 
     public static string CombinePathSafe(string directory, string relativePath)
     {
-        var absolutePath = Path.Combine(
-            Path.GetFullPath(directory),
-            relativePath);
+        var absoluteDirectory = Path.GetFullPath(directory);
+        var absolutePath = Path.GetFullPath(
+            Path.Combine(absoluteDirectory, relativePath));
 
-        if (!absolutePath.Equals(Path.GetFullPath(absolutePath)))
+        if (!absolutePath.StartsWith(absoluteDirectory))
         {
             throw new ArgumentException(
                 "Invalid directory traversal",
                 nameof(relativePath));
         }
 
-        return absolutePath;
+        return Path.Combine(directory, relativePath);
     }
 
     public static IReadOnlyCollection<string> ListFiles(string path)
