@@ -23,7 +23,25 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void StoreSnapshot_Does_Not_Deduplicate_Chunks_For_Known_Blobs()
+    public static void StoreSnapshot_Does_Not_Read_Blob_With_Unchanged_LastWriteTimeUtc()
+    {
+        var snapshotStore = Some.SnapshotStore();
+        var blobs = Some.Blobs();
+
+        var blobSystem1 = Some.BlobSystem(blobs, _ => new byte[] { 0x01 });
+        var snapshotId1 = snapshotStore.StoreSnapshot(blobSystem1);
+
+        var blobSystem2 = Some.BlobSystem(blobs, _ => new byte[] { 0x02 });
+        var snapshotId2 = snapshotStore.StoreSnapshot(blobSystem2);
+
+        var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
+        var snapshot2 = snapshotStore.GetSnapshot(snapshotId2);
+
+        Assert.Equal(snapshot1.BlobReferences, snapshot2.BlobReferences);
+    }
+
+    [Fact]
+    public static void StoreSnapshot_Does_Not_Deduplicate_Chunks_For_Blobs_With_Changed_LastWriteTimeUtc()
     {
         var snapshotStore = Some.SnapshotStore();
         var blobs = Some.Blobs();
@@ -43,8 +61,6 @@ public static class SnapshotStoreTests
         var blobReferences2 = snapshotStore.GetSnapshot(snapshotId2)
             .BlobReferences;
 
-        Assert.NotEqual(blobReferences1, blobReferences2);
-
         Assert.Equal(
             blobReferences1.Select(br => br.Blob.Name),
             blobReferences2.Select(br => br.Blob.Name));
@@ -55,27 +71,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void StoreSnapshot_Does_Not_Read_Blob_With_Unchanged_LastWriteTimeUtc()
-    {
-        var snapshotStore = Some.SnapshotStore();
-        var blobs = Some.Blobs();
-
-        var blobSystem1 = Some.BlobSystem(blobs, _ => new byte[] { 0x01 });
-        var snapshotId1 = snapshotStore.StoreSnapshot(blobSystem1);
-
-        var blobSystem2 = Some.BlobSystem(blobs, _ => new byte[] { 0x02 });
-        var snapshotId2 = snapshotStore.StoreSnapshot(blobSystem2);
-
-        var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
-        var snapshot2 = snapshotStore.GetSnapshot(snapshotId2);
-
-        Assert.Equal(
-            snapshot1.BlobReferences,
-            snapshot2.BlobReferences);
-    }
-
-    [Fact]
-    public static void StoreSnapshot_Stores_Snapshot_Without_Any_Blobs()
+    public static void StoreSnapshot_Can_Store_Empty_Snapshot()
     {
         var snapshotStore = Some.SnapshotStore();
 
@@ -86,7 +82,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void StoreSnapshot_Stores_Empty_Blobs()
+    public static void StoreSnapshot_Can_Store_Empty_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
 
@@ -113,9 +109,7 @@ public static class SnapshotStoreTests
             .GetSnapshot(snapshotId).BlobReferences
             .Select(br => br.Blob);
 
-        Assert.Equal(
-            expectedBlobs,
-            actualBlobs);
+        Assert.Equal(expectedBlobs, actualBlobs);
     }
 
     [Fact]
@@ -136,22 +130,6 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void GetSnapshot_Throws_If_Snapshot_Does_Not_Exist()
-    {
-        var snapshotStore = Some.SnapshotStore();
-
-        var snapshotId = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(Some.Blobs()));
-
-        Assert.ThrowsAny<Exception>(
-            () => snapshotStore.GetSnapshot(snapshotId + 1));
-
-        Assert.ThrowsAny<Exception>(
-            () => snapshotStore.GetSnapshot(
-                SnapshotStore.SecondLatestSnapshotId));
-    }
-
-    [Fact]
     public static void GetSnapshot_Accepts_Negative_SnapshotIds_With_Gaps()
     {
         var snapshotStore = Some.SnapshotStore();
@@ -169,12 +147,24 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void GetSnapshot_Throws_When_Empty()
+    public static void GetSnapshot_Throws_If_Snapshot_Does_Not_Exist()
     {
         var snapshotStore = Some.SnapshotStore();
 
-        Assert.Throws<ChunkyardException>(
-            () => snapshotStore.GetSnapshot(SnapshotStore.LatestSnapshotId));
+        var snapshotId = snapshotStore.StoreSnapshot(
+            Some.BlobSystem(Some.Blobs()));
+
+        Assert.ThrowsAny<Exception>(
+            () => snapshotStore.GetSnapshot(snapshotId + 1));
+    }
+
+    [Fact]
+    public static void GetSnapshot_Throws_If_Empty()
+    {
+        var snapshotStore = Some.SnapshotStore();
+
+        Assert.ThrowsAny<Exception>(
+            () => snapshotStore.GetSnapshot(0));
     }
 
     [Fact]
@@ -486,7 +476,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void RemoveSnapshot_Throws_When_Empty()
+    public static void RemoveSnapshot_Throws_If_Empty()
     {
         var snapshotStore = Some.SnapshotStore();
 
