@@ -44,7 +44,7 @@ tools. Here's a list of [options][backup-tools].
 
 ## Build
 
-- Install the .NET 6 SDK
+- Install the .NET SDK
 - Run `./make build` to build and test Chunkyard
 
 The `./make` script runs the project `./src/Chunkyard.Make`, a CLI tool which
