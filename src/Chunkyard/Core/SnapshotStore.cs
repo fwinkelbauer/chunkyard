@@ -474,8 +474,8 @@ public sealed class SnapshotStore
     {
         //  0: the first element
         //  1: the second element
-        // -1: the last element
         // -2: the second-last element
+        // -1: the last element
         if (snapshotId >= 0)
         {
             return snapshotId;
