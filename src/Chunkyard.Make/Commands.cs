@@ -32,6 +32,8 @@ internal static class Commands
 
     public static void Build()
     {
+        Dotnet($"format {Solution} --verify-no-changes");
+
         Dotnet(
             $"build {Solution}",
             $"-c {Configuration}",
