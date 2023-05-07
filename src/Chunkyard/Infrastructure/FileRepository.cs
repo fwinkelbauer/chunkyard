@@ -86,17 +86,13 @@ public sealed class FileRepository<T> : IRepository<T>
     public bool TryLast(out T? key)
     {
         var keys = List();
+        var any = keys.Any();
 
-        if (keys.Any())
-        {
-            key = keys.Max();
-            return true;
-        }
-        else
-        {
-            key = default;
-            return false;
-        }
+        key = any
+            ? keys.Max()
+            : default;
+
+        return any;
     }
 
     public void Remove(T key)
