@@ -7,9 +7,8 @@ public static class FuzzyTests
     {
         var text = "some text!";
 
-        Assert.True(new Fuzzy().IsMatch(text));
-        Assert.True(new Fuzzy("").IsMatch(text));
         Assert.True(Fuzzy.Default.IsMatch(text));
+        Assert.True(new Fuzzy("").IsMatch(text));
     }
 
     [Theory]
