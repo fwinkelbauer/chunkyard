@@ -37,8 +37,6 @@ public static class CryptoTests
             RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
             Crypto.DefaultIterations);
 
-        var plainBytes = Encoding.UTF8.GetBytes("Hello!");
-
         var encryptedBytes = someCrypto.Encrypt(
             RandomNumberGenerator.GetBytes(Crypto.NonceBytes),
             Encoding.UTF8.GetBytes("Hello!"));

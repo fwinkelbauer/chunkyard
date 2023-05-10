@@ -2,10 +2,10 @@ namespace Chunkyard.Tests.Core;
 
 public static class FastCdcTests
 {
-    private static readonly byte[] _pictureBytes = File.ReadAllBytes(
+    private static readonly byte[] PictureBytes = File.ReadAllBytes(
         "Assets/SekienAkashita.jpg");
 
-    private static readonly uint[] _table = new uint[]
+    private static readonly uint[] Table = new uint[]
     {
         0x5C95C078,
         0x22408989,
@@ -284,15 +284,15 @@ public static class FastCdcTests
     [Theory, MemberData(nameof(TheoryData))]
     public static void SplitIntoChunks(FastCdc fastCdc, int[] chunkSizes)
     {
-        using var stream = new MemoryStream(_pictureBytes);
-        var chunks = fastCdc.SplitIntoChunks(stream, _table).ToArray();
+        using var stream = new MemoryStream(PictureBytes);
+        var chunks = fastCdc.SplitIntoChunks(stream, Table).ToArray();
 
         Assert.Equal(
             chunkSizes,
             chunks.Select(c => c.Length));
 
         Assert.Equal(
-            _pictureBytes,
+            PictureBytes,
             chunks.SelectMany(c => c));
     }
 

@@ -324,9 +324,9 @@ public static class SnapshotStoreTests
             "unchanged blob",
             "changed blob");
 
-        static byte[] generator(string _) => new byte[] { 0xAB, 0xCD, 0xEF };
+        static byte[] Generator(string _) => new byte[] { 0xAB, 0xCD, 0xEF };
 
-        var inputBlobSystem = Some.BlobSystem(blobs, generator);
+        var inputBlobSystem = Some.BlobSystem(blobs, Generator);
         var outputBlobSystem = Some.BlobSystem(
             new[]
             {
@@ -335,7 +335,7 @@ public static class SnapshotStoreTests
                     blobs[2].Name,
                     blobs[2].LastWriteTimeUtc.AddHours(1))
             },
-            generator);
+            Generator);
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
 

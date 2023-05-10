@@ -12,7 +12,7 @@ public sealed class MemoryRepositoryTests
 public sealed class FileRepositoryTests
     : RepositoryTests, IDisposable
 {
-    private static DisposableDirectory? TempDirectory;
+    private static DisposableDirectory? _tempDirectory;
 
     public FileRepositoryTests()
         : base(CreateRepository())
@@ -39,16 +39,16 @@ public sealed class FileRepositoryTests
 
     public void Dispose()
     {
-        TempDirectory?.Dispose();
-        TempDirectory = null;
+        _tempDirectory?.Dispose();
+        _tempDirectory = null;
     }
 
     private static IRepository<string> CreateRepository()
     {
-        TempDirectory = new DisposableDirectory();
+        _tempDirectory = new DisposableDirectory();
 
         return new FileRepository<string>(
-            TempDirectory.Name,
+            _tempDirectory.Name,
             key => key,
             file => file);
     }
@@ -56,15 +56,16 @@ public sealed class FileRepositoryTests
 
 public abstract class RepositoryTests
 {
+    private readonly IReadOnlyCollection<string> _keys;
+
     internal RepositoryTests(IRepository<string> repository)
     {
         Repository = repository;
-        Keys = new[] { "aa", "bb", "cc" };
+
+        _keys = new[] { "aa", "bb", "cc" };
     }
 
-    internal IRepository<string> Repository { get; }
-
-    internal IReadOnlyCollection<string> Keys { get; }
+    protected IRepository<string> Repository { get; }
 
     [Fact]
     public void Repository_Can_Read_Write()
@@ -72,7 +73,7 @@ public abstract class RepositoryTests
         Assert.Empty(Repository.List());
         Assert.False(Repository.TryLast(out _));
 
-        var dict = Keys.ToDictionary(
+        var dict = _keys.ToDictionary(
             k => k,
             k => SHA256.HashData(Encoding.UTF8.GetBytes(k)));
 
@@ -84,7 +85,7 @@ public abstract class RepositoryTests
             Assert.Equal(pair.Value, Repository.Retrieve(pair.Key));
         }
 
-        Assert.Equal(Keys, Repository.List().OrderBy(k => k));
+        Assert.Equal(_keys, Repository.List().OrderBy(k => k));
         Assert.True(Repository.TryLast(out var maxKey));
         Assert.Equal(Repository.List().Max(), maxKey);
 
@@ -101,7 +102,7 @@ public abstract class RepositoryTests
     [Fact]
     public void Repository_Store_Throws_When_Writing_To_Same_Key()
     {
-        var key = Keys.First();
+        var key = _keys.First();
         var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
         Repository.Store(key, bytes);

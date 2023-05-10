@@ -21,10 +21,10 @@ public static class ProcessUtils
 
         if (processOutput != null)
         {
+            string? line;
+
             if (startInfo.RedirectStandardOutput)
             {
-                string? line;
-
                 while ((line = process.StandardOutput.ReadLine()) != null)
                 {
                     processOutput(line);
@@ -33,8 +33,6 @@ public static class ProcessUtils
 
             if (startInfo.RedirectStandardError)
             {
-                string? line;
-
                 while ((line = process.StandardError.ReadLine()) != null)
                 {
                     processOutput(line);

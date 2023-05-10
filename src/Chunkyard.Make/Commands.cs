@@ -24,7 +24,7 @@ internal static class Commands
         if (GitQuery("status --porcelain").Contains("??"))
         {
             throw new InvalidOperationException(
-                $"Found untracked files. Aborting cleanup");
+                "Found untracked files. Aborting cleanup");
         }
 
         Git(

@@ -11,7 +11,7 @@ public sealed class MemoryBlobSystemTests : BlobSystemTests
 public sealed class FileBlobSystemTests
     : BlobSystemTests, IDisposable
 {
-    private static DisposableDirectory? TempDirectory;
+    private static DisposableDirectory? _tempDirectory;
 
     public FileBlobSystemTests()
         : base(CreateBlobSystem())
@@ -45,37 +45,6 @@ public sealed class FileBlobSystemTests
             blobSystem.ListBlobs().Select(b => b.Name));
     }
 
-    [Fact]
-    public static void OpenWrite_Overwrites_Previous_Content()
-    {
-        using var directory = new DisposableDirectory();
-
-        var blobSystem = new FileBlobSystem(
-            new[] { directory.Name },
-            Fuzzy.Default);
-
-        var blob = Some.Blob("some blob");
-
-        using (var writeStream = blobSystem.OpenWrite(blob))
-        {
-            writeStream.Write(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
-        }
-
-        using (var writeStream = blobSystem.OpenWrite(blob))
-        {
-            writeStream.Write(new byte[] { 0x11 });
-        }
-
-        using var readStream = blobSystem.OpenRead(blob.Name);
-        using var memoryStream = new MemoryStream();
-
-        readStream.CopyTo(memoryStream);
-
-        Assert.Equal(
-            new byte[] { 0x11 },
-            memoryStream.ToArray());
-    }
-
     [Theory]
     [InlineData("../directory-traversal")]
     [InlineData("excluded-blob")]
@@ -103,18 +72,43 @@ public sealed class FileBlobSystemTests
             () => blobSystem.OpenWrite(invalidBlob));
     }
 
+    [Fact]
+    public void OpenWrite_Overwrites_Previous_Content()
+    {
+        var blob = Some.Blob("some blob");
+
+        using (var writeStream = BlobSystem.OpenWrite(blob))
+        {
+            writeStream.Write(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
+        }
+
+        using (var writeStream = BlobSystem.OpenWrite(blob))
+        {
+            writeStream.Write(new byte[] { 0x11 });
+        }
+
+        using var readStream = BlobSystem.OpenRead(blob.Name);
+        using var memoryStream = new MemoryStream();
+
+        readStream.CopyTo(memoryStream);
+
+        Assert.Equal(
+            new byte[] { 0x11 },
+            memoryStream.ToArray());
+    }
+
     public void Dispose()
     {
-        TempDirectory?.Dispose();
-        TempDirectory = null;
+        _tempDirectory?.Dispose();
+        _tempDirectory = null;
     }
 
     private static IBlobSystem CreateBlobSystem()
     {
-        TempDirectory = new DisposableDirectory();
+        _tempDirectory = new DisposableDirectory();
 
         return new FileBlobSystem(
-            new[] { TempDirectory.Name },
+            new[] { _tempDirectory.Name },
             Fuzzy.Default);
     }
 }
@@ -126,7 +120,7 @@ public abstract class BlobSystemTests
         BlobSystem = blobSystem;
     }
 
-    public IBlobSystem BlobSystem { get; }
+    protected IBlobSystem BlobSystem { get; }
 
     [Fact]
     public void BlobSystem_Can_Read_Write()
