@@ -13,6 +13,10 @@ internal static class Commands
     {
         Directory.SetCurrentDirectory(
             GitQuery("rev-parse --show-toplevel"));
+
+        Environment.SetEnvironmentVariable(
+            "DOTNET_CLI_TELEMETRY_OPTOUT",
+            "1");
     }
 
     public static void Clean()
