@@ -22,9 +22,7 @@ public static class DirectoryUtils
     {
         if (paths.Length == 0)
         {
-            throw new ArgumentException(
-                "Cannot operate on empty path list",
-                nameof(paths));
+            return "";
         }
         else if (paths.Length == 1)
         {

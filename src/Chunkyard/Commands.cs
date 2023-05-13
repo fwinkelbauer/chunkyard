@@ -212,8 +212,7 @@ internal static class Commands
             Prompt.Console => new ConsolePrompt(),
             Prompt.Environment => new EnvironmentPrompt(),
             Prompt.SecretTool => new SecretToolPrompt(repository.Id),
-            _ => throw new NotSupportedException(
-                $"Not supported --prompt: {o.Prompt}")
+            _ => new ConsolePrompt()
         };
 
         var parallelism = o.Parallel < 1

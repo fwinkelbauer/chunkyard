@@ -14,9 +14,7 @@ public static class ProcessUtils
 
         if (process == null)
         {
-            throw new ArgumentException(
-                $"Could not run '{startInfo.FileName}'",
-                nameof(startInfo));
+            return;
         }
 
         if (processOutput != null)
