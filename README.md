@@ -4,10 +4,8 @@ Chunkyard is a fast backup application for Windows and Linux which stores files
 in a content addressable storage with support for dynamic chunking and
 encryption.
 
-The [FastCDC][fastcdc] chunking algorithm is a C# port of these libraries:
-
-- [fastcdc-rs][fastcdc-rs]
-- [fastcdc-py][fastcdc-py]
+The [FastCDC][fastcdc] chunking algorithm is a C# port of the Rust crate
+[fastcdc-rs][fastcdc-rs].
 
 I built Chunkyard for myself. You might want to consider more sophisticated
 tools. Here's a list of [options][backup-tools].
@@ -144,7 +142,6 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 [fastcdc]: https://www.usenix.org/system/files/conference/atc16/atc16-paper-xia.pdf
 [fastcdc-rs]: https://github.com/nlfiedler/fastcdc-rs
-[fastcdc-py]: https://github.com/titusz/fastcdc-py
 [backup-tools]: https://github.com/restic/others
 [commandlineparser]: https://www.nuget.org/packages/CommandLineParser
 [borg]: https://borgbackup.readthedocs.io/en/stable/internals/security.html#fingerprinting
