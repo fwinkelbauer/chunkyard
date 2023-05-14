@@ -19,13 +19,13 @@ public static class Program
 
     private static void ProcessArguments(string[] args)
     {
-        Parser.Default.ParseArguments<CleanOptions, BuildOptions, PublishOptions, ReleaseOptions, FmtOptions, OutdatedOptions>(args)
+        Parser.Default.ParseArguments<CleanOptions, BuildOptions, PublishOptions, ReleaseOptions, FormatOptions, CheckOptions>(args)
             .WithParsed<CleanOptions>(_ => Commands.Clean())
             .WithParsed<BuildOptions>(_ => Commands.Build())
             .WithParsed<PublishOptions>(_ => Commands.Publish())
             .WithParsed<ReleaseOptions>(_ => Commands.Release())
-            .WithParsed<FmtOptions>(_ => Commands.Fmt())
-            .WithParsed<OutdatedOptions>(_ => Commands.Outdated())
+            .WithParsed<FormatOptions>(_ => Commands.Format())
+            .WithParsed<CheckOptions>(_ => Commands.Check())
             .WithNotParsed(_ => Environment.ExitCode = 1);
     }
 }

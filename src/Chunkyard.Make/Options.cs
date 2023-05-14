@@ -15,13 +15,13 @@ public class PublishOptions
 {
 }
 
-[Verb("fmt", HelpText = "Run the formatter.")]
-public class FmtOptions
+[Verb("format", HelpText = "Run the formatter.")]
+public class FormatOptions
 {
 }
 
-[Verb("outdated", HelpText = "Search for outdated dependencies.")]
-public class OutdatedOptions
+[Verb("check", HelpText = "Check dependencies.")]
+public class CheckOptions
 {
 }
 

@@ -21,6 +21,8 @@ internal static class Commands
 
     public static void Clean()
     {
+        Announce("Cleanup");
+
         if (GitQuery("status --porcelain").Contains("??"))
         {
             throw new InvalidOperationException(
@@ -36,6 +38,8 @@ internal static class Commands
 
     public static void Build()
     {
+        Announce("Build");
+
         Dotnet($"format {Solution} --verify-no-changes");
 
         Dotnet(
@@ -55,6 +59,8 @@ internal static class Commands
     {
         Clean();
         Build();
+
+        Announce("Publish");
 
         var directory = "artifacts";
         var version = FetchVersion();
@@ -78,13 +84,17 @@ internal static class Commands
         GenerateChecksumFile(directory);
     }
 
-    public static void Fmt()
+    public static void Format()
     {
+        Announce("Format");
+
         Dotnet($"format {Solution}");
     }
 
-    public static void Outdated()
+    public static void Check()
     {
+        Announce("Check");
+
         Dotnet($"restore {Solution}");
 
         Dotnet($"list {Solution} package --deprecated");
@@ -94,6 +104,8 @@ internal static class Commands
 
     public static void Release()
     {
+        Announce("Release");
+
         var version = FetchVersion();
         var tag = $"v{version}";
         var message = $"Prepare Chunkyard release {tag}";
@@ -168,5 +180,11 @@ internal static class Commands
     private static string GitQuery(params string[] arguments)
     {
         return ProcessUtils.RunQuery("git", string.Join(' ', arguments));
+    }
+
+    private static void Announce(string text)
+    {
+        Console.WriteLine(text);
+        Console.WriteLine("========================================");
     }
 }
