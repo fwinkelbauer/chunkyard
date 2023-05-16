@@ -15,6 +15,13 @@ public sealed class Crypto
 
     public Crypto(string password, byte[] salt, int iterations)
     {
+        if (string.IsNullOrEmpty(password))
+        {
+            throw new ArgumentException(
+                "Password cannot be null or empty",
+                nameof(password));
+        }
+
         _key = PasswordToKey(password, salt, iterations);
 
         Salt = salt;
@@ -68,13 +75,6 @@ public sealed class Crypto
         byte[] salt,
         int iterations)
     {
-        if (string.IsNullOrEmpty(password))
-        {
-            throw new ArgumentException(
-                "Password cannot be empty",
-                nameof(password));
-        }
-
         using var rfc2898 = new Rfc2898DeriveBytes(
             password,
             salt,
