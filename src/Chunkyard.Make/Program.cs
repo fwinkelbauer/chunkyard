@@ -10,11 +10,33 @@ public static class Program
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine($"Error: {e.Message}");
+            PrintError(e);
             Environment.ExitCode = 1;
         }
 
         return Environment.ExitCode;
+    }
+
+    private static void PrintError(Exception e)
+    {
+        Console.Error.WriteLine("Error:");
+
+        if (!string.IsNullOrEmpty(
+            Environment.GetEnvironmentVariable("CHUNKYARD_DEBUG")))
+        {
+            Console.Error.WriteLine(e.ToString());
+        }
+        else
+        {
+            IReadOnlyCollection<Exception> exceptions = e is AggregateException a
+                ? a.InnerExceptions
+                : new[] { e };
+
+            foreach (var exception in exceptions)
+            {
+                Console.Error.WriteLine(exception.Message);
+            }
+        }
     }
 
     private static void ProcessArguments(string[] args)
