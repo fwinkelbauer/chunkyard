@@ -254,6 +254,16 @@ public static class SnapshotStoreTests
             snapshotStore.CheckSnapshotValid(
                 snapshotId,
                 Fuzzy.Default));
+
+        Assert.Throws<ChunkyardException>(
+            () => snapshotStore.EnsureSnapshotExists(
+                snapshotId,
+                Fuzzy.Default));
+
+        Assert.Throws<ChunkyardException>(
+            () => snapshotStore.EnsureSnapshotValid(
+                snapshotId,
+                Fuzzy.Default));
     }
 
     [Fact]
@@ -278,6 +288,11 @@ public static class SnapshotStoreTests
 
         Assert.False(
             snapshotStore.CheckSnapshotValid(
+                snapshotId,
+                Fuzzy.Default));
+
+        Assert.Throws<ChunkyardException>(
+            () => snapshotStore.EnsureSnapshotValid(
                 snapshotId,
                 Fuzzy.Default));
     }

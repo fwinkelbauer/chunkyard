@@ -93,6 +93,28 @@ public sealed class SnapshotStore
             GetSnapshotReference(snapshotId).ChunkIds);
     }
 
+    public void EnsureSnapshotExists(int snapshotId, Fuzzy fuzzy)
+    {
+        var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
+
+        if (!CheckSnapshotExists(resolvedSnapshotId, fuzzy))
+        {
+            throw new ChunkyardException(
+                $"Found missing chunks for snapshot: #{resolvedSnapshotId}");
+        }
+    }
+
+    public void EnsureSnapshotValid(int snapshotId, Fuzzy fuzzy)
+    {
+        var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
+
+        if (!CheckSnapshotValid(resolvedSnapshotId, fuzzy))
+        {
+            throw new ChunkyardException(
+                $"Found invalid or missing chunks for snapshot: #{resolvedSnapshotId}");
+        }
+    }
+
     public bool CheckSnapshotExists(int snapshotId, Fuzzy fuzzy)
     {
         return CheckSnapshot(
@@ -244,7 +266,7 @@ public sealed class SnapshotStore
             if (!bytes.SequenceEqual(otherBytes))
             {
                 throw new ChunkyardException(
-                    $"Snapshot reference differs: #{sharedSnapshotId}");
+                    $"Copying data between different repositories is not supported");
             }
         }
 
@@ -275,7 +297,7 @@ public sealed class SnapshotStore
                 if (!ChunkId.Valid(chunkId, bytes))
                 {
                     throw new ChunkyardException(
-                        $"Invalid chunk: {chunkId}");
+                        $"Aborting copy operation. Found invalid chunk: {chunkId}");
                 }
 
                 otherRepository.Chunks.Store(chunkId, bytes);
@@ -300,7 +322,16 @@ public sealed class SnapshotStore
 
         RestoreChunks(chunkIds, memoryStream);
 
-        return Serialize.BytesToSnapshot(memoryStream.ToArray());
+        try
+        {
+            return Serialize.BytesToSnapshot(memoryStream.ToArray());
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not read snapshot: {string.Join(", ", chunkIds)}",
+                e);
+        }
     }
 
     private BlobReference[] StoreBlobs(IBlobSystem blobSystem)
@@ -465,7 +496,7 @@ public sealed class SnapshotStore
         catch (Exception e)
         {
             throw new ChunkyardException(
-                $"Could not deserialize snapshot reference: #{snapshotId}",
+                $"Could not retrieve snapshot: #{snapshotId}",
                 e);
         }
     }
@@ -495,7 +526,7 @@ public sealed class SnapshotStore
         if (position < 0)
         {
             throw new ChunkyardException(
-                $"Could not resolve snapshot reference: #{snapshotId}");
+                $"Snapshot does not exist: #{snapshotId}");
         }
 
         return snapshotIds[position];

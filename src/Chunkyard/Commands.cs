@@ -31,14 +31,13 @@ internal static class Commands
 
         var fuzzy = new Fuzzy(o.IncludePatterns);
 
-        var ok = o.Shallow
-            ? snapshotStore.CheckSnapshotExists(o.SnapshotId, fuzzy)
-            : snapshotStore.CheckSnapshotValid(o.SnapshotId, fuzzy);
-
-        if (!ok)
+        if (o.Shallow)
         {
-            throw new ChunkyardException(
-                "Found errors while checking snapshot");
+            snapshotStore.EnsureSnapshotExists(o.SnapshotId, fuzzy);
+        }
+        else
+        {
+            snapshotStore.EnsureSnapshotValid(o.SnapshotId, fuzzy);
         }
     }
 
