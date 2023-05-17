@@ -79,8 +79,7 @@ public static class ProcessUtils
         return RunQuery(
             new ProcessStartInfo(fileName, arguments)
             {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
+                RedirectStandardOutput = true
             },
             validExitCodes);
     }
