@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 19.4.0 - 2023-05-18
+
 ### Changed
 
 - Error messages to be more readable
