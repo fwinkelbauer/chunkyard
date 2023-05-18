@@ -19,7 +19,8 @@ internal sealed class SecretToolPrompt : IPrompt
     {
         if (!File.Exists(SecretTool))
         {
-            return "";
+            throw new InvalidOperationException(
+                $"Could not find {SecretTool}. Install the application or try a different prompt");
         }
 
         var password = Lookup();
@@ -43,16 +44,40 @@ internal sealed class SecretToolPrompt : IPrompt
 
     private string Lookup()
     {
-        return ProcessUtils.RunQuery(
+        var startInfo = new ProcessStartInfo(
             SecretTool,
-            $"lookup chunkyard-repository {_repositoryId}",
-            new[] { 0, 1 });
+            $"lookup chunkyard-repository {_repositoryId}")
+        {
+            RedirectStandardOutput = true
+        };
+
+        using var process = Process.Start(startInfo)!;
+
+        string? line;
+        var builder = new StringBuilder();
+
+        while ((line = process.StandardOutput.ReadLine()) != null)
+        {
+            builder.AppendLine(line);
+        }
+
+        process.WaitForExit();
+
+        return builder.ToString().TrimEnd();
     }
 
     private void Store()
     {
-        ProcessUtils.Run(
+        using var process = Process.Start(
             SecretTool,
             $"store --label=\"Chunkyard\" chunkyard-repository {_repositoryId}");
+
+        process.WaitForExit();
+
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException(
+                $"Could not store password using {SecretTool}");
+        }
     }
 }

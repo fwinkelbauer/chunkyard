@@ -17,14 +17,17 @@ public static class EnvironmentPromptTests
     [Theory]
     [InlineData("")]
     [InlineData(null)]
-    public static void EnvironmentPrompt_Returns_Empty_String_If_No_Or_Empty_Environment_Variable(string? password)
+    public static void EnvironmentPrompt_Throws_If_No_Or_Empty_Environment_Variable(string? password)
     {
         var prompt = new EnvironmentPrompt();
 
         using var environment = CreateEnvironment(password);
 
-        Assert.Empty(prompt.NewPassword());
-        Assert.Empty(prompt.ExistingPassword());
+        Assert.Throws<InvalidOperationException>(
+            () => prompt.NewPassword());
+
+        Assert.Throws<InvalidOperationException>(
+            () => prompt.ExistingPassword());
     }
 
     private static DisposableEnvironment CreateEnvironment(string? password)

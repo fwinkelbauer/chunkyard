@@ -11,7 +11,8 @@ public sealed class EnvironmentPrompt : IPrompt
     public string NewPassword()
     {
         return Environment.GetEnvironmentVariable(PasswordVariable)
-            ?? "";
+            ?? throw new InvalidOperationException(
+                $"Environment variable \"{PasswordVariable}\" is empty or does not exist");
     }
 
     public string ExistingPassword()

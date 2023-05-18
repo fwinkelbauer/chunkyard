@@ -18,7 +18,7 @@ public abstract class Options
     [Option("parallel", Required = false, HelpText = "The degree of parallelism.", Default = 1)]
     public int Parallel { get; }
 
-    [Option("prompt", Required = false, HelpText = "The password prompt method.", Default = Prompt.Console)]
+    [Option("prompt", Required = false, HelpText = "The password prompt method: Console, Environment or SecretTool.", Default = Prompt.Console)]
     public Prompt Prompt { get; }
 }
 
