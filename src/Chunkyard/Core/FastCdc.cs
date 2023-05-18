@@ -93,20 +93,6 @@ public sealed class FastCdc
 
     public IEnumerable<byte[]> SplitIntoChunks(Stream stream, uint[] table)
     {
-        if (stream.Length == 0)
-        {
-            yield break;
-        }
-        else if (stream.Length <= MinSize)
-        {
-            var smallBuffer = new byte[stream.Length];
-
-            stream.Read(smallBuffer);
-
-            yield return smallBuffer;
-            yield break;
-        }
-
         var buffer = new byte[MaxSize];
         var bytesCarryOver = 0;
         long bytesProcessed = 0;
