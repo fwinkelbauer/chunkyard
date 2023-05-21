@@ -4,6 +4,8 @@ root = true
 charset = utf-8
 
 [*.cs]
+dotnet_diagnostic.IDE0005.severity = warning
+
 dotnet_diagnostic.CA1031.severity = none
 dotnet_diagnostic.CA1062.severity = none
 dotnet_diagnostic.CA1303.severity = none
@@ -15,4 +17,8 @@ dotnet_diagnostic.CA1309.severity = none
 dotnet_diagnostic.CA1310.severity = none
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1819.severity = none
-dotnet_diagnostic.IDE0005.severity = warning
+
+# LibsecretPrompt
+dotnet_diagnostic.CA1806.severity = none
+dotnet_diagnostic.CA2101.severity = none
+dotnet_diagnostic.CA5392.severity = none

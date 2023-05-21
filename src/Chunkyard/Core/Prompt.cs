@@ -4,5 +4,5 @@ public enum Prompt
 {
     Console = 0,
     Environment = 1,
-    SecretTool = 2
+    Libsecret = 2
 }

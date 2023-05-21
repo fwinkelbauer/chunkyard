@@ -210,7 +210,9 @@ internal static class Commands
         {
             Prompt.Console => new ConsolePrompt(),
             Prompt.Environment => new EnvironmentPrompt(),
-            Prompt.SecretTool => new SecretToolPrompt(repository.Id),
+            Prompt.Libsecret => new LibsecretPrompt(
+                new ConsolePrompt(),
+                repository.Id),
             _ => new ConsolePrompt()
         };
 

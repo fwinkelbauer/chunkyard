@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- The password prompt `SecretTool` to `Libsecret` since it now depends on
+  libsecret instead of secret-tool
+
 ## 19.4.0 - 2023-05-18
 
 ### Changed
