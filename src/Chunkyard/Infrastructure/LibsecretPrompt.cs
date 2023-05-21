@@ -34,14 +34,9 @@ internal sealed class LibsecretPrompt : IPrompt
 
         var password = Lookup();
 
-        if (string.IsNullOrEmpty(password))
-        {
-            return Store();
-        }
-        else
-        {
-            return password;
-        }
+        return string.IsNullOrEmpty(password)
+            ? Store()
+            : password;
     }
 
     public string ExistingPassword()
