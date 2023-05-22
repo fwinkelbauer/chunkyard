@@ -16,9 +16,7 @@ internal sealed class LibsecretPrompt : IPrompt
     private readonly IPrompt _prompt;
     private readonly string _repositoryId;
 
-    public LibsecretPrompt(
-        IPrompt prompt,
-        string repositoryId)
+    public LibsecretPrompt(IPrompt prompt, string repositoryId)
     {
         _prompt = prompt;
         _repositoryId = repositoryId;

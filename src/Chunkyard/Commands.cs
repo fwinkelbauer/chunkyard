@@ -154,9 +154,9 @@ internal static class Commands
     public static void Copy(CopyOptions o)
     {
         var snapshotStore = CreateSnapshotStore(o);
-        var otherRepository = CreateRepository(o.DestinationRepository);
 
-        snapshotStore.CopyTo(otherRepository);
+        snapshotStore.CopyTo(
+            CreateRepository(o.DestinationRepository));
     }
 
     public static void Cat(CatOptions o)

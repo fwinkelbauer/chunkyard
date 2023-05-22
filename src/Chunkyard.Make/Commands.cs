@@ -109,7 +109,6 @@ internal static class Commands
         var version = FetchVersion();
         var tag = $"v{version}";
         var message = $"Prepare Chunkyard release {tag}";
-
         var status = GitQuery("status --porcelain");
 
         if (!status.Equals($" M {Changelog}")
