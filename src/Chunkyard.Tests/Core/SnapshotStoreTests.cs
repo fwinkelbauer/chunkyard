@@ -187,7 +187,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void CheckSnapshot_Throws_If_Snapshot_Missing()
+    public static void CheckSnapshot_Throws_If_Missing_Snapshot()
     {
         var repository = Some.Repository();
         var snapshotStore = Some.SnapshotStore(repository);
@@ -195,7 +195,7 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Remove(repository.Chunks, repository.Chunks.List());
+        Missing(repository.Chunks, repository.Chunks.List());
 
         Assert.ThrowsAny<Exception>(
             () => snapshotStore.CheckSnapshotExists(
@@ -209,7 +209,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void CheckSnapshot_Throws_If_Snapshot_Invalid()
+    public static void CheckSnapshot_Throws_If_Corrupt_Snapshot()
     {
         var repository = Some.Repository();
         var snapshotStore = Some.SnapshotStore(repository);
@@ -217,7 +217,7 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Change(repository.Chunks, repository.Chunks.List());
+        Corrupt(repository.Chunks, repository.Chunks.List());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
@@ -243,7 +243,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Remove(repository.Chunks, chunkIds);
+        Missing(repository.Chunks, chunkIds);
 
         Assert.False(
             snapshotStore.CheckSnapshotExists(
@@ -267,7 +267,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void CheckSnapshot_Detects_Invalid_Blob()
+    public static void CheckSnapshot_Detects_Corrupt_Blob()
     {
         var repository = Some.Repository();
         var snapshotStore = Some.SnapshotStore(repository);
@@ -279,7 +279,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Change(repository.Chunks, chunkIds);
+        Corrupt(repository.Chunks, chunkIds);
 
         Assert.True(
            snapshotStore.CheckSnapshotExists(
@@ -611,7 +611,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void CopyTo_Throws_On_Invalid_Chunks()
+    public static void CopyTo_Throws_On_Corrupt_Chunks()
     {
         var repository = Some.Repository();
         var snapshotStore = Some.SnapshotStore(repository);
@@ -623,7 +623,7 @@ public static class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Change(repository.Chunks, chunkIds);
+        Corrupt(repository.Chunks, chunkIds);
 
         Assert.Throws<AggregateException>(
             () => snapshotStore.CopyTo(
@@ -631,7 +631,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void CopyTo_Throws_On_Invalid_References()
+    public static void CopyTo_Throws_On_Corrupt_References()
     {
         var repository = Some.Repository();
         var snapshotStore = Some.SnapshotStore(repository);
@@ -639,7 +639,7 @@ public static class SnapshotStoreTests
         _ = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Change(repository.Snapshots, repository.Snapshots.List());
+        Corrupt(repository.Snapshots, repository.Snapshots.List());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(
@@ -697,7 +697,7 @@ public static class SnapshotStoreTests
             changedDiff);
     }
 
-    private static void Remove<T>(
+    private static void Missing<T>(
         IRepository<T> repository,
         IEnumerable<T> keys)
     {
@@ -707,7 +707,7 @@ public static class SnapshotStoreTests
         }
     }
 
-    private static void Change<T>(
+    private static void Corrupt<T>(
         IRepository<T> repository,
         IEnumerable<T> keys)
     {
