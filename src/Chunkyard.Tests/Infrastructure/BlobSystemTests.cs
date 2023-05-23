@@ -72,31 +72,6 @@ public sealed class FileBlobSystemTests
             () => blobSystem.OpenWrite(invalidBlob));
     }
 
-    [Fact]
-    public void OpenWrite_Overwrites_Previous_Content()
-    {
-        var blob = Some.Blob("some blob");
-
-        using (var writeStream = BlobSystem.OpenWrite(blob))
-        {
-            writeStream.Write(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
-        }
-
-        using (var writeStream = BlobSystem.OpenWrite(blob))
-        {
-            writeStream.Write(new byte[] { 0x11 });
-        }
-
-        using var readStream = BlobSystem.OpenRead(blob.Name);
-        using var memoryStream = new MemoryStream();
-
-        readStream.CopyTo(memoryStream);
-
-        Assert.Equal(
-            new byte[] { 0x11 },
-            memoryStream.ToArray());
-    }
-
     public void Dispose()
     {
         _tempDirectory?.Dispose();
@@ -154,5 +129,30 @@ public abstract class BlobSystemTests
                 expectedBytes,
                 memoryStream.ToArray());
         }
+    }
+
+    [Fact]
+    public void OpenWrite_Overwrites_Previous_Content()
+    {
+        var blob = Some.Blob("some blob");
+
+        using (var writeStream = BlobSystem.OpenWrite(blob))
+        {
+            writeStream.Write(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
+        }
+
+        using (var writeStream = BlobSystem.OpenWrite(blob))
+        {
+            writeStream.Write(new byte[] { 0x11 });
+        }
+
+        using var readStream = BlobSystem.OpenRead(blob.Name);
+        using var memoryStream = new MemoryStream();
+
+        readStream.CopyTo(memoryStream);
+
+        Assert.Equal(
+            new byte[] { 0x11 },
+            memoryStream.ToArray());
     }
 }
