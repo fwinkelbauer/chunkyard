@@ -21,21 +21,18 @@ public static class Program
     {
         Console.Error.WriteLine("Error:");
 
-        if (!string.IsNullOrEmpty(
-            Environment.GetEnvironmentVariable("CHUNKYARD_DEBUG")))
-        {
-            Console.Error.WriteLine(e.ToString());
-        }
-        else
-        {
-            IReadOnlyCollection<Exception> exceptions = e is AggregateException a
-                ? a.InnerExceptions
-                : new[] { e };
+        IReadOnlyCollection<Exception> exceptions = e is AggregateException a
+            ? a.InnerExceptions
+            : new[] { e };
 
-            foreach (var exception in exceptions)
-            {
-                Console.Error.WriteLine(exception.Message);
-            }
+        var debugMode = !string.IsNullOrEmpty(
+            Environment.GetEnvironmentVariable("CHUNKYARD_DEBUG"));
+
+        foreach (var exception in exceptions)
+        {
+            Console.Error.WriteLine(debugMode
+                ? exception.ToString()
+                : exception.Message);
         }
     }
 
