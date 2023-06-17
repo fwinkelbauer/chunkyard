@@ -34,7 +34,7 @@ public sealed class FileBlobSystem : IBlobSystem
     {
         return _paths
             .SelectMany(DirectoryUtils.ListFiles)
-            .Where(file => _fuzzy.IsMatch(file))
+            .Where(_fuzzy.IsMatch)
             .Distinct()
             .OrderBy(file => file)
             .Select(ToBlob)
