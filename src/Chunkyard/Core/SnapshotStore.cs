@@ -145,12 +145,9 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy fuzzy)
     {
-        var blobs = blobSystem.ListBlobs();
-        var blobReferences = FilterSnapshot(snapshotId, fuzzy);
-
         var diffSet = DiffSet.Create(
-            blobs,
-            blobReferences.Select(br => br.Blob),
+            blobSystem.ListBlobs(),
+            FilterSnapshot(snapshotId, fuzzy).Select(br => br.Blob),
             blob => blob.Name);
 
         return new DiffSet(
@@ -211,8 +208,7 @@ public sealed class SnapshotStore
     public void KeepSnapshots(int latestCount)
     {
         var snapshotIds = ListSnapshotIds();
-        var snapshotIdsToKeep = snapshotIds.TakeLast(latestCount);
-        var snapshotIdsToRemove = snapshotIds.Except(snapshotIdsToKeep)
+        var snapshotIdsToRemove = snapshotIds.Take(snapshotIds.Count - latestCount)
             .ToArray();
 
         foreach (var snapshotId in snapshotIdsToRemove)
@@ -270,8 +266,7 @@ public sealed class SnapshotStore
             }
         }
 
-        var otherSnapshotId = otherSnapshotIds
-            .Max(id => id as int?);
+        var otherSnapshotId = otherSnapshotIds.Max(id => id as int?);
 
         var snapshotIdsToCopy = otherSnapshotId != null
             ? snapshotIds.Where(id => id > otherSnapshotId)
