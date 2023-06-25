@@ -45,9 +45,9 @@ tools. Here's a list of [options][backup-tools].
 - Install the .NET SDK
 - Run `./make build` to build and test Chunkyard
 
-The `./make` script runs the project `./src/Chunkyard.Make`, a CLI tool which
-can be used to build, test and publish Chunkyard. You can type commands such as
-`./make help` or `./make build --help` to learn more.
+`./make` runs the project `./src/Chunkyard.Make`, a CLI tool which can be used
+to build, test and publish Chunkyard. You can type commands such as `./make
+help` or `./make build --help` to learn more.
 
 ## Publish
 
@@ -78,10 +78,10 @@ chunkyard store -r "../repository" -p "Music" -i "!Desktop\.ini" "!thumbs\.db" -
 # Store a backup
 chunkyard store -r "../repository" -p "Music" -i "!Desktop\.ini" "!thumbs\.db"
 
-# Check if the backup is valid
+# Check if the latest backup is valid
 chunkyard check -r "../repository"
 
-# Restore parts of the backup
+# Restore parts of the latest backup
 chunkyard restore -r "../repository" -d . -i "mp3$"
 ```
 
