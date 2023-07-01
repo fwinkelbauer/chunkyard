@@ -1,5 +1,8 @@
 namespace Chunkyard.Cli;
 
+/// <summary>
+/// A stateful helper class used by instances of <see cref="ICommandParser"/>.
+/// </summary>
 public sealed class ArgConsumer
 {
     private readonly Dictionary<string, IReadOnlyCollection<string>> _flags;

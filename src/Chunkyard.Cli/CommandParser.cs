@@ -1,5 +1,10 @@
 namespace Chunkyard.Cli;
 
+/// <summary>
+/// This class dispatches args to instances of <see cref="ICommandParser"/>.
+/// Returns a <see cref="HelpCommand"/> if no matching command parser can be
+/// found.
+/// </summary>
 public sealed class CommandParser
 {
     private readonly IReadOnlyCollection<ICommandParser> _parsers;

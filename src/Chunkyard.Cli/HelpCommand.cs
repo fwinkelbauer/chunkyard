@@ -1,5 +1,9 @@
 namespace Chunkyard.Cli;
 
+/// <summary>
+/// A command which can be used to inform a user on how the command line
+/// interface can be used.
+/// </summary>
 public sealed class HelpCommand
 {
     private readonly IReadOnlyCollection<HelpText> _helpTexts;

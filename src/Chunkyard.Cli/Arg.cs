@@ -1,5 +1,14 @@
 namespace Chunkyard.Cli;
 
+/// <summary>
+/// A structured form of input arguments.
+///
+/// Command line arguments are expected to have the following shape:
+///
+/// [command] [flags]
+///
+/// e.g. my-command --some-flag param1 param2 --another-flag
+/// </summary>
 public sealed class Arg
 {
     public Arg(
