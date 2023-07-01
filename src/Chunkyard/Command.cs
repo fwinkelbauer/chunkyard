@@ -8,8 +8,7 @@ public sealed class CatCommandParser : ICommandParser
 
     public ICommand Parse(ArgConsumer consumer)
     {
-        if (consumer.TryRepository(out var repository)
-            & consumer.TryPrompt(out var prompt)
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & (consumer.TrySnapshot(out var snapshotId)
                 | consumer.TryList("--chunks", "The chunk IDs", out var chunkIds))
             & consumer.TryString("--export", "The export path", out var export, "")
@@ -18,6 +17,7 @@ public sealed class CatCommandParser : ICommandParser
             return new CatCommand(
                 repository,
                 prompt,
+                parallel,
                 snapshotId,
                 chunkIds,
                 export);
@@ -37,9 +37,7 @@ public sealed class CheckCommandParser : ICommandParser
 
     public ICommand Parse(ArgConsumer consumer)
     {
-        if (consumer.TryRepository(out var repository)
-            & consumer.TryPrompt(out var prompt)
-            & consumer.TryParallel(out var parallel)
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshotId)
             & consumer.TryIncludePatterns(out var includePatterns)
             & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow)
@@ -68,9 +66,7 @@ public sealed class CopyCommandParser : ICommandParser
 
     public ICommand Parse(ArgConsumer consumer)
     {
-        if (consumer.TryRepository(out var repository)
-            & consumer.TryPrompt(out var prompt)
-            & consumer.TryParallel(out var parallel)
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryString("--destination", "The destination repository path", out var destinationRepository)
             & consumer.IsConsumed())
         {
@@ -95,8 +91,7 @@ public sealed class DiffCommandParser : ICommandParser
 
     public ICommand Parse(ArgConsumer consumer)
     {
-        if (consumer.TryRepository(out var repository)
-            & consumer.TryPrompt(out var prompt)
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryInt("--first", "The first snapshot ID", out var firstSnapshotId, SnapshotStore.SecondLatestSnapshotId)
             & consumer.TryInt("--second", "The second snapshot ID", out var secondSnapshotId, SnapshotStore.LatestSnapshotId)
             & consumer.TryIncludePatterns(out var includePatterns)
@@ -106,6 +101,7 @@ public sealed class DiffCommandParser : ICommandParser
             return new DiffCommand(
                 repository,
                 prompt,
+                parallel,
                 firstSnapshotId,
                 secondSnapshotId,
                 includePatterns,
@@ -126,13 +122,13 @@ public sealed class GarbageCollectCommandParser : ICommandParser
 
     public ICommand Parse(ArgConsumer consumer)
     {
-        if (consumer.TryRepository(out var repository)
-            & consumer.TryPrompt(out var prompt)
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.IsConsumed())
         {
             return new GarbageCollectCommand(
                 repository,
-                prompt);
+                prompt,
+                parallel);
         }
         else
         {
@@ -149,14 +145,14 @@ public sealed class KeepCommandParser : ICommandParser
 
     public ICommand Parse(ArgConsumer consumer)
     {
-        if (consumer.TryRepository(out var repository)
-            & consumer.TryPrompt(out var prompt)
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount)
             & consumer.IsConsumed())
         {
             return new KeepCommand(
                 repository,
                 prompt,
+                parallel,
                 latestCount);
         }
         else
@@ -174,13 +170,13 @@ public sealed class ListCommandParser : ICommandParser
 
     public ICommand Parse(ArgConsumer consumer)
     {
-        if (consumer.TryRepository(out var repository)
-            & consumer.TryPrompt(out var prompt)
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.IsConsumed())
         {
             return new ListCommand(
                 repository,
-                prompt);
+                prompt,
+                parallel);
         }
         else
         {
@@ -197,14 +193,14 @@ public sealed class RemoveCommandParser : ICommandParser
 
     public ICommand Parse(ArgConsumer consumer)
     {
-        if (consumer.TryRepository(out var repository)
-            & consumer.TryPrompt(out var prompt)
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.IsConsumed())
         {
             return new RemoveCommand(
                 repository,
                 prompt,
+                parallel,
                 snapshot);
         }
         else
@@ -222,9 +218,7 @@ public sealed class RestoreCommandParser : ICommandParser
 
     public ICommand Parse(ArgConsumer consumer)
     {
-        if (consumer.TryRepository(out var repository)
-            & consumer.TryPrompt(out var prompt)
-            & consumer.TryParallel(out var parallel)
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryString("--directory", "The directory to restore into", out var directory)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryIncludePatterns(out var includePatterns)
@@ -255,8 +249,7 @@ public sealed class ShowCommandParser : ICommandParser
 
     public ICommand Parse(ArgConsumer consumer)
     {
-        if (consumer.TryRepository(out var repository)
-            & consumer.TryPrompt(out var prompt)
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryIncludePatterns(out var includePatterns)
             & consumer.TryChunksOnly(out var chunksOnly)
@@ -265,6 +258,7 @@ public sealed class ShowCommandParser : ICommandParser
             return new ShowCommand(
                 repository,
                 prompt,
+                parallel,
                 snapshot,
                 includePatterns,
                 chunksOnly);
@@ -284,9 +278,7 @@ public sealed class StoreCommandParser : ICommandParser
 
     public ICommand Parse(ArgConsumer consumer)
     {
-        if (consumer.TryRepository(out var repository)
-            & consumer.TryParallel(out var parallel)
-            & consumer.TryPrompt(out var prompt)
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryList("--paths", "The files and directories (blobs) to store", out var paths)
             & consumer.TryIncludePatterns(out var includePatterns)
             & consumer.TryPreview(out var preview)
@@ -307,19 +299,31 @@ public sealed class StoreCommandParser : ICommandParser
     }
 }
 
-public abstract class Command : ICommand
+public interface IChunkyardCommand : ICommand
 {
-    public const Prompt DefaultPrompt = Prompt.Console;
-    public const int DefaultParallel = 1;
+    string Repository { get; }
 
-    protected Command(
+    Prompt Prompt { get; }
+
+    int Parallel { get; }
+}
+
+public sealed class CatCommand : IChunkyardCommand
+{
+    public CatCommand(
         string repository,
-        Prompt? prompt = null,
-        int? parallel = null)
+        Prompt prompt,
+        int parallel,
+        int snapshotId,
+        IEnumerable<string> chunkIds,
+        string? export)
     {
         Repository = repository;
-        Prompt = prompt ?? DefaultPrompt;
-        Parallel = parallel ?? DefaultParallel;
+        Prompt = prompt;
+        Parallel = parallel;
+        SnapshotId = snapshotId;
+        ChunkIds = chunkIds;
+        Export = export;
     }
 
     public string Repository { get; }
@@ -328,31 +332,13 @@ public abstract class Command : ICommand
 
     public int Parallel { get; }
 
-    public abstract void Run();
-}
-
-public sealed class CatCommand : Command
-{
-    public CatCommand(
-        string repository,
-        Prompt prompt,
-        int snapshotId,
-        IEnumerable<string> chunkIds,
-        string? export)
-        : base(repository, prompt)
-    {
-        SnapshotId = snapshotId;
-        ChunkIds = chunkIds;
-        Export = export;
-    }
-
     public int SnapshotId { get; }
 
     public IEnumerable<string> ChunkIds { get; }
 
     public string? Export { get; }
 
-    public override void Run()
+    public void Run()
     {
         var snapshotStore = CommandUtils.CreateSnapshotStore(this);
 
@@ -378,7 +364,7 @@ public sealed class CatCommand : Command
     }
 }
 
-public sealed class CheckCommand : Command
+public sealed class CheckCommand : IChunkyardCommand
 {
     public CheckCommand(
         string repository,
@@ -387,12 +373,20 @@ public sealed class CheckCommand : Command
         int snapshotId,
         IEnumerable<string> includePatterns,
         bool shallow)
-        : base(repository, prompt, parallel)
     {
+        Repository = repository;
+        Prompt = prompt;
+        Parallel = parallel;
         SnapshotId = snapshotId;
         IncludePatterns = includePatterns;
         Shallow = shallow;
     }
+
+    public string Repository { get; }
+
+    public Prompt Prompt { get; }
+
+    public int Parallel { get; }
 
     public int SnapshotId { get; }
 
@@ -400,7 +394,7 @@ public sealed class CheckCommand : Command
 
     public bool Shallow { get; }
 
-    public override void Run()
+    public void Run()
     {
         var snapshotStore = CommandUtils.CreateSnapshotStore(this);
 
@@ -417,21 +411,29 @@ public sealed class CheckCommand : Command
     }
 }
 
-public sealed class CopyCommand : Command
+public sealed class CopyCommand : IChunkyardCommand
 {
     public CopyCommand(
         string repository,
         Prompt prompt,
         int parallel,
         string destinationRepository)
-        : base(repository, prompt, parallel)
     {
+        Repository = repository;
+        Prompt = prompt;
+        Parallel = parallel;
         DestinationRepository = destinationRepository;
     }
 
+    public string Repository { get; }
+
+    public Prompt Prompt { get; }
+
+    public int Parallel { get; }
+
     public string DestinationRepository { get; }
 
-    public override void Run()
+    public void Run()
     {
         var snapshotStore = CommandUtils.CreateSnapshotStore(this);
 
@@ -440,22 +442,31 @@ public sealed class CopyCommand : Command
     }
 }
 
-public sealed class DiffCommand : Command
+public sealed class DiffCommand : IChunkyardCommand
 {
     public DiffCommand(
         string repository,
         Prompt prompt,
+        int parallel,
         int firstSnapshotId,
         int secondSnapshotId,
         IEnumerable<string> includePatterns,
         bool chunksOnly)
-        : base(repository, prompt)
     {
+        Repository = repository;
+        Prompt = prompt;
+        Parallel = parallel;
         FirstSnapshotId = firstSnapshotId;
         SecondSnapshotId = secondSnapshotId;
         IncludePatterns = includePatterns;
         ChunksOnly = chunksOnly;
     }
+
+    public string Repository { get; }
+
+    public Prompt Prompt { get; }
+
+    public int Parallel { get; }
 
     public int FirstSnapshotId { get; }
 
@@ -465,7 +476,7 @@ public sealed class DiffCommand : Command
 
     public bool ChunksOnly { get; }
 
-    public override void Run()
+    public void Run()
     {
         var snapshotStore = CommandUtils.CreateSnapshotStore(this);
 
@@ -487,16 +498,25 @@ public sealed class DiffCommand : Command
     }
 }
 
-public sealed class GarbageCollectCommand : Command
+public sealed class GarbageCollectCommand : IChunkyardCommand
 {
     public GarbageCollectCommand(
         string repository,
-        Prompt prompt)
-        : base(repository, prompt)
+        Prompt prompt,
+        int parallel)
     {
+        Repository = repository;
+        Prompt = prompt;
+        Parallel = parallel;
     }
 
-    public override void Run()
+    public string Repository { get; }
+
+    public Prompt Prompt { get; }
+
+    public int Parallel { get; }
+
+    public void Run()
     {
         var snapshotStore = CommandUtils.CreateSnapshotStore(this);
 
@@ -504,20 +524,29 @@ public sealed class GarbageCollectCommand : Command
     }
 }
 
-public sealed class KeepCommand : Command
+public sealed class KeepCommand : IChunkyardCommand
 {
     public KeepCommand(
         string repository,
         Prompt prompt,
+        int parallel,
         int latestCount)
-        : base(repository, prompt)
     {
+        Repository = repository;
+        Prompt = prompt;
+        Parallel = parallel;
         LatestCount = latestCount;
     }
 
+    public string Repository { get; }
+
+    public Prompt Prompt { get; }
+
+    public int Parallel { get; }
+
     public int LatestCount { get; }
 
-    public override void Run()
+    public void Run()
     {
         var snapshotStore = CommandUtils.CreateSnapshotStore(this);
 
@@ -525,16 +554,25 @@ public sealed class KeepCommand : Command
     }
 }
 
-public sealed class ListCommand : Command
+public sealed class ListCommand : IChunkyardCommand
 {
     public ListCommand(
         string repository,
-        Prompt prompt)
-        : base(repository, prompt)
+        Prompt prompt,
+        int parallel)
     {
+        Repository = repository;
+        Prompt = prompt;
+        Parallel = parallel;
     }
 
-    public override void Run()
+    public string Repository { get; }
+
+    public Prompt Prompt { get; }
+
+    public int Parallel { get; }
+
+    public void Run()
     {
         var snapshotStore = CommandUtils.CreateSnapshotStore(this);
 
@@ -550,20 +588,29 @@ public sealed class ListCommand : Command
     }
 }
 
-public sealed class RemoveCommand : Command
+public sealed class RemoveCommand : IChunkyardCommand
 {
     public RemoveCommand(
         string repository,
         Prompt prompt,
+        int parallel,
         int snapshotId)
-        : base(repository, prompt)
     {
+        Repository = repository;
+        Prompt = prompt;
+        Parallel = parallel;
         SnapshotId = snapshotId;
     }
 
+    public string Repository { get; }
+
+    public Prompt Prompt { get; }
+
+    public int Parallel { get; }
+
     public int SnapshotId { get; }
 
-    public override void Run()
+    public void Run()
     {
         var snapshotStore = CommandUtils.CreateSnapshotStore(this);
 
@@ -571,7 +618,7 @@ public sealed class RemoveCommand : Command
     }
 }
 
-public sealed class RestoreCommand : Command
+public sealed class RestoreCommand : IChunkyardCommand
 {
     public RestoreCommand(
         string repository,
@@ -581,13 +628,21 @@ public sealed class RestoreCommand : Command
         int snapshotId,
         IEnumerable<string> includePatterns,
         bool preview)
-        : base(repository, prompt, parallel)
     {
+        Repository = repository;
+        Prompt = prompt;
+        Parallel = parallel;
         Directory = directory;
         SnapshotId = snapshotId;
         IncludePatterns = includePatterns;
         Preview = preview;
     }
+
+    public string Repository { get; }
+
+    public Prompt Prompt { get; }
+
+    public int Parallel { get; }
 
     public string Directory { get; }
 
@@ -597,7 +652,7 @@ public sealed class RestoreCommand : Command
 
     public bool Preview { get; }
 
-    public override void Run()
+    public void Run()
     {
         var snapshotStore = CommandUtils.CreateSnapshotStore(this);
 
@@ -626,20 +681,29 @@ public sealed class RestoreCommand : Command
     }
 }
 
-public sealed class ShowCommand : Command
+public sealed class ShowCommand : IChunkyardCommand
 {
     public ShowCommand(
         string repository,
         Prompt prompt,
+        int parallel,
         int snapshotId,
         IEnumerable<string> includePatterns,
         bool chunksOnly)
-        : base(repository, prompt)
     {
+        Repository = repository;
+        Prompt = prompt;
+        Parallel = parallel;
         SnapshotId = snapshotId;
         IncludePatterns = includePatterns;
         ChunksOnly = chunksOnly;
     }
+
+    public string Repository { get; }
+
+    public Prompt Prompt { get; }
+
+    public int Parallel { get; }
 
     public int SnapshotId { get; }
 
@@ -647,7 +711,7 @@ public sealed class ShowCommand : Command
 
     public bool ChunksOnly { get; }
 
-    public override void Run()
+    public void Run()
     {
         var snapshotStore = CommandUtils.CreateSnapshotStore(this);
 
@@ -666,7 +730,7 @@ public sealed class ShowCommand : Command
     }
 }
 
-public sealed class StoreCommand : Command
+public sealed class StoreCommand : IChunkyardCommand
 {
     public StoreCommand(
         string repository,
@@ -675,12 +739,20 @@ public sealed class StoreCommand : Command
         IReadOnlyCollection<string> paths,
         IReadOnlyCollection<string> includePatterns,
         bool preview)
-        : base(repository, prompt, parallel)
     {
+        Repository = repository;
+        Prompt = prompt;
+        Parallel = parallel;
         Paths = paths;
         IncludePatterns = includePatterns;
         Preview = preview;
     }
+
+    public string Repository { get; }
+
+    public Prompt Prompt { get; }
+
+    public int Parallel { get; }
 
     public IEnumerable<string> Paths { get; }
 
@@ -688,7 +760,7 @@ public sealed class StoreCommand : Command
 
     public bool Preview { get; }
 
-    public override void Run()
+    public void Run()
     {
         var snapshotStore = CommandUtils.CreateSnapshotStore(this);
 
@@ -729,7 +801,7 @@ public static class CommandUtils
         }
     }
 
-    public static SnapshotStore CreateSnapshotStore(Command c)
+    public static SnapshotStore CreateSnapshotStore(IChunkyardCommand c)
     {
         var repository = CreateRepository(c.Repository);
 
@@ -764,25 +836,17 @@ public static class CommandUtils
 
 public static class ArgConsumerExtensions
 {
-    public static bool TryRepository(
+    public static bool TryCommon(
         this ArgConsumer consumer,
-        out string repository)
-    {
-        return consumer.TryString(
-            "--repository",
-            "The repository path",
-            out repository);
-    }
-
-    public static bool TryParallel(
-        this ArgConsumer consumer,
+        out string repository,
+        out Prompt prompt,
         out int parallel)
     {
-        return consumer.TryInt(
-            "--parallel",
-            "The degree of parallelism",
-            out parallel,
-            Command.DefaultParallel);
+        var prompts = string.Join(", ", Enum.GetNames<Prompt>());
+
+        return consumer.TryString("--repository", "The repository path", out repository)
+            & consumer.TryEnum("--prompt", $"The password prompt method: {prompts}", out prompt, Prompt.Console)
+            & consumer.TryInt("--parallel", "The degree of parallelism", out parallel, 1);
     }
 
     public static bool TrySnapshot(
@@ -794,19 +858,6 @@ public static class ArgConsumerExtensions
             "The snapshot ID",
             out snapshot,
             SnapshotStore.LatestSnapshotId);
-    }
-
-    public static bool TryPrompt(
-        this ArgConsumer consumer,
-        out Prompt prompt)
-    {
-        var names = string.Join(", ", Enum.GetNames<Prompt>());
-
-        return consumer.TryEnum(
-            "--prompt",
-            $"The password prompt method: {names}",
-            out prompt,
-            Command.DefaultPrompt);
     }
 
     public static bool TryIncludePatterns(

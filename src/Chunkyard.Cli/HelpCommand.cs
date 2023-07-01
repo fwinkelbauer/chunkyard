@@ -24,7 +24,7 @@ public sealed class HelpCommand : ICommand
         if (_helpTexts.Any())
         {
             Console.WriteLine();
-            Console.WriteLine($"Commands:");
+            Console.WriteLine($"Help:");
 
             foreach (var helpText in _helpTexts)
             {

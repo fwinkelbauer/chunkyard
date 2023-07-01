@@ -45,6 +45,11 @@ public sealed class ArgConsumer
     {
         string? parsed = null;
 
+        if (!string.IsNullOrEmpty(defaultValue))
+        {
+            info = $"{info}. Default: {defaultValue}";
+        }
+
         if (TryList(flag, info, out var list)
             && list.Any())
         {
