@@ -6,8 +6,20 @@ public static class Program
     {
         try
         {
-            CommandParser.Parse(args)
-                .Handle(new CommandHandler());
+            var parser = new CommandParser(
+                new CatCommandParser(),
+                new CheckCommandParser(),
+                new CopyCommandParser(),
+                new DiffCommandParser(),
+                new GarbageCollectCommandParser(),
+                new KeepCommandParser(),
+                new ListCommandParser(),
+                new RemoveCommandParser(),
+                new RestoreCommandParser(),
+                new ShowCommandParser(),
+                new StoreCommandParser());
+
+            parser.Parse(args).Run();
         }
         catch (Exception e)
         {

@@ -6,8 +6,22 @@ public static class Program
     {
         try
         {
-            CommandParser.Parse(args)
-                .Handle(new CommandHandler());
+            Directory.SetCurrentDirectory(
+                CommandUtils.GitQuery("rev-parse --show-toplevel"));
+
+            Environment.SetEnvironmentVariable(
+                "DOTNET_CLI_TELEMETRY_OPTOUT",
+                "1");
+
+            var parser = new CommandParser(
+                new BuildCommandParser(),
+                new CheckCommandParser(),
+                new CleanCommandParser(),
+                new FormatCommandParser(),
+                new PublishCommandParser(),
+                new ReleaseCommandParser());
+
+            parser.Parse(args).Run();
         }
         catch (Exception e)
         {

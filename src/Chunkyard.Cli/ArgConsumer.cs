@@ -3,17 +3,17 @@ namespace Chunkyard.Cli;
 public sealed class ArgConsumer
 {
     private readonly Dictionary<string, IReadOnlyCollection<string>> _flags;
-    private readonly List<Usage> _usages;
+    private readonly List<HelpText> _helpTexts;
     private readonly List<string> _errors;
 
     public ArgConsumer(Arg arg)
     {
         _flags = new Dictionary<string, IReadOnlyCollection<string>>(arg.Flags);
-        _usages = new List<Usage>();
+        _helpTexts = new List<HelpText>();
         _errors = new List<string>();
     }
 
-    public IReadOnlyCollection<Usage> Usages => _usages;
+    public IReadOnlyCollection<HelpText> HelpTexts => _helpTexts;
 
     public IReadOnlyCollection<string> Errors => _errors;
 
@@ -32,7 +32,7 @@ public sealed class ArgConsumer
             list = Array.Empty<string>();
         }
 
-        _usages.Add(new Usage(flag, info));
+        _helpTexts.Add(new HelpText(flag, info));
 
         return true;
     }

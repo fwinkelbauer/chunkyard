@@ -28,17 +28,16 @@ public sealed class Arg
         return HashCode.Combine(Command, Flags);
     }
 
-    public static Result<Arg> Parse(params string[] args)
+    public static Arg? Parse(params string[] args)
     {
         if (args.Length == 0)
         {
-            return Result.Error<Arg>("No arguments provided");
+            return null;
         }
 
         var command = args[0];
         var currentFlag = "";
         var flags = new Dictionary<string, List<string>>();
-        var errors = new List<string>();
 
         for (var i = 1; i < args.Length; i++)
         {
@@ -56,7 +55,7 @@ public sealed class Arg
             }
             else if (string.IsNullOrEmpty(currentFlag))
             {
-                errors.Add($"Unexpected value without a flag: {token}");
+                return null;
             }
             else
             {
@@ -68,8 +67,6 @@ public sealed class Arg
             pair => pair.Key,
             pair => (IReadOnlyCollection<string>)pair.Value);
 
-        return errors.Any()
-            ? Result.Error<Arg>(errors)
-            : Result.Success(new Arg(command, flagsCasted));
+        return new Arg(command, flagsCasted);
     }
 }
