@@ -13,9 +13,7 @@ public sealed class ArgConsumer
         _errors = new List<string>();
     }
 
-    public IReadOnlyCollection<HelpText> HelpTexts => _helpTexts;
-
-    public IReadOnlyCollection<string> Errors => _errors;
+    public HelpCommand Help => new(_helpTexts, _errors);
 
     public bool TryList(
         string flag,

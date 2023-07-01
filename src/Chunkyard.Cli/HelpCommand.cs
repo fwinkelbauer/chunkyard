@@ -1,6 +1,6 @@
 namespace Chunkyard.Cli;
 
-public sealed class HelpCommand : ICommand
+public sealed class HelpCommand
 {
     private readonly IReadOnlyCollection<HelpText> _helpTexts;
     private readonly IReadOnlyCollection<string> _errors;
@@ -13,38 +13,39 @@ public sealed class HelpCommand : ICommand
         _errors = errors;
     }
 
-    public void Run()
+    public string ToText()
     {
+        var builder = new StringBuilder();
+
         Console.WriteLine();
-        Console.WriteLine("Usage:");
-        Console.WriteLine($"  <command> <flags>");
-        Console.WriteLine($"  <command> --help");
-        Console.WriteLine($"  help");
+        builder.AppendLine("Usage:");
+        builder.AppendLine($"  <command> <flags>");
+        builder.AppendLine($"  <command> --help");
+        builder.AppendLine($"  help");
 
         if (_helpTexts.Any())
         {
-            Console.WriteLine();
-            Console.WriteLine($"Help:");
+            builder.AppendLine();
+            builder.AppendLine($"Help:");
 
             foreach (var helpText in _helpTexts)
             {
-                Console.WriteLine($"  {helpText.Topic}");
-                Console.WriteLine($"    {helpText.Info}");
+                builder.AppendLine($"  {helpText.Topic}");
+                builder.AppendLine($"    {helpText.Info}");
             }
         }
 
         if (_errors.Any())
         {
-            Console.WriteLine();
-            Console.WriteLine(_errors.Count == 1 ? "Error:" : "Errors:");
+            builder.AppendLine();
+            builder.AppendLine(_errors.Count == 1 ? "Error:" : "Errors:");
 
             foreach (var error in _errors)
             {
-                Console.WriteLine($"  {error}");
+                builder.AppendLine($"  {error}");
             }
         }
 
-        Console.WriteLine();
-        Environment.ExitCode = 1;
+        return builder.ToString();
     }
 }

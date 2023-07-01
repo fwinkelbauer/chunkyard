@@ -6,5 +6,5 @@ public interface ICommandParser
 
     string Info { get; }
 
-    ICommand Parse(ArgConsumer consumer);
+    object Parse(ArgConsumer consumer);
 }

@@ -6,13 +6,6 @@ public static class Program
     {
         try
         {
-            Directory.SetCurrentDirectory(
-                CommandUtils.GitQuery("rev-parse --show-toplevel"));
-
-            Environment.SetEnvironmentVariable(
-                "DOTNET_CLI_TELEMETRY_OPTOUT",
-                "1");
-
             var parser = new CommandParser(
                 new BuildCommandParser(),
                 new CheckCommandParser(),
@@ -21,7 +14,27 @@ public static class Program
                 new PublishCommandParser(),
                 new ReleaseCommandParser());
 
-            parser.Parse(args).Run();
+            var command = parser.Parse(args);
+
+            if (command is BuildCommand)
+                CommandHandler.Build();
+            else if (command is CheckCommand)
+                CommandHandler.Check();
+            else if (command is CleanCommand)
+                CommandHandler.Clean();
+            else if (command is FormatCommand)
+                CommandHandler.Format();
+            else if (command is PublishCommand)
+                CommandHandler.Publish();
+            else if (command is HelpCommand help)
+            {
+                Console.WriteLine(help.ToText());
+                Environment.ExitCode = 1;
+            }
+            else if (command is ReleaseCommand)
+                CommandHandler.Release();
+            else
+                throw new NotImplementedException();
         }
         catch (Exception e)
         {

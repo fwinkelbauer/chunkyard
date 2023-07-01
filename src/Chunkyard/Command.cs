@@ -6,7 +6,7 @@ public sealed class CatCommandParser : ICommandParser
 
     public string Info => "Export or print the value of a snapshot or a set of chunk IDs";
 
-    public ICommand Parse(ArgConsumer consumer)
+    public object Parse(ArgConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & (consumer.TrySnapshot(out var snapshotId)
@@ -24,7 +24,7 @@ public sealed class CatCommandParser : ICommandParser
         }
         else
         {
-            return new HelpCommand(consumer.HelpTexts, consumer.Errors);
+            return consumer.Help;
         }
     }
 }
@@ -35,7 +35,7 @@ public sealed class CheckCommandParser : ICommandParser
 
     public string Info => "Check if a snapshot is valid";
 
-    public ICommand Parse(ArgConsumer consumer)
+    public object Parse(ArgConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshotId)
@@ -53,7 +53,7 @@ public sealed class CheckCommandParser : ICommandParser
         }
         else
         {
-            return new HelpCommand(consumer.HelpTexts, consumer.Errors);
+            return consumer.Help;
         }
     }
 }
@@ -64,7 +64,7 @@ public sealed class CopyCommandParser : ICommandParser
 
     public string Info => "Copy snapshots from one repository to another";
 
-    public ICommand Parse(ArgConsumer consumer)
+    public object Parse(ArgConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryString("--destination", "The destination repository path", out var destinationRepository)
@@ -78,7 +78,7 @@ public sealed class CopyCommandParser : ICommandParser
         }
         else
         {
-            return new HelpCommand(consumer.HelpTexts, consumer.Errors);
+            return consumer.Help;
         }
     }
 }
@@ -89,7 +89,7 @@ public sealed class DiffCommandParser : ICommandParser
 
     public string Info => "Show the difference between two snapshots";
 
-    public ICommand Parse(ArgConsumer consumer)
+    public object Parse(ArgConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryInt("--first", "The first snapshot ID", out var firstSnapshotId, SnapshotStore.SecondLatestSnapshotId)
@@ -109,7 +109,7 @@ public sealed class DiffCommandParser : ICommandParser
         }
         else
         {
-            return new HelpCommand(consumer.HelpTexts, consumer.Errors);
+            return consumer.Help;
         }
     }
 }
@@ -120,7 +120,7 @@ public sealed class GarbageCollectCommandParser : ICommandParser
 
     public string Info => "Remove unreferenced chunks";
 
-    public ICommand Parse(ArgConsumer consumer)
+    public object Parse(ArgConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.IsConsumed())
@@ -132,7 +132,7 @@ public sealed class GarbageCollectCommandParser : ICommandParser
         }
         else
         {
-            return new HelpCommand(consumer.HelpTexts, consumer.Errors);
+            return consumer.Help;
         }
     }
 }
@@ -143,7 +143,7 @@ public sealed class KeepCommandParser : ICommandParser
 
     public string Info => "Keep only the given list of snapshots";
 
-    public ICommand Parse(ArgConsumer consumer)
+    public object Parse(ArgConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount)
@@ -157,7 +157,7 @@ public sealed class KeepCommandParser : ICommandParser
         }
         else
         {
-            return new HelpCommand(consumer.HelpTexts, consumer.Errors);
+            return consumer.Help;
         }
     }
 }
@@ -168,7 +168,7 @@ public sealed class ListCommandParser : ICommandParser
 
     public string Info => "List all snapshots";
 
-    public ICommand Parse(ArgConsumer consumer)
+    public object Parse(ArgConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.IsConsumed())
@@ -180,7 +180,7 @@ public sealed class ListCommandParser : ICommandParser
         }
         else
         {
-            return new HelpCommand(consumer.HelpTexts, consumer.Errors);
+            return consumer.Help;
         }
     }
 }
@@ -191,7 +191,7 @@ public sealed class RemoveCommandParser : ICommandParser
 
     public string Info => "Remove a snapshot or a set of chunk IDs";
 
-    public ICommand Parse(ArgConsumer consumer)
+    public object Parse(ArgConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshot)
@@ -205,7 +205,7 @@ public sealed class RemoveCommandParser : ICommandParser
         }
         else
         {
-            return new HelpCommand(consumer.HelpTexts, consumer.Errors);
+            return consumer.Help;
         }
     }
 }
@@ -216,7 +216,7 @@ public sealed class RestoreCommandParser : ICommandParser
 
     public string Info => "Restore a snapshot";
 
-    public ICommand Parse(ArgConsumer consumer)
+    public object Parse(ArgConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryString("--directory", "The directory to restore into", out var directory)
@@ -236,7 +236,7 @@ public sealed class RestoreCommandParser : ICommandParser
         }
         else
         {
-            return new HelpCommand(consumer.HelpTexts, consumer.Errors);
+            return consumer.Help;
         }
     }
 }
@@ -247,7 +247,7 @@ public sealed class ShowCommandParser : ICommandParser
 
     public string Info => "Show the content of a snapshot";
 
-    public ICommand Parse(ArgConsumer consumer)
+    public object Parse(ArgConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshot)
@@ -265,7 +265,7 @@ public sealed class ShowCommandParser : ICommandParser
         }
         else
         {
-            return new HelpCommand(consumer.HelpTexts, consumer.Errors);
+            return consumer.Help;
         }
     }
 }
@@ -276,7 +276,7 @@ public sealed class StoreCommandParser : ICommandParser
 
     public string Info => "Store a new snapshot";
 
-    public ICommand Parse(ArgConsumer consumer)
+    public object Parse(ArgConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryList("--paths", "The files and directories (blobs) to store", out var paths)
@@ -294,12 +294,12 @@ public sealed class StoreCommandParser : ICommandParser
         }
         else
         {
-            return new HelpCommand(consumer.HelpTexts, consumer.Errors);
+            return consumer.Help;
         }
     }
 }
 
-public interface IChunkyardCommand : ICommand
+public interface IChunkyardCommand
 {
     string Repository { get; }
 
@@ -337,31 +337,6 @@ public sealed class CatCommand : IChunkyardCommand
     public IEnumerable<string> ChunkIds { get; }
 
     public string? Export { get; }
-
-    public void Run()
-    {
-        var snapshotStore = CommandUtils.CreateSnapshotStore(this);
-
-        using Stream stream = string.IsNullOrEmpty(Export)
-            ? new MemoryStream()
-            : new FileStream(Export, FileMode.CreateNew, FileAccess.Write);
-
-        if (ChunkIds.Any())
-        {
-            snapshotStore.RestoreChunks(ChunkIds, stream);
-        }
-        else
-        {
-            stream.Write(
-                snapshotStore.RestoreSnapshotReference(SnapshotId));
-        }
-
-        if (stream is MemoryStream memoryStream)
-        {
-            Console.WriteLine(
-                Encoding.UTF8.GetString(memoryStream.ToArray()));
-        }
-    }
 }
 
 public sealed class CheckCommand : IChunkyardCommand
@@ -393,22 +368,6 @@ public sealed class CheckCommand : IChunkyardCommand
     public IEnumerable<string> IncludePatterns { get; }
 
     public bool Shallow { get; }
-
-    public void Run()
-    {
-        var snapshotStore = CommandUtils.CreateSnapshotStore(this);
-
-        var fuzzy = new Fuzzy(IncludePatterns);
-
-        if (Shallow)
-        {
-            snapshotStore.EnsureSnapshotExists(SnapshotId, fuzzy);
-        }
-        else
-        {
-            snapshotStore.EnsureSnapshotValid(SnapshotId, fuzzy);
-        }
-    }
 }
 
 public sealed class CopyCommand : IChunkyardCommand
@@ -432,14 +391,6 @@ public sealed class CopyCommand : IChunkyardCommand
     public int Parallel { get; }
 
     public string DestinationRepository { get; }
-
-    public void Run()
-    {
-        var snapshotStore = CommandUtils.CreateSnapshotStore(this);
-
-        snapshotStore.CopyTo(
-            CommandUtils.CreateRepository(DestinationRepository));
-    }
 }
 
 public sealed class DiffCommand : IChunkyardCommand
@@ -475,27 +426,6 @@ public sealed class DiffCommand : IChunkyardCommand
     public IEnumerable<string> IncludePatterns { get; }
 
     public bool ChunksOnly { get; }
-
-    public void Run()
-    {
-        var snapshotStore = CommandUtils.CreateSnapshotStore(this);
-
-        var fuzzy = new Fuzzy(IncludePatterns);
-        var first = snapshotStore.FilterSnapshot(FirstSnapshotId, fuzzy);
-        var second = snapshotStore.FilterSnapshot(SecondSnapshotId, fuzzy);
-
-        var diff = ChunksOnly
-            ? DiffSet.Create(
-                first.SelectMany(br => br.ChunkIds),
-                second.SelectMany(br => br.ChunkIds),
-                chunkId => chunkId)
-            : DiffSet.Create(
-                first,
-                second,
-                br => br.Blob.Name);
-
-        CommandUtils.PrintDiff(diff);
-    }
 }
 
 public sealed class GarbageCollectCommand : IChunkyardCommand
@@ -515,13 +445,6 @@ public sealed class GarbageCollectCommand : IChunkyardCommand
     public Prompt Prompt { get; }
 
     public int Parallel { get; }
-
-    public void Run()
-    {
-        var snapshotStore = CommandUtils.CreateSnapshotStore(this);
-
-        snapshotStore.GarbageCollect();
-    }
 }
 
 public sealed class KeepCommand : IChunkyardCommand
@@ -545,13 +468,6 @@ public sealed class KeepCommand : IChunkyardCommand
     public int Parallel { get; }
 
     public int LatestCount { get; }
-
-    public void Run()
-    {
-        var snapshotStore = CommandUtils.CreateSnapshotStore(this);
-
-        snapshotStore.KeepSnapshots(LatestCount);
-    }
 }
 
 public sealed class ListCommand : IChunkyardCommand
@@ -571,21 +487,6 @@ public sealed class ListCommand : IChunkyardCommand
     public Prompt Prompt { get; }
 
     public int Parallel { get; }
-
-    public void Run()
-    {
-        var snapshotStore = CommandUtils.CreateSnapshotStore(this);
-
-        foreach (var snapshotId in snapshotStore.ListSnapshotIds())
-        {
-            var isoDate = snapshotStore.GetSnapshot(snapshotId).CreationTimeUtc
-                .ToLocalTime()
-                .ToString("yyyy-MM-dd HH:mm:ss");
-
-            Console.WriteLine(
-                $"Snapshot #{snapshotId}: {isoDate}");
-        }
-    }
 }
 
 public sealed class RemoveCommand : IChunkyardCommand
@@ -609,13 +510,6 @@ public sealed class RemoveCommand : IChunkyardCommand
     public int Parallel { get; }
 
     public int SnapshotId { get; }
-
-    public void Run()
-    {
-        var snapshotStore = CommandUtils.CreateSnapshotStore(this);
-
-        snapshotStore.RemoveSnapshot(SnapshotId);
-    }
 }
 
 public sealed class RestoreCommand : IChunkyardCommand
@@ -651,34 +545,6 @@ public sealed class RestoreCommand : IChunkyardCommand
     public IEnumerable<string> IncludePatterns { get; }
 
     public bool Preview { get; }
-
-    public void Run()
-    {
-        var snapshotStore = CommandUtils.CreateSnapshotStore(this);
-
-        var blobSystem = new FileBlobSystem(
-            new[] { Directory },
-            Fuzzy.Default);
-
-        var fuzzy = new Fuzzy(IncludePatterns);
-
-        if (Preview)
-        {
-            var diff = snapshotStore.RestoreSnapshotPreview(
-                blobSystem,
-                SnapshotId,
-                fuzzy);
-
-            CommandUtils.PrintDiff(diff);
-        }
-        else
-        {
-            snapshotStore.RestoreSnapshot(
-                blobSystem,
-                SnapshotId,
-                fuzzy);
-        }
-    }
 }
 
 public sealed class ShowCommand : IChunkyardCommand
@@ -710,24 +576,6 @@ public sealed class ShowCommand : IChunkyardCommand
     public IEnumerable<string> IncludePatterns { get; }
 
     public bool ChunksOnly { get; }
-
-    public void Run()
-    {
-        var snapshotStore = CommandUtils.CreateSnapshotStore(this);
-
-        var blobReferences = snapshotStore.FilterSnapshot(
-            SnapshotId,
-            new Fuzzy(IncludePatterns));
-
-        var contents = ChunksOnly
-            ? blobReferences.SelectMany(br => br.ChunkIds)
-            : blobReferences.Select(br => br.Blob.Name);
-
-        foreach (var content in contents)
-        {
-            Console.WriteLine(content);
-        }
-    }
 }
 
 public sealed class StoreCommand : IChunkyardCommand
@@ -759,80 +607,8 @@ public sealed class StoreCommand : IChunkyardCommand
     public IEnumerable<string> IncludePatterns { get; }
 
     public bool Preview { get; }
-
-    public void Run()
-    {
-        var snapshotStore = CommandUtils.CreateSnapshotStore(this);
-
-        var blobSystem = new FileBlobSystem(
-            Paths,
-            new Fuzzy(IncludePatterns));
-
-        if (Preview)
-        {
-            var diff = snapshotStore.StoreSnapshotPreview(blobSystem);
-
-            CommandUtils.PrintDiff(diff);
-        }
-        else
-        {
-            snapshotStore.StoreSnapshot(blobSystem);
-        }
-    }
 }
 
-public static class CommandUtils
-{
-    public static void PrintDiff(DiffSet diff)
-    {
-        foreach (var added in diff.Added)
-        {
-            Console.WriteLine($"+ {added}");
-        }
-
-        foreach (var changed in diff.Changed)
-        {
-            Console.WriteLine($"~ {changed}");
-        }
-
-        foreach (var removed in diff.Removed)
-        {
-            Console.WriteLine($"- {removed}");
-        }
-    }
-
-    public static SnapshotStore CreateSnapshotStore(IChunkyardCommand c)
-    {
-        var repository = CreateRepository(c.Repository);
-
-        IPrompt prompt = c.Prompt switch
-        {
-            Prompt.Console => new ConsolePrompt(),
-            Prompt.Environment => new EnvironmentPrompt(),
-            Prompt.Libsecret => new LibsecretPrompt(
-                new ConsolePrompt(),
-                repository.Id),
-            _ => new ConsolePrompt()
-        };
-
-        var parallelism = c.Parallel < 1
-            ? Environment.ProcessorCount
-            : c.Parallel;
-
-        return new SnapshotStore(
-            repository,
-            new FastCdc(),
-            new ConsoleProbe(),
-            new RealWorld(),
-            prompt,
-            parallelism);
-    }
-
-    public static IRepository CreateRepository(string repositoryPath)
-    {
-        return new FileRepository(repositoryPath);
-    }
-}
 
 public static class ArgConsumerExtensions
 {

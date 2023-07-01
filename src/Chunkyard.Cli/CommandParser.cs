@@ -14,7 +14,7 @@ public sealed class CommandParser
             .ToArray();
     }
 
-    public ICommand Parse(params string[] args)
+    public object Parse(params string[] args)
     {
         var arg = Arg.Parse(args);
 

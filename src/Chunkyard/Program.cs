@@ -19,7 +19,35 @@ public static class Program
                 new ShowCommandParser(),
                 new StoreCommandParser());
 
-            parser.Parse(args).Run();
+            var command = parser.Parse(args);
+
+            if (command is CatCommand cat)
+                CommandHandler.Cat(cat);
+            else if (command is CheckCommand check)
+                CommandHandler.CheckSnapshot(check);
+            else if (command is CopyCommand copy)
+                CommandHandler.Copy(copy);
+            else if (command is DiffCommand diff)
+                CommandHandler.DiffSnapshots(diff);
+            else if (command is GarbageCollectCommand gc)
+                CommandHandler.GarbageCollect(gc);
+            else if (command is KeepCommand keep)
+                CommandHandler.KeepSnapshots(keep);
+            else if (command is HelpCommand help)
+            {
+                Console.WriteLine(help.ToText());
+                Environment.ExitCode = 1;
+            }
+            else if (command is ListCommand list)
+                CommandHandler.ListSnapshots(list);
+            else if (command is RemoveCommand remove)
+                CommandHandler.RemoveSnapshot(remove);
+            else if (command is RestoreCommand restore)
+                CommandHandler.RestoreSnapshot(restore);
+            else if (command is StoreCommand store)
+                CommandHandler.StoreSnapshot(store);
+            else
+                throw new NotImplementedException();
         }
         catch (Exception e)
         {
