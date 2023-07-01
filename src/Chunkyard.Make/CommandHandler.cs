@@ -1,15 +1,12 @@
 namespace Chunkyard.Make;
 
-/// <summary>
-/// Describes every available command line verb of the Chunkyard.Make assembly.
-/// </summary>
-internal static class Commands
+public sealed class CommandHandler : ICommandHandler
 {
     private const string Solution = "src/Chunkyard.sln";
     private const string Changelog = "CHANGELOG.md";
     private const string Configuration = "Release";
 
-    static Commands()
+    public CommandHandler()
     {
         Directory.SetCurrentDirectory(
             GitQuery("rev-parse --show-toplevel"));
@@ -19,24 +16,7 @@ internal static class Commands
             "1");
     }
 
-    public static void Clean()
-    {
-        Announce("Cleanup");
-
-        if (GitQuery("status --porcelain").Contains("??"))
-        {
-            throw new InvalidOperationException(
-                "Found untracked files. Aborting cleanup");
-        }
-
-        Git(
-            "clean -dfx",
-            $"-e *{typeof(Commands).Namespace}",
-            "-e .vs/",
-            "-e launchSettings.json");
-    }
-
-    public static void Build()
+    public void Handle(BuildCommand c)
     {
         Announce("Build");
 
@@ -55,10 +35,76 @@ internal static class Commands
             "--logger console;verbosity=detailed");
     }
 
-    public static void Publish()
+    public void Handle(CheckCommand c)
     {
-        Clean();
-        Build();
+        Announce("Check");
+
+        Dotnet($"restore {Solution}");
+
+        Dotnet($"list {Solution} package --deprecated");
+        Dotnet($"list {Solution} package --vulnerable");
+        Dotnet($"list {Solution} package --outdated");
+    }
+
+    public void Handle(CleanCommand c)
+    {
+        Announce("Cleanup");
+
+        if (GitQuery("status --porcelain").Contains("??"))
+        {
+            throw new InvalidOperationException(
+                "Found untracked files. Aborting cleanup");
+        }
+
+        Git(
+            "clean -dfx",
+            $"-e *{GetType().Namespace}",
+            "-e .vs/",
+            "-e launchSettings.json");
+    }
+
+    public void Handle(FormatCommand c)
+    {
+        Announce("Format");
+
+        Dotnet($"format {Solution}");
+    }
+
+    public void Handle(HelpCommand c)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Usage:");
+        Console.WriteLine($"  {GetType().Assembly.GetName().Name} <command> <flags>");
+        Console.WriteLine();
+
+        foreach (var usage in c.Usages)
+        {
+            Console.WriteLine($"  {usage.Topic}");
+            Console.WriteLine($"    {usage.Info}");
+            Console.WriteLine();
+        }
+
+        if (c.Errors.Any())
+        {
+            Console.WriteLine(c.Errors.Count == 1
+                ? "Error:"
+                : "Errors:");
+
+            foreach (var error in c.Errors)
+            {
+                Console.WriteLine($"  {error}");
+            }
+
+            Console.WriteLine();
+        }
+
+        Environment.ExitCode = 1;
+    }
+
+    public void Handle(PublishCommand c)
+    {
+        Handle(new CleanCommand());
+        Handle(new BuildCommand());
 
         Announce("Publish");
 
@@ -84,25 +130,7 @@ internal static class Commands
         GenerateChecksumFile(directory);
     }
 
-    public static void Format()
-    {
-        Announce("Format");
-
-        Dotnet($"format {Solution}");
-    }
-
-    public static void Check()
-    {
-        Announce("Check");
-
-        Dotnet($"restore {Solution}");
-
-        Dotnet($"list {Solution} package --deprecated");
-        Dotnet($"list {Solution} package --vulnerable");
-        Dotnet($"list {Solution} package --outdated");
-    }
-
-    public static void Release()
+    public void Handle(ReleaseCommand c)
     {
         Announce("Release");
 
@@ -186,4 +214,21 @@ internal static class Commands
         Console.WriteLine(text);
         Console.WriteLine("========================================");
     }
+}
+
+public interface ICommandHandler
+{
+    void Handle(BuildCommand c);
+
+    void Handle(CheckCommand c);
+
+    void Handle(CleanCommand c);
+
+    void Handle(FormatCommand c);
+
+    void Handle(HelpCommand c);
+
+    void Handle(PublishCommand c);
+
+    void Handle(ReleaseCommand c);
 }

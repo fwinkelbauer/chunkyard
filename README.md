@@ -20,9 +20,7 @@ tools. Here's a list of [options][backup-tools].
 - Strong symmetric encryption (AES Galois/Counter Mode using a 256 bit key)
 - Ability to copy from/to other repositories
 - Verifiable backups
-- Minimal NuGet dependencies. The Chunkyard binary only utilizes the
-  [commandlineparser][commandlineparser] package to create its command line
-  interface
+- No NuGet dependencies
 
 ## Non-Goals
 
@@ -61,7 +59,8 @@ help` or `./make build --help` to learn more.
 ## Usage
 
 Type `chunkyard --help` to see a list of all available commands. You can add
-`--help` to any command to get more information on its usage.
+`--help` to any command to get more information about what parameters it
+expects.
 
 Example:
 
@@ -73,16 +72,16 @@ chunkyard --help
 chunkyard store --help
 
 # See which files chunkyard would backup
-chunkyard store -r "../repository" -p "Music" -i "!Desktop\.ini" "!thumbs\.db" --preview
+chunkyard store --repository '../repository' --paths 'Music' --include '!Desktop\.ini' '!thumbs\.db' --preview
 
 # Store a backup
-chunkyard store -r "../repository" -p "Music" -i "!Desktop\.ini" "!thumbs\.db"
+chunkyard store --repository '../repository' --paths 'Music' --include '!Desktop\.ini' '!thumbs\.db'
 
 # Check if the latest backup is valid
-chunkyard check -r "../repository"
+chunkyard check --repository '../repository'
 
 # Restore parts of the latest backup
-chunkyard restore -r "../repository" -d . -i "mp3$"
+chunkyard restore --repository '../repository' --destination . --include 'mp3$'
 ```
 
 Here's an example of a bash script:
@@ -104,15 +103,15 @@ directories=(
 # export CHUNKYARD_DEBUG='1'
 
 # Store backup
-chunkyard store -r "$repo" -p "${directories[@]}"
+chunkyard store --repository "$repo" --paths "${directories[@]}"
 
 # Optional: Prevent password prompts
 # export CHUNKYARD_PASSWORD='my secret password'
-# chunkyard store -r "$repo" -p "${directories[@]}" --prompt Environment
+# chunkyard store --repository "$repo" --paths "${directories[@]}" --prompt Environment
 
 # Keep the latest four backups
-chunkyard keep -r "$repo" --latest 4
-chunkyard gc -r "$repo"
+chunkyard keep --repository "$repo" --latest 4
+chunkyard gc --repository "$repo"
 ```
 
 And here is the same script written in PowerShell:
@@ -130,24 +129,23 @@ $directories = @(
 # $env:CHUNKYARD_DEBUG = '1'
 
 # Store backup
-chunkyard store -r $repo -p $directories
+chunkyard store --repository $repo --paths $directories
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # Optional: Prevent password prompts
 # $env:CHUNKYARD_PASSWORD = 'my secret password'
-# chunkyard store -r $repo -p $directories --prompt Environment
+# chunkyard store --repository $repo --paths $directories --prompt Environment
 # if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # Keep the latest four backups
-chunkyard keep -r $repo --latest 4
+chunkyard keep --repository $repo --latest 4
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-chunkyard gc -r $repo
+chunkyard gc --repository $repo
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 ```
 
 [fastcdc]: https://www.usenix.org/system/files/conference/atc16/atc16-paper-xia.pdf
 [fastcdc-rs]: https://github.com/nlfiedler/fastcdc-rs
 [backup-tools]: https://github.com/restic/others
-[commandlineparser]: https://www.nuget.org/packages/CommandLineParser
 [borg]: https://borgbackup.readthedocs.io/en/stable/internals/security.html#fingerprinting

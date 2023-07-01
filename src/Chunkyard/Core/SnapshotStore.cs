@@ -185,12 +185,7 @@ public sealed class SnapshotStore
         var unusedChunkIds = _repository.Chunks.List()
             .Except(ListChunkIds(_repository.Snapshots.List()));
 
-        RemoveChunks(unusedChunkIds);
-    }
-
-    public void RemoveChunks(IEnumerable<string> chunkIds)
-    {
-        foreach (var chunkId in chunkIds)
+        foreach (var chunkId in unusedChunkIds)
         {
             _repository.Chunks.Remove(chunkId);
             _probe.RemovedChunk(chunkId);

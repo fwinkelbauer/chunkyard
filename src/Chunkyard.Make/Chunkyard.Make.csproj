@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="commandlineparser" Version="2.9.1" />
+    <ProjectReference Include="..\Chunkyard.Cli\Chunkyard.Cli.csproj" />
   </ItemGroup>
 
 </Project>

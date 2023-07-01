@@ -1,3 +1,4 @@
+global using Chunkyard.Cli;
 global using Chunkyard.Core;
 global using Chunkyard.Infrastructure;
 global using Chunkyard.Tests.Infrastructure;

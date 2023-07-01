@@ -2,19 +2,18 @@ namespace Chunkyard;
 
 public static class Program
 {
-    public static int Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            ProcessArguments(args);
+            CommandParser.Parse(args)
+                .Handle(new CommandHandler());
         }
         catch (Exception e)
         {
             PrintError(e);
             Environment.ExitCode = 1;
         }
-
-        return Environment.ExitCode;
     }
 
     private static void PrintError(Exception e)
@@ -34,22 +33,5 @@ public static class Program
                 ? exception.ToString()
                 : exception.Message);
         }
-    }
-
-    private static void ProcessArguments(string[] args)
-    {
-        Parser.Default.ParseArguments<RestoreOptions, StoreOptions, CheckOptions, ShowOptions, RemoveOptions, KeepOptions, ListOptions, DiffOptions, GarbageCollectOptions, CopyOptions, CatOptions>(args)
-            .WithParsed<RestoreOptions>(Commands.RestoreSnapshot)
-            .WithParsed<StoreOptions>(Commands.StoreSnapshot)
-            .WithParsed<CheckOptions>(Commands.CheckSnapshot)
-            .WithParsed<ShowOptions>(Commands.ShowSnapshot)
-            .WithParsed<KeepOptions>(Commands.KeepSnapshots)
-            .WithParsed<ListOptions>(Commands.ListSnapshots)
-            .WithParsed<DiffOptions>(Commands.DiffSnapshots)
-            .WithParsed<GarbageCollectOptions>(Commands.GarbageCollect)
-            .WithParsed<CopyOptions>(Commands.Copy)
-            .WithParsed<CatOptions>(Commands.Cat)
-            .WithParsed<RemoveOptions>(Commands.Remove)
-            .WithNotParsed(_ => Environment.ExitCode = 1);
     }
 }
