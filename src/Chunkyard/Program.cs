@@ -24,25 +24,25 @@ public static class Program
             if (command is CatCommand cat)
                 CommandHandler.Cat(cat);
             else if (command is CheckCommand check)
-                CommandHandler.CheckSnapshot(check);
+                CommandHandler.Check(check);
             else if (command is CopyCommand copy)
                 CommandHandler.Copy(copy);
             else if (command is DiffCommand diff)
-                CommandHandler.DiffSnapshots(diff);
+                CommandHandler.Diff(diff);
             else if (command is GarbageCollectCommand gc)
                 CommandHandler.GarbageCollect(gc);
             else if (command is KeepCommand keep)
-                CommandHandler.KeepSnapshots(keep);
+                CommandHandler.Keep(keep);
             else if (command is HelpCommand help)
                 CommandHandler.Help(help);
             else if (command is ListCommand list)
-                CommandHandler.ListSnapshots(list);
+                CommandHandler.List(list);
             else if (command is RemoveCommand remove)
-                CommandHandler.RemoveSnapshot(remove);
+                CommandHandler.Remove(remove);
             else if (command is RestoreCommand restore)
-                CommandHandler.RestoreSnapshot(restore);
+                CommandHandler.Restore(restore);
             else if (command is StoreCommand store)
-                CommandHandler.StoreSnapshot(store);
+                CommandHandler.Store(store);
             else
                 throw new NotImplementedException();
         }

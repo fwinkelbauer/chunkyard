@@ -30,7 +30,7 @@ internal static class CommandHandler
         }
     }
 
-    public static void CheckSnapshot(CheckCommand c)
+    public static void Check(CheckCommand c)
     {
         var snapshotStore = CreateSnapshotStore(c);
 
@@ -54,7 +54,7 @@ internal static class CommandHandler
             CreateRepository(c.DestinationRepository));
     }
 
-    public static void DiffSnapshots(DiffCommand c)
+    public static void Diff(DiffCommand c)
     {
         var snapshotStore = CreateSnapshotStore(c);
 
@@ -109,14 +109,14 @@ internal static class CommandHandler
         Environment.ExitCode = 1;
     }
 
-    public static void KeepSnapshots(KeepCommand c)
+    public static void Keep(KeepCommand c)
     {
         var snapshotStore = CreateSnapshotStore(c);
 
         snapshotStore.KeepSnapshots(c.LatestCount);
     }
 
-    public static void ListSnapshots(ListCommand c)
+    public static void List(ListCommand c)
     {
         var snapshotStore = CreateSnapshotStore(c);
 
@@ -131,14 +131,14 @@ internal static class CommandHandler
         }
     }
 
-    public static void RemoveSnapshot(RemoveCommand c)
+    public static void Remove(RemoveCommand c)
     {
         var snapshotStore = CreateSnapshotStore(c);
 
         snapshotStore.RemoveSnapshot(c.SnapshotId);
     }
 
-    public static void RestoreSnapshot(RestoreCommand c)
+    public static void Restore(RestoreCommand c)
     {
         var snapshotStore = CreateSnapshotStore(c);
 
@@ -166,7 +166,7 @@ internal static class CommandHandler
         }
     }
 
-    public static void ShowSnapshot(ShowCommand c)
+    public static void Show(ShowCommand c)
     {
         var snapshotStore = CreateSnapshotStore(c);
 
@@ -184,7 +184,7 @@ internal static class CommandHandler
         }
     }
 
-    public static void StoreSnapshot(StoreCommand c)
+    public static void Store(StoreCommand c)
     {
         var snapshotStore = CreateSnapshotStore(c);
 
