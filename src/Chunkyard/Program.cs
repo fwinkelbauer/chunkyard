@@ -34,10 +34,7 @@ public static class Program
             else if (command is KeepCommand keep)
                 CommandHandler.KeepSnapshots(keep);
             else if (command is HelpCommand help)
-            {
-                Console.WriteLine(help.ToText());
-                Environment.ExitCode = 1;
-            }
+                CommandHandler.Help(help);
             else if (command is ListCommand list)
                 CommandHandler.ListSnapshots(list);
             else if (command is RemoveCommand remove)
@@ -51,27 +48,7 @@ public static class Program
         }
         catch (Exception e)
         {
-            PrintError(e);
-            Environment.ExitCode = 1;
-        }
-    }
-
-    private static void PrintError(Exception e)
-    {
-        Console.Error.WriteLine("Error:");
-
-        IReadOnlyCollection<Exception> exceptions = e is AggregateException a
-            ? a.InnerExceptions
-            : new[] { e };
-
-        var debugMode = !string.IsNullOrEmpty(
-            Environment.GetEnvironmentVariable("CHUNKYARD_DEBUG"));
-
-        foreach (var exception in exceptions)
-        {
-            Console.Error.WriteLine(debugMode
-                ? exception.ToString()
-                : exception.Message);
+            CommandHandler.Error(e);
         }
     }
 }

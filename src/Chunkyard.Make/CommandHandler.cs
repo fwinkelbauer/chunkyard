@@ -55,6 +55,33 @@ internal static class CommandHandler
             "--logger console;verbosity=detailed");
     }
 
+    public static void Error(Exception e)
+    {
+        Console.Error.WriteLine("Error:");
+
+        IReadOnlyCollection<Exception> exceptions = e is AggregateException a
+            ? a.InnerExceptions
+            : new[] { e };
+
+        var debugMode = !string.IsNullOrEmpty(
+            Environment.GetEnvironmentVariable("CHUNKYARD_DEBUG"));
+
+        foreach (var exception in exceptions)
+        {
+            Console.Error.WriteLine(debugMode
+                ? exception.ToString()
+                : exception.Message);
+        }
+
+        Environment.ExitCode = 1;
+    }
+
+    public static void Help(HelpCommand c)
+    {
+        Console.WriteLine(c.ToText());
+        Environment.ExitCode = 1;
+    }
+
     public static void Publish()
     {
         Clean();
