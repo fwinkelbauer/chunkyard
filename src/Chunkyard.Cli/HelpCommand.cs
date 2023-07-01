@@ -1,5 +1,7 @@
 namespace Chunkyard.Cli;
 
+internal sealed record HelpText(string Topic, string Info);
+
 /// <summary>
 /// A command which can be used to inform a user on how the command line
 /// interface can be used.
@@ -9,7 +11,7 @@ public sealed class HelpCommand
     private readonly IReadOnlyCollection<HelpText> _helpTexts;
     private readonly IReadOnlyCollection<string> _errors;
 
-    public HelpCommand(
+    internal HelpCommand(
         IReadOnlyCollection<HelpText> helpTexts,
         IReadOnlyCollection<string> errors)
     {
