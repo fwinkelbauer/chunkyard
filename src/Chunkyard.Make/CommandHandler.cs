@@ -123,9 +123,6 @@ internal static class CommandHandler
         Announce("Check");
 
         Dotnet($"restore {Solution}");
-
-        Dotnet($"list {Solution} package --deprecated");
-        Dotnet($"list {Solution} package --vulnerable");
         Dotnet($"list {Solution} package --outdated");
     }
 
