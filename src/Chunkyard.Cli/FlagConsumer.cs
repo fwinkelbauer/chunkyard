@@ -3,17 +3,18 @@ namespace Chunkyard.Cli;
 /// <summary>
 /// A stateful helper class used by instances of <see cref="ICommandParser"/>.
 /// </summary>
-public sealed class ArgConsumer
+public sealed class FlagConsumer
 {
     private readonly Dictionary<string, IReadOnlyCollection<string>> _flags;
-    private readonly List<HelpText> _helpTexts;
-    private readonly List<string> _errors;
+    private readonly HashSet<HelpText> _helpTexts;
+    private readonly HashSet<string> _errors;
 
-    public ArgConsumer(Arg arg)
+    public FlagConsumer(
+        IReadOnlyDictionary<string, IReadOnlyCollection<string>> flags)
     {
-        _flags = new Dictionary<string, IReadOnlyCollection<string>>(arg.Flags);
-        _helpTexts = new List<HelpText>();
-        _errors = new List<string>();
+        _flags = new Dictionary<string, IReadOnlyCollection<string>>(flags);
+        _helpTexts = new HashSet<HelpText>();
+        _errors = new HashSet<string>();
     }
 
     public HelpCommand Help => new(_helpTexts, _errors);
@@ -132,7 +133,7 @@ public sealed class ArgConsumer
 
         if (!consumed)
         {
-            _errors.AddRange(_flags.Keys.Select(k => $"Extra flag: {k}"));
+            _errors.UnionWith(_flags.Keys.Select(k => $"Extra flag: {k}"));
         }
 
         return consumed;

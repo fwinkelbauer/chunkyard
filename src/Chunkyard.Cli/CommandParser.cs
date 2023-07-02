@@ -23,7 +23,10 @@ public sealed class CommandParser
     {
         var arg = Arg.Parse(args);
 
-        if (arg == null)
+        if (arg == null
+            || arg.Command.Equals("help")
+            || (new FlagConsumer(arg.Flags).TryBool("--help", "Print usage information", out var help)
+                && help))
         {
             return new HelpCommand(_helpTexts, Array.Empty<string>());
         }
@@ -35,6 +38,6 @@ public sealed class CommandParser
             ? new HelpCommand(
                 _helpTexts,
                 new[] { $"Unknown command: {arg.Command}" })
-            : parser.Parse(new ArgConsumer(arg));
+            : parser.Parse(new FlagConsumer(arg.Flags));
     }
 }

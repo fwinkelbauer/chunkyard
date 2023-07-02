@@ -6,7 +6,7 @@ public sealed class CatCommandParser : ICommandParser
 
     public string Info => "Export or print the value of a snapshot or a set of chunk IDs";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & (consumer.TrySnapshot(out var snapshotId)
@@ -35,7 +35,7 @@ public sealed class CheckCommandParser : ICommandParser
 
     public string Info => "Check if a snapshot is valid";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshotId)
@@ -64,7 +64,7 @@ public sealed class CopyCommandParser : ICommandParser
 
     public string Info => "Copy snapshots from one repository to another";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryString("--destination", "The destination repository path", out var destinationRepository)
@@ -89,7 +89,7 @@ public sealed class DiffCommandParser : ICommandParser
 
     public string Info => "Show the difference between two snapshots";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryInt("--first", "The first snapshot ID", out var firstSnapshotId, SnapshotStore.SecondLatestSnapshotId)
@@ -120,7 +120,7 @@ public sealed class GarbageCollectCommandParser : ICommandParser
 
     public string Info => "Remove unreferenced chunks";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.IsConsumed())
@@ -143,7 +143,7 @@ public sealed class KeepCommandParser : ICommandParser
 
     public string Info => "Keep only the given list of snapshots";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount)
@@ -168,7 +168,7 @@ public sealed class ListCommandParser : ICommandParser
 
     public string Info => "List all snapshots";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.IsConsumed())
@@ -191,7 +191,7 @@ public sealed class RemoveCommandParser : ICommandParser
 
     public string Info => "Remove a snapshot or a set of chunk IDs";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshot)
@@ -216,7 +216,7 @@ public sealed class RestoreCommandParser : ICommandParser
 
     public string Info => "Restore a snapshot";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryString("--directory", "The directory to restore into", out var directory)
@@ -247,7 +247,7 @@ public sealed class ShowCommandParser : ICommandParser
 
     public string Info => "Show the content of a snapshot";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshot)
@@ -276,7 +276,7 @@ public sealed class StoreCommandParser : ICommandParser
 
     public string Info => "Store a new snapshot";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryList("--paths", "The files and directories (blobs) to store", out var paths)
@@ -613,7 +613,7 @@ public sealed class StoreCommand : IChunkyardCommand
 public static class ArgConsumerExtensions
 {
     public static bool TryCommon(
-        this ArgConsumer consumer,
+        this FlagConsumer consumer,
         out string repository,
         out Prompt prompt,
         out int parallel)
@@ -626,7 +626,7 @@ public static class ArgConsumerExtensions
     }
 
     public static bool TrySnapshot(
-        this ArgConsumer consumer,
+        this FlagConsumer consumer,
         out int snapshot)
     {
         return consumer.TryInt(
@@ -637,7 +637,7 @@ public static class ArgConsumerExtensions
     }
 
     public static bool TryIncludePatterns(
-        this ArgConsumer consumer,
+        this FlagConsumer consumer,
         out IReadOnlyCollection<string> includePatterns)
     {
         return consumer.TryList(
@@ -647,7 +647,7 @@ public static class ArgConsumerExtensions
     }
 
     public static bool TryPreview(
-        this ArgConsumer consumer,
+        this FlagConsumer consumer,
         out bool preview)
     {
         return consumer.TryBool(
@@ -657,7 +657,7 @@ public static class ArgConsumerExtensions
     }
 
     public static bool TryChunksOnly(
-        this ArgConsumer consumer,
+        this FlagConsumer consumer,
         out bool chunksOnly)
     {
         return consumer.TryBool(

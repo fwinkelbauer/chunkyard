@@ -6,7 +6,7 @@ public sealed class BuildCommandParser : ICommandParser
 
     public string Info => "Build the repository";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         return consumer.IsConsumed()
             ? new BuildCommand()
@@ -20,7 +20,7 @@ public sealed class CheckCommandParser : ICommandParser
 
     public string Info => "Check for dependency updates";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         return consumer.IsConsumed()
             ? new CheckCommand()
@@ -34,7 +34,7 @@ public sealed class CleanCommandParser : ICommandParser
 
     public string Info => "Clean the repository";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         return consumer.IsConsumed()
             ? new CleanCommand()
@@ -48,7 +48,7 @@ public sealed class FormatCommandParser : ICommandParser
 
     public string Info => "Run the formatter";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         return consumer.IsConsumed()
             ? new FormatCommand()
@@ -62,7 +62,7 @@ public sealed class PublishCommandParser : ICommandParser
 
     public string Info => "Publish the main project";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         return consumer.IsConsumed()
             ? new PublishCommand()
@@ -76,7 +76,7 @@ public sealed class ReleaseCommandParser : ICommandParser
 
     public string Info => "Create a release commit";
 
-    public object Parse(ArgConsumer consumer)
+    public object Parse(FlagConsumer consumer)
     {
         return consumer.IsConsumed()
             ? new ReleaseCommand()
