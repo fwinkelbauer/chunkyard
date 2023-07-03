@@ -7,12 +7,30 @@ public static class Program
         try
         {
             var parser = new CommandParser(
-                new BuildCommandParser(),
-                new CheckCommandParser(),
-                new CleanCommandParser(),
-                new FormatCommandParser(),
-                new PublishCommandParser(),
-                new ReleaseCommandParser());
+                new SimpleCommandParser(
+                    "build",
+                    "Build the repository",
+                    new BuildCommand()),
+                new SimpleCommandParser(
+                    "check",
+                    "Check for dependency updates",
+                    new CheckCommand()),
+                new SimpleCommandParser(
+                    "clean",
+                    "Clean the repository",
+                    new CleanCommand()),
+                new SimpleCommandParser(
+                    "format",
+                    "Run the formatter",
+                    new FormatCommand()),
+                new SimpleCommandParser(
+                    "publish",
+                    "Publish the main project",
+                    new PublishCommand()),
+                new SimpleCommandParser(
+                    "release",
+                    "Create a release commit",
+                    new ReleaseCommand()));
 
             var command = parser.Parse(args);
 

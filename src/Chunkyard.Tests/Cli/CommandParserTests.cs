@@ -8,7 +8,7 @@ public static class CommandParserTests
     public static void Parse_Returns_Parsed_Command(string args)
     {
         var parser = new CommandParser(
-            new SomeCommandParser());
+            new SimpleCommandParser("cmd", "info", new SomeCommand()));
 
         Assert.IsType<SomeCommand>(
             parser.Parse(args.Split(' ')));
@@ -26,7 +26,7 @@ public static class CommandParserTests
         string args)
     {
         var parser = new CommandParser(
-            new SomeCommandParser());
+            new SimpleCommandParser("cmd", "info", new SomeCommand()));
 
         Assert.IsType<HelpCommand>(
             parser.Parse(args.Split(' ')));
@@ -34,17 +34,5 @@ public static class CommandParserTests
 
     internal sealed class SomeCommand
     {
-    }
-
-    internal sealed class SomeCommandParser : ICommandParser
-    {
-        public string Command => "cmd";
-
-        public string Info => "some info";
-
-        public object Parse(FlagConsumer consumer)
-        {
-            return new SomeCommand();
-        }
     }
 }
