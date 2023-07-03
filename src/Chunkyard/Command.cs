@@ -12,7 +12,7 @@ public sealed class CatCommandParser : ICommandParser
             & (consumer.TrySnapshot(out var snapshotId)
                 | consumer.TryList("--chunks", "The chunk IDs", out var chunkIds))
             & consumer.TryString("--export", "The export path", out var export, "")
-            & consumer.IsConsumed())
+            & consumer.IsEmpty())
         {
             return new CatCommand(
                 repository,
@@ -41,7 +41,7 @@ public sealed class CheckCommandParser : ICommandParser
             & consumer.TrySnapshot(out var snapshotId)
             & consumer.TryIncludePatterns(out var includePatterns)
             & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow)
-            & consumer.IsConsumed())
+            & consumer.IsEmpty())
         {
             return new CheckCommand(
                 repository,
@@ -68,7 +68,7 @@ public sealed class CopyCommandParser : ICommandParser
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryString("--destination", "The destination repository path", out var destinationRepository)
-            & consumer.IsConsumed())
+            & consumer.IsEmpty())
         {
             return new CopyCommand(
                 repository,
@@ -96,7 +96,7 @@ public sealed class DiffCommandParser : ICommandParser
             & consumer.TryInt("--second", "The second snapshot ID", out var secondSnapshotId, SnapshotStore.LatestSnapshotId)
             & consumer.TryIncludePatterns(out var includePatterns)
             & consumer.TryChunksOnly(out var chunksOnly)
-            & consumer.IsConsumed())
+            & consumer.IsEmpty())
         {
             return new DiffCommand(
                 repository,
@@ -123,7 +123,7 @@ public sealed class GarbageCollectCommandParser : ICommandParser
     public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
-            & consumer.IsConsumed())
+            & consumer.IsEmpty())
         {
             return new GarbageCollectCommand(
                 repository,
@@ -147,7 +147,7 @@ public sealed class KeepCommandParser : ICommandParser
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount)
-            & consumer.IsConsumed())
+            & consumer.IsEmpty())
         {
             return new KeepCommand(
                 repository,
@@ -171,7 +171,7 @@ public sealed class ListCommandParser : ICommandParser
     public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
-            & consumer.IsConsumed())
+            & consumer.IsEmpty())
         {
             return new ListCommand(
                 repository,
@@ -195,7 +195,7 @@ public sealed class RemoveCommandParser : ICommandParser
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshot)
-            & consumer.IsConsumed())
+            & consumer.IsEmpty())
         {
             return new RemoveCommand(
                 repository,
@@ -223,7 +223,7 @@ public sealed class RestoreCommandParser : ICommandParser
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryIncludePatterns(out var includePatterns)
             & consumer.TryPreview(out var preview)
-            & consumer.IsConsumed())
+            & consumer.IsEmpty())
         {
             return new RestoreCommand(
                 repository,
@@ -253,7 +253,7 @@ public sealed class ShowCommandParser : ICommandParser
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryIncludePatterns(out var includePatterns)
             & consumer.TryChunksOnly(out var chunksOnly)
-            & consumer.IsConsumed())
+            & consumer.IsEmpty())
         {
             return new ShowCommand(
                 repository,
@@ -282,7 +282,7 @@ public sealed class StoreCommandParser : ICommandParser
             & consumer.TryList("--paths", "The files and directories (blobs) to store", out var paths)
             & consumer.TryIncludePatterns(out var includePatterns)
             & consumer.TryPreview(out var preview)
-            & consumer.IsConsumed())
+            & consumer.IsEmpty())
         {
             return new StoreCommand(
                 repository,

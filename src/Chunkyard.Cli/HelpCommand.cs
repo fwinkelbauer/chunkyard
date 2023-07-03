@@ -23,14 +23,14 @@ public sealed class HelpCommand
 
         Console.WriteLine();
         builder.AppendLine("Usage:");
-        builder.AppendLine($"  <command> <flags>");
-        builder.AppendLine($"  <command> --help");
-        builder.AppendLine($"  help");
+        builder.AppendLine("  <command> <flags>");
+        builder.AppendLine("  <command> --help");
+        builder.AppendLine("  help");
 
         if (_helpTexts.Any())
         {
             builder.AppendLine();
-            builder.AppendLine($"Help:");
+            builder.AppendLine("Help:");
 
             foreach (var helpText in _helpTexts)
             {

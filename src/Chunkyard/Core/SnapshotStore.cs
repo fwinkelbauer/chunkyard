@@ -257,7 +257,7 @@ public sealed class SnapshotStore
             if (!bytes.SequenceEqual(otherBytes))
             {
                 throw new ChunkyardException(
-                    $"Copying data between different repositories is not supported");
+                    "Copying data between different repositories is not supported");
             }
         }
 

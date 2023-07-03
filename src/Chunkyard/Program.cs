@@ -41,6 +41,8 @@ public static class Program
                 CommandHandler.Remove(remove);
             else if (command is RestoreCommand restore)
                 CommandHandler.Restore(restore);
+            else if (command is ShowCommand show)
+                CommandHandler.Show(show);
             else if (command is StoreCommand store)
                 CommandHandler.Store(store);
             else

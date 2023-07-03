@@ -90,7 +90,7 @@ public sealed class FileBlobSystemTests
 
 public abstract class BlobSystemTests
 {
-    internal BlobSystemTests(IBlobSystem blobSystem)
+    protected BlobSystemTests(IBlobSystem blobSystem)
     {
         BlobSystem = blobSystem;
     }
@@ -120,15 +120,14 @@ public abstract class BlobSystemTests
             new[] { blob },
             BlobSystem.ListBlobs());
 
-        using (var readStream = BlobSystem.OpenRead(blob.Name))
-        using (var memoryStream = new MemoryStream())
-        {
-            readStream.CopyTo(memoryStream);
+        using var readStream = BlobSystem.OpenRead(blob.Name);
+        using var memoryStream = new MemoryStream();
 
-            Assert.Equal(
-                expectedBytes,
-                memoryStream.ToArray());
-        }
+        readStream.CopyTo(memoryStream);
+
+        Assert.Equal(
+            expectedBytes,
+            memoryStream.ToArray());
     }
 
     [Fact]

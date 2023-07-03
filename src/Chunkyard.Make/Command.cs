@@ -8,7 +8,7 @@ public sealed class BuildCommandParser : ICommandParser
 
     public object Parse(FlagConsumer consumer)
     {
-        return consumer.IsConsumed()
+        return consumer.IsEmpty()
             ? new BuildCommand()
             : consumer.Help;
     }
@@ -22,7 +22,7 @@ public sealed class CheckCommandParser : ICommandParser
 
     public object Parse(FlagConsumer consumer)
     {
-        return consumer.IsConsumed()
+        return consumer.IsEmpty()
             ? new CheckCommand()
             : consumer.Help;
     }
@@ -36,7 +36,7 @@ public sealed class CleanCommandParser : ICommandParser
 
     public object Parse(FlagConsumer consumer)
     {
-        return consumer.IsConsumed()
+        return consumer.IsEmpty()
             ? new CleanCommand()
             : consumer.Help;
     }
@@ -50,7 +50,7 @@ public sealed class FormatCommandParser : ICommandParser
 
     public object Parse(FlagConsumer consumer)
     {
-        return consumer.IsConsumed()
+        return consumer.IsEmpty()
             ? new FormatCommand()
             : consumer.Help;
     }
@@ -64,7 +64,7 @@ public sealed class PublishCommandParser : ICommandParser
 
     public object Parse(FlagConsumer consumer)
     {
-        return consumer.IsConsumed()
+        return consumer.IsEmpty()
             ? new PublishCommand()
             : consumer.Help;
     }
@@ -78,7 +78,7 @@ public sealed class ReleaseCommandParser : ICommandParser
 
     public object Parse(FlagConsumer consumer)
     {
-        return consumer.IsConsumed()
+        return consumer.IsEmpty()
             ? new ReleaseCommand()
             : consumer.Help;
     }

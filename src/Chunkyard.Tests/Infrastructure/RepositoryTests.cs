@@ -58,7 +58,7 @@ public abstract class RepositoryTests
 {
     private readonly IReadOnlyCollection<string> _keys;
 
-    internal RepositoryTests(IRepository<string> repository)
+    protected RepositoryTests(IRepository<string> repository)
     {
         Repository = repository;
 
