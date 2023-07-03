@@ -2,22 +2,27 @@ namespace Chunkyard.Tests.Cli;
 
 public static class CommandParserTests
 {
-    [Fact]
-    public static void Parse_Returns_Parsed_Command()
+    [Theory]
+    [InlineData("cmd")]
+    [InlineData("cmd --help false")]
+    public static void Parse_Returns_Parsed_Command(string args)
     {
         var parser = new CommandParser(
             new SomeCommandParser());
 
         Assert.IsType<SomeCommand>(
-            parser.Parse("cmd"));
+            parser.Parse(args.Split(' ')));
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("unknown")]
     [InlineData("help")]
+    [InlineData("cmd --unknown value")]
     [InlineData("cmd --help")]
-    public static void Parse_Returns_Help_For_Unknown_Or_Help_Command(
+    [InlineData("cmd --help true")]
+    [InlineData("cmd --help invalid")]
+    public static void Parse_Returns_Help_For_Unknown_Invalid_Or_Help_Command(
         string args)
     {
         var parser = new CommandParser(

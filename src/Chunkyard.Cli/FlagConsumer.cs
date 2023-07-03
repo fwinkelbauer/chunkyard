@@ -93,6 +93,7 @@ public sealed class FlagConsumer
             && list.Count == 0)
         {
             _flags.Remove(flag);
+            _helpTexts.Add(new HelpText(flag, info));
 
             value = true;
             return true;

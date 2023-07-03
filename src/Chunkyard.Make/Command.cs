@@ -6,12 +6,7 @@ public sealed class BuildCommandParser : ICommandParser
 
     public string Info => "Build the repository";
 
-    public object Parse(FlagConsumer consumer)
-    {
-        return consumer.IsEmpty()
-            ? new BuildCommand()
-            : consumer.Help;
-    }
+    public object Parse(FlagConsumer consumer) => new BuildCommand();
 }
 
 public sealed class CheckCommandParser : ICommandParser
@@ -20,12 +15,7 @@ public sealed class CheckCommandParser : ICommandParser
 
     public string Info => "Check for dependency updates";
 
-    public object Parse(FlagConsumer consumer)
-    {
-        return consumer.IsEmpty()
-            ? new CheckCommand()
-            : consumer.Help;
-    }
+    public object Parse(FlagConsumer consumer) => new CheckCommand();
 }
 
 public sealed class CleanCommandParser : ICommandParser
@@ -34,12 +24,7 @@ public sealed class CleanCommandParser : ICommandParser
 
     public string Info => "Clean the repository";
 
-    public object Parse(FlagConsumer consumer)
-    {
-        return consumer.IsEmpty()
-            ? new CleanCommand()
-            : consumer.Help;
-    }
+    public object Parse(FlagConsumer consumer) => new CleanCommand();
 }
 
 public sealed class FormatCommandParser : ICommandParser
@@ -48,12 +33,7 @@ public sealed class FormatCommandParser : ICommandParser
 
     public string Info => "Run the formatter";
 
-    public object Parse(FlagConsumer consumer)
-    {
-        return consumer.IsEmpty()
-            ? new FormatCommand()
-            : consumer.Help;
-    }
+    public object Parse(FlagConsumer consumer) => new FormatCommand();
 }
 
 public sealed class PublishCommandParser : ICommandParser
@@ -62,12 +42,7 @@ public sealed class PublishCommandParser : ICommandParser
 
     public string Info => "Publish the main project";
 
-    public object Parse(FlagConsumer consumer)
-    {
-        return consumer.IsEmpty()
-            ? new PublishCommand()
-            : consumer.Help;
-    }
+    public object Parse(FlagConsumer consumer) => new PublishCommand();
 }
 
 public sealed class ReleaseCommandParser : ICommandParser
@@ -76,12 +51,7 @@ public sealed class ReleaseCommandParser : ICommandParser
 
     public string Info => "Create a release commit";
 
-    public object Parse(FlagConsumer consumer)
-    {
-        return consumer.IsEmpty()
-            ? new ReleaseCommand()
-            : consumer.Help;
-    }
+    public object Parse(FlagConsumer consumer) => new ReleaseCommand();
 }
 
 public sealed class BuildCommand

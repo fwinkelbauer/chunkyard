@@ -6,16 +6,17 @@ namespace Chunkyard.Cli;
 /// </summary>
 public sealed class HelpCommand
 {
-    private readonly IReadOnlyCollection<HelpText> _helpTexts;
-    private readonly IReadOnlyCollection<string> _errors;
-
     public HelpCommand(
         IReadOnlyCollection<HelpText> helpTexts,
         IReadOnlyCollection<string> errors)
     {
-        _helpTexts = helpTexts;
-        _errors = errors;
+        HelpTexts = helpTexts;
+        Errors = errors;
     }
+
+    public IReadOnlyCollection<HelpText> HelpTexts { get; }
+
+    public IReadOnlyCollection<string> Errors { get; }
 
     public string ToText()
     {
@@ -27,24 +28,24 @@ public sealed class HelpCommand
         builder.AppendLine("  <command> --help");
         builder.AppendLine("  help");
 
-        if (_helpTexts.Any())
+        if (HelpTexts.Any())
         {
             builder.AppendLine();
             builder.AppendLine("Help:");
 
-            foreach (var helpText in _helpTexts)
+            foreach (var helpText in HelpTexts)
             {
                 builder.AppendLine($"  {helpText.Topic}");
                 builder.AppendLine($"    {helpText.Info}");
             }
         }
 
-        if (_errors.Any())
+        if (Errors.Any())
         {
             builder.AppendLine();
-            builder.AppendLine(_errors.Count == 1 ? "Error:" : "Errors:");
+            builder.AppendLine(Errors.Count == 1 ? "Error:" : "Errors:");
 
-            foreach (var error in _errors)
+            foreach (var error in Errors)
             {
                 builder.AppendLine($"  {error}");
             }
@@ -56,12 +57,12 @@ public sealed class HelpCommand
     public override bool Equals(object? obj)
     {
         return obj is HelpCommand other
-            && _helpTexts.SequenceEqual(other._helpTexts)
-            && _errors.SequenceEqual(other._errors);
+            && HelpTexts.SequenceEqual(other.HelpTexts)
+            && Errors.SequenceEqual(other.Errors);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(_helpTexts, _errors);
+        return HashCode.Combine(HelpTexts, Errors);
     }
 }

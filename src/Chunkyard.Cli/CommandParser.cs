@@ -23,10 +23,14 @@ public sealed class CommandParser
     {
         var arg = Arg.Parse(args);
 
-        if (arg == null
-            || arg.Command.Equals("help")
-            || (new FlagConsumer(arg.Flags).TryBool("--help", "Print usage information", out var help)
-                && help))
+        if (arg == null)
+        {
+            return new HelpCommand(_helpTexts, Array.Empty<string>());
+        }
+
+        var consumer = new FlagConsumer(arg.Flags);
+
+        if (arg.Command.Equals("help"))
         {
             return new HelpCommand(_helpTexts, Array.Empty<string>());
         }
@@ -34,10 +38,22 @@ public sealed class CommandParser
         var parser = _parsers.FirstOrDefault(
             p => p.Command.Equals(arg.Command));
 
-        return parser == null
-            ? new HelpCommand(
+        if (parser == null)
+        {
+            return new HelpCommand(
                 _helpTexts,
-                new[] { $"Unknown command: {arg.Command}" })
-            : parser.Parse(new FlagConsumer(arg.Flags));
+                new[] { $"Unknown command: {arg.Command}" });
+        }
+
+        var command = parser.Parse(consumer);
+
+        if ((consumer.TryBool("--help", "Print usage information", out var help) && help)
+            | !consumer.IsEmpty()
+            || consumer.Help.Errors.Any())
+        {
+            return consumer.Help;
+        }
+
+        return command;
     }
 }

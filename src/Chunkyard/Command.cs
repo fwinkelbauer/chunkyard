@@ -11,8 +11,7 @@ public sealed class CatCommandParser : ICommandParser
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & (consumer.TrySnapshot(out var snapshotId)
                 | consumer.TryList("--chunks", "The chunk IDs", out var chunkIds))
-            & consumer.TryString("--export", "The export path", out var export, "")
-            & consumer.IsEmpty())
+            & consumer.TryString("--export", "The export path", out var export, ""))
         {
             return new CatCommand(
                 repository,
@@ -40,8 +39,7 @@ public sealed class CheckCommandParser : ICommandParser
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshotId)
             & consumer.TryIncludePatterns(out var includePatterns)
-            & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow)
-            & consumer.IsEmpty())
+            & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow))
         {
             return new CheckCommand(
                 repository,
@@ -67,8 +65,7 @@ public sealed class CopyCommandParser : ICommandParser
     public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
-            & consumer.TryString("--destination", "The destination repository path", out var destinationRepository)
-            & consumer.IsEmpty())
+            & consumer.TryString("--destination", "The destination repository path", out var destinationRepository))
         {
             return new CopyCommand(
                 repository,
@@ -95,8 +92,7 @@ public sealed class DiffCommandParser : ICommandParser
             & consumer.TryInt("--first", "The first snapshot ID", out var firstSnapshotId, SnapshotStore.SecondLatestSnapshotId)
             & consumer.TryInt("--second", "The second snapshot ID", out var secondSnapshotId, SnapshotStore.LatestSnapshotId)
             & consumer.TryIncludePatterns(out var includePatterns)
-            & consumer.TryChunksOnly(out var chunksOnly)
-            & consumer.IsEmpty())
+            & consumer.TryChunksOnly(out var chunksOnly))
         {
             return new DiffCommand(
                 repository,
@@ -122,8 +118,7 @@ public sealed class GarbageCollectCommandParser : ICommandParser
 
     public object Parse(FlagConsumer consumer)
     {
-        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
-            & consumer.IsEmpty())
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel))
         {
             return new GarbageCollectCommand(
                 repository,
@@ -146,8 +141,7 @@ public sealed class KeepCommandParser : ICommandParser
     public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
-            & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount)
-            & consumer.IsEmpty())
+            & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount))
         {
             return new KeepCommand(
                 repository,
@@ -170,8 +164,7 @@ public sealed class ListCommandParser : ICommandParser
 
     public object Parse(FlagConsumer consumer)
     {
-        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
-            & consumer.IsEmpty())
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel))
         {
             return new ListCommand(
                 repository,
@@ -194,8 +187,7 @@ public sealed class RemoveCommandParser : ICommandParser
     public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
-            & consumer.TrySnapshot(out var snapshot)
-            & consumer.IsEmpty())
+            & consumer.TrySnapshot(out var snapshot))
         {
             return new RemoveCommand(
                 repository,
@@ -222,8 +214,7 @@ public sealed class RestoreCommandParser : ICommandParser
             & consumer.TryString("--directory", "The directory to restore into", out var directory)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryIncludePatterns(out var includePatterns)
-            & consumer.TryPreview(out var preview)
-            & consumer.IsEmpty())
+            & consumer.TryPreview(out var preview))
         {
             return new RestoreCommand(
                 repository,
@@ -252,8 +243,7 @@ public sealed class ShowCommandParser : ICommandParser
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryIncludePatterns(out var includePatterns)
-            & consumer.TryChunksOnly(out var chunksOnly)
-            & consumer.IsEmpty())
+            & consumer.TryChunksOnly(out var chunksOnly))
         {
             return new ShowCommand(
                 repository,
@@ -281,8 +271,7 @@ public sealed class StoreCommandParser : ICommandParser
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryList("--paths", "The files and directories (blobs) to store", out var paths)
             & consumer.TryIncludePatterns(out var includePatterns)
-            & consumer.TryPreview(out var preview)
-            & consumer.IsEmpty())
+            & consumer.TryPreview(out var preview))
         {
             return new StoreCommand(
                 repository,

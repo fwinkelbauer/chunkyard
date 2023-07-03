@@ -111,4 +111,37 @@ public static class FlagConsumerTests
         Assert.True(success);
         Assert.False(actual);
     }
+
+    [Fact]
+    public static void TryBool_Returns_True_On_Empty_Flag()
+    {
+        var expectedHelp = new HelpCommand(
+            new[] { new HelpText("--bool", "info") },
+            Array.Empty<string>());
+
+        var consumer = new FlagConsumer(
+            Some.Dict(("--bool", Some.Strings())));
+
+        var success = consumer.TryBool("--bool", "info", out var actual);
+
+        Assert.True(success);
+        Assert.True(actual);
+        Assert.Equal(expectedHelp, consumer.Help);
+    }
+
+    [Fact]
+    public static void TryBool_Returns_False_On_Invalid_Input()
+    {
+        var expectedHelp = new HelpCommand(
+            new[] { new HelpText("--bool", "info. Default: False") },
+            new[] { "Invalid value: --bool" });
+
+        var consumer = new FlagConsumer(
+            Some.Dict(("--bool", Some.Strings("not-a-bool"))));
+
+        var success = consumer.TryBool("--bool", "info", out var actual);
+
+        Assert.False(success);
+        Assert.Equal(expectedHelp, consumer.Help);
+    }
 }
