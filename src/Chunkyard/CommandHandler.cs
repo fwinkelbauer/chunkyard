@@ -106,6 +106,7 @@ internal static class CommandHandler
     public static void Help(HelpCommand c)
     {
         Console.WriteLine(c.ToText());
+
         Environment.ExitCode = 1;
     }
 
