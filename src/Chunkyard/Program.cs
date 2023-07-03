@@ -2,7 +2,7 @@ namespace Chunkyard;
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static int Main(string[] args)
     {
         try
         {
@@ -52,5 +52,7 @@ public static class Program
         {
             CommandHandler.Error(e);
         }
+
+        return Environment.ExitCode;
     }
 }
