@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard.Make", "Chunkyard
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chunkyard.Cli", "Chunkyard.Cli\Chunkyard.Cli.csproj", "{B2EDBAE8-C6B2-45C3-8EEC-9E5B0AEA1689}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chunkyard.Cli.Tests", "Chunkyard.Cli.Tests\Chunkyard.Cli.Tests.csproj", "{06E71056-EC33-4870-A476-F1EC1F95CBE0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,18 @@ Global
 		{B2EDBAE8-C6B2-45C3-8EEC-9E5B0AEA1689}.Release|x64.Build.0 = Release|Any CPU
 		{B2EDBAE8-C6B2-45C3-8EEC-9E5B0AEA1689}.Release|x86.ActiveCfg = Release|Any CPU
 		{B2EDBAE8-C6B2-45C3-8EEC-9E5B0AEA1689}.Release|x86.Build.0 = Release|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Debug|x64.Build.0 = Debug|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Debug|x86.Build.0 = Debug|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Release|x64.ActiveCfg = Release|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Release|x64.Build.0 = Release|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Release|x86.ActiveCfg = Release|Any CPU
+		{06E71056-EC33-4870-A476-F1EC1F95CBE0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
