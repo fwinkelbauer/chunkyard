@@ -23,7 +23,7 @@ These classes contain the most important logic:
 - **IBlobSystem.cs:** Provides an abstraction to read and write Blobs
 - **SnapshotStore.cs:** Chunks, encrypts, deduplicates and stores Blobs in an
   IRepository
-- **Commands.cs:** Defines all verbs of the command line interface
+- **CommandHandler.cs:** Defines available actions of the command line interface
 
 ## Backup Workflow
 

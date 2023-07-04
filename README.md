@@ -35,8 +35,7 @@ tools. Here's a list of [options][backup-tools].
 
 ## Development
 
-- You can learn more about a few basic Chunkyard topics by reading the
-  `ARCHITECTURE.md` file
+- You can learn more about a few basic concepts by reading `ARCHITECTURE.md`
 
 ## Build
 
@@ -58,7 +57,7 @@ help` or `./make build --help` to learn more.
 
 ## Usage
 
-Type `chunkyard --help` to see a list of all available commands. You can add
+Type `chunkyard help` to see a list of all available commands. You can add
 `--help` to any command to get more information about what parameters it
 expects.
 
@@ -66,7 +65,7 @@ Example:
 
 ``` shell
 # List all available commands
-chunkyard --help
+chunkyard help
 
 # Learn more about the store command
 chunkyard store --help
