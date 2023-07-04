@@ -19,7 +19,8 @@ public static class Program
                 new ShowCommandParser(),
                 new StoreCommandParser());
 
-            var command = parser.Parse(args);
+            var command = parser.Parse(
+                PopulateArguments(args));
 
             Run<CatCommand>(command, CommandHandler.Cat);
             Run<CheckCommand>(command, CommandHandler.Check);
@@ -40,6 +41,28 @@ public static class Program
         }
 
         return Environment.ExitCode;
+    }
+
+    private static string[] PopulateArguments(string[] args)
+    {
+        const string config = ".chunkyard.config";
+
+        if (args.Length > 0 && File.Exists(config))
+        {
+            var mergedArgs = new List<string>
+            {
+                args[0]
+            };
+
+            mergedArgs.AddRange(File.ReadAllText(config).Split(' '));
+            mergedArgs.AddRange(args[1..]);
+
+            return mergedArgs.ToArray();
+        }
+        else
+        {
+            return args;
+        }
     }
 
     private static void Run<T>(object obj, Action<T> handler)
