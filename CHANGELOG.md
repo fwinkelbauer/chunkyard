@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 20.0.0 - 2023-07-04
+
 ### Added
 
 - Support for `.chunkyard.config` files to set default command line flags
