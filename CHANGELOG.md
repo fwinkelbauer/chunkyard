@@ -132,14 +132,14 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ### Added
 
-- The `-s` option to `cat` so that it can also print snapshots
+- The `-s` flag to `cat` so that it can also print snapshots
 
 ## 16.6.0 - 2022-06-09
 
 ### Changed
 
-- The `-r` and `--repository` option to have the default value `.chunkyard`
-- The `-f` and `--files` option of `store` to `-p` and `--paths`
+- The `-r` and `--repository` flag to have the default value `.chunkyard`
+- The `-f` and `--files` flag of `store` to `-p` and `--paths`
 
 ## 16.5.0 - 2022-06-07
 
@@ -305,15 +305,15 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ### Removed
 
-- The `--snapshot` option from the `preview` command
+- The `--snapshot` flag from the `preview` command
 
 ## 11.9.0 - 2021-10-30
 
 ### Changed
 
-- The `diff` command to include an `--include` option. The `--content-only` flag
+- The `diff` command to include an `--include` flag. The `--content-only` flag
   will now print the actual content URIs
-- The `show` command to also include a `--content-only` option
+- The `show` command to also include a `--content-only` flag
 
 ## 11.8.0 - 2021-10-10
 
@@ -337,7 +337,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ### Removed
 
-- The `-c` option when using the `diff` command. `--content-only` should be used
+- The `-c` flag when using the `diff` command. `--content-only` should be used
   instead
 
 ## 11.5.0 - 2021-09-09
@@ -351,8 +351,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ### Removed
 
-- The `--scan` option when using `create`
-- The `--overwrite` option when using `restore` as this option is now always
+- The `--scan` flag when using `create`
+- The `--overwrite` flag when using `restore` as this flag is now always
   active
 
 ## 11.4.1 - 2021-08-09
@@ -438,7 +438,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ### Changed
 
-- A compiler option when publishing Chunkyard to cut the binary size in half
+- A compiler flag when publishing Chunkyard to cut the binary size in half
 - The file fetching algorithm to improve its performance
 
 ## 9.1.0 - 2021-04-17
@@ -497,7 +497,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ### Removed
 
-- Chunk size settings from all CLI verbs
+- Chunk size settings from the command line
 
 ## 6.1.0 - 2021-03-09
 
@@ -534,7 +534,8 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ### Changed
 
-- The name of the argument `log-position` to `snapshot` for all CLI verbs
+- The name of the argument `log-position` to `snapshot` when using the command
+  line interface
 
 ### Removed
 
@@ -635,7 +636,7 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ### Changed
 
-- The names of a few command line verbs
+- The names of a few commands
 - The `create` command to accept chunk size parameters
 
 ### Fixed

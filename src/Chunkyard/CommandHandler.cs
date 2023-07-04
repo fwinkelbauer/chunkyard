@@ -1,7 +1,7 @@
 namespace Chunkyard;
 
 /// <summary>
-/// Handles every available command line verb of the Chunkyard assembly.
+/// Handles every available command of the Chunkyard assembly.
 /// </summary>
 internal static class CommandHandler
 {

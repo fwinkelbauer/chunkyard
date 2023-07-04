@@ -6,7 +6,7 @@ public static class ProgramTests
     [InlineData("store --not-a-real-argument")]
     [InlineData("store")]
     [InlineData("store --help")]
-    [InlineData("not-a-real-verb")]
+    [InlineData("invalid-cmd")]
     [InlineData("help")]
     [InlineData("")]
     public static void Invalid_Arguments_Or_Help_Commands_Return_ExitCode_One(
