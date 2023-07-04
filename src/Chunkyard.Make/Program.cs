@@ -34,22 +34,13 @@ public static class Program
 
             var command = parser.Parse(args);
 
-            if (command is BuildCommand)
-                CommandHandler.Build();
-            else if (command is CheckCommand)
-                CommandHandler.Check();
-            else if (command is CleanCommand)
-                CommandHandler.Clean();
-            else if (command is FormatCommand)
-                CommandHandler.Format();
-            else if (command is HelpCommand help)
-                CommandHandler.Help(help);
-            else if (command is PublishCommand)
-                CommandHandler.Publish();
-            else if (command is ReleaseCommand)
-                CommandHandler.Release();
-            else
-                throw new NotImplementedException();
+            Run<BuildCommand>(command, _ => CommandHandler.Build());
+            Run<CheckCommand>(command, _ => CommandHandler.Check());
+            Run<CleanCommand>(command, _ => CommandHandler.Clean());
+            Run<FormatCommand>(command, _ => CommandHandler.Format());
+            Run<HelpCommand>(command, CommandHandler.Help);
+            Run<PublishCommand>(command, _ => CommandHandler.Publish());
+            Run<ReleaseCommand>(command, _ => CommandHandler.Release());
         }
         catch (Exception e)
         {
@@ -57,5 +48,13 @@ public static class Program
         }
 
         return Environment.ExitCode;
+    }
+
+    private static void Run<T>(object obj, Action<T> handler)
+    {
+        if (obj is T t)
+        {
+            handler(t);
+        }
     }
 }

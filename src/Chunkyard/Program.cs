@@ -21,32 +21,18 @@ public static class Program
 
             var command = parser.Parse(args);
 
-            if (command is CatCommand cat)
-                CommandHandler.Cat(cat);
-            else if (command is CheckCommand check)
-                CommandHandler.Check(check);
-            else if (command is CopyCommand copy)
-                CommandHandler.Copy(copy);
-            else if (command is DiffCommand diff)
-                CommandHandler.Diff(diff);
-            else if (command is GarbageCollectCommand gc)
-                CommandHandler.GarbageCollect(gc);
-            else if (command is KeepCommand keep)
-                CommandHandler.Keep(keep);
-            else if (command is HelpCommand help)
-                CommandHandler.Help(help);
-            else if (command is ListCommand list)
-                CommandHandler.List(list);
-            else if (command is RemoveCommand remove)
-                CommandHandler.Remove(remove);
-            else if (command is RestoreCommand restore)
-                CommandHandler.Restore(restore);
-            else if (command is ShowCommand show)
-                CommandHandler.Show(show);
-            else if (command is StoreCommand store)
-                CommandHandler.Store(store);
-            else
-                throw new NotImplementedException();
+            Run<CatCommand>(command, CommandHandler.Cat);
+            Run<CheckCommand>(command, CommandHandler.Check);
+            Run<CopyCommand>(command, CommandHandler.Copy);
+            Run<DiffCommand>(command, CommandHandler.Diff);
+            Run<GarbageCollectCommand>(command, CommandHandler.GarbageCollect);
+            Run<KeepCommand>(command, CommandHandler.Keep);
+            Run<HelpCommand>(command, CommandHandler.Help);
+            Run<ListCommand>(command, CommandHandler.List);
+            Run<RemoveCommand>(command, CommandHandler.Remove);
+            Run<RestoreCommand>(command, CommandHandler.Restore);
+            Run<ShowCommand>(command, CommandHandler.Show);
+            Run<StoreCommand>(command, CommandHandler.Store);
         }
         catch (Exception e)
         {
@@ -54,5 +40,13 @@ public static class Program
         }
 
         return Environment.ExitCode;
+    }
+
+    private static void Run<T>(object obj, Action<T> handler)
+    {
+        if (obj is T t)
+        {
+            handler(t);
+        }
     }
 }
