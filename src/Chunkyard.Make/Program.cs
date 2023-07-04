@@ -34,13 +34,13 @@ public static class Program
 
             var command = parser.Parse(args);
 
-            Run<BuildCommand>(command, _ => CommandHandler.Build());
-            Run<CheckCommand>(command, _ => CommandHandler.Check());
-            Run<CleanCommand>(command, _ => CommandHandler.Clean());
-            Run<FormatCommand>(command, _ => CommandHandler.Format());
-            Run<HelpCommand>(command, CommandHandler.Help);
-            Run<PublishCommand>(command, _ => CommandHandler.Publish());
-            Run<ReleaseCommand>(command, _ => CommandHandler.Release());
+            Handle<BuildCommand>(command, _ => CommandHandler.Build());
+            Handle<CheckCommand>(command, _ => CommandHandler.Check());
+            Handle<CleanCommand>(command, _ => CommandHandler.Clean());
+            Handle<FormatCommand>(command, _ => CommandHandler.Format());
+            Handle<HelpCommand>(command, CommandHandler.Help);
+            Handle<PublishCommand>(command, _ => CommandHandler.Publish());
+            Handle<ReleaseCommand>(command, _ => CommandHandler.Release());
         }
         catch (Exception e)
         {
@@ -50,7 +50,7 @@ public static class Program
         return Environment.ExitCode;
     }
 
-    private static void Run<T>(object obj, Action<T> handler)
+    private static void Handle<T>(object obj, Action<T> handler)
     {
         if (obj is T t)
         {

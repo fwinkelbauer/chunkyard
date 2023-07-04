@@ -22,18 +22,18 @@ public static class Program
             var command = parser.Parse(
                 PopulateArguments(args));
 
-            Run<CatCommand>(command, CommandHandler.Cat);
-            Run<CheckCommand>(command, CommandHandler.Check);
-            Run<CopyCommand>(command, CommandHandler.Copy);
-            Run<DiffCommand>(command, CommandHandler.Diff);
-            Run<GarbageCollectCommand>(command, CommandHandler.GarbageCollect);
-            Run<KeepCommand>(command, CommandHandler.Keep);
-            Run<HelpCommand>(command, CommandHandler.Help);
-            Run<ListCommand>(command, CommandHandler.List);
-            Run<RemoveCommand>(command, CommandHandler.Remove);
-            Run<RestoreCommand>(command, CommandHandler.Restore);
-            Run<ShowCommand>(command, CommandHandler.Show);
-            Run<StoreCommand>(command, CommandHandler.Store);
+            Handle<CatCommand>(command, CommandHandler.Cat);
+            Handle<CheckCommand>(command, CommandHandler.Check);
+            Handle<CopyCommand>(command, CommandHandler.Copy);
+            Handle<DiffCommand>(command, CommandHandler.Diff);
+            Handle<GarbageCollectCommand>(command, CommandHandler.GarbageCollect);
+            Handle<KeepCommand>(command, CommandHandler.Keep);
+            Handle<HelpCommand>(command, CommandHandler.Help);
+            Handle<ListCommand>(command, CommandHandler.List);
+            Handle<RemoveCommand>(command, CommandHandler.Remove);
+            Handle<RestoreCommand>(command, CommandHandler.Restore);
+            Handle<ShowCommand>(command, CommandHandler.Show);
+            Handle<StoreCommand>(command, CommandHandler.Store);
         }
         catch (Exception e)
         {
@@ -65,7 +65,7 @@ public static class Program
         }
     }
 
-    private static void Run<T>(object obj, Action<T> handler)
+    private static void Handle<T>(object obj, Action<T> handler)
     {
         if (obj is T t)
         {
