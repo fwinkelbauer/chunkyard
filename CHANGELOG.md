@@ -7,10 +7,16 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- Support for `.chunkyard.config` files to set default command line flags
+
 ### Changed
 
 - The password prompt `SecretTool` to `Libsecret` since it now depends on
   libsecret instead of secret-tool
+- Changed all commands to only support flags with two dashes, e.g.
+  `--repository`
 
 ## 19.4.0 - 2023-05-18
 
