@@ -3,16 +3,16 @@ namespace Chunkyard.Cli.Tests;
 public static class FlagConsumerTests
 {
     [Fact]
-    public static void IsEmpty_Indicates_If_Consumer_Is_Empty()
+    public static void TryEmpty_Indicates_If_Consumer_Is_Empty()
     {
         var consumer = new FlagConsumer(
             Some.Dict(("--some", Some.Strings("value"))));
 
-        Assert.False(consumer.IsEmpty());
+        Assert.False(consumer.TryEmpty());
 
         consumer.TryList("--some", "info", out _);
 
-        Assert.True(consumer.IsEmpty());
+        Assert.True(consumer.TryEmpty());
     }
 
     [Fact]

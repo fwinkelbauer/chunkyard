@@ -48,7 +48,7 @@ public sealed class CommandParser
         var command = parser.Parse(consumer);
 
         if ((consumer.TryBool("--help", "Print usage information", out var help) && help)
-            | !consumer.IsEmpty()
+            || !consumer.TryEmpty()
             || consumer.Help.Errors.Any())
         {
             return consumer.Help;

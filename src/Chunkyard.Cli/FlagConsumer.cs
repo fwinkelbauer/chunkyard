@@ -128,7 +128,7 @@ public sealed class FlagConsumer
             defaultValue);
     }
 
-    public bool IsEmpty()
+    public bool TryEmpty()
     {
         var consumed = _flags.Count == 0;
 
