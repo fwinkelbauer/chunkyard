@@ -32,6 +32,19 @@ public static class CommandParserTests
             parser.Parse(args.Split(' ')));
     }
 
+    [Fact]
+    public static void Parse_Dispatches_To_Correct_Parser()
+    {
+        var parser = new CommandParser(
+            new SimpleCommandParser("one", "info", "result-one"),
+            new SimpleCommandParser("two", "info", "result-two"),
+            new SimpleCommandParser("three", "info", "result-three"));
+
+        Assert.Equal("result-one", parser.Parse("one"));
+        Assert.Equal("result-two", parser.Parse("two"));
+        Assert.Equal("result-three", parser.Parse("three"));
+    }
+
     internal sealed class SomeCommand
     {
     }
