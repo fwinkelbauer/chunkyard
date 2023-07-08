@@ -50,7 +50,7 @@ public static class FlagConsumerTests
     }
 
     [Fact]
-    public static void TryString_Returns_Nothing_On_Empty_Input()
+    public static void TryString_Returns_Nothing_On_Empty_Required_Input()
     {
         var expectedHelp = new HelpCommand(
             new[] { new HelpText("--some", "info") },
@@ -66,7 +66,7 @@ public static class FlagConsumerTests
     }
 
     [Fact]
-    public static void TryString_Returns_Default_On_Empty_Input()
+    public static void TryString_Returns_Default_On_Empty_Optional_Input()
     {
         var expectedValue = "default value";
 
