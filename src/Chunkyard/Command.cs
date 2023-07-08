@@ -630,7 +630,7 @@ public static class ArgConsumerExtensions
         out IReadOnlyCollection<string> includePatterns)
     {
         return consumer.TryStrings(
-            "--include",
+            "--includes",
             "The fuzzy patterns for blobs to include",
             out includePatterns);
     }
