@@ -10,7 +10,7 @@ public sealed class CatCommandParser : ICommandParser
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & (consumer.TrySnapshot(out var snapshotId)
-                | consumer.TryList("--chunks", "The chunk IDs", out var chunkIds))
+                | consumer.TryStrings("--chunks", "The chunk IDs", out var chunkIds))
             & consumer.TryString("--export", "The export path", out var export, ""))
         {
             return new CatCommand(
@@ -269,7 +269,7 @@ public sealed class StoreCommandParser : ICommandParser
     public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
-            & consumer.TryList("--paths", "The files and directories (blobs) to store", out var paths)
+            & consumer.TryStrings("--paths", "The files and directories (blobs) to store", out var paths)
             & consumer.TryIncludePatterns(out var includePatterns)
             & consumer.TryPreview(out var preview))
         {
@@ -629,7 +629,7 @@ public static class ArgConsumerExtensions
         this FlagConsumer consumer,
         out IReadOnlyCollection<string> includePatterns)
     {
-        return consumer.TryList(
+        return consumer.TryStrings(
             "--include",
             "The fuzzy patterns for blobs to include",
             out includePatterns);

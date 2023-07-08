@@ -19,7 +19,7 @@ public sealed class FlagConsumer
 
     public HelpCommand Help => new(_helpTexts, _errors);
 
-    public bool TryList(
+    public bool TryStrings(
         string flag,
         string info,
         out IReadOnlyCollection<string> list)
@@ -52,7 +52,7 @@ public sealed class FlagConsumer
             info = $"{info}. Default: {defaultValue}";
         }
 
-        if (TryList(flag, info, out var list)
+        if (TryStrings(flag, info, out var list)
             && list.Any())
         {
             parsed = list.Last();

@@ -10,18 +10,18 @@ public static class FlagConsumerTests
 
         Assert.False(consumer.TryEmpty());
 
-        consumer.TryList("--some", "info", out _);
+        consumer.TryStrings("--some", "info", out _);
 
         Assert.True(consumer.TryEmpty());
     }
 
     [Fact]
-    public static void TryList_Returns_Empty_List_On_Empty_Input()
+    public static void TryStrings_Returns_Empty_List_On_Empty_Input()
     {
         var consumer = new FlagConsumer(
             Some.Dict<string, IReadOnlyCollection<string>>());
 
-        var success = consumer.TryList(
+        var success = consumer.TryStrings(
             "--something",
             "info",
             out var list);
@@ -31,7 +31,7 @@ public static class FlagConsumerTests
     }
 
     [Fact]
-    public static void TryList_Returns_List_On_Non_Empty_Input()
+    public static void TryStrings_Returns_List_On_Non_Empty_Input()
     {
         var expectedList = Some.Strings("one", "two");
 
@@ -42,7 +42,7 @@ public static class FlagConsumerTests
         var consumer = new FlagConsumer(
             Some.Dict(("--list", expectedList)));
 
-        var success = consumer.TryList("--list", "info", out var actualList);
+        var success = consumer.TryStrings("--list", "info", out var actualList);
 
         Assert.True(success);
         Assert.Equal(expectedList, actualList);
