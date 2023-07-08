@@ -130,14 +130,15 @@ public sealed class FlagConsumer
 
     public bool TryEmpty()
     {
-        var consumed = _flags.Count == 0;
+        var empty = _flags.Count == 0;
 
-        if (!consumed)
+        if (!empty)
         {
             _errors.UnionWith(_flags.Keys.Select(k => $"Extra flag: {k}"));
+            _flags.Clear();
         }
 
-        return consumed;
+        return empty;
     }
 
     private bool TryStruct<T>(
