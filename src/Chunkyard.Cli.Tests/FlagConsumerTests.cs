@@ -141,4 +141,41 @@ public static class FlagConsumerTests
         Assert.False(success);
         Assert.Equal(expectedHelp, consumer.Help);
     }
+
+    [Theory]
+    [InlineData("true", true)]
+    [InlineData("TrUe", true)]
+    [InlineData("false", false)]
+    [InlineData("FALSE", false)]
+    public static void TryBool_Ignores_Case(string arg, bool expected)
+    {
+        var consumer = new FlagConsumer(
+            Some.Dict(("--bool", Some.Strings(arg))));
+
+        var success = consumer.TryBool("--bool", "info", out var actual);
+
+        Assert.True(success);
+        Assert.Equal(expected, actual);
+    }
+
+    [Theory]
+    [InlineData("Monday", Day.Monday)]
+    [InlineData("monday", Day.Monday)]
+    [InlineData("TUESDAY", Day.Tuesday)]
+    public static void TryEnum_Ignores_Case(string arg, Day expected)
+    {
+        var consumer = new FlagConsumer(
+            Some.Dict(("--enum", Some.Strings(arg))));
+
+        var success = consumer.TryEnum<Day>("--enum", "info", out var actual);
+
+        Assert.True(success);
+        Assert.Equal(expected, actual);
+    }
+
+    public enum Day
+    {
+        Monday = 0,
+        Tuesday = 1
+    }
 }

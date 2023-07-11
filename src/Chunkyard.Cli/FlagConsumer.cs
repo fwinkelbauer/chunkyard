@@ -122,8 +122,8 @@ public sealed class FlagConsumer
             flag,
             info,
             out value,
-            s => Enum.TryParse<T>(s, out _),
-            s => Enum.Parse<T>(s),
+            s => Enum.TryParse<T>(s, true, out _),
+            s => Enum.Parse<T>(s, true),
             e => Enum.GetName(typeof(T), e)!,
             defaultValue);
     }
