@@ -136,7 +136,7 @@ public static class FlagConsumerTests
         var consumer = new FlagConsumer(
             Some.Dict(("--bool", Some.Strings("not-a-bool"))));
 
-        var success = consumer.TryBool("--bool", "info", out var actual);
+        var success = consumer.TryBool("--bool", "info", out _);
 
         Assert.False(success);
         Assert.Equal(expectedHelp, consumer.Help);
