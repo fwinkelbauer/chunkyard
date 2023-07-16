@@ -51,8 +51,8 @@ public sealed class CommandParser
             && help;
 
         if (helpRequested
-            || !consumer.TryEmpty()
-            || consumer.Help.Errors.Any())
+            | !consumer.TryEmpty()
+            | consumer.Help.Errors.Any())
         {
             return consumer.Help;
         }

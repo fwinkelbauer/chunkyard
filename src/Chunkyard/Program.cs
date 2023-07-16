@@ -27,16 +27,17 @@ public static class Program
             Handle<DiffCommand>(command, CommandHandler.Diff);
             Handle<GarbageCollectCommand>(command, CommandHandler.GarbageCollect);
             Handle<KeepCommand>(command, CommandHandler.Keep);
-            Handle<HelpCommand>(command, CommandHandler.Help);
             Handle<ListCommand>(command, CommandHandler.List);
             Handle<RemoveCommand>(command, CommandHandler.Remove);
             Handle<RestoreCommand>(command, CommandHandler.Restore);
             Handle<ShowCommand>(command, CommandHandler.Show);
             Handle<StoreCommand>(command, CommandHandler.Store);
+
+            Handle<HelpCommand>(command, DefaultCommandHandler.Help);
         }
         catch (Exception e)
         {
-            CommandHandler.Error(e);
+            DefaultCommandHandler.Error(e);
         }
 
         return Environment.ExitCode;

@@ -99,7 +99,7 @@ directories=(
 )
 
 # Optional: Show error traces
-# export CHUNKYARD_DEBUG='1'
+# export DEBUG='1'
 
 # Store backup
 chunkyard store --repository "$repo" --paths "${directories[@]}"
@@ -125,7 +125,7 @@ $directories = @(
 )
 
 # Optional: Show error traces
-# $env:CHUNKYARD_DEBUG = '1'
+# $env:DEBUG = '1'
 
 # Store backup
 chunkyard store --repository $repo --paths $directories

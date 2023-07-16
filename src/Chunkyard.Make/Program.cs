@@ -38,13 +38,14 @@ public static class Program
             Handle<CheckCommand>(command, _ => CommandHandler.Check());
             Handle<CleanCommand>(command, _ => CommandHandler.Clean());
             Handle<FormatCommand>(command, _ => CommandHandler.Format());
-            Handle<HelpCommand>(command, CommandHandler.Help);
             Handle<PublishCommand>(command, _ => CommandHandler.Publish());
             Handle<ReleaseCommand>(command, _ => CommandHandler.Release());
+
+            Handle<HelpCommand>(command, DefaultCommandHandler.Help);
         }
         catch (Exception e)
         {
-            CommandHandler.Error(e);
+            DefaultCommandHandler.Error(e);
         }
 
         return Environment.ExitCode;
