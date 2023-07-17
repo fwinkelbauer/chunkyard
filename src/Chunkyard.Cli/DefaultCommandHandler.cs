@@ -28,36 +28,36 @@ public static class DefaultCommandHandler
 
     public static void Help(HelpCommand c)
     {
-        Console.WriteLine();
-        Console.WriteLine("Usage:");
-        Console.WriteLine("  <command> <flags>");
-        Console.WriteLine("  <command> --help");
-        Console.WriteLine("  help");
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("Usage:");
+        Console.Error.WriteLine("  <command> <flags>");
+        Console.Error.WriteLine("  <command> --help");
+        Console.Error.WriteLine("  help");
 
         if (c.HelpTexts.Any())
         {
-            Console.WriteLine();
-            Console.WriteLine("Help:");
+            Console.Error.WriteLine();
+            Console.Error.WriteLine("Help:");
 
             foreach (var helpText in c.HelpTexts)
             {
-                Console.WriteLine($"  {helpText.Topic}");
-                Console.WriteLine($"    {helpText.Info}");
+                Console.Error.WriteLine($"  {helpText.Topic}");
+                Console.Error.WriteLine($"    {helpText.Info}");
             }
         }
 
         if (c.Errors.Any())
         {
-            Console.WriteLine();
-            Console.WriteLine(c.Errors.Count == 1 ? "Error:" : "Errors:");
+            Console.Error.WriteLine();
+            Console.Error.WriteLine(c.Errors.Count == 1 ? "Error:" : "Errors:");
 
             foreach (var error in c.Errors)
             {
-                Console.WriteLine($"  {error}");
+                Console.Error.WriteLine($"  {error}");
             }
         }
 
-        Console.WriteLine();
+        Console.Error.WriteLine();
 
         Environment.ExitCode = 1;
     }
