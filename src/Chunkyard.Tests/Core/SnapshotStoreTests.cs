@@ -125,8 +125,7 @@ public static class SnapshotStoreTests
             snapshotStore.GetSnapshot(SnapshotStore.LatestSnapshotId));
 
         Assert.NotNull(
-            Serialize.BytesToSnapshotReference(
-                snapshotStore.RestoreSnapshotReference(snapshotId)));
+            snapshotStore.GetSnapshotReference(snapshotId));
     }
 
     [Fact]

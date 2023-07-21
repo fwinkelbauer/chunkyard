@@ -20,7 +20,8 @@ internal static class CommandHandler
         else
         {
             stream.Write(
-                snapshotStore.RestoreSnapshotReference(c.SnapshotId));
+                Serialize.SnapshotReferenceToBytes(
+                    snapshotStore.GetSnapshotReference(c.SnapshotId)));
         }
 
         if (stream is MemoryStream memoryStream)

@@ -234,10 +234,21 @@ public sealed class SnapshotStore
         }
     }
 
-    public byte[] RestoreSnapshotReference(int snapshotId)
+    public SnapshotReference GetSnapshotReference(int snapshotId)
     {
-        return _repository.Snapshots.Retrieve(
+        var bytes = _repository.Snapshots.Retrieve(
             ResolveSnapshotId(snapshotId));
+
+        try
+        {
+            return Serialize.BytesToSnapshotReference(bytes);
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not retrieve snapshot: #{snapshotId}",
+                e);
+        }
     }
 
     public void CopyTo(IRepository otherRepository)
@@ -473,22 +484,6 @@ public sealed class SnapshotStore
         }
 
         return chunkIds;
-    }
-
-    private SnapshotReference GetSnapshotReference(int snapshotId)
-    {
-        var bytes = RestoreSnapshotReference(snapshotId);
-
-        try
-        {
-            return Serialize.BytesToSnapshotReference(bytes);
-        }
-        catch (Exception e)
-        {
-            throw new ChunkyardException(
-                $"Could not retrieve snapshot: #{snapshotId}",
-                e);
-        }
     }
 
     private int ResolveSnapshotId(int snapshotId)
