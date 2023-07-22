@@ -7,16 +7,31 @@ namespace Chunkyard.Cli;
 /// </summary>
 public sealed class CommandParser
 {
-    private readonly IReadOnlyCollection<ICommandParser> _parsers;
-    private readonly IReadOnlyCollection<HelpText> _helpTexts;
+    private readonly List<ICommandParser> _parsers;
+    private readonly List<HelpText> _helpTexts;
 
     public CommandParser(params ICommandParser[] parsers)
     {
-        _parsers = parsers;
+        _parsers = new List<ICommandParser>(parsers);
 
         _helpTexts = _parsers
             .Select(p => new HelpText(p.Command, p.Info))
-            .ToArray();
+            .ToList();
+
+        var helpCommand = "help";
+        var helpInfo = "Print all available commands";
+        var helpText = new HelpText(helpCommand, helpInfo);
+
+        _helpTexts.Add(helpText);
+
+        _parsers.Add(
+            new SimpleCommandParser(
+                helpCommand,
+                helpInfo,
+                new HelpCommand(_helpTexts, Array.Empty<string>())));
+
+        _parsers = _parsers.OrderBy(p => p.Command).ToList();
+        _helpTexts = _helpTexts.OrderBy(h => h.Topic).ToList();
     }
 
     public object Parse(params string[] args)
@@ -29,11 +44,6 @@ public sealed class CommandParser
         }
 
         var consumer = new FlagConsumer(arg.Flags);
-
-        if (arg.Command.Equals("help"))
-        {
-            return new HelpCommand(_helpTexts, Array.Empty<string>());
-        }
 
         var parser = _parsers.FirstOrDefault(
             p => p.Command.Equals(arg.Command));
