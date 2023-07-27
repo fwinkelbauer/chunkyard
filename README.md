@@ -104,9 +104,9 @@ directories=(
 # Store backup
 chunkyard store --repository "$repo" --paths "${directories[@]}"
 
-# Optional: Prevent password prompts
+# Optional: Prevent password prompts and use more threads
 # export CHUNKYARD_PASSWORD='my secret password'
-# chunkyard store --repository "$repo" --paths "${directories[@]}" --prompt Environment
+# chunkyard store --repository "$repo" --paths "${directories[@]}" --prompt Environment --parallel 2
 
 # Keep the latest four backups
 chunkyard keep --repository "$repo" --latest 4
@@ -131,9 +131,9 @@ $directories = @(
 chunkyard store --repository $repo --paths $directories
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-# Optional: Prevent password prompts
+# Optional: Prevent password prompts and use more threads
 # $env:CHUNKYARD_PASSWORD = 'my secret password'
-# chunkyard store --repository $repo --paths $directories --prompt Environment
+# chunkyard store --repository $repo --paths $directories --prompt Environment --parallel 2
 # if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # Keep the latest four backups

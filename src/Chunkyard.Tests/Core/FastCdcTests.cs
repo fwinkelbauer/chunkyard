@@ -282,7 +282,7 @@ public static class FastCdcTests
     };
 
     [Theory, MemberData(nameof(TheoryData))]
-    public static void SplitIntoChunks(FastCdc fastCdc, int[] chunkSizes)
+    public static void SplitIntoChunks_Splits_Data_Into_Ordered_List_Of_Pieces(FastCdc fastCdc, int[] chunkSizes)
     {
         using var stream = new MemoryStream(PictureBytes);
         var chunks = fastCdc.SplitIntoChunks(stream, Table).ToArray();
