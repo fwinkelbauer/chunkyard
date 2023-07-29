@@ -2,7 +2,7 @@ namespace Chunkyard.Core;
 
 /// <summary>
 /// A class which uses an <see cref="IRepository"/> to store snapshots of a set
-/// of blobs.
+/// of blobs taken from an <see cref="IBlobSystem"/>.
 /// </summary>
 public sealed class SnapshotStore
 {
@@ -14,7 +14,7 @@ public sealed class SnapshotStore
     private readonly IProbe _probe;
     private readonly IWorld _world;
     private readonly Lazy<Crypto> _crypto;
-    private readonly Lazy<uint[]> _table;
+    private readonly Lazy<uint[]> _gearTable;
     private readonly int _parallelism;
 
     public SnapshotStore(
@@ -50,7 +50,7 @@ public sealed class SnapshotStore
             }
         });
 
-        _table = new Lazy<uint[]>(
+        _gearTable = new Lazy<uint[]>(
             () => FastCdc.GenerateGearTable(_crypto.Value));
 
         _parallelism = parallelism;
@@ -391,7 +391,7 @@ public sealed class SnapshotStore
 
     private IReadOnlyCollection<string> StoreChunks(Stream stream)
     {
-        return _fastCdc.SplitIntoChunks(stream, _table.Value)
+        return _fastCdc.SplitIntoChunks(stream, _gearTable.Value)
             .AsParallel()
             .AsOrdered()
             .WithDegreeOfParallelism(_parallelism)

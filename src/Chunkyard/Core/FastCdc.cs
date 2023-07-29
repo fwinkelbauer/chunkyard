@@ -79,19 +79,19 @@ public sealed class FastCdc
         var random = crypto.Encrypt(nonce, input)
             .AsSpan(Crypto.NonceBytes, input.Length);
 
-        var table = new uint[256];
+        var gearTable = new uint[256];
         var mask = Mask(31);
 
-        for (var i = 0; i < table.Length; i++)
+        for (var i = 0; i < gearTable.Length; i++)
         {
             var slice = random.Slice(i * 4, 4);
-            table[i] = BitConverter.ToUInt32(slice) & mask;
+            gearTable[i] = BitConverter.ToUInt32(slice) & mask;
         }
 
-        return table;
+        return gearTable;
     }
 
-    public IEnumerable<byte[]> SplitIntoChunks(Stream stream, uint[] table)
+    public IEnumerable<byte[]> SplitIntoChunks(Stream stream, uint[] gearTable)
     {
         var buffer = new byte[MaxSize];
         var bytesCarryOver = 0;
@@ -108,7 +108,7 @@ public sealed class FastCdc
 
             var chunkSize = Cut(
                 buffer.AsSpan(0, bytesTotal),
-                table);
+                gearTable);
 
             yield return buffer.AsSpan(0, chunkSize).ToArray();
 
@@ -119,7 +119,7 @@ public sealed class FastCdc
         }
     }
 
-    private int Cut(ReadOnlySpan<byte> buffer, uint[] table)
+    private int Cut(ReadOnlySpan<byte> buffer, uint[] gearTable)
     {
         if (buffer.Length <= MinSize)
         {
@@ -134,7 +134,7 @@ public sealed class FastCdc
         {
             var index = buffer[offset];
             offset++;
-            hash = (hash >> 1) + table[index];
+            hash = (hash >> 1) + gearTable[index];
 
             if ((hash & _maskS) == 0)
             {
@@ -146,7 +146,7 @@ public sealed class FastCdc
         {
             var index = buffer[offset];
             offset++;
-            hash = (hash >> 1) + table[index];
+            hash = (hash >> 1) + gearTable[index];
 
             if ((hash & _maskL) == 0)
             {

@@ -5,7 +5,7 @@ public static class FastCdcTests
     private static readonly byte[] PictureBytes = File.ReadAllBytes(
         "Assets/SekienAkashita.jpg");
 
-    private static readonly uint[] Table = new uint[]
+    private static readonly uint[] GearTable = new uint[]
     {
         0x5C95C078,
         0x22408989,
@@ -285,7 +285,7 @@ public static class FastCdcTests
     public static void SplitIntoChunks_Splits_Data_Into_Ordered_List_Of_Pieces(FastCdc fastCdc, int[] chunkSizes)
     {
         using var stream = new MemoryStream(PictureBytes);
-        var chunks = fastCdc.SplitIntoChunks(stream, Table).ToArray();
+        var chunks = fastCdc.SplitIntoChunks(stream, GearTable).ToArray();
 
         Assert.Equal(
             chunkSizes,
