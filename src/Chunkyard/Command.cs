@@ -304,7 +304,7 @@ public sealed class CatCommand : IChunkyardCommand
         Prompt prompt,
         int parallel,
         int snapshotId,
-        IEnumerable<string> chunkIds,
+        IReadOnlyCollection<string> chunkIds,
         string? export)
     {
         Repository = repository;
@@ -323,7 +323,7 @@ public sealed class CatCommand : IChunkyardCommand
 
     public int SnapshotId { get; }
 
-    public IEnumerable<string> ChunkIds { get; }
+    public IReadOnlyCollection<string> ChunkIds { get; }
 
     public string? Export { get; }
 }
@@ -335,7 +335,7 @@ public sealed class CheckCommand : IChunkyardCommand
         Prompt prompt,
         int parallel,
         int snapshotId,
-        IEnumerable<string> includePatterns,
+        IReadOnlyCollection<string> includePatterns,
         bool shallow)
     {
         Repository = repository;
@@ -354,7 +354,7 @@ public sealed class CheckCommand : IChunkyardCommand
 
     public int SnapshotId { get; }
 
-    public IEnumerable<string> IncludePatterns { get; }
+    public IReadOnlyCollection<string> IncludePatterns { get; }
 
     public bool Shallow { get; }
 }
@@ -390,7 +390,7 @@ public sealed class DiffCommand : IChunkyardCommand
         int parallel,
         int firstSnapshotId,
         int secondSnapshotId,
-        IEnumerable<string> includePatterns,
+        IReadOnlyCollection<string> includePatterns,
         bool chunksOnly)
     {
         Repository = repository;
@@ -412,7 +412,7 @@ public sealed class DiffCommand : IChunkyardCommand
 
     public int SecondSnapshotId { get; }
 
-    public IEnumerable<string> IncludePatterns { get; }
+    public IReadOnlyCollection<string> IncludePatterns { get; }
 
     public bool ChunksOnly { get; }
 }
@@ -509,7 +509,7 @@ public sealed class RestoreCommand : IChunkyardCommand
         int parallel,
         string directory,
         int snapshotId,
-        IEnumerable<string> includePatterns,
+        IReadOnlyCollection<string> includePatterns,
         bool preview)
     {
         Repository = repository;
@@ -531,7 +531,7 @@ public sealed class RestoreCommand : IChunkyardCommand
 
     public int SnapshotId { get; }
 
-    public IEnumerable<string> IncludePatterns { get; }
+    public IReadOnlyCollection<string> IncludePatterns { get; }
 
     public bool Preview { get; }
 }
@@ -543,7 +543,7 @@ public sealed class ShowCommand : IChunkyardCommand
         Prompt prompt,
         int parallel,
         int snapshotId,
-        IEnumerable<string> includePatterns,
+        IReadOnlyCollection<string> includePatterns,
         bool chunksOnly)
     {
         Repository = repository;
@@ -562,7 +562,7 @@ public sealed class ShowCommand : IChunkyardCommand
 
     public int SnapshotId { get; }
 
-    public IEnumerable<string> IncludePatterns { get; }
+    public IReadOnlyCollection<string> IncludePatterns { get; }
 
     public bool ChunksOnly { get; }
 }
@@ -591,9 +591,9 @@ public sealed class StoreCommand : IChunkyardCommand
 
     public int Parallel { get; }
 
-    public IEnumerable<string> Paths { get; }
+    public IReadOnlyCollection<string> Paths { get; }
 
-    public IEnumerable<string> IncludePatterns { get; }
+    public IReadOnlyCollection<string> IncludePatterns { get; }
 
     public bool Preview { get; }
 }
