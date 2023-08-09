@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- The `--last` flag to `copy` to control how many snapshots should be copied
+
 ## 20.0.0 - 2023-07-04
 
 ### Added

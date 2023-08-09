@@ -65,13 +65,15 @@ public sealed class CopyCommandParser : ICommandParser
     public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
-            & consumer.TryString("--destination", "The destination repository path", out var destinationRepository))
+            & consumer.TryString("--destination", "The destination repository path", out var destinationRepository)
+            & consumer.TryInt("--last", "The maximum amount of snapshots to copy. Zero or a negative number copies all", out var last, 0))
         {
             return new CopyCommand(
                 repository,
                 prompt,
                 parallel,
-                destinationRepository);
+                destinationRepository,
+                last);
         }
         else
         {
@@ -365,12 +367,14 @@ public sealed class CopyCommand : IChunkyardCommand
         string repository,
         Prompt prompt,
         int parallel,
-        string destinationRepository)
+        string destinationRepository,
+        int last)
     {
         Repository = repository;
         Prompt = prompt;
         Parallel = parallel;
         DestinationRepository = destinationRepository;
+        Last = last;
     }
 
     public string Repository { get; }
@@ -380,6 +384,8 @@ public sealed class CopyCommand : IChunkyardCommand
     public int Parallel { get; }
 
     public string DestinationRepository { get; }
+
+    public int Last { get; }
 }
 
 public sealed class DiffCommand : IChunkyardCommand

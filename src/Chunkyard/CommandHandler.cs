@@ -52,7 +52,8 @@ internal static class CommandHandler
         var snapshotStore = CreateSnapshotStore(c);
 
         snapshotStore.CopyTo(
-            CreateRepository(c.DestinationRepository));
+            CreateRepository(c.DestinationRepository),
+            c.Last);
     }
 
     public static void Diff(DiffCommand c)

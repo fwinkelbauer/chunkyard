@@ -251,7 +251,7 @@ public sealed class SnapshotStore
         }
     }
 
-    public void CopyTo(IRepository otherRepository)
+    public void CopyTo(IRepository otherRepository, int last = 0)
     {
         var snapshotIds = ListSnapshotIds();
         var otherSnapshotIds = otherRepository.Snapshots.List();
@@ -278,6 +278,12 @@ public sealed class SnapshotStore
             ? snapshotIds.Where(id => id > otherSnapshotId)
                 .ToArray()
             : snapshotIds;
+
+        if (last > 0)
+        {
+            snapshotIdsToCopy = snapshotIdsToCopy.TakeLast(last)
+                .ToArray();
+        }
 
         var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
             .Except(otherRepository.Chunks.List())

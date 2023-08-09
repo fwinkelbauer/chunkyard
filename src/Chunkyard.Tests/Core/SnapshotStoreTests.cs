@@ -610,6 +610,25 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
+    public static void CopyTo_Can_Limit_Copied_Snapshots()
+    {
+        var snapshotStore = Some.SnapshotStore();
+        var blobSystem = Some.BlobSystem(Some.Blobs());
+        var otherRepository = Some.Repository();
+        var otherSnapshotStore = Some.SnapshotStore(otherRepository);
+
+        _ = snapshotStore.StoreSnapshot(blobSystem);
+        var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
+
+        snapshotStore.CopyTo(otherRepository, 1);
+
+        Assert.Single(otherSnapshotStore.ListSnapshotIds());
+
+        Assert.True(
+            otherSnapshotStore.CheckSnapshotValid(snapshotId, Fuzzy.Default));
+    }
+
+    [Fact]
     public static void CopyTo_Throws_On_Corrupt_Chunks()
     {
         var repository = Some.Repository();
