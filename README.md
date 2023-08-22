@@ -20,7 +20,7 @@ tools. Here's a list of [options][backup-tools].
 - Strong symmetric encryption (AES Galois/Counter Mode using a 256 bit key)
 - Ability to copy from/to other repositories
 - Verifiable backups
-- No NuGet dependencies
+- No third-party dependencies
 
 ## Non-Goals
 
