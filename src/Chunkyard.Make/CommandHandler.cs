@@ -154,8 +154,7 @@ internal static class CommandHandler
             var relativeFile = Path.GetRelativePath(directory, file);
 
             // The sha256sum binary expects Linux-style line endings
-            hashLines.Append($"{hash} *{relativeFile}");
-            hashLines.Append('\n');
+            hashLines.Append($"{hash} *{relativeFile}\n");
         }
 
         File.WriteAllText(
