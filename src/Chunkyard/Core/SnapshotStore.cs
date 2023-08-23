@@ -253,6 +253,24 @@ public sealed class SnapshotStore
 
     public void CopyTo(IRepository otherRepository, int last = 0)
     {
+        var snapshotIdsToCopy = ListSnapshotIdsToCopy(otherRepository);
+
+        if (last > 0)
+        {
+            snapshotIdsToCopy = snapshotIdsToCopy.TakeLast(last)
+                .ToArray();
+        }
+
+        var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
+            .Except(otherRepository.Chunks.List())
+            .ToArray();
+
+        CopyChunkIds(otherRepository, chunkIdsToCopy);
+        CopySnapshotIds(otherRepository, snapshotIdsToCopy);
+    }
+
+    private IReadOnlyCollection<int> ListSnapshotIdsToCopy(IRepository otherRepository)
+    {
         var snapshotIds = ListSnapshotIds();
         var otherSnapshotIds = otherRepository.Snapshots.List();
 
@@ -279,16 +297,13 @@ public sealed class SnapshotStore
                 .ToArray()
             : snapshotIds;
 
-        if (last > 0)
-        {
-            snapshotIdsToCopy = snapshotIdsToCopy.TakeLast(last)
-                .ToArray();
-        }
+        return snapshotIdsToCopy;
+    }
 
-        var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
-            .Except(otherRepository.Chunks.List())
-            .ToArray();
-
+    private void CopyChunkIds(
+        IRepository otherRepository,
+        IReadOnlyCollection<string> chunkIdsToCopy)
+    {
         var options = new ParallelOptions()
         {
             MaxDegreeOfParallelism = _parallelism
@@ -310,6 +325,16 @@ public sealed class SnapshotStore
                 otherRepository.Chunks.Store(chunkId, bytes);
                 _probe.CopiedChunk(chunkId);
             });
+    }
+
+    private void CopySnapshotIds(
+        IRepository otherRepository,
+        IReadOnlyCollection<int> snapshotIdsToCopy)
+    {
+        var options = new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = _parallelism
+        };
 
         Parallel.ForEach(
             snapshotIdsToCopy,
