@@ -24,22 +24,33 @@ internal sealed class LibsecretPrompt : IPrompt
 
     public string NewPassword()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            throw new NotSupportedException(
-                "The libsecret prompt is only available on Linux");
-        }
+        EnsureLinux();
 
         var password = Lookup();
 
         return string.IsNullOrEmpty(password)
-            ? Store()
+            ? Store(_prompt.NewPassword())
             : password;
     }
 
     public string ExistingPassword()
     {
-        return NewPassword();
+        EnsureLinux();
+
+        var password = Lookup();
+
+        return string.IsNullOrEmpty(password)
+            ? Store(_prompt.ExistingPassword())
+            : password;
+    }
+
+    private static void EnsureLinux()
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            throw new NotSupportedException(
+                "The libsecret prompt is only available on Linux");
+        }
     }
 
     private string Lookup()
@@ -61,10 +72,8 @@ internal sealed class LibsecretPrompt : IPrompt
         return password;
     }
 
-    private string Store()
+    private string Store(string password)
     {
-        var password = _prompt.NewPassword();
-
         secret_password_store_sync(
             Schema,
             "default",
