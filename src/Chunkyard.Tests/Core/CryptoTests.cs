@@ -41,7 +41,7 @@ public static class CryptoTests
             RandomNumberGenerator.GetBytes(Crypto.NonceBytes),
             Encoding.UTF8.GetBytes("Hello!"));
 
-        Assert.Throws<CryptographicException>(
+        Assert.Throws<AuthenticationTagMismatchException>(
             () => otherCrypto.Decrypt(encryptedBytes));
     }
 

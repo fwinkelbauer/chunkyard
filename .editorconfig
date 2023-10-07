@@ -17,6 +17,9 @@ dotnet_diagnostic.CA1309.severity = none
 dotnet_diagnostic.CA1310.severity = none
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1819.severity = none
+dotnet_diagnostic.CA1859.severity = none
+dotnet_diagnostic.CA1860.severity = none
+dotnet_diagnostic.CA1861.severity = none
 
 # LibsecretPrompt
 dotnet_diagnostic.CA1806.severity = none

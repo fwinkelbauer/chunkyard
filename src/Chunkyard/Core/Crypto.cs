@@ -48,7 +48,7 @@ public sealed class Crypto
             cipher.Length - TagBytes,
             TagBytes);
 
-        using var aesGcm = new AesGcm(_key);
+        using var aesGcm = new AesGcm(_key, TagBytes);
 
         aesGcm.Encrypt(nonce, plain, innerCipher, tag);
 
@@ -63,7 +63,7 @@ public sealed class Crypto
         var innerCipher = cipher.Slice(nonce.Length, plain.Length);
         var tag = cipher.Slice(cipher.Length - TagBytes, TagBytes);
 
-        using var aesGcm = new AesGcm(_key);
+        using var aesGcm = new AesGcm(_key, TagBytes);
 
         aesGcm.Decrypt(nonce, innerCipher, tag, plain);
 
