@@ -32,7 +32,7 @@ public sealed class Fuzzy
         foreach (var pattern in patterns)
         {
             var tmp = pattern.Trim();
-            var negated = tmp.StartsWith("!");
+            var negated = tmp.StartsWith('!');
 
             tmp = negated
                 ? tmp[1..]

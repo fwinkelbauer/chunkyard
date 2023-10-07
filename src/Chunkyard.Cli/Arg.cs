@@ -52,7 +52,7 @@ public sealed class Arg
         {
             var token = args[i];
 
-            if (token.StartsWith("-")
+            if (token.StartsWith('-')
                 && !int.TryParse(token, out _))
             {
                 currentFlag = token;
