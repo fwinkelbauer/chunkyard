@@ -24,7 +24,7 @@ public interface IRepository<T>
 
     bool Exists(T key);
 
-    T[] List();
+    T[] UnorderedList();
 
     bool TryLast(out T? key);
 

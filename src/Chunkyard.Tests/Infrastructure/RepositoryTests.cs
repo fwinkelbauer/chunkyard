@@ -70,7 +70,7 @@ public abstract class RepositoryTests
     [Fact]
     public void Repository_Can_Read_Write()
     {
-        Assert.Empty(Repository.List());
+        Assert.Empty(Repository.UnorderedList());
         Assert.False(Repository.TryLast(out _));
 
         var dict = _keys.ToDictionary(
@@ -85,9 +85,9 @@ public abstract class RepositoryTests
             Assert.Equal(pair.Value, Repository.Retrieve(pair.Key));
         }
 
-        Assert.Equal(_keys, Repository.List().OrderBy(k => k));
+        Assert.Equal(_keys, Repository.UnorderedList().OrderBy(k => k));
         Assert.True(Repository.TryLast(out var maxKey));
-        Assert.Equal(Repository.List().Max(), maxKey);
+        Assert.Equal(Repository.UnorderedList().Max(), maxKey);
 
         foreach (var pair in dict)
         {
@@ -96,7 +96,7 @@ public abstract class RepositoryTests
             Assert.False(Repository.Exists(pair.Key));
         }
 
-        Assert.Empty(Repository.List());
+        Assert.Empty(Repository.UnorderedList());
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public abstract class RepositoryTests
         var output = new ConcurrentDictionary<string, byte[]>();
 
         Parallel.ForEach(
-            Repository.List(),
+            Repository.UnorderedList(),
             key => output.TryAdd(key, Repository.Retrieve(key)));
 
         Assert.Equal(input, output);

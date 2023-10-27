@@ -194,7 +194,7 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Missing(repository.Chunks, repository.Chunks.List());
+        Missing(repository.Chunks, repository.Chunks.UnorderedList());
 
         Assert.ThrowsAny<Exception>(
             () => snapshotStore.CheckSnapshotExists(
@@ -216,7 +216,7 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Corrupt(repository.Chunks, repository.Chunks.List());
+        Corrupt(repository.Chunks, repository.Chunks.UnorderedList());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(
@@ -466,12 +466,12 @@ public static class SnapshotStoreTests
 
         snapshotStore.RemoveSnapshot(snapshotId);
 
-        Assert.NotEmpty(repository.Chunks.List());
+        Assert.NotEmpty(repository.Chunks.UnorderedList());
 
         snapshotStore.GarbageCollect();
 
-        Assert.Empty(repository.Chunks.List());
-        Assert.Empty(repository.Snapshots.List());
+        Assert.Empty(repository.Chunks.UnorderedList());
+        Assert.Empty(repository.Snapshots.UnorderedList());
     }
 
     [Fact]
@@ -601,12 +601,12 @@ public static class SnapshotStoreTests
         snapshotStore.CopyTo(otherRepository);
 
         Assert.Equal(
-            repository.Chunks.List().OrderBy(k => k),
-            otherRepository.Chunks.List().OrderBy(k => k));
+            repository.Chunks.UnorderedList().OrderBy(k => k),
+            otherRepository.Chunks.UnorderedList().OrderBy(k => k));
 
         Assert.Equal(
-            repository.Snapshots.List().OrderBy(k => k),
-            otherRepository.Snapshots.List().OrderBy(k => k));
+            repository.Snapshots.UnorderedList().OrderBy(k => k),
+            otherRepository.Snapshots.UnorderedList().OrderBy(k => k));
     }
 
     [Fact]
@@ -657,7 +657,7 @@ public static class SnapshotStoreTests
         _ = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Corrupt(repository.Snapshots, repository.Snapshots.List());
+        Corrupt(repository.Snapshots, repository.Snapshots.UnorderedList());
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(

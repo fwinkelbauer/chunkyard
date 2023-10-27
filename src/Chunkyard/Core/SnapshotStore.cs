@@ -173,7 +173,7 @@ public sealed class SnapshotStore
 
     public IReadOnlyCollection<int> ListSnapshotIds()
     {
-        var snapshotIds = _repository.Snapshots.List();
+        var snapshotIds = _repository.Snapshots.UnorderedList();
 
         Array.Sort(snapshotIds);
 
@@ -182,8 +182,8 @@ public sealed class SnapshotStore
 
     public void GarbageCollect()
     {
-        var unusedChunkIds = _repository.Chunks.List()
-            .Except(ListChunkIds(_repository.Snapshots.List()));
+        var unusedChunkIds = _repository.Chunks.UnorderedList()
+            .Except(ListChunkIds(_repository.Snapshots.UnorderedList()));
 
         foreach (var chunkId in unusedChunkIds)
         {
@@ -262,7 +262,7 @@ public sealed class SnapshotStore
         }
 
         var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
-            .Except(otherRepository.Chunks.List())
+            .Except(otherRepository.Chunks.UnorderedList())
             .ToArray();
 
         CopyChunkIds(otherRepository, chunkIdsToCopy);
@@ -272,7 +272,7 @@ public sealed class SnapshotStore
     private IReadOnlyCollection<int> ListSnapshotIdsToCopy(IRepository otherRepository)
     {
         var snapshotIds = ListSnapshotIds();
-        var otherSnapshotIds = otherRepository.Snapshots.List();
+        var otherSnapshotIds = otherRepository.Snapshots.UnorderedList();
 
         var sharedSnapshotId = snapshotIds.Intersect(otherSnapshotIds)
             .Max(id => id as int?);
@@ -533,7 +533,7 @@ public sealed class SnapshotStore
             return lastId;
         }
 
-        var snapshotIds = _repository.Snapshots.List();
+        var snapshotIds = _repository.Snapshots.UnorderedList();
 
         Array.Sort(snapshotIds);
 

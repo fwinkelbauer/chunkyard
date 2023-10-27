@@ -53,7 +53,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         }
     }
 
-    public T[] List()
+    public T[] UnorderedList()
     {
         lock (_lock)
         {
@@ -66,7 +66,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
 
     public bool TryLast(out T? key)
     {
-        var keys = List();
+        var keys = UnorderedList();
         var any = keys.Any();
 
         key = any

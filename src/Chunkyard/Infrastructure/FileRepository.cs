@@ -71,7 +71,7 @@ public sealed class FileRepository<T> : IRepository<T>
             ToFile(key));
     }
 
-    public T[] List()
+    public T[] UnorderedList()
     {
         if (!Directory.Exists(_directory))
         {
@@ -85,7 +85,7 @@ public sealed class FileRepository<T> : IRepository<T>
 
     public bool TryLast(out T? key)
     {
-        var keys = List();
+        var keys = UnorderedList();
         var any = keys.Any();
 
         key = any
