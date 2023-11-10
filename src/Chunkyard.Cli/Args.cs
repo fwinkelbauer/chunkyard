@@ -9,9 +9,9 @@ namespace Chunkyard.Cli;
 ///
 /// e.g. my-command --some-flag param1 param2 --another-flag
 /// </summary>
-public sealed class Arg
+public sealed class Args
 {
-    public Arg(
+    public Args(
         string command,
         IReadOnlyDictionary<string, IReadOnlyCollection<string>> flags)
     {
@@ -25,7 +25,7 @@ public sealed class Arg
 
     public override bool Equals(object? obj)
     {
-        return obj is Arg other
+        return obj is Args other
             && Command.Equals(other.Command)
             && Flags.Keys.SequenceEqual(other.Flags.Keys)
             && Flags.Values.SelectMany(v => v)
@@ -37,7 +37,7 @@ public sealed class Arg
         return HashCode.Combine(Command, Flags);
     }
 
-    public static Arg? Parse(params string[] args)
+    public static Args? Parse(params string[] args)
     {
         if (args.Length == 0)
         {
@@ -76,6 +76,6 @@ public sealed class Arg
             pair => pair.Key,
             pair => (IReadOnlyCollection<string>)pair.Value);
 
-        return new Arg(command, flagsCasted);
+        return new Args(command, flagsCasted);
     }
 }

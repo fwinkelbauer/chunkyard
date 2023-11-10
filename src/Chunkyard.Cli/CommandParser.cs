@@ -36,7 +36,7 @@ public sealed class CommandParser
 
     public object Parse(params string[] args)
     {
-        var arg = Arg.Parse(args);
+        var arg = Args.Parse(args);
 
         if (arg == null)
         {
