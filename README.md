@@ -42,9 +42,9 @@ tools. Here's a list of [options][backup-tools].
 - Install the .NET SDK
 - Run `./make build` to build and test Chunkyard
 
-`./make` runs the project `./src/Chunkyard.Make`, a CLI tool which can be used
-to build, test and publish Chunkyard. You can type commands such as `./make
-help` or `./make build --help` to learn more.
+`./make` runs the project `src/Chunkyard.Make`, a CLI tool which can be used to
+build, test and publish Chunkyard. You can type commands such as `./make help`
+or `./make build --help` to learn more.
 
 ## Publish
 
