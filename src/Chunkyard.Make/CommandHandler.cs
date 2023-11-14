@@ -68,12 +68,14 @@ internal static class CommandHandler
 
         foreach (var runtime in new[] { "linux-x64", "win-x64" })
         {
+            var runtimeDirectory = Path.Combine(directory, runtime);
+
             Dotnet(
                 "publish src/Chunkyard/Chunkyard.csproj",
                 $"-c {Configuration}",
                 $"-r {runtime}",
                 "--self-contained",
-                $"-o {directory}",
+                $"-o {runtimeDirectory}",
                 $"-p:Version={version}",
                 $"-p:SourceRevisionId={commitId}",
                 "-p:PublishSingleFile=true",
