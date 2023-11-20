@@ -115,8 +115,7 @@ internal static class CommandHandler
                 $"A release commit should only contain changes to {Changelog}");
         }
 
-        Git($"add {Changelog}");
-        Git($"commit -m \"{message}\"");
+        Git($"commit -am \"{message}\"");
         Git($"tag -a \"{tag}\" -m \"{message}\"");
     }
 
