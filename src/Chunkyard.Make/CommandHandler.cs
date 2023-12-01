@@ -93,8 +93,12 @@ internal static class CommandHandler
     {
         Announce("Check");
 
-        Dotnet($"restore {Solution}");
-        Dotnet($"list {Solution} package --outdated");
+        var solution = Path.Combine(
+            Directory.GetCurrentDirectory(),
+            Solution);
+
+        Dotnet($"restore {solution}");
+        Dotnet($"list {solution} package --outdated");
     }
 
     public static void Release()

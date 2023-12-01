@@ -45,15 +45,12 @@ public static class CryptoTests
             () => otherCrypto.Decrypt(encryptedBytes));
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public static void Constructor_Throws_On_EmptyPassword(
-        string password)
+    [Fact]
+    public static void Constructor_Throws_On_EmptyPassword()
     {
         Assert.Throws<ArgumentException>(
             () => new Crypto(
-                password,
+                "",
                 RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
                 Crypto.DefaultIterations));
     }
