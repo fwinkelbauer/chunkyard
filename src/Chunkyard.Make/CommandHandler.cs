@@ -64,7 +64,6 @@ internal static class CommandHandler
 
         var directory = "artifacts";
         var version = FetchVersion();
-        var commitId = GitQuery("rev-parse --short HEAD");
 
         foreach (var runtime in new[] { "linux-x64", "win-x64", "osx-x64", "osx-arm64" })
         {
@@ -77,7 +76,6 @@ internal static class CommandHandler
                 "--self-contained",
                 $"-o {runtimeDirectory}",
                 $"-p:Version={version}",
-                $"-p:SourceRevisionId={commitId}",
                 "-p:PublishSingleFile=true",
                 "-p:PublishTrimmed=true",
                 "-p:DebugType=none");
