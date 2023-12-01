@@ -20,9 +20,8 @@ public sealed class CommandParser
 
         var helpCommand = "help";
         var helpInfo = "Print all available commands";
-        var helpText = new HelpText(helpCommand, helpInfo);
 
-        _helpTexts.Add(helpText);
+        _helpTexts.Add(new HelpText(helpCommand, helpInfo));
 
         _parsers.Add(
             new SimpleCommandParser(

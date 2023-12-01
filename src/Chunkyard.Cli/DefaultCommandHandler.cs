@@ -31,8 +31,6 @@ public static class DefaultCommandHandler
         Console.Error.WriteLine();
         Console.Error.WriteLine("Usage:");
         Console.Error.WriteLine("  <command> <flags>");
-        Console.Error.WriteLine("  <command> --help");
-        Console.Error.WriteLine("  help");
 
         if (c.HelpTexts.Any())
         {
