@@ -17,7 +17,8 @@ public static class Program
                 new RemoveCommandParser(),
                 new RestoreCommandParser(),
                 new ShowCommandParser(),
-                new StoreCommandParser());
+                new StoreCommandParser(),
+                new VersionCommandParser());
 
             var command = parser.Parse(args);
 
@@ -32,6 +33,7 @@ public static class Program
             Handle<RestoreCommand>(command, CommandHandler.Restore);
             Handle<ShowCommand>(command, CommandHandler.Show);
             Handle<StoreCommand>(command, CommandHandler.Store);
+            Handle<VersionCommand>(command, CommandHandler.Version);
 
             Handle<HelpCommand>(command, DefaultCommandHandler.Help);
         }

@@ -179,6 +179,11 @@ internal static class CommandHandler
         }
     }
 
+    public static void Version(VersionCommand c)
+    {
+        Console.WriteLine(c.Version);
+    }
+
     private static void PrintDiff(DiffSet diff)
     {
         foreach (var added in diff.Added)

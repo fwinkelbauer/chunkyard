@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- The command `version`
+
 ## 20.1.0 - 2023-08-29
 
 ### Added

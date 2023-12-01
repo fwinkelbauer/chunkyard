@@ -290,6 +290,25 @@ public sealed class StoreCommandParser : ICommandParser
     }
 }
 
+public sealed class VersionCommandParser : ICommandParser
+{
+    public string Command => "version";
+
+    public string Info => "Print version information";
+
+    public object Parse(FlagConsumer consumer)
+    {
+        var attribute = typeof(VersionCommand).Assembly
+            .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
+            .First();
+
+        var version = ((AssemblyInformationalVersionAttribute)attribute)
+            .InformationalVersion;
+
+        return new VersionCommand(version);
+    }
+}
+
 public interface IChunkyardCommand
 {
     string Repository { get; }
@@ -604,6 +623,15 @@ public sealed class StoreCommand : IChunkyardCommand
     public bool Preview { get; }
 }
 
+public sealed class VersionCommand
+{
+    public VersionCommand(string version)
+    {
+        Version = version;
+    }
+
+    public string Version { get; }
+}
 
 public static class ArgConsumerExtensions
 {
