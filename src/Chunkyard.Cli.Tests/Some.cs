@@ -6,14 +6,7 @@ internal static class Some
         params (TKey Key, TValue Value)[] pairs)
         where TKey : notnull
     {
-        var dict = new Dictionary<TKey, TValue>();
-
-        foreach (var pair in pairs)
-        {
-            dict.Add(pair.Key, pair.Value);
-        }
-
-        return dict;
+        return pairs.ToDictionary(p => p.Key, p => p.Value);
     }
 
     public static IReadOnlyCollection<string> Strings(params string[] values)

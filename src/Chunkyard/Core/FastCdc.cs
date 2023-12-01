@@ -45,7 +45,7 @@ public sealed class FastCdc
             MaximumMax,
             nameof(maxSize));
 
-        if ((MaxSize - MinSize) <= AvgSize)
+        if (MaxSize - MinSize <= AvgSize)
         {
             throw new ArgumentException(
                 "Invariant violation: maxSize - minSize > avgSize");
@@ -167,7 +167,7 @@ public sealed class FastCdc
 
     private static int CeilDiv(int x, int y)
     {
-        return 1 + ((x - 1) / y);
+        return 1 + (x - 1) / y;
     }
 
     private static int Logarithm2(int value)

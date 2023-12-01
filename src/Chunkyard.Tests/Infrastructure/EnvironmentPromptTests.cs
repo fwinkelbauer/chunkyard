@@ -35,7 +35,7 @@ public static class EnvironmentPromptTests
         return new DisposableEnvironment(
             new Dictionary<string, string?>
             {
-                { EnvironmentPrompt.PasswordVariable, password },
+                { EnvironmentPrompt.PasswordVariable, password }
             });
     }
 }

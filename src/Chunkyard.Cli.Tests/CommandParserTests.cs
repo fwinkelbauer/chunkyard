@@ -45,7 +45,5 @@ public static class CommandParserTests
         Assert.Equal("result-three", parser.Parse("three"));
     }
 
-    internal sealed class SomeCommand
-    {
-    }
+    internal sealed class SomeCommand;
 }

@@ -44,7 +44,7 @@ internal static class Some
         Func<string, byte[]>? generator = null)
     {
         blobs ??= Array.Empty<Blob>();
-        generator ??= (blobName => Encoding.UTF8.GetBytes(blobName));
+        generator ??= blobName => Encoding.UTF8.GetBytes(blobName);
 
         var blobSystem = new MemoryBlobSystem();
 

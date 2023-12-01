@@ -304,7 +304,7 @@ public sealed class SnapshotStore
         IRepository otherRepository,
         IReadOnlyCollection<string> chunkIdsToCopy)
     {
-        var options = new ParallelOptions()
+        var options = new ParallelOptions
         {
             MaxDegreeOfParallelism = _parallelism
         };
@@ -331,7 +331,7 @@ public sealed class SnapshotStore
         IRepository otherRepository,
         IReadOnlyCollection<int> snapshotIdsToCopy)
     {
-        var options = new ParallelOptions()
+        var options = new ParallelOptions
         {
             MaxDegreeOfParallelism = _parallelism
         };

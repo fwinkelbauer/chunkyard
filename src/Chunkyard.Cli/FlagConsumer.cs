@@ -82,7 +82,7 @@ public sealed class FlagConsumer
             info,
             out value,
             s => int.TryParse(s, out _),
-            s => int.Parse(s),
+            int.Parse,
             i => i.ToString(),
             defaultValue);
     }
@@ -105,7 +105,7 @@ public sealed class FlagConsumer
                 info,
                 out value,
                 s => bool.TryParse(s, out _),
-                s => bool.Parse(s),
+                bool.Parse,
                 b => b.ToString(),
                 false);
         }
@@ -153,7 +153,7 @@ public sealed class FlagConsumer
     {
         T? parsed = null;
 
-        string? defaultStringValue = defaultValue == null
+        var defaultStringValue = defaultValue == null
             ? null
             : convertTo(defaultValue.Value);
 
@@ -169,9 +169,7 @@ public sealed class FlagConsumer
             }
         }
 
-        value = parsed != null
-            ? parsed.Value
-            : default;
+        value = parsed ?? default;
 
         return parsed != null;
     }

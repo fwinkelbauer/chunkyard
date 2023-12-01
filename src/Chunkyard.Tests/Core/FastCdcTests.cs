@@ -5,7 +5,7 @@ public static class FastCdcTests
     private static readonly byte[] PictureBytes = File.ReadAllBytes(
         "Assets/SekienAkashita.jpg");
 
-    private static readonly uint[] GearTable = new uint[]
+    private static readonly uint[] GearTable =
     {
         0x5C95C078,
         0x22408989,
@@ -297,7 +297,7 @@ public static class FastCdcTests
     }
 
     [Fact]
-    public static void GenerateGearTable_Generates_Reproducable_Semi_Random_Data_Based_On_Crypto_Parameter()
+    public static void GenerateGearTable_Generates_Reproducible_Semi_Random_Data_Based_On_Crypto_Parameter()
     {
         var crypto = new Crypto(
             "my-password",
