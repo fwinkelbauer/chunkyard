@@ -11,6 +11,14 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 - The command `version`
 
+### Changed
+
+- `keep` to also run `gc`
+
+### Removed
+
+- The command `gc`
+
 ## 20.1.0 - 2023-08-29
 
 ### Added

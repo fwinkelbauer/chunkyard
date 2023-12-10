@@ -112,28 +112,6 @@ public sealed class DiffCommandParser : ICommandParser
     }
 }
 
-public sealed class GarbageCollectCommandParser : ICommandParser
-{
-    public string Command => "gc";
-
-    public string Info => "Remove unreferenced chunks";
-
-    public object Parse(FlagConsumer consumer)
-    {
-        if (consumer.TryCommon(out var repository, out var prompt, out var parallel))
-        {
-            return new GarbageCollectCommand(
-                repository,
-                prompt,
-                parallel);
-        }
-        else
-        {
-            return consumer.Help;
-        }
-    }
-}
-
 public sealed class KeepCommandParser : ICommandParser
 {
     public string Command => "keep";
@@ -440,25 +418,6 @@ public sealed class DiffCommand : IChunkyardCommand
     public IReadOnlyCollection<string> IncludePatterns { get; }
 
     public bool ChunksOnly { get; }
-}
-
-public sealed class GarbageCollectCommand : IChunkyardCommand
-{
-    public GarbageCollectCommand(
-        string repository,
-        Prompt prompt,
-        int parallel)
-    {
-        Repository = repository;
-        Prompt = prompt;
-        Parallel = parallel;
-    }
-
-    public string Repository { get; }
-
-    public Prompt Prompt { get; }
-
-    public int Parallel { get; }
 }
 
 public sealed class KeepCommand : IChunkyardCommand

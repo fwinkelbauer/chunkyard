@@ -11,7 +11,6 @@ public static class Program
                 new CheckCommandParser(),
                 new CopyCommandParser(),
                 new DiffCommandParser(),
-                new GarbageCollectCommandParser(),
                 new KeepCommandParser(),
                 new ListCommandParser(),
                 new RemoveCommandParser(),
@@ -26,7 +25,6 @@ public static class Program
             Handle<CheckCommand>(command, CommandHandler.Check);
             Handle<CopyCommand>(command, CommandHandler.Copy);
             Handle<DiffCommand>(command, CommandHandler.Diff);
-            Handle<GarbageCollectCommand>(command, CommandHandler.GarbageCollect);
             Handle<KeepCommand>(command, CommandHandler.Keep);
             Handle<ListCommand>(command, CommandHandler.List);
             Handle<RemoveCommand>(command, CommandHandler.Remove);

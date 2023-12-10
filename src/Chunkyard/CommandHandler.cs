@@ -77,18 +77,12 @@ internal static class CommandHandler
         PrintDiff(diff);
     }
 
-    public static void GarbageCollect(GarbageCollectCommand c)
-    {
-        var snapshotStore = CreateSnapshotStore(c);
-
-        snapshotStore.GarbageCollect();
-    }
-
     public static void Keep(KeepCommand c)
     {
         var snapshotStore = CreateSnapshotStore(c);
 
         snapshotStore.KeepSnapshots(c.LatestCount);
+        snapshotStore.GarbageCollect();
     }
 
     public static void List(ListCommand c)
