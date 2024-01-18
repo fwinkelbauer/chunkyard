@@ -1,7 +1,7 @@
-namespace Chunkyard.Make;
+namespace Chunkyard.Build;
 
 /// <summary>
-/// Handles every available command of the Chunkyard.Make assembly.
+/// Handles every available command of the Chunkyard.Build assembly.
 /// </summary>
 internal static class CommandHandler
 {

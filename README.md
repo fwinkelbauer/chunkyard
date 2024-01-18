@@ -40,19 +40,19 @@ tools. Here's a list of [options][backup-tools].
 ## Build
 
 - Install the .NET SDK
-- Run `./make build` to build and test Chunkyard
+- Run `./pls build` to build and test Chunkyard
 
-`./make` runs the project `src/Chunkyard.Make`, a CLI tool which can be used to
-build, test and publish Chunkyard. You can type commands such as `./make help`
-or `./make build --help` to learn more.
+`./pls` runs the project `src/Chunkyard.Build`, a CLI tool which can be used to
+build, test and publish Chunkyard. You can type commands such as `./pls help` or
+`./pls build --help` to learn more.
 
 ## Publish
 
 - Commit all your work
-- Update `CHANGELOG.md` and add a new version header. Run `./make release` to
+- Update `CHANGELOG.md` and add a new version header. Run `./pls release` to
   create a tagged commit containing the latest version found in `CHANGELOG.md`
 - Run `git push --follow-tags`
-- Run `./make publish` to create Linux and Windows binaries in the `./artifacts`
+- Run `./pls publish` to create Linux and Windows binaries in the `./artifacts`
   directory
 
 ## Usage

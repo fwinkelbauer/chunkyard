@@ -1,4 +1,4 @@
-namespace Chunkyard.Make;
+namespace Chunkyard.Build;
 
 public static class Program
 {

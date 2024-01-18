@@ -1,4 +1,4 @@
-namespace Chunkyard.Make;
+namespace Chunkyard.Build;
 
 public sealed class BuildCommand;
 

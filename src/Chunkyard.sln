@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard", "Chunkyard\Chun
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard.Tests", "Chunkyard.Tests\Chunkyard.Tests.csproj", "{ECEF842F-8D64-4581-B1AA-F720BF6B72F3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard.Make", "Chunkyard.Make\Chunkyard.Make.csproj", "{2CFC370A-5780-430E-B60B-FB9852F13DFC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chunkyard.Build", "Chunkyard.Build\Chunkyard.Build.csproj", "{2CFC370A-5780-430E-B60B-FB9852F13DFC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chunkyard.Cli", "Chunkyard.Cli\Chunkyard.Cli.csproj", "{B2EDBAE8-C6B2-45C3-8EEC-9E5B0AEA1689}"
 EndProject
