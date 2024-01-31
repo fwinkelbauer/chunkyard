@@ -19,6 +19,8 @@ internal sealed class ConsolePrompt : IPrompt
         return firstPassword;
     }
 
+    public int Iterations => Crypto.DefaultIterations;
+
     public string ExistingPassword()
     {
         return ReadPassword("Password: ");

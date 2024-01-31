@@ -4,10 +4,14 @@ internal sealed class DummyPrompt : IPrompt
 {
     private readonly string _password;
 
-    public DummyPrompt(string password)
+    public DummyPrompt(string password, int iterations)
     {
         _password = password;
+
+        Iterations = iterations;
     }
+
+    public int Iterations { get; }
 
     public string NewPassword()
     {

@@ -30,7 +30,7 @@ internal static class Some
             fastCdc ?? new FastCdc(),
             new DummyProbe(),
             new DummyWorld(DateUtc),
-            new DummyPrompt(password),
+            new DummyPrompt(password, 1),
             Environment.ProcessorCount);
     }
 

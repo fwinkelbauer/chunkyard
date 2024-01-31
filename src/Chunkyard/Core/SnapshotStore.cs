@@ -46,7 +46,7 @@ public sealed class SnapshotStore
                 return new Crypto(
                     prompt.NewPassword(),
                     _world.GenerateSalt(),
-                    Crypto.DefaultIterations);
+                    prompt.Iterations);
             }
         });
 
