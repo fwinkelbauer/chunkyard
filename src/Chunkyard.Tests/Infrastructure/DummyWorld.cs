@@ -9,14 +9,7 @@ internal sealed class DummyWorld : IWorld
         _nowUtc = nowUtc;
     }
 
-    public DateTime NowUtc()
-    {
-        var temp = _nowUtc;
-
-        _nowUtc = _nowUtc.AddHours(1);
-
-        return temp;
-    }
+    public int Iterations => 1;
 
     public byte[] GenerateSalt()
     {
@@ -26,5 +19,14 @@ internal sealed class DummyWorld : IWorld
     public byte[] GenerateNonce()
     {
         return RandomNumberGenerator.GetBytes(Crypto.NonceBytes);
+    }
+
+    public DateTime NowUtc()
+    {
+        var temp = _nowUtc;
+
+        _nowUtc = _nowUtc.AddHours(1);
+
+        return temp;
     }
 }

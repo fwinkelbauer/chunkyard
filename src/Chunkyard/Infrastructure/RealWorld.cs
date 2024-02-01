@@ -6,10 +6,7 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 internal sealed class RealWorld : IWorld
 {
-    public DateTime NowUtc()
-    {
-        return DateTime.UtcNow;
-    }
+    public int Iterations => Crypto.DefaultIterations;
 
     public byte[] GenerateSalt()
     {
@@ -19,5 +16,10 @@ internal sealed class RealWorld : IWorld
     public byte[] GenerateNonce()
     {
         return RandomNumberGenerator.GetBytes(Crypto.NonceBytes);
+    }
+
+    public DateTime NowUtc()
+    {
+        return DateTime.UtcNow;
     }
 }
