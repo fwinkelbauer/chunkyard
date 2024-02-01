@@ -22,8 +22,6 @@ internal sealed class LibsecretPrompt : IPrompt
         _repositoryId = repositoryId;
     }
 
-    public int Iterations => _prompt.Iterations;
-
     public string NewPassword()
     {
         EnsureLinux();

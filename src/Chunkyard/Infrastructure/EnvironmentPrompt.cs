@@ -8,8 +8,6 @@ public sealed class EnvironmentPrompt : IPrompt
 {
     public const string PasswordVariable = "CHUNKYARD_PASSWORD";
 
-    public int Iterations => Crypto.DefaultIterations;
-
     public string NewPassword()
     {
         return Environment.GetEnvironmentVariable(PasswordVariable)
