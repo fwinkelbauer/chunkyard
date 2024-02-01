@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog][changelog] and this project adheres to
 
 ## Unreleased
 
+## 21.0.1 - 2024-02-01
+
+### Fixed
+
+- An issue when resolving paths
+
 ## 21.0.0 - 2023-10-12
 
 ### Added
