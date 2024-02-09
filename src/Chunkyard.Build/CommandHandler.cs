@@ -63,7 +63,7 @@ internal static class CommandHandler
         Announce("Publish");
 
         var directory = "artifacts";
-        var version = FetchVersion();
+        var (version, revision) = FetchGitVersion();
 
         foreach (var runtime in new[] { "linux-x64", "win-x64", "osx-x64", "osx-arm64" })
         {
@@ -76,6 +76,7 @@ internal static class CommandHandler
                 "--self-contained",
                 $"-o {runtimeDirectory}",
                 $"-p:Version={version}",
+                $"-p:SourceRevisionId={revision}",
                 "-p:PublishSingleFile=true",
                 "-p:PublishTrimmed=true",
                 "-p:DebugType=none");
@@ -105,7 +106,7 @@ internal static class CommandHandler
     {
         Announce("Release");
 
-        var version = FetchVersion();
+        var version = FetchChangelogVersion();
         var tag = $"v{version}";
         var message = $"Prepare Chunkyard release {tag}";
         var status = GitQuery("status --porcelain");
@@ -121,7 +122,15 @@ internal static class CommandHandler
         Git($"tag -a \"{tag}\" -m \"{message}\"");
     }
 
-    private static string FetchVersion()
+    private static (string, string) FetchGitVersion()
+    {
+        var version = GitQuery("describe --long").Substring(1);
+        var split = version.Split("-", 2);
+
+        return (split[0], split[1]);
+    }
+
+    private static string FetchChangelogVersion()
     {
         var match = Regex.Match(
             File.ReadAllText(Changelog),
