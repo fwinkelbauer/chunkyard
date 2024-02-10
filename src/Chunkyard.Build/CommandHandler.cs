@@ -124,7 +124,7 @@ internal static class CommandHandler
 
     private static (string, string) FetchGitVersion()
     {
-        var version = GitQuery("describe --long").Substring(1);
+        var version = GitQuery("describe --long").TrimStart('v');
         var split = version.Split("-", 2);
 
         return (split[0], split[1]);
