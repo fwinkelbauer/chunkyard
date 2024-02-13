@@ -65,7 +65,7 @@ internal static class CommandHandler
         var directory = "artifacts";
         var (version, revision) = FetchGitVersion();
 
-        foreach (var runtime in new[] { "linux-x64", "win-x64", "osx-x64", "osx-arm64" })
+        foreach (var runtime in new[] { "linux-x64", "win-x64" })
         {
             var runtimeDirectory = Path.Combine(directory, runtime);
 
