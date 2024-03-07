@@ -94,9 +94,7 @@ internal static class CommandHandler
     {
         Announce("Check");
 
-        var solution = Path.Combine(
-            Directory.GetCurrentDirectory(),
-            Solution);
+        var solution = Path.Combine(Directory.GetCurrentDirectory(), Solution);
 
         Dotnet($"restore {solution}");
         Dotnet($"list {solution} package --outdated");
