@@ -267,6 +267,40 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
+    public static void RestoreSnapshot_Keeps_Chunks_Order()
+    {
+        var fastCdc = new FastCdc(256, 1024, 2048);
+        var snapshotStore = Some.SnapshotStore(fastCdc: fastCdc);
+
+        // Create data that is large enough to create at least two chunks
+        var inputBlobSystem = Some.BlobSystem(
+            Some.Blobs(),
+            _ => RandomNumberGenerator.GetBytes(2 * fastCdc.MaxSize));
+
+        var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
+
+        var outputBlobSystem = Some.BlobSystem();
+
+        snapshotStore.RestoreSnapshot(
+            outputBlobSystem,
+            snapshotId,
+            Fuzzy.Default);
+
+        var blobReferences = snapshotStore.GetSnapshot(snapshotId)
+            .BlobReferences
+            .ToArray();
+
+        var chunkIds = blobReferences.SelectMany(br => br.ChunkIds).ToArray();
+
+        Assert.Equal(
+            ToContent(inputBlobSystem),
+            ToContent(outputBlobSystem));
+
+        Assert.NotEmpty(blobReferences);
+        Assert.True(blobReferences.Length * 2 <= chunkIds.Length);
+    }
+
+    [Fact]
     public static void FilterSnapshot_Lists_Matching_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
