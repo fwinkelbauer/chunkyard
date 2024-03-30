@@ -7,10 +7,7 @@ public static class CryptoTests
     [InlineData("")]
     public static void Encrypt_And_Decrypt_Return_Input(string plain)
     {
-        var crypto = new Crypto(
-            "secret",
-            RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
-            Crypto.DefaultIterations);
+        var crypto = Some.Crypto("secret");
 
         var plainBytes = Encoding.UTF8.GetBytes(plain);
 
@@ -27,15 +24,8 @@ public static class CryptoTests
     [Fact]
     public static void Decrypt_Throws_Given_Wrong_Key()
     {
-        var someCrypto = new Crypto(
-            "some secret",
-            RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
-            Crypto.DefaultIterations);
-
-        var otherCrypto = new Crypto(
-            "other secret",
-            RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
-            Crypto.DefaultIterations);
+        var someCrypto = Some.Crypto("some secret");
+        var otherCrypto = Some.Crypto("other secret");
 
         var encryptedBytes = someCrypto.Encrypt(
             RandomNumberGenerator.GetBytes(Crypto.NonceBytes),
@@ -49,9 +39,6 @@ public static class CryptoTests
     public static void Constructor_Throws_On_EmptyPassword()
     {
         Assert.Throws<ArgumentException>(
-            () => new Crypto(
-                "",
-                RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
-                Crypto.DefaultIterations));
+            () => Some.Crypto(""));
     }
 }

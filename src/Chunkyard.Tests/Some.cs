@@ -3,6 +3,15 @@ namespace Chunkyard.Tests;
 internal static class Some
 {
     public static readonly DateTime DateUtc = DateTime.UtcNow;
+    public static readonly IWorld World = new DummyWorld(DateUtc);
+
+    public static Crypto Crypto(string password)
+    {
+        return new Crypto(
+            password,
+            World.GenerateSalt(),
+            World.Iterations);
+    }
 
     public static Blob Blob(string blobName)
     {
@@ -29,7 +38,7 @@ internal static class Some
             repository ?? Repository(),
             fastCdc ?? new FastCdc(),
             new DummyProbe(),
-            new DummyWorld(DateUtc),
+            World,
             new DummyPrompt(password),
             Environment.ProcessorCount);
     }

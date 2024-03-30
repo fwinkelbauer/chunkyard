@@ -299,10 +299,7 @@ public static class FastCdcTests
     [Fact]
     public static void GenerateGearTable_Generates_Reproducible_Semi_Random_Data_Based_On_Crypto_Parameter()
     {
-        var crypto = new Crypto(
-            "my-password",
-            RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
-            Crypto.DefaultIterations);
+        var crypto = Some.Crypto("my-password");
 
         Assert.Equal(
             FastCdc.GenerateGearTable(crypto),
@@ -312,11 +309,8 @@ public static class FastCdcTests
     [Fact]
     public static void GenerateGearTable_Generates_Different_Data_Based_On_Crypto_Parameter()
     {
-        var salt = RandomNumberGenerator.GetBytes(Crypto.SaltBytes);
-        var iterations = Crypto.DefaultIterations;
-
-        var crypto1 = new Crypto("my-password", salt, iterations);
-        var crypto2 = new Crypto("my-other-password", salt, iterations);
+        var crypto1 = Some.Crypto("my-password");
+        var crypto2 = Some.Crypto("my-other-password");
 
         Assert.NotEqual(
             FastCdc.GenerateGearTable(crypto1),
