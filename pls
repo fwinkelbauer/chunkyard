@@ -1,3 +1,3 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 dotnet run --project 'src/Chunkyard.Build/Chunkyard.Build.csproj' -- "$@"
