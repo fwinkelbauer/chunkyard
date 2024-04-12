@@ -6,7 +6,7 @@ namespace Chunkyard.Build;
 internal static class CommandHandler
 {
     private const string Solution = "src/Chunkyard.sln";
-    private const string Changelog = "CHANGELOG.md";
+    private const string Changelog = "CHANGELOG.org";
     private const string Configuration = "Release";
 
     static CommandHandler()
@@ -132,7 +132,7 @@ internal static class CommandHandler
     {
         var match = Regex.Match(
             File.ReadAllText(Changelog),
-            @"##\s+(\d+\.\d+\.\d+)",
+            @"\*\s+(\d+\.\d+\.\d+)",
             RegexOptions.None,
             TimeSpan.FromSeconds(1));
 
