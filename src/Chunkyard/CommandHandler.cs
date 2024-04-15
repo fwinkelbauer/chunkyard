@@ -204,9 +204,7 @@ internal static class CommandHandler
         {
             Prompt.Console => new ConsolePrompt(),
             Prompt.Environment => new EnvironmentPrompt(),
-            Prompt.Libsecret => new LibsecretPrompt(
-                new ConsolePrompt(),
-                repository.Id),
+            Prompt.Libsecret => new LibsecretPrompt(new ConsolePrompt()),
             _ => new ConsolePrompt()
         };
 

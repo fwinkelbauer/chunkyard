@@ -14,33 +14,27 @@ internal sealed class LibsecretPrompt : IPrompt
         IntPtr.Zero);
 
     private readonly IPrompt _prompt;
-    private readonly string _repositoryId;
 
-    public LibsecretPrompt(IPrompt prompt, string repositoryId)
+    public LibsecretPrompt(IPrompt prompt)
     {
         _prompt = prompt;
-        _repositoryId = repositoryId;
     }
 
-    public string NewPassword()
+    public string NewPassword(string repositoryId)
     {
         EnsureLinux();
 
-        var password = Lookup();
-
-        return string.IsNullOrEmpty(password)
-            ? Store(_prompt.NewPassword())
-            : password;
+        return Store(repositoryId, _prompt.NewPassword(repositoryId));
     }
 
-    public string ExistingPassword()
+    public string ExistingPassword(string repositoryId)
     {
         EnsureLinux();
 
-        var password = Lookup();
+        var password = Lookup(repositoryId);
 
         return string.IsNullOrEmpty(password)
-            ? Store(_prompt.ExistingPassword())
+            ? Store(repositoryId, _prompt.ExistingPassword(repositoryId))
             : password;
     }
 
@@ -53,14 +47,14 @@ internal sealed class LibsecretPrompt : IPrompt
         }
     }
 
-    private string Lookup()
+    private static string Lookup(string repositoryId)
     {
         var password = secret_password_lookup_sync(
             Schema,
             IntPtr.Zero,
             out var error,
             "chunkyard-repository",
-            _repositoryId,
+            repositoryId,
             IntPtr.Zero);
 
         if (error != IntPtr.Zero)
@@ -72,17 +66,17 @@ internal sealed class LibsecretPrompt : IPrompt
         return password;
     }
 
-    private string Store(string password)
+    private static string Store(string repositoryId, string password)
     {
         secret_password_store_sync(
             Schema,
             "default",
-            $"Chunkyard {_repositoryId}",
+            $"Chunkyard {repositoryId}",
             password,
             IntPtr.Zero,
             out var error,
             "chunkyard-repository",
-            _repositoryId,
+            repositoryId,
             IntPtr.Zero);
 
         if (error != IntPtr.Zero)

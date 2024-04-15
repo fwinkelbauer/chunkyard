@@ -5,8 +5,6 @@ namespace Chunkyard.Core;
 /// </summary>
 public interface IRepository
 {
-    string Id { get; }
-
     IRepository<int> Snapshots { get; }
 
     IRepository<string> Chunks { get; }

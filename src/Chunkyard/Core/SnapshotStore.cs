@@ -36,17 +36,25 @@ public sealed class SnapshotStore
             {
                 var snapshotReference = GetSnapshotReference(snapshotId);
 
+                var repositoryId = ToRepositoryId(
+                    snapshotReference.Salt,
+                    snapshotReference.Iterations);
+
                 return new Crypto(
-                    prompt.ExistingPassword(),
+                    prompt.ExistingPassword(repositoryId),
                     snapshotReference.Salt,
                     snapshotReference.Iterations);
             }
             else
             {
+                var salt = _world.GenerateSalt();
+                var iterations = _world.Iterations;
+                var repositoryId = ToRepositoryId(salt, iterations);
+
                 return new Crypto(
-                    prompt.NewPassword(),
-                    _world.GenerateSalt(),
-                    _world.Iterations);
+                    prompt.NewPassword(repositoryId),
+                    salt,
+                    iterations);
             }
         });
 
@@ -546,5 +554,13 @@ public sealed class SnapshotStore
         }
 
         return snapshotIds[position];
+    }
+
+    private static string ToRepositoryId(byte[] salt, int iterations)
+    {
+        var saltText = Convert.ToHexString(salt)
+            .ToLowerInvariant();
+
+        return $"salt: {saltText}, iterations: {iterations}";
     }
 }

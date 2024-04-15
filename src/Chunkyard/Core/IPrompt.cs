@@ -5,7 +5,7 @@ namespace Chunkyard.Core;
 /// </summary>
 public interface IPrompt
 {
-    string NewPassword();
+    string NewPassword(string repositoryId);
 
-    string ExistingPassword();
+    string ExistingPassword(string repositoryId);
 }

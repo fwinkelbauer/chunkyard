@@ -7,9 +7,6 @@ public sealed class FileRepository : IRepository
 {
     public FileRepository(string directory)
     {
-        Id = Path.TrimEndingDirectorySeparator(
-            Path.GetFullPath(directory));
-
         Snapshots = new FileRepository<int>(
             Path.Combine(directory, "references"),
             key => key.ToString(),
@@ -20,8 +17,6 @@ public sealed class FileRepository : IRepository
             key => Path.Combine(key[..2], key),
             Path.GetFileName);
     }
-
-    public string Id { get; }
 
     public IRepository<int> Snapshots { get; }
 
