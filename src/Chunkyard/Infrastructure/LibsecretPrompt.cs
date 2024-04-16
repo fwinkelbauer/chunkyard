@@ -20,22 +20,20 @@ internal sealed class LibsecretPrompt : IPrompt
         _prompt = prompt;
     }
 
-    public string NewPassword(string repositoryId)
+    public string NewPassword(string key)
     {
         EnsureLinux();
 
-        return Store(repositoryId, _prompt.NewPassword(repositoryId));
+        return Store(key, _prompt.NewPassword(key));
     }
 
-    public string ExistingPassword(string repositoryId)
+    public string ExistingPassword(string key)
     {
         EnsureLinux();
 
-        var password = Lookup(repositoryId);
-
-        return string.IsNullOrEmpty(password)
-            ? Store(repositoryId, _prompt.ExistingPassword(repositoryId))
-            : password;
+        return TryRetrieve(key, out var password)
+            ? password
+            : Store(key, _prompt.ExistingPassword(key));
     }
 
     private static void EnsureLinux()
@@ -47,14 +45,14 @@ internal sealed class LibsecretPrompt : IPrompt
         }
     }
 
-    private static string Lookup(string repositoryId)
+    private static bool TryRetrieve(string key, out string password)
     {
-        var password = secret_password_lookup_sync(
+        password = secret_password_lookup_sync(
             Schema,
             IntPtr.Zero,
             out var error,
             "chunkyard-repository",
-            repositoryId,
+            key,
             IntPtr.Zero);
 
         if (error != IntPtr.Zero)
@@ -63,20 +61,20 @@ internal sealed class LibsecretPrompt : IPrompt
                 "Could not read from libsecret");
         }
 
-        return password;
+        return !string.IsNullOrEmpty(password);
     }
 
-    private static string Store(string repositoryId, string password)
+    private static string Store(string key, string password)
     {
         secret_password_store_sync(
             Schema,
             "default",
-            $"Chunkyard {repositoryId}",
+            $"Chunkyard: {key}",
             password,
             IntPtr.Zero,
             out var error,
             "chunkyard-repository",
-            repositoryId,
+            key,
             IntPtr.Zero);
 
         if (error != IntPtr.Zero)

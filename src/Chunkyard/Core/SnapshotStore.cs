@@ -36,12 +36,12 @@ public sealed class SnapshotStore
             {
                 var snapshotReference = GetSnapshotReference(snapshotId);
 
-                var repositoryId = ToRepositoryId(
+                var promptKey = ToPromptKey(
                     snapshotReference.Salt,
                     snapshotReference.Iterations);
 
                 return new Crypto(
-                    prompt.ExistingPassword(repositoryId),
+                    prompt.ExistingPassword(promptKey),
                     snapshotReference.Salt,
                     snapshotReference.Iterations);
             }
@@ -49,10 +49,10 @@ public sealed class SnapshotStore
             {
                 var salt = _world.GenerateSalt();
                 var iterations = _world.Iterations;
-                var repositoryId = ToRepositoryId(salt, iterations);
+                var promptKey = ToPromptKey(salt, iterations);
 
                 return new Crypto(
-                    prompt.NewPassword(repositoryId),
+                    prompt.NewPassword(promptKey),
                     salt,
                     iterations);
             }
@@ -556,11 +556,11 @@ public sealed class SnapshotStore
         return snapshotIds[position];
     }
 
-    private static string ToRepositoryId(byte[] salt, int iterations)
+    private static string ToPromptKey(byte[] salt, int iterations)
     {
         var saltText = Convert.ToHexString(salt)
             .ToLowerInvariant();
 
-        return $"salt: {saltText}, iterations: {iterations}";
+        return $"s-{saltText}-i-{iterations}";
     }
 }

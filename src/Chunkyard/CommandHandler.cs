@@ -203,7 +203,7 @@ internal static class CommandHandler
         IPrompt prompt = c.Prompt switch
         {
             Prompt.Console => new ConsolePrompt(),
-            Prompt.Environment => new EnvironmentPrompt(),
+            Prompt.Store => new StorePrompt(new ConsolePrompt()),
             Prompt.Libsecret => new LibsecretPrompt(new ConsolePrompt()),
             _ => new ConsolePrompt()
         };

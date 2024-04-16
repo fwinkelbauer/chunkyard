@@ -1,8 +1,8 @@
-namespace Chunkyard.Core;
+namespace Chunkyard;
 
 public enum Prompt
 {
     Console = 0,
-    Environment = 1,
+    Store = 1,
     Libsecret = 2
 }

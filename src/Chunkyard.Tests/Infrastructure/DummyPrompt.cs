@@ -11,15 +11,15 @@ internal sealed class DummyPrompt : IPrompt
         _password = password;
     }
 
-    public string NewPassword(string repositoryId)
+    public string NewPassword(string key)
     {
-        _passwords[repositoryId] = _password;
+        _passwords[key] = _password;
 
         return _password;
     }
 
-    public string ExistingPassword(string repositoryId)
+    public string ExistingPassword(string key)
     {
-        return _passwords[repositoryId];
+        return _passwords[key];
     }
 }
