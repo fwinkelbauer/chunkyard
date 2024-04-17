@@ -8,7 +8,10 @@ public static class CommandParserTests
     public static void Parse_Returns_Parsed_Command(string args)
     {
         var parser = new CommandParser(
-            new SimpleCommandParser("cmd", "info", new SomeCommand()));
+            new[]
+            {
+                new SimpleCommandParser("cmd", "info", new SomeCommand())
+            });
 
         Assert.IsType<SomeCommand>(
             parser.Parse(args.Split(' ')));
@@ -26,7 +29,10 @@ public static class CommandParserTests
         string args)
     {
         var parser = new CommandParser(
-            new SimpleCommandParser("cmd", "info", new SomeCommand()));
+            new[]
+            {
+                new SimpleCommandParser("cmd", "info", new SomeCommand())
+            });
 
         Assert.IsType<HelpCommand>(
             parser.Parse(args.Split(' ')));
@@ -36,9 +42,12 @@ public static class CommandParserTests
     public static void Parse_Dispatches_To_Correct_Parser()
     {
         var parser = new CommandParser(
-            new SimpleCommandParser("one", "info", "result-one"),
-            new SimpleCommandParser("two", "info", "result-two"),
-            new SimpleCommandParser("three", "info", "result-three"));
+            new[]
+            {
+                new SimpleCommandParser("one", "info", "result-one"),
+                new SimpleCommandParser("two", "info", "result-two"),
+                new SimpleCommandParser("three", "info", "result-three")
+            });
 
         Assert.Equal("result-one", parser.Parse("one"));
         Assert.Equal("result-two", parser.Parse("two"));

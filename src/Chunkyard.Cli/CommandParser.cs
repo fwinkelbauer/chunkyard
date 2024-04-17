@@ -10,7 +10,7 @@ public sealed class CommandParser
     private readonly List<ICommandParser> _parsers;
     private readonly List<HelpText> _helpTexts;
 
-    public CommandParser(params ICommandParser[] parsers)
+    public CommandParser(IReadOnlyCollection<ICommandParser> parsers)
     {
         _parsers = new List<ICommandParser>(parsers);
 
