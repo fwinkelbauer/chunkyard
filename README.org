@@ -32,16 +32,12 @@ tools. Here's a list of [[https://github.com/restic/others][options]].
 - Concurrent operations on a single repository using more than one Chunkyard
   process (e.g. creating a new backup while garbage collecting unused data)
 
-* Development
-
-- You can learn more about a few basic concepts by reading [[./ARCHITECTURE.org][ARCHITECTURE.org]]
-
 * Build
 
 - Install the .NET SDK
 - Run ~./pls build~ to build and test Chunkyard
 
-~./pls~ runs the project ~src/Chunkyard.Build~, a CLI tool which can be used to
+~./pls~ runs the project [[./src/Chunkyard.Build][src/Chunkyard.Build]], a CLI tool which can be used to
 build, test and publish Chunkyard. You can type commands such as ~./pls help~ or
 ~./pls build --help~ to learn more.
 
@@ -51,7 +47,7 @@ build, test and publish Chunkyard. You can type commands such as ~./pls help~ or
 - Update [[./CHANGELOG.org][CHANGELOG.org]] and add a new version header. Run ~./pls release~ to
   create a tagged commit containing the latest version found in [[./CHANGELOG.org][CHANGELOG.org]]
 - Run ~git push --follow-tags~
-- Run ~./pls publish~ to create Linux and Windows binaries in the ~./artifacts~
+- Run ~./pls publish~ to create Linux and Windows binaries in the ~artifacts~
   directory
 
 * Usage
@@ -138,3 +134,41 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 chunkyard gc --repository $repo
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 #+end_src
+
+* Architecture
+
+** Concepts
+
+- *Blob:* Binary data (e.g. the content of a file) with some meta data
+- *Snapshot:* A set of BlobReferences. It describes the current state of a set
+  of Blobs at a specific point in time
+- *Repository:* A store which Chunkyard uses to persist data
+- *Chunk:* An encrypted piece of a Blob or a Snapshot
+- *Chunk ID:* A hash address which can be used to retrieve Chunks
+- *BlobReference:* Contains Chunk IDs and meta data which can be used to restore
+  a Blob
+- *SnapshotReference:* Contains Chunk IDs and meta data which can be used to
+  restore a Snapshot
+
+** Main Components
+
+These classes contain the most important logic:
+
+- [[./src/Chunkyard/Core/IRepository.cs][IRepository.cs]]: Defines the underlying backup storage
+- [[./src/Chunkyard/Core/IBlobSystem.cs][IBlobSystem.cs]]: Provides an abstraction to read and write Blobs
+- [[./src/Chunkyard/Core/SnapshotStore.cs][SnapshotStore.cs]]: Chunks, encrypts, deduplicates and stores Blobs in an
+  IRepository
+
+** Backup Workflow
+
+- Take a set of files
+- Split files into encrypted chunks, store them in a repository and return a
+  list of BlobReferences
+- Bundle all BlobReferences into a Snapshot, store this Snapshot as encrypted
+  chunks and return a SnapshotReference
+
+** Restore Workflow
+
+- Retrieve a Snapshot using a SnapshotReference
+- Retrieve, decrypt and reassemble all files using their BlobReferences of the
+  given Snapshot
