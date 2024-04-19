@@ -34,9 +34,7 @@ public class CommandHandler
 
             _handlers[command.GetType()](command);
 
-            return command is HelpCommand
-                ? 1
-                : 0;
+            return Convert.ToInt32(command is HelpCommand);
         }
         catch (Exception e)
         {
@@ -50,15 +48,7 @@ public class CommandHandler
     {
         _handlers[typeof(T)] = o =>
         {
-            if (o is T t)
-            {
-                handler(t);
-            }
-            else
-            {
-                throw new InvalidOperationException(
-                    $"Cannot parse arguments to {typeof(T)}");
-            }
+            handler((T)o);
         };
     }
 
