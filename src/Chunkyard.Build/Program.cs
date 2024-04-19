@@ -2,8 +2,8 @@ namespace Chunkyard.Build;
 
 public static class Program
 {
+    private const string Tag = "v22.0.0";
     private const string Solution = "src/Chunkyard.sln";
-    private const string Changelog = "CHANGELOG.org";
     private const string Configuration = "Release";
 
     static Program()
@@ -141,20 +141,9 @@ public static class Program
     {
         Announce("Release");
 
-        var version = FetchChangelogVersion();
-        var tag = $"v{version}";
-        var message = $"Prepare Chunkyard release {tag}";
-        var status = GitQuery("status --porcelain");
+        var message = $"Prepare Chunkyard release {Tag}";
 
-        if (!status.Equals($" M {Changelog}")
-            && !status.Equals($"M  {Changelog}"))
-        {
-            throw new InvalidOperationException(
-                $"A release commit should only contain changes to {Changelog}");
-        }
-
-        Git($"commit -am \"{message}\"");
-        Git($"tag -a \"{tag}\" -m \"{message}\"");
+        Git($"tag -a \"{Tag}\" -m \"{message}\"");
     }
 
     private static (string, string) FetchGitVersion()
@@ -163,19 +152,6 @@ public static class Program
         var split = version.Split("-", 2);
 
         return (split[0], split[1]);
-    }
-
-    private static string FetchChangelogVersion()
-    {
-        var match = Regex.Match(
-            File.ReadAllText(Changelog),
-            @"\*\s+(\d+\.\d+\.\d+)",
-            RegexOptions.None,
-            TimeSpan.FromSeconds(1));
-
-        return match.Groups.Count < 2
-            ? "0.1.0"
-            : match.Groups[1].Value;
     }
 
     private static void Dotnet(params string[] arguments)

@@ -44,8 +44,8 @@ build, test and publish Chunkyard. You can type commands such as ~./pls help~ or
 * Publish
 
 - Commit all your work
-- Update [[./CHANGELOG.org][CHANGELOG.org]] and add a new version header. Run ~./pls release~ to
-  create a tagged commit containing the latest version found in [[./CHANGELOG.org][CHANGELOG.org]]
+- Update the ~Tag~ variable in [[./src/Chunkyard.Build/Program.cs][Program.cs]] and run ~./pls release~ to create a
+  tagged release commit
 - Run ~git push --follow-tags~
 - Run ~./pls publish~ to create Linux and Windows binaries in the ~artifacts~
   directory
