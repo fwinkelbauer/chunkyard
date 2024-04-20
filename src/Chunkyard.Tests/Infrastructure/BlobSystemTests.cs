@@ -80,7 +80,7 @@ public sealed class FileBlobSystemTests
 
     private static IBlobSystem CreateBlobSystem()
     {
-        _tempDirectory = new DisposableDirectory();
+        _tempDirectory = new();
 
         return new FileBlobSystem(
             new[] { _tempDirectory.Name },

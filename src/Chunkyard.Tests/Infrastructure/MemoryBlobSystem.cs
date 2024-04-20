@@ -8,9 +8,9 @@ internal sealed class MemoryBlobSystem : IBlobSystem
 
     public MemoryBlobSystem()
     {
-        _blobs = new Dictionary<string, Blob>();
-        _values = new Dictionary<string, byte[]>();
-        _lock = new object();
+        _blobs = new();
+        _values = new();
+        _lock = new();
     }
 
     public bool BlobExists(string blobName)

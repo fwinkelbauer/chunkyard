@@ -27,7 +27,7 @@ public sealed class Fuzzy
 
     public Fuzzy(IEnumerable<string> patterns)
     {
-        _expressions = new List<FuzzyExpression>();
+        _expressions = new();
 
         foreach (var pattern in patterns)
         {

@@ -30,7 +30,7 @@ public sealed class SnapshotStore
         _probe = probe;
         _world = world;
 
-        _crypto = new Lazy<Crypto>(() =>
+        _crypto = new(() =>
         {
             if (_repository.Snapshots.TryLast(out var snapshotId))
             {

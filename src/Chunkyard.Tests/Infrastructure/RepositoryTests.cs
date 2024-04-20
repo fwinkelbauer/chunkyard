@@ -45,7 +45,7 @@ public sealed class FileRepositoryTests
 
     private static IRepository<string> CreateRepository()
     {
-        _tempDirectory = new DisposableDirectory();
+        _tempDirectory = new();
 
         return new FileRepository<string>(
             _tempDirectory.Name,

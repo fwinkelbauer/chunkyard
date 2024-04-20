@@ -21,8 +21,8 @@ internal sealed class MemoryRepository<T> : IRepository<T>
 
     public MemoryRepository()
     {
-        _lock = new object();
-        _valuesPerKey = new Dictionary<T, byte[]>();
+        _lock = new();
+        _valuesPerKey = new();
     }
 
     public void Store(T key, ReadOnlySpan<byte> value)
