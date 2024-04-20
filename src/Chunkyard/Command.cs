@@ -592,6 +592,13 @@ public sealed class VersionCommand
     public string Version { get; }
 }
 
+public enum Prompt
+{
+    Console = 0,
+    Store = 1,
+    Libsecret = 2
+}
+
 public static class ArgConsumerExtensions
 {
     public static bool TryCommon(

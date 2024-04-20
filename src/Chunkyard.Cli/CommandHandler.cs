@@ -46,10 +46,7 @@ public class CommandHandler
 
     private void Handle<T>(Action<T> handler)
     {
-        _handlers[typeof(T)] = o =>
-        {
-            handler((T)o);
-        };
+        _handlers[typeof(T)] = o => handler((T)o);
     }
 
     private static void Error(Exception e)
