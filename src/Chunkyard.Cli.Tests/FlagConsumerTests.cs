@@ -33,7 +33,7 @@ public static class FlagConsumerTests
         var expectedList = Some.Strings("one", "two");
 
         var expectedHelp = new HelpCommand(
-            new[] { new HelpText("--list", "info") },
+            Some.Dict(("--list", "info")),
             Array.Empty<string>());
 
         var consumer = new FlagConsumer(
@@ -50,7 +50,7 @@ public static class FlagConsumerTests
     public static void TryString_Returns_Nothing_On_Empty_Required_Input()
     {
         var expectedHelp = new HelpCommand(
-            new[] { new HelpText("--some", "info") },
+            Some.Dict(("--some", "info")),
             new[] { "Missing mandatory flag: --some" });
 
         var consumer = new FlagConsumer(
@@ -68,7 +68,7 @@ public static class FlagConsumerTests
         var expectedValue = "default value";
 
         var expectedHelp = new HelpCommand(
-            new[] { new HelpText("--some", $"info. Default: {expectedValue}") },
+            Some.Dict(("--some", $"info. Default: {expectedValue}")),
             Array.Empty<string>());
 
         var consumer = new FlagConsumer(
@@ -113,7 +113,7 @@ public static class FlagConsumerTests
     public static void TryBool_Returns_True_On_Empty_Flag()
     {
         var expectedHelp = new HelpCommand(
-            new[] { new HelpText("--bool", "info") },
+            Some.Dict(("--bool", "info")),
             Array.Empty<string>());
 
         var consumer = new FlagConsumer(
@@ -130,7 +130,7 @@ public static class FlagConsumerTests
     public static void TryBool_Returns_False_On_Invalid_Input()
     {
         var expectedHelp = new HelpCommand(
-            new[] { new HelpText("--bool", "info. Default: False") },
+            Some.Dict(("--bool", "info. Default: False")),
             new[] { "Invalid value: --bool" });
 
         var consumer = new FlagConsumer(

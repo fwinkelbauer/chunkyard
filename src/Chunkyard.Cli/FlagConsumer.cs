@@ -6,18 +6,18 @@ namespace Chunkyard.Cli;
 public sealed class FlagConsumer
 {
     private readonly Dictionary<string, IReadOnlyCollection<string>> _flags;
-    private readonly HashSet<HelpText> _helpTexts;
+    private readonly Dictionary<string, string> _infos;
     private readonly HashSet<string> _errors;
 
     public FlagConsumer(
         IReadOnlyDictionary<string, IReadOnlyCollection<string>> flags)
     {
-        _flags = new Dictionary<string, IReadOnlyCollection<string>>(flags);
-        _helpTexts = new HashSet<HelpText>();
-        _errors = new HashSet<string>();
+        _flags = new(flags);
+        _infos = new();
+        _errors = new();
     }
 
-    public HelpCommand Help => new(_helpTexts, _errors);
+    public HelpCommand Help => new(_infos, _errors);
 
     public bool TryStrings(
         string flag,
@@ -34,7 +34,7 @@ public sealed class FlagConsumer
             list = Array.Empty<string>();
         }
 
-        _helpTexts.Add(new HelpText(flag, info));
+        _infos[flag] = info;
 
         return true;
     }
@@ -93,7 +93,7 @@ public sealed class FlagConsumer
             && list.Count == 0)
         {
             _flags.Remove(flag);
-            _helpTexts.Add(new HelpText(flag, info));
+            _infos[flag] = info;
 
             value = true;
             return true;

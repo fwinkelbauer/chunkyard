@@ -7,30 +7,23 @@ namespace Chunkyard.Cli;
 /// </summary>
 public sealed class CommandParser
 {
-    private readonly List<ICommandParser> _parsers;
-    private readonly List<HelpText> _helpTexts;
+    private readonly Dictionary<string, ICommandParser> _parsers;
+    private readonly Dictionary<string, string> _infos;
 
     public CommandParser(IReadOnlyCollection<ICommandParser> parsers)
     {
-        _parsers = new List<ICommandParser>(parsers);
-
-        _helpTexts = _parsers
-            .Select(p => new HelpText(p.Command, p.Info))
-            .ToList();
+        _parsers = parsers.ToDictionary(p => p.Command, p => p);
+        _infos = parsers.ToDictionary(p => p.Command, p => p.Info);
 
         var helpCommand = "help";
         var helpInfo = "Print all available commands";
 
-        _helpTexts.Add(new HelpText(helpCommand, helpInfo));
+        _infos[helpCommand] = helpInfo;
 
-        _parsers.Add(
-            new SimpleCommandParser(
-                helpCommand,
-                helpInfo,
-                new HelpCommand(_helpTexts, Array.Empty<string>())));
-
-        _parsers = _parsers.OrderBy(p => p.Command).ToList();
-        _helpTexts = _helpTexts.OrderBy(h => h.Topic).ToList();
+        _parsers[helpCommand] = new SimpleCommandParser(
+            helpCommand,
+            helpInfo,
+            new HelpCommand(_infos, Array.Empty<string>()));
     }
 
     public object Parse(params string[] args)
@@ -39,18 +32,15 @@ public sealed class CommandParser
 
         if (arg == null)
         {
-            return new HelpCommand(_helpTexts, Array.Empty<string>());
+            return new HelpCommand(_infos, Array.Empty<string>());
         }
 
         var consumer = new FlagConsumer(arg.Flags);
 
-        var parser = _parsers.FirstOrDefault(
-            p => p.Command.Equals(arg.Command));
-
-        if (parser == null)
+        if (!_parsers.TryGetValue(arg.Command, out var parser))
         {
             return new HelpCommand(
-                _helpTexts,
+                _infos,
                 new[] { $"Unknown command: {arg.Command}" });
         }
 

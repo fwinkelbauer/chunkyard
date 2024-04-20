@@ -77,15 +77,15 @@ public class CommandHandler
         Console.Error.WriteLine("Usage:");
         Console.Error.WriteLine("  <command> <flags>");
 
-        if (c.HelpTexts.Any())
+        if (c.Infos.Any())
         {
             Console.Error.WriteLine();
             Console.Error.WriteLine("Help:");
 
-            foreach (var helpText in c.HelpTexts)
+            foreach (var info in c.Infos.OrderBy(i => i.Key))
             {
-                Console.Error.WriteLine($"  {helpText.Topic}");
-                Console.Error.WriteLine($"    {helpText.Info}");
+                Console.Error.WriteLine($"  {info.Key}");
+                Console.Error.WriteLine($"    {info.Value}");
             }
         }
 
@@ -94,7 +94,7 @@ public class CommandHandler
             Console.Error.WriteLine();
             Console.Error.WriteLine(c.Errors.Count == 1 ? "Error:" : "Errors:");
 
-            foreach (var error in c.Errors)
+            foreach (var error in c.Errors.OrderBy(e => e))
             {
                 Console.Error.WriteLine($"  {error}");
             }

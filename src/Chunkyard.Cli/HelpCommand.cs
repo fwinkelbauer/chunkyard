@@ -7,26 +7,26 @@ namespace Chunkyard.Cli;
 public sealed class HelpCommand
 {
     public HelpCommand(
-        IReadOnlyCollection<HelpText> helpTexts,
+        IReadOnlyDictionary<string, string> infos,
         IReadOnlyCollection<string> errors)
     {
-        HelpTexts = helpTexts;
+        Infos = infos;
         Errors = errors;
     }
 
-    public IReadOnlyCollection<HelpText> HelpTexts { get; }
+    public IReadOnlyDictionary<string, string> Infos { get; }
 
     public IReadOnlyCollection<string> Errors { get; }
 
     public override bool Equals(object? obj)
     {
         return obj is HelpCommand other
-            && HelpTexts.SequenceEqual(other.HelpTexts)
+            && Infos.SequenceEqual(other.Infos)
             && Errors.SequenceEqual(other.Errors);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(HelpTexts, Errors);
+        return HashCode.Combine(Infos, Errors);
     }
 }
