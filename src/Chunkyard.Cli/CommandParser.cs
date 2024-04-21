@@ -35,8 +35,6 @@ public sealed class CommandParser
             return new HelpCommand(_infos, Array.Empty<string>());
         }
 
-        var consumer = new FlagConsumer(arg.Flags);
-
         if (!_parsers.TryGetValue(arg.Command, out var parser))
         {
             return new HelpCommand(
@@ -44,10 +42,12 @@ public sealed class CommandParser
                 new[] { $"Unknown command: {arg.Command}" });
         }
 
-        var command = parser.Parse(consumer);
+        var consumer = new FlagConsumer(arg.Flags);
 
         var helpRequested = consumer.TryBool("--help", "Print usage information", out var help)
             && help;
+
+        var command = parser.Parse(consumer);
 
         if (helpRequested
             | !consumer.TryEmpty()

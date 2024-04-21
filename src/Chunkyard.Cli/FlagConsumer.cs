@@ -17,7 +17,9 @@ public sealed class FlagConsumer
         _errors = new();
     }
 
-    public HelpCommand Help => new(_infos, _errors);
+    public HelpCommand Help => new(
+        new Dictionary<string, string>(_infos),
+        new HashSet<string>(_errors));
 
     public bool TryStrings(
         string flag,
