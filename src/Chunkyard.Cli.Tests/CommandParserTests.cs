@@ -7,14 +7,15 @@ public static class CommandParserTests
     [InlineData("cmd --help false")]
     public static void Parse_Returns_Parsed_Command(string args)
     {
+        var expected = "the result";
+
         var parser = new CommandParser(
             new[]
             {
-                new SimpleCommandParser("cmd", "info", new SomeCommand())
+                new SimpleCommandParser("cmd", "info", expected)
             });
 
-        Assert.IsType<SomeCommand>(
-            parser.Parse(args.Split(' ')));
+        Assert.Equal(expected, parser.Parse(args.Split(' ')));
     }
 
     [Theory]
@@ -31,7 +32,7 @@ public static class CommandParserTests
         var parser = new CommandParser(
             new[]
             {
-                new SimpleCommandParser("cmd", "info", new SomeCommand())
+                new SimpleCommandParser("cmd", "info", "the result")
             });
 
         Assert.IsType<HelpCommand>(
@@ -53,6 +54,4 @@ public static class CommandParserTests
         Assert.Equal("result-two", parser.Parse("two"));
         Assert.Equal("result-three", parser.Parse("three"));
     }
-
-    internal sealed class SomeCommand;
 }

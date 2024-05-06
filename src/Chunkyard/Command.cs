@@ -11,7 +11,8 @@ public sealed class CatCommandParser : ICommandParser
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & (consumer.TrySnapshot(out var snapshotId)
                 | consumer.TryStrings("--chunks", "The chunk IDs", out var chunkIds))
-            & consumer.TryString("--export", "The export path", out var export, ""))
+            & consumer.TryString("--export", "The export path", out var export, "")
+            & consumer.NoHelp(out var help))
         {
             return new CatCommand(
                 repository,
@@ -23,7 +24,7 @@ public sealed class CatCommandParser : ICommandParser
         }
         else
         {
-            return consumer.Help;
+            return help;
         }
     }
 }
@@ -39,7 +40,8 @@ public sealed class CheckCommandParser : ICommandParser
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshotId)
             & consumer.TryIncludePatterns(out var includePatterns)
-            & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow))
+            & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow)
+            & consumer.NoHelp(out var help))
         {
             return new CheckCommand(
                 repository,
@@ -51,7 +53,7 @@ public sealed class CheckCommandParser : ICommandParser
         }
         else
         {
-            return consumer.Help;
+            return help;
         }
     }
 }
@@ -66,7 +68,8 @@ public sealed class CopyCommandParser : ICommandParser
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryString("--destination", "The destination repository path", out var destinationRepository)
-            & consumer.TryInt("--last", "The maximum amount of snapshots to copy. Zero or a negative number copies all", out var last, 0))
+            & consumer.TryInt("--last", "The maximum amount of snapshots to copy. Zero or a negative number copies all", out var last, 0)
+            & consumer.NoHelp(out var help))
         {
             return new CopyCommand(
                 repository,
@@ -77,7 +80,7 @@ public sealed class CopyCommandParser : ICommandParser
         }
         else
         {
-            return consumer.Help;
+            return help;
         }
     }
 }
@@ -94,7 +97,8 @@ public sealed class DiffCommandParser : ICommandParser
             & consumer.TryInt("--first", "The first snapshot ID", out var firstSnapshotId, SnapshotStore.SecondLatestSnapshotId)
             & consumer.TryInt("--second", "The second snapshot ID", out var secondSnapshotId, SnapshotStore.LatestSnapshotId)
             & consumer.TryIncludePatterns(out var includePatterns)
-            & consumer.TryChunksOnly(out var chunksOnly))
+            & consumer.TryChunksOnly(out var chunksOnly)
+            & consumer.NoHelp(out var help))
         {
             return new DiffCommand(
                 repository,
@@ -107,7 +111,7 @@ public sealed class DiffCommandParser : ICommandParser
         }
         else
         {
-            return consumer.Help;
+            return help;
         }
     }
 }
@@ -121,7 +125,8 @@ public sealed class KeepCommandParser : ICommandParser
     public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
-            & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount))
+            & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount)
+            & consumer.NoHelp(out var help))
         {
             return new KeepCommand(
                 repository,
@@ -131,7 +136,7 @@ public sealed class KeepCommandParser : ICommandParser
         }
         else
         {
-            return consumer.Help;
+            return help;
         }
     }
 }
@@ -144,7 +149,8 @@ public sealed class ListCommandParser : ICommandParser
 
     public object Parse(FlagConsumer consumer)
     {
-        if (consumer.TryCommon(out var repository, out var prompt, out var parallel))
+        if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
+            & consumer.NoHelp(out var help))
         {
             return new ListCommand(
                 repository,
@@ -153,7 +159,7 @@ public sealed class ListCommandParser : ICommandParser
         }
         else
         {
-            return consumer.Help;
+            return help;
         }
     }
 }
@@ -167,7 +173,8 @@ public sealed class RemoveCommandParser : ICommandParser
     public object Parse(FlagConsumer consumer)
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
-            & consumer.TrySnapshot(out var snapshot))
+            & consumer.TrySnapshot(out var snapshot)
+            & consumer.NoHelp(out var help))
         {
             return new RemoveCommand(
                 repository,
@@ -177,7 +184,7 @@ public sealed class RemoveCommandParser : ICommandParser
         }
         else
         {
-            return consumer.Help;
+            return help;
         }
     }
 }
@@ -194,7 +201,8 @@ public sealed class RestoreCommandParser : ICommandParser
             & consumer.TryString("--directory", "The directory to restore into", out var directory)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryIncludePatterns(out var includePatterns)
-            & consumer.TryPreview(out var preview))
+            & consumer.TryPreview(out var preview)
+            & consumer.NoHelp(out var help))
         {
             return new RestoreCommand(
                 repository,
@@ -207,7 +215,7 @@ public sealed class RestoreCommandParser : ICommandParser
         }
         else
         {
-            return consumer.Help;
+            return help;
         }
     }
 }
@@ -223,7 +231,8 @@ public sealed class ShowCommandParser : ICommandParser
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryIncludePatterns(out var includePatterns)
-            & consumer.TryChunksOnly(out var chunksOnly))
+            & consumer.TryChunksOnly(out var chunksOnly)
+            & consumer.NoHelp(out var help))
         {
             return new ShowCommand(
                 repository,
@@ -235,7 +244,7 @@ public sealed class ShowCommandParser : ICommandParser
         }
         else
         {
-            return consumer.Help;
+            return help;
         }
     }
 }
@@ -251,7 +260,8 @@ public sealed class StoreCommandParser : ICommandParser
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryStrings("--paths", "The files and directories (blobs) to store", out var paths)
             & consumer.TryIncludePatterns(out var includePatterns)
-            & consumer.TryPreview(out var preview))
+            & consumer.TryPreview(out var preview)
+            & consumer.NoHelp(out var help))
         {
             return new StoreCommand(
                 repository,
@@ -263,7 +273,7 @@ public sealed class StoreCommandParser : ICommandParser
         }
         else
         {
-            return consumer.Help;
+            return help;
         }
     }
 }
@@ -276,14 +286,21 @@ public sealed class VersionCommandParser : ICommandParser
 
     public object Parse(FlagConsumer consumer)
     {
-        var attribute = typeof(VersionCommand).Assembly
-            .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
-            .First();
+        if (consumer.NoHelp(out var help))
+        {
+            var attribute = typeof(VersionCommand).Assembly
+                .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
+                .First();
 
-        var version = ((AssemblyInformationalVersionAttribute)attribute)
-            .InformationalVersion;
+            var version = ((AssemblyInformationalVersionAttribute)attribute)
+                .InformationalVersion;
 
-        return new VersionCommand(version);
+            return new VersionCommand(version);
+        }
+        else
+        {
+            return help;
+        }
     }
 }
 

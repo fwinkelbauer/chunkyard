@@ -17,10 +17,6 @@ public sealed class FlagConsumer
         _errors = new();
     }
 
-    public HelpCommand Help => new(
-        new Dictionary<string, string>(_infos),
-        new HashSet<string>(_errors));
-
     public bool TryStrings(
         string flag,
         string info,
@@ -130,17 +126,22 @@ public sealed class FlagConsumer
             defaultValue);
     }
 
-    public bool TryEmpty()
+    public bool NoHelp(out HelpCommand help)
     {
-        var empty = _flags.Count == 0;
+        var helpRequested = TryBool("--help", "Print usage information", out var h)
+            && h;
 
-        if (!empty)
+        if (_flags.Count != 0)
         {
             _errors.UnionWith(_flags.Keys.Select(k => $"Extra flag: {k}"));
             _flags.Clear();
         }
 
-        return empty;
+        help = new HelpCommand(
+            new Dictionary<string, string>(_infos),
+            new HashSet<string>(_errors));
+
+        return !(helpRequested || _errors.Any());
     }
 
     private bool TryStruct<T>(

@@ -34,28 +34,16 @@ public sealed class CommandParser
         {
             return new HelpCommand(_infos, Array.Empty<string>());
         }
-
-        if (!_parsers.TryGetValue(arg.Command, out var parser))
+        else if (_parsers.TryGetValue(arg.Command, out var parser))
+        {
+            return parser.Parse(
+                new FlagConsumer(arg.Flags));
+        }
+        else
         {
             return new HelpCommand(
                 _infos,
                 new[] { $"Unknown command: {arg.Command}" });
         }
-
-        var consumer = new FlagConsumer(arg.Flags);
-
-        var helpRequested = consumer.TryBool("--help", "Print usage information", out var help)
-            && help;
-
-        var command = parser.Parse(consumer);
-
-        if (helpRequested
-            | !consumer.TryEmpty()
-            | consumer.Help.Errors.Any())
-        {
-            return consumer.Help;
-        }
-
-        return command;
     }
 }

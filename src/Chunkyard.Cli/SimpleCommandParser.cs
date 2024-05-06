@@ -24,6 +24,8 @@ public sealed class SimpleCommandParser : ICommandParser
 
     public object Parse(FlagConsumer consumer)
     {
-        return _result;
+        return consumer.NoHelp(out var help)
+            ? _result
+            : help;
     }
 }

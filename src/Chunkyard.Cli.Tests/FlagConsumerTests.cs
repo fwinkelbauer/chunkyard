@@ -3,16 +3,6 @@ namespace Chunkyard.Cli.Tests;
 public static class FlagConsumerTests
 {
     [Fact]
-    public static void TryEmpty_Clears_Consumer()
-    {
-        var consumer = new FlagConsumer(
-            Some.Dict(("--some", Some.Strings("value"))));
-
-        Assert.False(consumer.TryEmpty());
-        Assert.True(consumer.TryEmpty());
-    }
-
-    [Fact]
     public static void TryStrings_Returns_Empty_List_On_Empty_Input()
     {
         var consumer = new FlagConsumer(
@@ -32,10 +22,6 @@ public static class FlagConsumerTests
     {
         var expectedList = Some.Strings("one", "two");
 
-        var expectedHelp = new HelpCommand(
-            Some.Dict(("--list", "info")),
-            Array.Empty<string>());
-
         var consumer = new FlagConsumer(
             Some.Dict(("--list", expectedList)));
 
@@ -43,33 +29,23 @@ public static class FlagConsumerTests
 
         Assert.True(success);
         Assert.Equal(expectedList, actualList);
-        Assert.Equal(expectedHelp, consumer.Help);
     }
 
     [Fact]
     public static void TryString_Returns_Nothing_On_Empty_Required_Input()
     {
-        var expectedHelp = new HelpCommand(
-            Some.Dict(("--some", "info")),
-            new[] { "Missing mandatory flag: --some" });
-
         var consumer = new FlagConsumer(
             Some.Dict<string, IReadOnlyCollection<string>>());
 
         var success = consumer.TryString("--some", "info", out _);
 
         Assert.False(success);
-        Assert.Equal(expectedHelp, consumer.Help);
     }
 
     [Fact]
     public static void TryString_Returns_Default_On_Empty_Optional_Input()
     {
         var expectedValue = "default value";
-
-        var expectedHelp = new HelpCommand(
-            Some.Dict(("--some", $"info. Default: {expectedValue}")),
-            Array.Empty<string>());
 
         var consumer = new FlagConsumer(
             Some.Dict<string, IReadOnlyCollection<string>>());
@@ -82,7 +58,6 @@ public static class FlagConsumerTests
 
         Assert.True(success);
         Assert.Equal(expectedValue, actual);
-        Assert.Equal(expectedHelp, consumer.Help);
     }
 
     [Fact]
@@ -112,10 +87,6 @@ public static class FlagConsumerTests
     [Fact]
     public static void TryBool_Returns_True_On_Empty_Flag()
     {
-        var expectedHelp = new HelpCommand(
-            Some.Dict(("--bool", "info")),
-            Array.Empty<string>());
-
         var consumer = new FlagConsumer(
             Some.Dict(("--bool", Some.Strings())));
 
@@ -123,23 +94,17 @@ public static class FlagConsumerTests
 
         Assert.True(success);
         Assert.True(actual);
-        Assert.Equal(expectedHelp, consumer.Help);
     }
 
     [Fact]
     public static void TryBool_Returns_False_On_Invalid_Input()
     {
-        var expectedHelp = new HelpCommand(
-            Some.Dict(("--bool", "info. Default: False")),
-            new[] { "Invalid value: --bool" });
-
         var consumer = new FlagConsumer(
             Some.Dict(("--bool", Some.Strings("not-a-bool"))));
 
         var success = consumer.TryBool("--bool", "info", out _);
 
         Assert.False(success);
-        Assert.Equal(expectedHelp, consumer.Help);
     }
 
     [Theory]
