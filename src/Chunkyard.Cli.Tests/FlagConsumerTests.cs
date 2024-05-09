@@ -138,6 +138,54 @@ public static class FlagConsumerTests
         Assert.Equal(expected, actual);
     }
 
+    [Fact]
+    public static void NoHelp_Returns_True_If_No_Issues()
+    {
+        var consumer = new FlagConsumer(
+            Some.Dict(("--list", Some.Strings("element"))));
+
+        Assert.True(consumer.TryStrings("--list", "info", out _));
+        Assert.True(consumer.NoHelp(out _));
+    }
+
+    [Fact]
+    public static void NoHelp_Returns_False_If_User_Requests_Help()
+    {
+        var consumer = new FlagConsumer(
+            Some.Dict(("--help", Some.Strings())));
+
+        Assert.False(consumer.NoHelp(out _));
+    }
+
+    [Fact]
+    public static void NoHelp_Returns_False_On_Unconsumed_Arguments()
+    {
+        var consumer = new FlagConsumer(
+            Some.Dict(("--list", Some.Strings("element"))));
+
+        Assert.False(consumer.NoHelp(out _));
+    }
+
+    [Fact]
+    public static void NoHelp_Returns_False_On_Invalid_Arguments()
+    {
+        var consumer = new FlagConsumer(
+            Some.Dict(("--bool", Some.Strings("not-a-bool"))));
+
+        Assert.False(consumer.TryBool("--bool", "info", out _));
+        Assert.False(consumer.NoHelp(out _));
+    }
+
+    [Fact]
+    public static void NoHelp_Returns_False_On_Missing_Arguments()
+    {
+        var consumer = new FlagConsumer(
+            Some.Dict<string, IReadOnlyCollection<string>>());
+
+        Assert.False(consumer.TryString("--some", "info", out _));
+        Assert.False(consumer.NoHelp(out _));
+    }
+
     public enum Day
     {
         Monday = 0,
