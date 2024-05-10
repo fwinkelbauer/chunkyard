@@ -38,25 +38,20 @@ public sealed class FileBlobSystemTests
                 "some text");
         }
 
-        var blobSystem = new FileBlobSystem(subDirectories, Fuzzy.Default);
+        var blobSystem = new FileBlobSystem(subDirectories);
 
         Assert.Equal(
             new[] { "sub1/file.txt", "sub2/file.txt" },
             blobSystem.ListBlobs().Select(b => b.Name));
     }
 
-    [Theory]
-    [InlineData("../directory-traversal")]
-    [InlineData("excluded-blob")]
-    public static void Methods_Prevent_Accessing_Invalid_Blobs(
-        string invalidBlobName)
+    [Fact]
+    public static void Methods_Prevent_Accessing_Invalid_Blobs()
     {
         using var directory = new DisposableDirectory();
 
-        var blobSystem = new FileBlobSystem(
-            new[] { directory.Name },
-            new Fuzzy("!excluded-blob"));
-
+        var invalidBlobName = "../directory-traversal";
+        var blobSystem = new FileBlobSystem(directory.Name);
         var invalidBlob = Some.Blob(invalidBlobName);
 
         Assert.Throws<ArgumentException>(
@@ -82,9 +77,7 @@ public sealed class FileBlobSystemTests
     {
         _tempDirectory = new();
 
-        return new FileBlobSystem(
-            new[] { _tempDirectory.Name },
-            Fuzzy.Default);
+        return new FileBlobSystem(_tempDirectory.Name);
     }
 }
 

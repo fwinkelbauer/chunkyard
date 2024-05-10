@@ -66,14 +66,10 @@ public static class SnapshotStoreTests
             Some.BlobSystem(Some.Blobs()));
 
         Assert.True(
-            snapshotStore.CheckSnapshotExists(
-                snapshotId,
-                Fuzzy.Default));
+            snapshotStore.CheckSnapshotExists(snapshotId));
 
         Assert.True(
-            snapshotStore.CheckSnapshotValid(
-                snapshotId,
-                Fuzzy.Default));
+            snapshotStore.CheckSnapshotValid(snapshotId));
     }
 
     [Fact]
@@ -88,14 +84,10 @@ public static class SnapshotStoreTests
         Missing(repository.Chunks, repository.Chunks.UnorderedList());
 
         Assert.ThrowsAny<Exception>(
-            () => snapshotStore.CheckSnapshotExists(
-                snapshotId,
-                Fuzzy.Default));
+            () => snapshotStore.CheckSnapshotExists(snapshotId));
 
         Assert.ThrowsAny<Exception>(
-            () => snapshotStore.CheckSnapshotValid(
-                snapshotId,
-                Fuzzy.Default));
+            () => snapshotStore.CheckSnapshotValid(snapshotId));
     }
 
     [Fact]
@@ -110,14 +102,10 @@ public static class SnapshotStoreTests
         Corrupt(repository.Chunks, repository.Chunks.UnorderedList());
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.CheckSnapshotExists(
-                snapshotId,
-                Fuzzy.Default));
+            () => snapshotStore.CheckSnapshotExists(snapshotId));
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.CheckSnapshotValid(
-                snapshotId,
-                Fuzzy.Default));
+            () => snapshotStore.CheckSnapshotValid(snapshotId));
     }
 
     [Fact]
@@ -136,24 +124,16 @@ public static class SnapshotStoreTests
         Missing(repository.Chunks, chunkIds);
 
         Assert.False(
-            snapshotStore.CheckSnapshotExists(
-                snapshotId,
-                Fuzzy.Default));
+            snapshotStore.CheckSnapshotExists(snapshotId));
 
         Assert.False(
-            snapshotStore.CheckSnapshotValid(
-                snapshotId,
-                Fuzzy.Default));
+            snapshotStore.CheckSnapshotValid(snapshotId));
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.EnsureSnapshotExists(
-                snapshotId,
-                Fuzzy.Default));
+            () => snapshotStore.EnsureSnapshotExists(snapshotId));
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.EnsureSnapshotValid(
-                snapshotId,
-                Fuzzy.Default));
+            () => snapshotStore.EnsureSnapshotValid(snapshotId));
     }
 
     [Fact]
@@ -172,19 +152,13 @@ public static class SnapshotStoreTests
         Corrupt(repository.Chunks, chunkIds);
 
         Assert.True(
-           snapshotStore.CheckSnapshotExists(
-               snapshotId,
-               Fuzzy.Default));
+           snapshotStore.CheckSnapshotExists(snapshotId));
 
         Assert.False(
-            snapshotStore.CheckSnapshotValid(
-                snapshotId,
-                Fuzzy.Default));
+            snapshotStore.CheckSnapshotValid(snapshotId));
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.EnsureSnapshotValid(
-                snapshotId,
-                Fuzzy.Default));
+            () => snapshotStore.EnsureSnapshotValid(snapshotId));
     }
 
     [Fact]
@@ -211,10 +185,7 @@ public static class SnapshotStoreTests
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
 
-        snapshotStore.RestoreSnapshot(
-            outputBlobSystem,
-            snapshotId,
-            Fuzzy.Default);
+        snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
 
         Assert.Equal(
             ToContent(inputBlobSystem),
@@ -235,10 +206,7 @@ public static class SnapshotStoreTests
 
         var outputBlobSystem = Some.BlobSystem();
 
-        snapshotStore.RestoreSnapshot(
-            outputBlobSystem,
-            snapshotId,
-            Fuzzy.Default);
+        snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
 
         Assert.Equal(
             expectedContent,
@@ -255,8 +223,7 @@ public static class SnapshotStoreTests
 
         var actualDiff = snapshotStore.RestoreSnapshotPreview(
             Some.BlobSystem(Some.Blobs("new blob")),
-            snapshotId,
-            Fuzzy.Default);
+            snapshotId);
 
         Assert.Equal(
             new DiffSet(
@@ -281,10 +248,7 @@ public static class SnapshotStoreTests
 
         var outputBlobSystem = Some.BlobSystem();
 
-        snapshotStore.RestoreSnapshot(
-            outputBlobSystem,
-            snapshotId,
-            Fuzzy.Default);
+        snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
 
         var blobReferences = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
@@ -330,7 +294,7 @@ public static class SnapshotStoreTests
         snapshotStore.GarbageCollect();
 
         Assert.True(
-            snapshotStore.CheckSnapshotValid(snapshotId, Fuzzy.Default));
+            snapshotStore.CheckSnapshotValid(snapshotId));
 
         snapshotStore.RemoveSnapshot(snapshotId);
 
@@ -445,7 +409,7 @@ public static class SnapshotStoreTests
         Assert.Single(otherSnapshotStore.ListSnapshotIds());
 
         Assert.True(
-            otherSnapshotStore.CheckSnapshotValid(snapshotId, Fuzzy.Default));
+            otherSnapshotStore.CheckSnapshotValid(snapshotId));
     }
 
     [Fact]

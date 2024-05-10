@@ -7,11 +7,13 @@ public sealed class FileBlobSystem : IBlobSystem
 {
     private readonly string[] _paths;
     private readonly string _parent;
-    private readonly Fuzzy _fuzzy;
 
-    public FileBlobSystem(
-        IEnumerable<string> paths,
-        Fuzzy fuzzy)
+    public FileBlobSystem(params string[] paths)
+        : this((IEnumerable<string>)paths)
+    {
+    }
+
+    public FileBlobSystem(IEnumerable<string> paths)
     {
         _paths = paths.Select(Path.GetFullPath).ToArray();
 
@@ -20,8 +22,6 @@ public sealed class FileBlobSystem : IBlobSystem
             : DirectoryUtils.GetCommonParent(
                 _paths,
                 Path.DirectorySeparatorChar);
-
-        _fuzzy = fuzzy;
     }
 
     public bool BlobExists(string blobName)
@@ -34,7 +34,6 @@ public sealed class FileBlobSystem : IBlobSystem
     {
         return _paths
             .SelectMany(DirectoryUtils.ListFiles)
-            .Where(_fuzzy.IsMatch)
             .Distinct()
             .OrderBy(file => file)
             .Select(ToBlob)
@@ -86,16 +85,7 @@ public sealed class FileBlobSystem : IBlobSystem
 
     private string ToFile(string blobName)
     {
-        var file = DirectoryUtils.CombinePathSafe(_parent, blobName);
-
-        if (!_fuzzy.IsMatch(file))
-        {
-            throw new ArgumentException(
-                $"Blob {blobName} is excluded",
-                nameof(blobName));
-        }
-
-        return file;
+        return DirectoryUtils.CombinePathSafe(_parent, blobName);
     }
 
     private sealed class WriteStream : FileStream

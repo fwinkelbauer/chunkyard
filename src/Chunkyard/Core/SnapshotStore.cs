@@ -64,13 +64,17 @@ public sealed class SnapshotStore
         _parallelism = parallelism;
     }
 
-    public DiffSet StoreSnapshotPreview(IBlobSystem blobSystem)
+    public DiffSet StoreSnapshotPreview(
+        IBlobSystem blobSystem,
+        Fuzzy? fuzzy = null)
     {
         var blobReferences = _repository.Snapshots.TryLast(out var snapshotId)
             ? GetSnapshot(snapshotId).BlobReferences
             : Array.Empty<BlobReference>();
 
-        var blobs = blobSystem.ListBlobs();
+        var blobs = blobSystem.ListBlobs()
+            .Where(b => (fuzzy ?? new()).IsMatch(b.Name))
+            .ToArray();
 
         return DiffSet.Create(
             blobReferences.Select(br => br.Blob),
@@ -78,11 +82,13 @@ public sealed class SnapshotStore
             blob => blob.Name);
     }
 
-    public int StoreSnapshot(IBlobSystem blobSystem)
+    public int StoreSnapshot(
+        IBlobSystem blobSystem,
+        Fuzzy? fuzzy = null)
     {
         var snapshot = new Snapshot(
             _world.NowUtc(),
-            StoreBlobs(blobSystem));
+            StoreBlobs(blobSystem, fuzzy));
 
         var snapshotId = StoreSnapshotReference(
             new SnapshotReference(
@@ -101,7 +107,9 @@ public sealed class SnapshotStore
             GetSnapshotReference(snapshotId).ChunkIds);
     }
 
-    public void EnsureSnapshotExists(int snapshotId, Fuzzy fuzzy)
+    public void EnsureSnapshotExists(
+        int snapshotId,
+        Fuzzy? fuzzy = null)
     {
         var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
 
@@ -112,7 +120,9 @@ public sealed class SnapshotStore
         }
     }
 
-    public void EnsureSnapshotValid(int snapshotId, Fuzzy fuzzy)
+    public void EnsureSnapshotValid(
+        int snapshotId,
+        Fuzzy? fuzzy = null)
     {
         var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
 
@@ -123,35 +133,39 @@ public sealed class SnapshotStore
         }
     }
 
-    public bool CheckSnapshotExists(int snapshotId, Fuzzy fuzzy)
+    public bool CheckSnapshotExists(
+        int snapshotId,
+        Fuzzy? fuzzy = null)
     {
         return CheckSnapshot(
+            _repository.Chunks.Exists,
             snapshotId,
-            fuzzy,
-            _repository.Chunks.Exists);
+            fuzzy);
     }
 
-    public bool CheckSnapshotValid(int snapshotId, Fuzzy fuzzy)
+    public bool CheckSnapshotValid(
+        int snapshotId,
+        Fuzzy? fuzzy = null)
     {
         return CheckSnapshot(
+            ChunkValid,
             snapshotId,
-            fuzzy,
-            ChunkValid);
+            fuzzy);
     }
 
     public IReadOnlyCollection<BlobReference> FilterSnapshot(
         int snapshotId,
-        Fuzzy fuzzy)
+        Fuzzy? fuzzy = null)
     {
         return GetSnapshot(snapshotId).BlobReferences
-            .Where(br => fuzzy.IsMatch(br.Blob.Name))
+            .Where(br => (fuzzy ?? new()).IsMatch(br.Blob.Name))
             .ToArray();
     }
 
     public DiffSet RestoreSnapshotPreview(
         IBlobSystem blobSystem,
         int snapshotId,
-        Fuzzy fuzzy)
+        Fuzzy? fuzzy = null)
     {
         var diffSet = DiffSet.Create(
             blobSystem.ListBlobs(),
@@ -167,7 +181,7 @@ public sealed class SnapshotStore
     public void RestoreSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,
-        Fuzzy fuzzy)
+        Fuzzy? fuzzy = null)
     {
         _ = FilterSnapshot(snapshotId, fuzzy)
             .AsParallel()
@@ -374,7 +388,9 @@ public sealed class SnapshotStore
         }
     }
 
-    private BlobReference[] StoreBlobs(IBlobSystem blobSystem)
+    private BlobReference[] StoreBlobs(
+        IBlobSystem blobSystem,
+        Fuzzy? fuzzy = null)
     {
         var currentBlobReferences = _repository.Snapshots.TryLast(out var snapshotId)
             ? GetSnapshot(snapshotId).BlobReferences
@@ -399,7 +415,10 @@ public sealed class SnapshotStore
             return blobReference;
         }
 
+        fuzzy ??= new();
+
         return blobSystem.ListBlobs()
+            .Where(b => fuzzy.IsMatch(b.Name))
             .AsParallel()
             .AsOrdered()
             .WithDegreeOfParallelism(_parallelism)
@@ -452,9 +471,9 @@ public sealed class SnapshotStore
     }
 
     private bool CheckSnapshot(
+        Func<string, bool> checkChunkIdFunc,
         int snapshotId,
-        Fuzzy fuzzy,
-        Func<string, bool> checkChunkIdFunc)
+        Fuzzy? fuzzy = null)
     {
         var snapshotValid = FilterSnapshot(snapshotId, fuzzy)
             .AsParallel()

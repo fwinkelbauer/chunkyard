@@ -124,11 +124,7 @@ public static class Program
     private static void Restore(RestoreCommand c)
     {
         var snapshotStore = CreateSnapshotStore(c);
-
-        var blobSystem = new FileBlobSystem(
-            new[] { c.Directory },
-            Fuzzy.Default);
-
+        var blobSystem = new FileBlobSystem(c.Directory);
         var fuzzy = new Fuzzy(c.IncludePatterns);
 
         if (c.Preview)
@@ -170,20 +166,18 @@ public static class Program
     private static void Store(StoreCommand c)
     {
         var snapshotStore = CreateSnapshotStore(c);
-
-        var blobSystem = new FileBlobSystem(
-            c.Paths,
-            new Fuzzy(c.IncludePatterns));
+        var blobSystem = new FileBlobSystem(c.Paths);
+        var fuzzy = new Fuzzy(c.IncludePatterns);
 
         if (c.Preview)
         {
-            var diff = snapshotStore.StoreSnapshotPreview(blobSystem);
+            var diff = snapshotStore.StoreSnapshotPreview(blobSystem, fuzzy);
 
             PrintDiff(diff);
         }
         else
         {
-            snapshotStore.StoreSnapshot(blobSystem);
+            snapshotStore.StoreSnapshot(blobSystem, fuzzy);
         }
     }
 
