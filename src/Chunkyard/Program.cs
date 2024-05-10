@@ -216,17 +216,12 @@ public static class Program
             _ => new ConsolePrompt()
         };
 
-        var parallelism = c.Parallel < 1
-            ? Environment.ProcessorCount
-            : c.Parallel;
-
         return new SnapshotStore(
             repository,
             new FastCdc(),
             new ConsoleProbe(),
-            new RealWorld(),
-            prompt,
-            parallelism);
+            new RealWorld(c.Parallel),
+            prompt);
     }
 
     private static IRepository CreateRepository(string repositoryPath)

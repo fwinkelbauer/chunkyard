@@ -6,7 +6,18 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 internal sealed class RealWorld : IWorld
 {
-    public int Iterations => Crypto.DefaultIterations;
+    public RealWorld(int parallelism)
+    {
+        Parallelism = parallelism < 1
+            ? Environment.ProcessorCount
+            : parallelism;
+
+        Iterations = Crypto.DefaultIterations;
+    }
+
+    public int Parallelism { get; }
+
+    public int Iterations { get; }
 
     public byte[] GenerateSalt()
     {

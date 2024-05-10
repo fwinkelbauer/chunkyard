@@ -9,6 +9,8 @@ internal sealed class DummyWorld : IWorld
         _nowUtc = nowUtc;
     }
 
+    public int Parallelism => Environment.ProcessorCount;
+
     public int Iterations => 1;
 
     public byte[] GenerateSalt()

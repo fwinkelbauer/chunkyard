@@ -5,6 +5,8 @@ namespace Chunkyard.Core;
 /// </summary>
 public interface IWorld
 {
+    int Parallelism { get; }
+
     int Iterations { get; }
 
     byte[] GenerateSalt();

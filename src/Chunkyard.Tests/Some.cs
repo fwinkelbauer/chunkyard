@@ -38,8 +38,7 @@ internal static class Some
             fastCdc ?? new FastCdc(),
             new DummyProbe(),
             World,
-            new DummyPrompt(password),
-            Environment.ProcessorCount);
+            new DummyPrompt(password));
     }
 
     public static IRepository Repository()

@@ -15,15 +15,13 @@ public sealed class SnapshotStore
     private readonly IWorld _world;
     private readonly Lazy<Crypto> _crypto;
     private readonly Lazy<uint[]> _gearTable;
-    private readonly int _parallelism;
 
     public SnapshotStore(
         IRepository repository,
         FastCdc fastCdc,
         IProbe probe,
         IWorld world,
-        IPrompt prompt,
-        int parallelism)
+        IPrompt prompt)
     {
         _repository = repository;
         _fastCdc = fastCdc;
@@ -60,8 +58,6 @@ public sealed class SnapshotStore
 
         _gearTable = new Lazy<uint[]>(
             () => FastCdc.GenerateGearTable(_crypto.Value));
-
-        _parallelism = parallelism;
     }
 
     public DiffSet StoreSnapshotPreview(
@@ -185,7 +181,7 @@ public sealed class SnapshotStore
     {
         _ = FilterSnapshot(snapshotId, fuzzy)
             .AsParallel()
-            .WithDegreeOfParallelism(_parallelism)
+            .WithDegreeOfParallelism(_world.Parallelism)
             .Select(br => RestoreBlob(blobSystem, br))
             .ToArray();
 
@@ -328,7 +324,7 @@ public sealed class SnapshotStore
     {
         var options = new ParallelOptions
         {
-            MaxDegreeOfParallelism = _parallelism
+            MaxDegreeOfParallelism = _world.Parallelism
         };
 
         Parallel.ForEach(
@@ -355,7 +351,7 @@ public sealed class SnapshotStore
     {
         var options = new ParallelOptions
         {
-            MaxDegreeOfParallelism = _parallelism
+            MaxDegreeOfParallelism = _world.Parallelism
         };
 
         Parallel.ForEach(
@@ -421,7 +417,7 @@ public sealed class SnapshotStore
             .Where(b => fuzzy.IsMatch(b.Name))
             .AsParallel()
             .AsOrdered()
-            .WithDegreeOfParallelism(_parallelism)
+            .WithDegreeOfParallelism(_world.Parallelism)
             .Select(StoreBlob)
             .ToArray();
     }
@@ -452,7 +448,7 @@ public sealed class SnapshotStore
         return _fastCdc.SplitIntoChunks(stream, _gearTable.Value)
             .AsParallel()
             .AsOrdered()
-            .WithDegreeOfParallelism(_parallelism)
+            .WithDegreeOfParallelism(_world.Parallelism)
             .Select(StoreChunk)
             .ToArray();
     }
@@ -477,7 +473,7 @@ public sealed class SnapshotStore
     {
         var snapshotValid = FilterSnapshot(snapshotId, fuzzy)
             .AsParallel()
-            .WithDegreeOfParallelism(_parallelism)
+            .WithDegreeOfParallelism(_world.Parallelism)
             .All(br => CheckBlobReference(br, checkChunkIdFunc));
 
         _probe.SnapshotValid(
