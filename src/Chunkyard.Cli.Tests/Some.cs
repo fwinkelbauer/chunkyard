@@ -2,9 +2,8 @@ namespace Chunkyard.Cli.Tests;
 
 internal static class Some
 {
-    public static Dictionary<TKey, TValue> Dict<TKey, TValue>(
-        params (TKey Key, TValue Value)[] pairs)
-        where TKey : notnull
+    public static Dictionary<string, IReadOnlyCollection<string>> Flags(
+        params (string Key, IReadOnlyCollection<string> Value)[] pairs)
     {
         return pairs.ToDictionary(p => p.Key, p => p.Value);
     }

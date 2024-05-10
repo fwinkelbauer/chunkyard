@@ -5,9 +5,7 @@ public static class ArgsTests
     [Fact]
     public static void Parse_Treats_Single_Argument_As_Command()
     {
-        var expected = new Args(
-            "help",
-            Some.Dict<string, IReadOnlyCollection<string>>());
+        var expected = new Args("help", Some.Flags());
 
         var actual = Args.Parse("help");
 
@@ -19,7 +17,7 @@ public static class ArgsTests
     {
         var expected = new Args(
             "list",
-            Some.Dict(
+            Some.Flags(
                 ("--snapshot", Some.Strings("-2")),
                 ("-f", Some.Strings("foo", "bar", "baz")),
                 ("--preview", Some.Strings()),

@@ -6,7 +6,7 @@ public static class FlagConsumerTests
     public static void TryStrings_Returns_Empty_List_On_Empty_Input()
     {
         var consumer = new FlagConsumer(
-            Some.Dict<string, IReadOnlyCollection<string>>());
+            Some.Flags());
 
         var success = consumer.TryStrings(
             "--something",
@@ -23,7 +23,7 @@ public static class FlagConsumerTests
         var expectedList = Some.Strings("one", "two");
 
         var consumer = new FlagConsumer(
-            Some.Dict(("--list", expectedList)));
+            Some.Flags(("--list", expectedList)));
 
         var success = consumer.TryStrings("--list", "info", out var actualList);
 
@@ -35,7 +35,7 @@ public static class FlagConsumerTests
     public static void TryString_Returns_Nothing_On_Empty_Required_Input()
     {
         var consumer = new FlagConsumer(
-            Some.Dict<string, IReadOnlyCollection<string>>());
+            Some.Flags());
 
         var success = consumer.TryString("--some", "info", out _);
 
@@ -48,7 +48,7 @@ public static class FlagConsumerTests
         var expectedValue = "default value";
 
         var consumer = new FlagConsumer(
-            Some.Dict<string, IReadOnlyCollection<string>>());
+            Some.Flags());
 
         var success = consumer.TryString(
             "--some",
@@ -64,7 +64,7 @@ public static class FlagConsumerTests
     public static void TryString_Returns_Last_String_On_Non_Empty_Input()
     {
         var consumer = new FlagConsumer(
-            Some.Dict(("--value", Some.Strings("one", "two"))));
+            Some.Flags(("--value", Some.Strings("one", "two"))));
 
         var success = consumer.TryString("--value", "info", out var actual);
 
@@ -76,7 +76,7 @@ public static class FlagConsumerTests
     public static void TryBool_Returns_False_On_Empty_Input()
     {
         var consumer = new FlagConsumer(
-            Some.Dict<string, IReadOnlyCollection<string>>());
+            Some.Flags());
 
         var success = consumer.TryBool("--bool", "info", out var actual);
 
@@ -88,7 +88,7 @@ public static class FlagConsumerTests
     public static void TryBool_Returns_True_On_Empty_Flag()
     {
         var consumer = new FlagConsumer(
-            Some.Dict(("--bool", Some.Strings())));
+            Some.Flags(("--bool", Some.Strings())));
 
         var success = consumer.TryBool("--bool", "info", out var actual);
 
@@ -100,7 +100,7 @@ public static class FlagConsumerTests
     public static void TryBool_Returns_False_On_Invalid_Input()
     {
         var consumer = new FlagConsumer(
-            Some.Dict(("--bool", Some.Strings("not-a-bool"))));
+            Some.Flags(("--bool", Some.Strings("not-a-bool"))));
 
         var success = consumer.TryBool("--bool", "info", out _);
 
@@ -115,7 +115,7 @@ public static class FlagConsumerTests
     public static void TryBool_Ignores_Case(string arg, bool expected)
     {
         var consumer = new FlagConsumer(
-            Some.Dict(("--bool", Some.Strings(arg))));
+            Some.Flags(("--bool", Some.Strings(arg))));
 
         var success = consumer.TryBool("--bool", "info", out var actual);
 
@@ -130,7 +130,7 @@ public static class FlagConsumerTests
     public static void TryEnum_Ignores_Case(string arg, Day expected)
     {
         var consumer = new FlagConsumer(
-            Some.Dict(("--enum", Some.Strings(arg))));
+            Some.Flags(("--enum", Some.Strings(arg))));
 
         var success = consumer.TryEnum<Day>("--enum", "info", out var actual);
 
@@ -142,7 +142,7 @@ public static class FlagConsumerTests
     public static void NoHelp_Returns_True_If_No_Issues()
     {
         var consumer = new FlagConsumer(
-            Some.Dict(("--list", Some.Strings("element"))));
+            Some.Flags(("--list", Some.Strings("element"))));
 
         Assert.True(consumer.TryStrings("--list", "info", out _));
         Assert.True(consumer.NoHelp(out _));
@@ -152,7 +152,7 @@ public static class FlagConsumerTests
     public static void NoHelp_Returns_False_If_User_Requests_Help()
     {
         var consumer = new FlagConsumer(
-            Some.Dict(("--help", Some.Strings())));
+            Some.Flags(("--help", Some.Strings())));
 
         Assert.False(consumer.NoHelp(out _));
     }
@@ -161,7 +161,7 @@ public static class FlagConsumerTests
     public static void NoHelp_Returns_False_On_Unconsumed_Arguments()
     {
         var consumer = new FlagConsumer(
-            Some.Dict(("--list", Some.Strings("element"))));
+            Some.Flags(("--list", Some.Strings("element"))));
 
         Assert.False(consumer.NoHelp(out _));
     }
@@ -170,7 +170,7 @@ public static class FlagConsumerTests
     public static void NoHelp_Returns_False_On_Invalid_Arguments()
     {
         var consumer = new FlagConsumer(
-            Some.Dict(("--bool", Some.Strings("not-a-bool"))));
+            Some.Flags(("--bool", Some.Strings("not-a-bool"))));
 
         Assert.False(consumer.TryBool("--bool", "info", out _));
         Assert.False(consumer.NoHelp(out _));
@@ -179,8 +179,7 @@ public static class FlagConsumerTests
     [Fact]
     public static void NoHelp_Returns_False_On_Missing_Arguments()
     {
-        var consumer = new FlagConsumer(
-            Some.Dict<string, IReadOnlyCollection<string>>());
+        var consumer = new FlagConsumer(Some.Flags());
 
         Assert.False(consumer.TryString("--some", "info", out _));
         Assert.False(consumer.NoHelp(out _));
