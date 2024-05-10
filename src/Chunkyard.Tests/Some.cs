@@ -2,8 +2,7 @@ namespace Chunkyard.Tests;
 
 internal static class Some
 {
-    public static readonly DateTime DateUtc = DateTime.UtcNow;
-    public static readonly IWorld World = new DummyWorld(DateUtc);
+    public static readonly IWorld World = new DummyWorld(DateTime.UtcNow);
 
     public static Crypto Crypto(string password)
     {
@@ -15,7 +14,7 @@ internal static class Some
 
     public static Blob Blob(string blobName)
     {
-        return new Blob(blobName, DateUtc);
+        return new Blob(blobName, DateTime.UtcNow);
     }
 
     public static Blob[] Blobs(params string[] blobNames)

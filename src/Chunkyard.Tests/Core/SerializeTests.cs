@@ -6,7 +6,7 @@ public static class SerializeTests
     public static void Serialize_Can_Convert_Snapshot()
     {
         var expected = new Snapshot(
-            Some.DateUtc,
+            DateTime.UtcNow,
             new[]
             {
                 new BlobReference(
