@@ -2,7 +2,7 @@ namespace Chunkyard.Build;
 
 public static class Program
 {
-    private const string Tag = "v22.0.0";
+    private const string Tag = "v23.0.0";
     private const string Solution = "src/Chunkyard.sln";
     private const string Configuration = "Release";
 
