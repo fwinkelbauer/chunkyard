@@ -612,8 +612,7 @@ public sealed class VersionCommand
 public enum Prompt
 {
     Console = 0,
-    Store = 1,
-    Libsecret = 2
+    Store = 1
 }
 
 public static class ArgConsumerExtensions

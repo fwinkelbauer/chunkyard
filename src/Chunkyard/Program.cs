@@ -212,7 +212,6 @@ public static class Program
         {
             Prompt.Console => new ConsolePrompt(),
             Prompt.Store => new StorePrompt(new ConsolePrompt()),
-            Prompt.Libsecret => new LibsecretPrompt(new ConsolePrompt()),
             _ => new ConsolePrompt()
         };
 
