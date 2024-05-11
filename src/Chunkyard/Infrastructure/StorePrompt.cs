@@ -8,7 +8,8 @@ internal sealed class StorePrompt : IPrompt
 {
     private static readonly string CredentialsDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-        ".chunkyard-credentials");
+        ".config",
+        "chunkyard");
 
     private readonly IPrompt _prompt;
 
