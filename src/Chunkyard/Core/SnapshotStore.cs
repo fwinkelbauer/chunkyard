@@ -557,9 +557,6 @@ public sealed class SnapshotStore
         }
 
         var snapshotIds = _repository.Snapshots.UnorderedList();
-
-        Array.Sort(snapshotIds);
-
         var position = snapshotIds.Length + snapshotId;
 
         if (position < 0)
@@ -567,6 +564,8 @@ public sealed class SnapshotStore
             throw new ChunkyardException(
                 $"Snapshot does not exist: #{snapshotId}");
         }
+
+        Array.Sort(snapshotIds);
 
         return snapshotIds[position];
     }
