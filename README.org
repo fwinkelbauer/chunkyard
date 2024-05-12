@@ -97,7 +97,7 @@ directories=(
 # Store backup
 chunkyard store --repository "$repo" --paths "${directories[@]}"
 
-# Optional: Store password in ~/.chunkyard-credentials and use more threads
+# Optional: Store password in ~/.config/chunkyard and use more threads
 # chunkyard store --repository "$repo" --paths "${directories[@]}" --prompt Store --parallel 2
 
 # Keep the latest four backups
@@ -123,7 +123,7 @@ $directories = @(
 chunkyard store --repository $repo --paths $directories
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-# Optional: Store password in ~/.chunkyard-credentials and use more threads
+# Optional: Store password in ~/.config/chunkyard and use more threads
 # chunkyard store --repository $repo --paths $directories --prompt Store --parallel 2
 # if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
