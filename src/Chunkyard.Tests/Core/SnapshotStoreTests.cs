@@ -3,6 +3,21 @@ namespace Chunkyard.Tests.Core;
 public static class SnapshotStoreTests
 {
     [Fact]
+    public static void StoreSnapshot_Creates_Snapshot_Of_Blobs()
+    {
+        var snapshotStore = Some.SnapshotStore();
+        var blobs = Some.Blobs();
+        var blobSystem = Some.BlobSystem(blobs);
+
+        var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
+        var snapshot = snapshotStore.GetSnapshot(snapshotId);
+
+        Assert.Equal(
+            blobs,
+            snapshot.BlobReferences.Select(br => br.Blob));
+    }
+
+    [Fact]
     public static void StoreSnapshot_Does_Not_Read_Blob_With_Unchanged_LastWriteTimeUtc()
     {
         var snapshotStore = Some.SnapshotStore();
@@ -10,24 +25,41 @@ public static class SnapshotStoreTests
 
         var blobSystem1 = Some.BlobSystem(blobs, _ => new byte[] { 0x01 });
         var snapshotId1 = snapshotStore.StoreSnapshot(blobSystem1);
+        var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
 
         var blobSystem2 = Some.BlobSystem(blobs, _ => new byte[] { 0x02 });
         var snapshotId2 = snapshotStore.StoreSnapshot(blobSystem2);
-
-        var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
         var snapshot2 = snapshotStore.GetSnapshot(snapshotId2);
-
-        Assert.Equal(
-            new[] { snapshotId1, snapshotId2 },
-            snapshotStore.ListSnapshotIds());
-
-        Assert.Equal(
-            blobs,
-            snapshot1.BlobReferences.Select(br => br.Blob));
 
         Assert.Equal(
             snapshot1.BlobReferences,
             snapshot2.BlobReferences);
+    }
+
+    [Fact]
+    public static void StoreSnapshotPreview_Shows_Preview()
+    {
+        var snapshotStore = Some.SnapshotStore();
+        var initialBlobSystem = Some.BlobSystem(Some.Blobs("some blob"));
+        var changedBlobSystem = Some.BlobSystem(Some.Blobs("other blob"));
+
+        var initialDiff = snapshotStore.StoreSnapshotPreview(initialBlobSystem);
+        _ = snapshotStore.StoreSnapshot(initialBlobSystem);
+        var changedDiff = snapshotStore.StoreSnapshotPreview(changedBlobSystem);
+
+        Assert.Equal(
+            new DiffSet(
+                new[] { "some blob" },
+                Array.Empty<string>(),
+                Array.Empty<string>()),
+            initialDiff);
+
+        Assert.Equal(
+            new DiffSet(
+                new[] { "other blob" },
+                Array.Empty<string>(),
+                new[] { "some blob" }),
+            changedDiff);
     }
 
     [Fact]
@@ -39,7 +71,6 @@ public static class SnapshotStoreTests
         var snapshotId1 = snapshotStore.StoreSnapshot(blobSystem);
         var snapshotId2 = snapshotStore.StoreSnapshot(blobSystem);
         var snapshotId3 = snapshotStore.StoreSnapshot(blobSystem);
-
         snapshotStore.RemoveSnapshot(snapshotId2);
 
         Assert.Equal(
@@ -165,26 +196,19 @@ public static class SnapshotStoreTests
     public static void RestoreSnapshot_Updates_Known_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
-        var blobs = Some.Blobs(
-            "blob to restore",
-            "unchanged blob",
-            "changed blob");
 
-        static byte[] Generator(string _) => new byte[] { 0xAB, 0xCD, 0xEF };
+        var inputBlobSystem = Some.BlobSystem(
+            Some.Blobs(
+                "blob to restore",
+                "blob to update"),
+            _ => new byte[] { 0x01 });
 
-        var inputBlobSystem = Some.BlobSystem(blobs, Generator);
         var outputBlobSystem = Some.BlobSystem(
-            new[]
-            {
-                blobs[1],
-                new Blob(
-                    blobs[2].Name,
-                    blobs[2].LastWriteTimeUtc.AddHours(1))
-            },
-            Generator);
+            Some.Blobs(
+                "blob to update"),
+            _ => new byte[] { 0x02 });
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
-
         snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
 
         Assert.Equal(
@@ -196,20 +220,14 @@ public static class SnapshotStoreTests
     public static void RestoreSnapshot_Can_Write_Empty_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
-        var inputBlobSystem = Some.BlobSystem(
-            Some.Blobs(),
-            _ => Array.Empty<byte>());
-
-        var expectedContent = ToContent(inputBlobSystem);
-
-        var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
-
+        var inputBlobSystem = Some.BlobSystem(Some.Blobs(), _ => []);
         var outputBlobSystem = Some.BlobSystem();
 
+        var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
         snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
 
         Assert.Equal(
-            expectedContent,
+            ToContent(inputBlobSystem),
             ToContent(outputBlobSystem));
     }
 
@@ -222,7 +240,7 @@ public static class SnapshotStoreTests
             Some.BlobSystem(Some.Blobs("some blob")));
 
         var actualDiff = snapshotStore.RestoreSnapshotPreview(
-            Some.BlobSystem(Some.Blobs("new blob")),
+            Some.BlobSystem(),
             snapshotId);
 
         Assert.Equal(
@@ -244,10 +262,9 @@ public static class SnapshotStoreTests
             Some.Blobs(),
             _ => RandomNumberGenerator.GetBytes(2 * fastCdc.MaxSize));
 
-        var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
-
         var outputBlobSystem = Some.BlobSystem();
 
+        var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
         snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
 
         var blobReferences = snapshotStore.GetSnapshot(snapshotId)
@@ -293,8 +310,7 @@ public static class SnapshotStoreTests
 
         snapshotStore.GarbageCollect();
 
-        Assert.True(
-            snapshotStore.CheckSnapshotValid(snapshotId));
+        Assert.True(snapshotStore.CheckSnapshotValid(snapshotId));
 
         snapshotStore.RemoveSnapshot(snapshotId);
 
@@ -403,7 +419,6 @@ public static class SnapshotStoreTests
 
         _ = snapshotStore.StoreSnapshot(blobSystem);
         var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
-
         snapshotStore.CopyTo(otherRepository, 1);
 
         Assert.Single(otherSnapshotStore.ListSnapshotIds());
@@ -428,8 +443,7 @@ public static class SnapshotStoreTests
         Corrupt(repository.Chunks, chunkIds);
 
         Assert.Throws<AggregateException>(
-            () => snapshotStore.CopyTo(
-                Some.Repository()));
+            () => snapshotStore.CopyTo(Some.Repository()));
     }
 
     [Fact]
@@ -444,8 +458,7 @@ public static class SnapshotStoreTests
         Corrupt(repository.Snapshots, repository.Snapshots.UnorderedList());
 
         Assert.Throws<ChunkyardException>(
-            () => snapshotStore.CopyTo(
-                Some.Repository()));
+            () => snapshotStore.CopyTo(Some.Repository()));
     }
 
     [Fact]
@@ -465,38 +478,6 @@ public static class SnapshotStoreTests
 
         Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(otherRepository));
-    }
-
-    [Fact]
-    public static void StoreSnapshotPreview_Shows_Preview()
-    {
-        var snapshotStore = Some.SnapshotStore();
-        var initialBlobSystem = Some.BlobSystem(Some.Blobs("some blob"));
-
-        var initialDiff = snapshotStore.StoreSnapshotPreview(
-            initialBlobSystem);
-
-        _ = snapshotStore.StoreSnapshot(initialBlobSystem);
-
-        var changedBlobSystem = Some.BlobSystem(
-            Some.Blobs("other blob"));
-
-        var changedDiff = snapshotStore.StoreSnapshotPreview(
-            changedBlobSystem);
-
-        Assert.Equal(
-            new DiffSet(
-                new[] { "some blob" },
-                Array.Empty<string>(),
-                Array.Empty<string>()),
-            initialDiff);
-
-        Assert.Equal(
-            new DiffSet(
-                new[] { "other blob" },
-                Array.Empty<string>(),
-                new[] { "some blob" }),
-            changedDiff);
     }
 
     private static void Missing<T>(
