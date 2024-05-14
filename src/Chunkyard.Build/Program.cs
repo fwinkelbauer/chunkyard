@@ -143,6 +143,7 @@ public static class Program
 
         var message = $"Prepare Chunkyard release {Tag}";
 
+        Git($"commit -am \"{message}\"");
         Git($"tag -a \"{Tag}\" -m \"{message}\"");
     }
 
