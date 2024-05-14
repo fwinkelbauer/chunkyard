@@ -6,8 +6,8 @@ encryption.
 
 The [[https://www.usenix.org/system/files/conference/atc16/atc16-paper-xia.pdf][FastCDC]] chunking algorithm is a C# port of the Rust crate [[https://github.com/nlfiedler/fastcdc-rs][fastcdc-rs]].
 
-I built Chunkyard for myself. You might want to consider more sophisticated
-tools. Here's a list of [[https://github.com/restic/others][options]].
+I am building Chunkyard for myself. You might want to consider more
+sophisticated tools. Here's a list of [[https://github.com/restic/others][options]].
 
 * Goals
 
