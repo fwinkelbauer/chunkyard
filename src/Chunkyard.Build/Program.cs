@@ -2,7 +2,6 @@ namespace Chunkyard.Build;
 
 public static class Program
 {
-    private const string Tag = "v23.0.0";
     private const string Solution = "src/Chunkyard.sln";
     private const string Configuration = "Release";
 
@@ -141,10 +140,17 @@ public static class Program
     {
         Announce("Release");
 
-        var message = $"Prepare Chunkyard release {Tag}";
+        var currentTag = GitQuery("describe --abbrev=0");
+        Console.WriteLine($"Current tag: {currentTag}");
+        Console.Write("New tag: ");
+        var newTag = Console.ReadLine()?.Trim();
 
-        Git($"commit -am \"{message}\"");
-        Git($"tag -a \"{Tag}\" -m \"{message}\"");
+        if (string.IsNullOrEmpty(newTag))
+        {
+            return;
+        }
+
+        Git($"tag -a \"{newTag}\" -m \"Prepare Chunkyard release {newTag}\"");
     }
 
     private static (string, string) FetchGitVersion()
