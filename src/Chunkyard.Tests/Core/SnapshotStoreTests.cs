@@ -361,10 +361,8 @@ public static class SnapshotStoreTests
         var snapshotStore = Some.SnapshotStore();
         var blobSystem = Some.BlobSystem(Some.Blobs());
 
-        for (var i = 0; i < 5; i++)
-        {
-            _ = snapshotStore.StoreSnapshot(blobSystem);
-        }
+        _ = snapshotStore.StoreSnapshot(blobSystem);
+        _ = snapshotStore.StoreSnapshot(blobSystem);
 
         var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
 
