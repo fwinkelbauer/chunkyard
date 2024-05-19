@@ -38,13 +38,9 @@ public sealed class FileRepositoryTests
 
 public abstract class RepositoryTests
 {
-    private readonly IReadOnlyCollection<string> _keys;
-
     protected RepositoryTests(IRepository<string> repository)
     {
         Repository = repository;
-
-        _keys = new[] { "aa", "bb", "cc" };
     }
 
     protected IRepository<string> Repository { get; }
@@ -55,9 +51,12 @@ public abstract class RepositoryTests
         Assert.Empty(Repository.UnorderedList());
         Assert.False(Repository.TryLast(out _));
 
-        var dict = _keys.ToDictionary(
-            k => k,
-            k => SHA256.HashData(Encoding.UTF8.GetBytes(k)));
+        var dict = new Dictionary<string, byte[]>
+        {
+            { "aa", new byte[] { 0x00 } },
+            { "bb", new byte[] { 0x01 } },
+            { "cc", new byte[] { 0x02 } }
+        };
 
         foreach (var pair in dict)
         {
@@ -67,7 +66,7 @@ public abstract class RepositoryTests
             Assert.Equal(pair.Value, Repository.Retrieve(pair.Key));
         }
 
-        Assert.Equal(_keys, Repository.UnorderedList().OrderBy(k => k));
+        Assert.Equal(dict.Keys, Repository.UnorderedList().OrderBy(k => k));
         Assert.True(Repository.TryLast(out var maxKey));
         Assert.Equal(Repository.UnorderedList().Max(), maxKey);
 
@@ -84,7 +83,7 @@ public abstract class RepositoryTests
     [Fact]
     public void Repository_Store_Throws_When_Writing_To_Same_Key()
     {
-        var key = _keys.First();
+        var key = "some-key";
         var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
         Repository.Store(key, bytes);
@@ -97,6 +96,7 @@ public abstract class RepositoryTests
     public void Repository_Handles_Parallel_Operations()
     {
         var input = new ConcurrentDictionary<string, byte[]>();
+        var output = new ConcurrentDictionary<string, byte[]>();
 
         for (var i = 0; i < 100; i++)
         {
@@ -106,8 +106,6 @@ public abstract class RepositoryTests
         Parallel.ForEach(
             input,
             pair => Repository.Store(pair.Key, pair.Value));
-
-        var output = new ConcurrentDictionary<string, byte[]>();
 
         Parallel.ForEach(
             Repository.UnorderedList(),
