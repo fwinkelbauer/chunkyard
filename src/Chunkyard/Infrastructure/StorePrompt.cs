@@ -42,6 +42,6 @@ internal sealed class StorePrompt : IPrompt
 
     private static string ToFile(string key)
     {
-        return DirectoryUtils.CombinePathSafe(CredentialsDirectory, key);
+        return Path.Combine(CredentialsDirectory, key);
     }
 }

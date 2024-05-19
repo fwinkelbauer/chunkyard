@@ -26,32 +26,4 @@ public static class DirectoryUtilsTests
             expectedParent,
             DirectoryUtils.GetCommonParent(paths, '/'));
     }
-
-    [Theory]
-    [InlineData("/some", "dir/structure")]
-    [InlineData("/some/dir", "structure")]
-    [InlineData("/some/dir/structure", "")]
-    [InlineData("/other/../some/dir", "structure")]
-    public static void CombinePathSafe_Returns_Path(
-        string directory,
-        string relativePath)
-    {
-        Assert.Equal(
-            Path.Combine(directory, relativePath),
-            DirectoryUtils.CombinePathSafe(directory, relativePath));
-    }
-
-    [Theory]
-    [InlineData("/some/dir", "../invalid")]
-    [InlineData("C:/some/dir", "../invalid")]
-    [InlineData("some/dir", "../invalid")]
-    public static void CombinePathSafe_Throws_On_Directory_Traversal_Of_RelativePath(
-        string directory,
-        string relativePath)
-    {
-        Assert.Throws<ArgumentException>(
-            () => DirectoryUtils.CombinePathSafe(
-                directory,
-                relativePath));
-    }
 }

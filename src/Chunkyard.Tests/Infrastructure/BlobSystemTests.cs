@@ -45,28 +45,6 @@ public sealed class FileBlobSystemTests
             blobSystem.ListBlobs().Select(b => b.Name));
     }
 
-    [Fact]
-    public static void Methods_Prevent_Accessing_Invalid_Blobs()
-    {
-        using var directory = new DisposableDirectory();
-
-        var invalidBlobName = "../directory-traversal";
-        var blobSystem = new FileBlobSystem(directory.Name);
-        var invalidBlob = Some.Blob(invalidBlobName);
-
-        Assert.Throws<ArgumentException>(
-            () => blobSystem.BlobExists(invalidBlobName));
-
-        Assert.Throws<ArgumentException>(
-            () => blobSystem.GetBlob(invalidBlobName));
-
-        Assert.Throws<ArgumentException>(
-            () => blobSystem.OpenRead(invalidBlobName));
-
-        Assert.Throws<ArgumentException>(
-            () => blobSystem.OpenWrite(invalidBlob));
-    }
-
     public void Dispose()
     {
         _tempDirectory?.Dispose();

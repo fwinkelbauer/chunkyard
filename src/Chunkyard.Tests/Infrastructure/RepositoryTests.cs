@@ -19,24 +19,6 @@ public sealed class FileRepositoryTests
     {
     }
 
-    [Fact]
-    public void Methods_Prevent_Directory_Traversal_Attack()
-    {
-        var invalidKey = "../some-file";
-
-        Assert.Throws<ArgumentException>(
-            () => Repository.Store(invalidKey, new byte[] { 0xFF }));
-
-        Assert.Throws<ArgumentException>(
-            () => Repository.Retrieve(invalidKey));
-
-        Assert.Throws<ArgumentException>(
-            () => Repository.Exists(invalidKey));
-
-        Assert.Throws<ArgumentException>(
-            () => Repository.Remove(invalidKey));
-    }
-
     public void Dispose()
     {
         _tempDirectory?.Dispose();

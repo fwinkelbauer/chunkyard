@@ -98,7 +98,7 @@ public sealed class FileRepository<T> : IRepository<T>
 
     private string ToFile(T key)
     {
-        return DirectoryUtils.CombinePathSafe(_directory, _toFile(key));
+        return Path.Combine(_directory, _toFile(key));
     }
 
     private T ToKey(string file)

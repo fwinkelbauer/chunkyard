@@ -85,7 +85,7 @@ public sealed class FileBlobSystem : IBlobSystem
 
     private string ToFile(string blobName)
     {
-        return DirectoryUtils.CombinePathSafe(_parent, blobName);
+        return Path.Combine(_parent, blobName);
     }
 
     private sealed class WriteStream : FileStream
