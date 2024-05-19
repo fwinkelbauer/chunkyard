@@ -57,14 +57,9 @@ public class CommandHandler
             ? a.InnerExceptions
             : new[] { e };
 
-        var debugMode = !string.IsNullOrEmpty(
-            Environment.GetEnvironmentVariable("DEBUG"));
-
         foreach (var exception in exceptions)
         {
-            Console.Error.WriteLine(debugMode
-                ? exception.ToString()
-                : exception.Message);
+            Console.Error.WriteLine(exception.ToString());
         }
     }
 

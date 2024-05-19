@@ -91,9 +91,6 @@ directories=(
     ~/Videos
 )
 
-# Optional: Show error traces
-# export DEBUG='1'
-
 # Store backup
 chunkyard store --repository "$repo" --paths "${directories[@]}"
 
@@ -115,9 +112,6 @@ $directories = @(
     "$env:UserProfile\Pictures",
     "$env:UserProfile\Videos"
 )
-
-# Optional: Show error traces
-# $env:DEBUG = '1'
 
 # Store backup
 chunkyard store --repository $repo --paths $directories
