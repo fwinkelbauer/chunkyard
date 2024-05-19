@@ -34,8 +34,10 @@ internal sealed class StorePrompt : IPrompt
 
     private static string Store(string key, string password)
     {
-        Directory.CreateDirectory(CredentialsDirectory);
-        File.WriteAllText(ToFile(key), password);
+        var file = ToFile(key);
+
+        DirectoryUtils.EnsureParent(file);
+        File.WriteAllText(file, password);
 
         return password;
     }

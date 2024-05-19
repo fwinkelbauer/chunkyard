@@ -15,7 +15,7 @@ public static class DirectoryUtils
             return;
         }
 
-        _ = Directory.CreateDirectory(parent);
+        Directory.CreateDirectory(parent);
     }
 
     public static string GetCommonParent(string[] paths, char separatorChar)
