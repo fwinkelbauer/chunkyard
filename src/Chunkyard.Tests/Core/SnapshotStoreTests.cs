@@ -212,8 +212,8 @@ public static class SnapshotStoreTests
         snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
 
         Assert.Equal(
-            ToContent(inputBlobSystem),
-            ToContent(outputBlobSystem));
+            ToDictionary(inputBlobSystem),
+            ToDictionary(outputBlobSystem));
     }
 
     [Fact]
@@ -227,8 +227,8 @@ public static class SnapshotStoreTests
         snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
 
         Assert.Equal(
-            ToContent(inputBlobSystem),
-            ToContent(outputBlobSystem));
+            ToDictionary(inputBlobSystem),
+            ToDictionary(outputBlobSystem));
     }
 
     [Fact]
@@ -274,8 +274,8 @@ public static class SnapshotStoreTests
         var chunkIds = blobReferences.SelectMany(br => br.ChunkIds).ToArray();
 
         Assert.Equal(
-            ToContent(inputBlobSystem),
-            ToContent(outputBlobSystem));
+            ToDictionary(inputBlobSystem),
+            ToDictionary(outputBlobSystem));
 
         Assert.NotEmpty(blobReferences);
         Assert.True(blobReferences.Length * 2 <= chunkIds.Length);
@@ -503,7 +503,7 @@ public static class SnapshotStoreTests
         }
     }
 
-    private static IReadOnlyDictionary<Blob, byte[]> ToContent(
+    private static IReadOnlyDictionary<Blob, byte[]> ToDictionary(
         IBlobSystem blobSystem)
     {
         return blobSystem.ListBlobs().ToDictionary(
