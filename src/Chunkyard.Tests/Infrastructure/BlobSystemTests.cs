@@ -91,14 +91,9 @@ public abstract class BlobSystemTests
             new[] { blob },
             BlobSystem.ListBlobs());
 
-        using var readStream = BlobSystem.OpenRead(blob.Name);
-        using var memoryStream = new MemoryStream();
-
-        readStream.CopyTo(memoryStream);
-
         Assert.Equal(
             expectedBytes,
-            memoryStream.ToArray());
+            StreamUtils.AsBytes(() => BlobSystem.OpenRead(blob.Name)));
     }
 
     [Fact]
@@ -116,13 +111,8 @@ public abstract class BlobSystemTests
             writeStream.Write(new byte[] { 0x11 });
         }
 
-        using var readStream = BlobSystem.OpenRead(blob.Name);
-        using var memoryStream = new MemoryStream();
-
-        readStream.CopyTo(memoryStream);
-
         Assert.Equal(
             new byte[] { 0x11 },
-            memoryStream.ToArray());
+            StreamUtils.AsBytes(() => BlobSystem.OpenRead(blob.Name)));
     }
 }

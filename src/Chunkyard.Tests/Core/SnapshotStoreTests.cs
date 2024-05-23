@@ -508,14 +508,6 @@ public static class SnapshotStoreTests
     {
         return blobSystem.ListBlobs().ToDictionary(
             blob => blob,
-            blob =>
-            {
-                using var memoryStream = new MemoryStream();
-                using var blobStream = blobSystem.OpenRead(blob.Name);
-
-                blobStream.CopyTo(memoryStream);
-
-                return memoryStream.ToArray();
-            });
+            blob => StreamUtils.AsBytes(() => blobSystem.OpenRead(blob.Name)));
     }
 }
