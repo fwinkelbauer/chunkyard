@@ -89,8 +89,7 @@ public static class Program
             $"test {Solution}",
             $"-c {Configuration}",
             "--no-build",
-            "--nologo",
-            "--logger console;verbosity=detailed");
+            "--nologo");
     }
 
     private static void Publish()
