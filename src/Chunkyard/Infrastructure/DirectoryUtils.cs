@@ -65,7 +65,7 @@ public static class DirectoryUtils
         return parent;
     }
 
-    public static IReadOnlyCollection<string> ListFiles(string path)
+    public static string[] ListFiles(string path)
     {
         if (Directory.Exists(path))
         {

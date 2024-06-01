@@ -223,7 +223,7 @@ public static class Program
             prompt);
     }
 
-    private static IRepository CreateRepository(string repositoryPath)
+    private static FileRepository CreateRepository(string repositoryPath)
     {
         return new FileRepository(repositoryPath);
     }

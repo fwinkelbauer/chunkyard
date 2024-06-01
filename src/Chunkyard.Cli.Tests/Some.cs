@@ -8,8 +8,8 @@ internal static class Some
         return pairs.ToDictionary(p => p.Key, p => p.Value);
     }
 
-    public static IReadOnlyCollection<string> Strings(params string[] values)
+    public static string[] Strings(params string[] values)
     {
-        return new List<string>(values);
+        return values;
     }
 }

@@ -21,7 +21,7 @@ internal sealed class MemoryBlobSystem : IBlobSystem
         }
     }
 
-    public IReadOnlyCollection<Blob> ListBlobs()
+    public Blob[] ListBlobs()
     {
         lock (_lock)
         {

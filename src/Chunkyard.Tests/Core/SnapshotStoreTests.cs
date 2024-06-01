@@ -503,7 +503,7 @@ public static class SnapshotStoreTests
         }
     }
 
-    private static IReadOnlyDictionary<Blob, byte[]> ToDictionary(
+    private static Dictionary<Blob, byte[]> ToDictionary(
         IBlobSystem blobSystem)
     {
         return blobSystem.ListBlobs().ToDictionary(

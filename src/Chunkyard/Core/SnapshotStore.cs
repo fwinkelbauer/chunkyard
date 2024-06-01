@@ -149,7 +149,7 @@ public sealed class SnapshotStore
             fuzzy);
     }
 
-    public IReadOnlyCollection<BlobReference> FilterSnapshot(
+    public BlobReference[] FilterSnapshot(
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
@@ -189,7 +189,7 @@ public sealed class SnapshotStore
             ResolveSnapshotId(snapshotId));
     }
 
-    public IReadOnlyCollection<int> ListSnapshotIds()
+    public int[] ListSnapshotIds()
     {
         var snapshotIds = _repository.Snapshots.UnorderedList();
 
@@ -221,7 +221,7 @@ public sealed class SnapshotStore
     public void KeepSnapshots(int latestCount)
     {
         var snapshotIds = ListSnapshotIds();
-        var snapshotIdsToRemove = snapshotIds.Take(snapshotIds.Count - latestCount)
+        var snapshotIdsToRemove = snapshotIds.Take(snapshotIds.Length - latestCount)
             .ToArray();
 
         foreach (var snapshotId in snapshotIdsToRemove)
@@ -287,7 +287,7 @@ public sealed class SnapshotStore
         CopySnapshotIds(otherRepository, snapshotIdsToCopy);
     }
 
-    private IReadOnlyCollection<int> ListSnapshotIdsToCopy(IRepository otherRepository)
+    private int[] ListSnapshotIdsToCopy(IRepository otherRepository)
     {
         var snapshotIds = ListSnapshotIds();
         var otherSnapshotIds = otherRepository.Snapshots.UnorderedList();
@@ -422,7 +422,7 @@ public sealed class SnapshotStore
             .ToArray();
     }
 
-    private IReadOnlyCollection<string> StoreSnapshot(Snapshot snapshot)
+    private string[] StoreSnapshot(Snapshot snapshot)
     {
         using var memoryStream = new MemoryStream(
             Serialize.SnapshotToBytes(snapshot));
@@ -443,7 +443,7 @@ public sealed class SnapshotStore
         return nextId;
     }
 
-    private IReadOnlyCollection<string> StoreChunks(Stream stream)
+    private string[] StoreChunks(Stream stream)
     {
         return _fastCdc.SplitIntoChunks(stream, _gearTable.Value)
             .AsParallel()
@@ -522,8 +522,7 @@ public sealed class SnapshotStore
         return blob;
     }
 
-    private IReadOnlyCollection<string> ListChunkIds(
-        IEnumerable<int> snapshotIds)
+    private HashSet<string> ListChunkIds(IEnumerable<int> snapshotIds)
     {
         var chunkIds = new HashSet<string>();
 

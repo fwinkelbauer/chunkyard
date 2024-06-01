@@ -30,7 +30,7 @@ public sealed class FileBlobSystem : IBlobSystem
             ToFile(blobName));
     }
 
-    public IReadOnlyCollection<Blob> ListBlobs()
+    public Blob[] ListBlobs()
     {
         return _paths
             .SelectMany(DirectoryUtils.ListFiles)

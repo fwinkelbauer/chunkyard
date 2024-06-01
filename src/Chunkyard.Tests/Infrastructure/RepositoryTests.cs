@@ -25,7 +25,7 @@ public sealed class FileRepositoryTests
         _tempDirectory = null;
     }
 
-    private static IRepository<string> CreateRepository()
+    private static FileRepository<string> CreateRepository()
     {
         _tempDirectory = new();
 

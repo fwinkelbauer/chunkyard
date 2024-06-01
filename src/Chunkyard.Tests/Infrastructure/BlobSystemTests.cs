@@ -51,7 +51,7 @@ public sealed class FileBlobSystemTests
         _tempDirectory = null;
     }
 
-    private static IBlobSystem CreateBlobSystem()
+    private static FileBlobSystem CreateBlobSystem()
     {
         _tempDirectory = new();
 
