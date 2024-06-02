@@ -626,7 +626,7 @@ public static class ArgConsumerExtensions
         var prompts = string.Join(", ", Enum.GetNames<Prompt>());
 
         return consumer.TryString("--repository", "The repository path", out repository)
-            & consumer.TryEnum("--prompt", $"The password prompt method: {prompts}", out prompt, Prompt.Store)
+            & consumer.TryEnum("--prompt", $"The password prompt method: {prompts}", out prompt, Prompt.Console)
             & consumer.TryInt("--parallel", "The degree of parallelism", out parallel, 1);
     }
 
