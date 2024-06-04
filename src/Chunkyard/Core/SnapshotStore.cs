@@ -320,7 +320,7 @@ public sealed class SnapshotStore
 
     private void CopyChunkIds(
         IRepository otherRepository,
-        IReadOnlyCollection<string> chunkIdsToCopy)
+        IEnumerable<string> chunkIdsToCopy)
     {
         var options = new ParallelOptions
         {
@@ -347,7 +347,7 @@ public sealed class SnapshotStore
 
     private void CopySnapshotIds(
         IRepository otherRepository,
-        IReadOnlyCollection<int> snapshotIdsToCopy)
+        IEnumerable<int> snapshotIdsToCopy)
     {
         var options = new ParallelOptions
         {
