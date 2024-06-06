@@ -49,15 +49,13 @@ public static class Program
     {
         var snapshotStore = CreateSnapshotStore(c);
 
-        var fuzzy = new Fuzzy(c.IncludePatterns);
-
         if (c.Shallow)
         {
-            snapshotStore.EnsureSnapshotExists(c.SnapshotId, fuzzy);
+            snapshotStore.EnsureSnapshotExists(c.SnapshotId, c.Include);
         }
         else
         {
-            snapshotStore.EnsureSnapshotValid(c.SnapshotId, fuzzy);
+            snapshotStore.EnsureSnapshotValid(c.SnapshotId, c.Include);
         }
     }
 
@@ -74,9 +72,8 @@ public static class Program
     {
         var snapshotStore = CreateSnapshotStore(c);
 
-        var fuzzy = new Fuzzy(c.IncludePatterns);
-        var first = snapshotStore.FilterSnapshot(c.FirstSnapshotId, fuzzy);
-        var second = snapshotStore.FilterSnapshot(c.SecondSnapshotId, fuzzy);
+        var first = snapshotStore.FilterSnapshot(c.FirstSnapshotId, c.Include);
+        var second = snapshotStore.FilterSnapshot(c.SecondSnapshotId, c.Include);
 
         var diff = c.ChunksOnly
             ? DiffSet.Create(
@@ -125,14 +122,13 @@ public static class Program
     {
         var snapshotStore = CreateSnapshotStore(c);
         var blobSystem = new FileBlobSystem(c.Directory);
-        var fuzzy = new Fuzzy(c.IncludePatterns);
 
         if (c.Preview)
         {
             var diff = snapshotStore.RestoreSnapshotPreview(
                 blobSystem,
                 c.SnapshotId,
-                fuzzy);
+                c.Include);
 
             PrintDiff(diff);
         }
@@ -141,7 +137,7 @@ public static class Program
             snapshotStore.RestoreSnapshot(
                 blobSystem,
                 c.SnapshotId,
-                fuzzy);
+                c.Include);
         }
     }
 
@@ -151,7 +147,7 @@ public static class Program
 
         var blobReferences = snapshotStore.FilterSnapshot(
             c.SnapshotId,
-            new Fuzzy(c.IncludePatterns));
+            c.Include);
 
         var contents = c.ChunksOnly
             ? blobReferences.SelectMany(br => br.ChunkIds)
@@ -167,17 +163,16 @@ public static class Program
     {
         var snapshotStore = CreateSnapshotStore(c);
         var blobSystem = new FileBlobSystem(c.Paths);
-        var fuzzy = new Fuzzy(c.IncludePatterns);
 
         if (c.Preview)
         {
-            var diff = snapshotStore.StoreSnapshotPreview(blobSystem, fuzzy);
+            var diff = snapshotStore.StoreSnapshotPreview(blobSystem, c.Include);
 
             PrintDiff(diff);
         }
         else
         {
-            snapshotStore.StoreSnapshot(blobSystem, fuzzy);
+            snapshotStore.StoreSnapshot(blobSystem, c.Include);
         }
     }
 

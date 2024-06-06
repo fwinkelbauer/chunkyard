@@ -39,7 +39,7 @@ public sealed class CheckCommandParser : ICommandParser
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshotId)
-            & consumer.TryIncludePatterns(out var includePatterns)
+            & consumer.TryInclude(out var include)
             & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow)
             & consumer.NoHelp(out var help))
         {
@@ -48,7 +48,7 @@ public sealed class CheckCommandParser : ICommandParser
                 prompt,
                 parallel,
                 snapshotId,
-                includePatterns,
+                include,
                 shallow);
         }
         else
@@ -96,7 +96,7 @@ public sealed class DiffCommandParser : ICommandParser
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryInt("--first", "The first snapshot ID", out var firstSnapshotId, SnapshotStore.SecondLatestSnapshotId)
             & consumer.TryInt("--second", "The second snapshot ID", out var secondSnapshotId, SnapshotStore.LatestSnapshotId)
-            & consumer.TryIncludePatterns(out var includePatterns)
+            & consumer.TryInclude(out var include)
             & consumer.TryChunksOnly(out var chunksOnly)
             & consumer.NoHelp(out var help))
         {
@@ -106,7 +106,7 @@ public sealed class DiffCommandParser : ICommandParser
                 parallel,
                 firstSnapshotId,
                 secondSnapshotId,
-                includePatterns,
+                include,
                 chunksOnly);
         }
         else
@@ -200,7 +200,7 @@ public sealed class RestoreCommandParser : ICommandParser
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryString("--directory", "The directory to restore into", out var directory)
             & consumer.TrySnapshot(out var snapshot)
-            & consumer.TryIncludePatterns(out var includePatterns)
+            & consumer.TryInclude(out var include)
             & consumer.TryPreview(out var preview)
             & consumer.NoHelp(out var help))
         {
@@ -210,7 +210,7 @@ public sealed class RestoreCommandParser : ICommandParser
                 parallel,
                 directory,
                 snapshot,
-                includePatterns,
+                include,
                 preview);
         }
         else
@@ -230,7 +230,7 @@ public sealed class ShowCommandParser : ICommandParser
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TrySnapshot(out var snapshot)
-            & consumer.TryIncludePatterns(out var includePatterns)
+            & consumer.TryInclude(out var include)
             & consumer.TryChunksOnly(out var chunksOnly)
             & consumer.NoHelp(out var help))
         {
@@ -239,7 +239,7 @@ public sealed class ShowCommandParser : ICommandParser
                 prompt,
                 parallel,
                 snapshot,
-                includePatterns,
+                include,
                 chunksOnly);
         }
         else
@@ -259,7 +259,7 @@ public sealed class StoreCommandParser : ICommandParser
     {
         if (consumer.TryCommon(out var repository, out var prompt, out var parallel)
             & consumer.TryStrings("--paths", "The files and directories (blobs) to store", out var paths)
-            & consumer.TryIncludePatterns(out var includePatterns)
+            & consumer.TryInclude(out var include)
             & consumer.TryPreview(out var preview)
             & consumer.NoHelp(out var help))
         {
@@ -268,7 +268,7 @@ public sealed class StoreCommandParser : ICommandParser
                 prompt,
                 parallel,
                 paths,
-                includePatterns,
+                include,
                 preview);
         }
         else
@@ -351,14 +351,14 @@ public sealed class CheckCommand : IChunkyardCommand
         Prompt prompt,
         int parallel,
         int snapshotId,
-        IReadOnlyCollection<string> includePatterns,
+        Fuzzy include,
         bool shallow)
     {
         Repository = repository;
         Prompt = prompt;
         Parallel = parallel;
         SnapshotId = snapshotId;
-        IncludePatterns = includePatterns;
+        Include = include;
         Shallow = shallow;
     }
 
@@ -370,7 +370,7 @@ public sealed class CheckCommand : IChunkyardCommand
 
     public int SnapshotId { get; }
 
-    public IReadOnlyCollection<string> IncludePatterns { get; }
+    public Fuzzy Include { get; }
 
     public bool Shallow { get; }
 }
@@ -410,7 +410,7 @@ public sealed class DiffCommand : IChunkyardCommand
         int parallel,
         int firstSnapshotId,
         int secondSnapshotId,
-        IReadOnlyCollection<string> includePatterns,
+        Fuzzy include,
         bool chunksOnly)
     {
         Repository = repository;
@@ -418,7 +418,7 @@ public sealed class DiffCommand : IChunkyardCommand
         Parallel = parallel;
         FirstSnapshotId = firstSnapshotId;
         SecondSnapshotId = secondSnapshotId;
-        IncludePatterns = includePatterns;
+        Include = include;
         ChunksOnly = chunksOnly;
     }
 
@@ -432,7 +432,7 @@ public sealed class DiffCommand : IChunkyardCommand
 
     public int SecondSnapshotId { get; }
 
-    public IReadOnlyCollection<string> IncludePatterns { get; }
+    public Fuzzy Include { get; }
 
     public bool ChunksOnly { get; }
 }
@@ -510,7 +510,7 @@ public sealed class RestoreCommand : IChunkyardCommand
         int parallel,
         string directory,
         int snapshotId,
-        IReadOnlyCollection<string> includePatterns,
+        Fuzzy include,
         bool preview)
     {
         Repository = repository;
@@ -518,7 +518,7 @@ public sealed class RestoreCommand : IChunkyardCommand
         Parallel = parallel;
         Directory = directory;
         SnapshotId = snapshotId;
-        IncludePatterns = includePatterns;
+        Include = include;
         Preview = preview;
     }
 
@@ -532,7 +532,7 @@ public sealed class RestoreCommand : IChunkyardCommand
 
     public int SnapshotId { get; }
 
-    public IReadOnlyCollection<string> IncludePatterns { get; }
+    public Fuzzy Include { get; }
 
     public bool Preview { get; }
 }
@@ -544,14 +544,14 @@ public sealed class ShowCommand : IChunkyardCommand
         Prompt prompt,
         int parallel,
         int snapshotId,
-        IReadOnlyCollection<string> includePatterns,
+        Fuzzy include,
         bool chunksOnly)
     {
         Repository = repository;
         Prompt = prompt;
         Parallel = parallel;
         SnapshotId = snapshotId;
-        IncludePatterns = includePatterns;
+        Include = include;
         ChunksOnly = chunksOnly;
     }
 
@@ -563,7 +563,7 @@ public sealed class ShowCommand : IChunkyardCommand
 
     public int SnapshotId { get; }
 
-    public IReadOnlyCollection<string> IncludePatterns { get; }
+    public Fuzzy Include { get; }
 
     public bool ChunksOnly { get; }
 }
@@ -575,14 +575,14 @@ public sealed class StoreCommand : IChunkyardCommand
         Prompt prompt,
         int parallel,
         IReadOnlyCollection<string> paths,
-        IReadOnlyCollection<string> includePatterns,
+        Fuzzy include,
         bool preview)
     {
         Repository = repository;
         Prompt = prompt;
         Parallel = parallel;
         Paths = paths;
-        IncludePatterns = includePatterns;
+        Include = include;
         Preview = preview;
     }
 
@@ -594,7 +594,7 @@ public sealed class StoreCommand : IChunkyardCommand
 
     public IReadOnlyCollection<string> Paths { get; }
 
-    public IReadOnlyCollection<string> IncludePatterns { get; }
+    public Fuzzy Include { get; }
 
     public bool Preview { get; }
 }
@@ -641,14 +641,18 @@ public static class ArgConsumerExtensions
             SnapshotStore.LatestSnapshotId);
     }
 
-    public static bool TryIncludePatterns(
+    public static bool TryInclude(
         this FlagConsumer consumer,
-        out IReadOnlyCollection<string> includePatterns)
+        out Fuzzy include)
     {
-        return consumer.TryStrings(
+        var result = consumer.TryStrings(
             "--includes",
             "The fuzzy patterns for blobs to include",
-            out includePatterns);
+            out var includepatterns);
+
+        include = new Fuzzy(includepatterns);
+
+        return result;
     }
 
     public static bool TryPreview(
