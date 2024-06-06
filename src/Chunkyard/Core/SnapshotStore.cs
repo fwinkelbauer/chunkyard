@@ -366,22 +366,13 @@ public sealed class SnapshotStore
             });
     }
 
-    private Snapshot GetSnapshot(IReadOnlyCollection<string> chunkIds)
+    private Snapshot GetSnapshot(IEnumerable<string> chunkIds)
     {
         using var memoryStream = new MemoryStream();
 
         RestoreChunks(chunkIds, memoryStream);
 
-        try
-        {
-            return Serialize.BytesToSnapshot(memoryStream.ToArray());
-        }
-        catch (Exception e)
-        {
-            throw new ChunkyardException(
-                $"Could not read snapshot: {string.Join(", ", chunkIds)}",
-                e);
-        }
+        return Serialize.BytesToSnapshot(memoryStream.ToArray());
     }
 
     private BlobReference[] StoreBlobs(
