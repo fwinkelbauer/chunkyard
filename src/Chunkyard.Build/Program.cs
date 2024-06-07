@@ -36,12 +36,6 @@ public static class Program
                     "Clean the repository",
                     new CleanCommand()),
                 _ => Clean())
-            .With<FormatCommand>(
-                new SimpleCommandParser(
-                    "format",
-                    "Run the formatter",
-                    new FormatCommand()),
-                _ => Format())
             .With<PublishCommand>(
                 new SimpleCommandParser(
                     "publish",
@@ -116,13 +110,6 @@ public static class Program
                 "-p:PublishTrimmed=true",
                 "-p:DebugType=none");
         }
-    }
-
-    private static void Format()
-    {
-        Announce("Format");
-
-        Dotnet($"format {Solution}");
     }
 
     private static void Check()
