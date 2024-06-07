@@ -643,14 +643,14 @@ public static class ArgConsumerExtensions
         this FlagConsumer consumer,
         out Fuzzy include)
     {
-        var result = consumer.TryStrings(
+        var success = consumer.TryStrings(
             "--includes",
             "The fuzzy patterns for blobs to include",
-            out var includepatterns);
+            out var includePatterns);
 
-        include = new Fuzzy(includepatterns);
+        include = new Fuzzy(includePatterns);
 
-        return result;
+        return success;
     }
 
     public static bool TryPreview(
