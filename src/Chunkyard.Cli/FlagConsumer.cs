@@ -116,9 +116,11 @@ public sealed class FlagConsumer
         T? defaultValue = null)
         where T : struct
     {
+        var names = string.Join(", ", Enum.GetNames(typeof(T)));
+
         return TryStruct(
             flag,
-            info,
+            $"{info}: {names}",
             out value,
             s => Enum.TryParse<T>(s, true, out _),
             s => Enum.Parse<T>(s, true),
