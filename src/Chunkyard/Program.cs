@@ -21,21 +21,19 @@ public static class Program
 
     private static void Cat(CatCommand c)
     {
-        var snapshotStore = CreateSnapshotStore(c);
-
         using Stream stream = string.IsNullOrEmpty(c.Export)
             ? new MemoryStream()
             : new FileStream(c.Export, FileMode.CreateNew, FileAccess.Write);
 
         if (c.ChunkIds.Any())
         {
-            snapshotStore.RestoreChunks(c.ChunkIds, stream);
+            c.SnapshotStore.RestoreChunks(c.ChunkIds, stream);
         }
         else
         {
             stream.Write(
                 Serialize.SnapshotReferenceToBytes(
-                    snapshotStore.GetSnapshotReference(c.SnapshotId)));
+                    c.SnapshotStore.GetSnapshotReference(c.SnapshotId)));
         }
 
         if (stream is MemoryStream memoryStream)
@@ -47,33 +45,27 @@ public static class Program
 
     private static void Check(CheckCommand c)
     {
-        var snapshotStore = CreateSnapshotStore(c);
-
         if (c.Shallow)
         {
-            snapshotStore.EnsureSnapshotExists(c.SnapshotId, c.Include);
+            c.SnapshotStore.EnsureSnapshotExists(c.SnapshotId, c.Include);
         }
         else
         {
-            snapshotStore.EnsureSnapshotValid(c.SnapshotId, c.Include);
+            c.SnapshotStore.EnsureSnapshotValid(c.SnapshotId, c.Include);
         }
     }
 
     private static void Copy(CopyCommand c)
     {
-        var snapshotStore = CreateSnapshotStore(c);
-
-        snapshotStore.CopyTo(
-            CreateRepository(c.DestinationRepository),
+        c.SnapshotStore.CopyTo(
+            c.DestinationRepository,
             c.Last);
     }
 
     private static void Diff(DiffCommand c)
     {
-        var snapshotStore = CreateSnapshotStore(c);
-
-        var first = snapshotStore.FilterSnapshot(c.FirstSnapshotId, c.Include);
-        var second = snapshotStore.FilterSnapshot(c.SecondSnapshotId, c.Include);
+        var first = c.SnapshotStore.FilterSnapshot(c.FirstSnapshotId, c.Include);
+        var second = c.SnapshotStore.FilterSnapshot(c.SecondSnapshotId, c.Include);
 
         var diff = c.ChunksOnly
             ? DiffSet.Create(
@@ -90,43 +82,34 @@ public static class Program
 
     private static void Keep(KeepCommand c)
     {
-        var snapshotStore = CreateSnapshotStore(c);
-
-        snapshotStore.KeepSnapshots(c.LatestCount);
-        snapshotStore.GarbageCollect();
+        c.SnapshotStore.KeepSnapshots(c.LatestCount);
+        c.SnapshotStore.GarbageCollect();
     }
 
     private static void List(ListCommand c)
     {
-        var snapshotStore = CreateSnapshotStore(c);
-
-        foreach (var snapshotId in snapshotStore.ListSnapshotIds())
+        foreach (var snapshotId in c.SnapshotStore.ListSnapshotIds())
         {
-            var isoDate = snapshotStore.GetSnapshot(snapshotId).CreationTimeUtc
+            var isoDate = c.SnapshotStore.GetSnapshot(snapshotId)
+                .CreationTimeUtc
                 .ToLocalTime()
                 .ToString("yyyy-MM-dd HH:mm:ss");
 
-            Console.WriteLine(
-                $"Snapshot #{snapshotId}: {isoDate}");
+            Console.WriteLine($"Snapshot #{snapshotId}: {isoDate}");
         }
     }
 
     private static void Remove(RemoveCommand c)
     {
-        var snapshotStore = CreateSnapshotStore(c);
-
-        snapshotStore.RemoveSnapshot(c.SnapshotId);
+        c.SnapshotStore.RemoveSnapshot(c.SnapshotId);
     }
 
     private static void Restore(RestoreCommand c)
     {
-        var snapshotStore = CreateSnapshotStore(c);
-        var blobSystem = new FileBlobSystem(c.Directory);
-
         if (c.Preview)
         {
-            var diff = snapshotStore.RestoreSnapshotPreview(
-                blobSystem,
+            var diff = c.SnapshotStore.RestoreSnapshotPreview(
+                c.BlobSystem,
                 c.SnapshotId,
                 c.Include);
 
@@ -134,8 +117,8 @@ public static class Program
         }
         else
         {
-            snapshotStore.RestoreSnapshot(
-                blobSystem,
+            c.SnapshotStore.RestoreSnapshot(
+                c.BlobSystem,
                 c.SnapshotId,
                 c.Include);
         }
@@ -143,9 +126,7 @@ public static class Program
 
     private static void Show(ShowCommand c)
     {
-        var snapshotStore = CreateSnapshotStore(c);
-
-        var blobReferences = snapshotStore.FilterSnapshot(
+        var blobReferences = c.SnapshotStore.FilterSnapshot(
             c.SnapshotId,
             c.Include);
 
@@ -161,18 +142,19 @@ public static class Program
 
     private static void Store(StoreCommand c)
     {
-        var snapshotStore = CreateSnapshotStore(c);
-        var blobSystem = new FileBlobSystem(c.Paths);
-
         if (c.Preview)
         {
-            var diff = snapshotStore.StoreSnapshotPreview(blobSystem, c.Include);
+            var diff = c.SnapshotStore.StoreSnapshotPreview(
+                c.BlobSystem,
+                c.Include);
 
             PrintDiff(diff);
         }
         else
         {
-            snapshotStore.StoreSnapshot(blobSystem, c.Include);
+            c.SnapshotStore.StoreSnapshot(
+                c.BlobSystem,
+                c.Include);
         }
     }
 
@@ -197,29 +179,5 @@ public static class Program
         {
             Console.WriteLine($"- {removed}");
         }
-    }
-
-    private static SnapshotStore CreateSnapshotStore(IChunkyardCommand c)
-    {
-        var repository = CreateRepository(c.Repository);
-
-        IPrompt prompt = c.Prompt switch
-        {
-            Prompt.Console => new ConsolePrompt(),
-            Prompt.Store => new StorePrompt(new ConsolePrompt()),
-            _ => new ConsolePrompt()
-        };
-
-        return new SnapshotStore(
-            repository,
-            new FastCdc(),
-            new ConsoleProbe(),
-            new RealWorld(c.Parallel),
-            prompt);
-    }
-
-    private static FileRepository CreateRepository(string repositoryPath)
-    {
-        return new FileRepository(repositoryPath);
     }
 }
