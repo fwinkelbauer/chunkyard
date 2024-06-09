@@ -1,32 +1,5 @@
 namespace Chunkyard;
 
-public sealed class CatCommandParser : ICommandParser
-{
-    public string Command => "cat";
-
-    public string Info => "Export or print the value of a snapshot or a set of chunk IDs";
-
-    public object Parse(FlagConsumer consumer)
-    {
-        if (consumer.TrySnapshotStore(out var snapshotStore)
-            & (consumer.TrySnapshot(out var snapshotId)
-                | consumer.TryStrings("--chunks", "The chunk IDs", out var chunkIds))
-            & consumer.TryString("--export", "The export path", out var export, "")
-            & consumer.NoHelp(out var help))
-        {
-            return new CatCommand(
-                snapshotStore,
-                snapshotId,
-                chunkIds,
-                export);
-        }
-        else
-        {
-            return help;
-        }
-    }
-}
-
 public sealed class CheckCommandParser : ICommandParser
 {
     public string Command => "check";
@@ -281,29 +254,6 @@ public sealed class VersionCommandParser : ICommandParser
             return help;
         }
     }
-}
-
-public sealed class CatCommand
-{
-    public CatCommand(
-        SnapshotStore snapshotStore,
-        int snapshotId,
-        IReadOnlyCollection<string> chunkIds,
-        string? export)
-    {
-        SnapshotStore = snapshotStore;
-        SnapshotId = snapshotId;
-        ChunkIds = chunkIds;
-        Export = export;
-    }
-
-    public SnapshotStore SnapshotStore { get; }
-
-    public int SnapshotId { get; }
-
-    public IReadOnlyCollection<string> ChunkIds { get; }
-
-    public string? Export { get; }
 }
 
 public sealed class CheckCommand

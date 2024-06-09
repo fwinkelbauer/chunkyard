@@ -5,7 +5,6 @@ public static class Program
     public static int Main(string[] args)
     {
         return new CommandHandler()
-            .With<CatCommand>(new CatCommandParser(), Cat)
             .With<CheckCommand>(new CheckCommandParser(), Check)
             .With<CopyCommand>(new CopyCommandParser(), Copy)
             .With<DiffCommand>(new DiffCommandParser(), Diff)
@@ -17,30 +16,6 @@ public static class Program
             .With<StoreCommand>(new StoreCommandParser(), Store)
             .With<VersionCommand>(new VersionCommandParser(), Version)
             .Handle(args);
-    }
-
-    private static void Cat(CatCommand c)
-    {
-        using Stream stream = string.IsNullOrEmpty(c.Export)
-            ? new MemoryStream()
-            : new FileStream(c.Export, FileMode.CreateNew, FileAccess.Write);
-
-        if (c.ChunkIds.Any())
-        {
-            c.SnapshotStore.RestoreChunks(c.ChunkIds, stream);
-        }
-        else
-        {
-            stream.Write(
-                Serialize.SnapshotReferenceToBytes(
-                    c.SnapshotStore.GetSnapshotReference(c.SnapshotId)));
-        }
-
-        if (stream is MemoryStream memoryStream)
-        {
-            Console.WriteLine(
-                Encoding.UTF8.GetString(memoryStream.ToArray()));
-        }
     }
 
     private static void Check(CheckCommand c)

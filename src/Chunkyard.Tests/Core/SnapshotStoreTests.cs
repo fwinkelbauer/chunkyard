@@ -80,12 +80,6 @@ public static class SnapshotStoreTests
         Assert.Equal(
             snapshotStore.GetSnapshot(snapshotId3),
             snapshotStore.GetSnapshot(SnapshotStore.LatestSnapshotId));
-
-        Assert.NotNull(
-            snapshotStore.GetSnapshotReference(snapshotId1));
-
-        Assert.NotNull(
-            snapshotStore.GetSnapshotReference(snapshotId3));
     }
 
     [Fact]
