@@ -501,7 +501,8 @@ public sealed class VersionCommand
 public enum Prompt
 {
     Console = 0,
-    Store = 1
+    Store = 1,
+    Libsecret = 2
 }
 
 public static class ArgConsumerExtensions
@@ -518,6 +519,7 @@ public static class ArgConsumerExtensions
         {
             Prompt.Console => new ConsolePrompt(),
             Prompt.Store => new StorePrompt(new ConsolePrompt()),
+            Prompt.Libsecret => new LibsecretPrompt(new ConsolePrompt()),
             _ => new ConsolePrompt()
         };
 
