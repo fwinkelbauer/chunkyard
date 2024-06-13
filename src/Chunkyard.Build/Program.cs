@@ -94,7 +94,8 @@ public static class Program
         Announce("Publish");
 
         var directory = "artifacts";
-        var (version, revision) = FetchGitVersion();
+        var (tag, _, commit) = GitDescribe();
+        var version = tag.TrimStart('v');
 
         foreach (var runtime in new[] { "linux-x64", "win-x64" })
         {
@@ -105,7 +106,7 @@ public static class Program
                 "--self-contained",
                 $"-o {directory}",
                 $"-p:Version={version}",
-                $"-p:SourceRevisionId={revision}",
+                $"-p:SourceRevisionId={commit}",
                 "-p:PublishSingleFile=true",
                 "-p:PublishTrimmed=true",
                 "-p:DebugType=none");
@@ -139,12 +140,19 @@ public static class Program
         Git($"tag -a \"{newTag}\" -m \"Prepare Chunkyard release {newTag}\"");
     }
 
-    private static (string, string) FetchGitVersion()
+    private static (string Tag, int Distance, string Commit) GitDescribe()
     {
-        var version = GitQuery("describe --long").TrimStart('v');
-        var split = version.Split("-", 2);
+        var match = Regex.Match(
+            GitQuery("describe --long"),
+            @"(?<tag>.*)-(?<distance>\d+)-g(?<hash>[a-f0-9]+)",
+            RegexOptions.None,
+            TimeSpan.FromSeconds(1));
 
-        return (split[0], split[1]);
+        var tag = match.Groups["tag"].Value;
+        var distance = Convert.ToInt32(match.Groups["distance"].Value);
+        var hash = match.Groups["hash"].Value;
+
+        return (tag, distance, hash);
     }
 
     private static void Dotnet(params string[] arguments)
