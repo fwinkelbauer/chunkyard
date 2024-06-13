@@ -63,7 +63,7 @@ public static class Program
 
         Git(
             "clean -dfx",
-            $"-e *{typeof(CommandHandler).Namespace}",
+            $"-e *{typeof(Program).Namespace}",
             "-e .vs/",
             "-e launchSettings.json");
     }
