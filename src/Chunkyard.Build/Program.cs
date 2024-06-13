@@ -116,7 +116,7 @@ public static class Program
     {
         Announce("Check");
 
-        var solution = Path.Combine(Directory.GetCurrentDirectory(), Solution);
+        var solution = Path.GetFullPath(Solution);
 
         Dotnet($"restore {solution}");
         Dotnet($"list {solution} package --outdated");
