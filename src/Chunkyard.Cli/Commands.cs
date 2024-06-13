@@ -30,3 +30,5 @@ public sealed class HelpCommand
         return HashCode.Combine(Infos, Errors);
     }
 }
+
+public sealed class VersionCommand;

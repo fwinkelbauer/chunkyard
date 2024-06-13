@@ -12,6 +12,9 @@ public class CommandHandler
     {
         _parsers = new();
         _handlers = new();
+
+        Handle<HelpCommand>(Help);
+        Handle<VersionCommand>(_ => Version());
     }
 
     public CommandHandler With<T>(ICommandParser parser, Action<T> handler)
@@ -27,8 +30,6 @@ public class CommandHandler
     {
         try
         {
-            Handle<HelpCommand>(Help);
-
             var parser = new CommandParser(_parsers);
             var command = parser.Parse(args);
 
@@ -93,5 +94,17 @@ public class CommandHandler
         }
 
         Console.Error.WriteLine();
+    }
+
+    private static void Version()
+    {
+        var attribute = typeof(VersionCommand).Assembly
+            .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
+            .First();
+
+        var version = ((AssemblyInformationalVersionAttribute)attribute)
+            .InformationalVersion;
+
+        Console.Error.WriteLine(version);
     }
 }

@@ -14,7 +14,6 @@ public static class Program
             .With<RestoreCommand>(new RestoreCommandParser(), Restore)
             .With<ShowCommand>(new ShowCommandParser(), Show)
             .With<StoreCommand>(new StoreCommandParser(), Store)
-            .With<VersionCommand>(new VersionCommandParser(), Version)
             .Handle(args);
     }
 
@@ -131,11 +130,6 @@ public static class Program
                 c.BlobSystem,
                 c.Include);
         }
-    }
-
-    private static void Version(VersionCommand c)
-    {
-        Console.WriteLine(c.Version);
     }
 
     private static void PrintDiff(DiffSet diff)

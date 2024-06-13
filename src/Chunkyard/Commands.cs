@@ -230,32 +230,6 @@ public sealed class StoreCommandParser : ICommandParser
     }
 }
 
-public sealed class VersionCommandParser : ICommandParser
-{
-    public string Command => "version";
-
-    public string Info => "Print version information";
-
-    public object Parse(FlagConsumer consumer)
-    {
-        if (consumer.NoHelp(out var help))
-        {
-            var attribute = typeof(VersionCommand).Assembly
-                .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
-                .First();
-
-            var version = ((AssemblyInformationalVersionAttribute)attribute)
-                .InformationalVersion;
-
-            return new VersionCommand(version);
-        }
-        else
-        {
-            return help;
-        }
-    }
-}
-
 public sealed class CheckCommand
 {
     public CheckCommand(
@@ -436,16 +410,6 @@ public sealed class StoreCommand
     public Fuzzy Include { get; }
 
     public bool Preview { get; }
-}
-
-public sealed class VersionCommand
-{
-    public VersionCommand(string version)
-    {
-        Version = version;
-    }
-
-    public string Version { get; }
 }
 
 public enum Prompt
