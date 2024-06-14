@@ -64,15 +64,13 @@ public sealed class DiffCommandParser : ICommandParser
             & consumer.TryInt("--first", "The first snapshot ID", out var firstSnapshotId, SnapshotStore.SecondLatestSnapshotId)
             & consumer.TryInt("--second", "The second snapshot ID", out var secondSnapshotId, SnapshotStore.LatestSnapshotId)
             & consumer.TryInclude(out var include)
-            & consumer.TryChunksOnly(out var chunksOnly)
             & consumer.NoHelp(out var help))
         {
             return new DiffCommand(
                 snapshotStore,
                 firstSnapshotId,
                 secondSnapshotId,
-                include,
-                chunksOnly);
+                include);
         }
         else
         {
@@ -187,14 +185,12 @@ public sealed class ShowCommandParser : ICommandParser
         if (consumer.TrySnapshotStore(out var snapshotStore)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryInclude(out var include)
-            & consumer.TryChunksOnly(out var chunksOnly)
             & consumer.NoHelp(out var help))
         {
             return new ShowCommand(
                 snapshotStore,
                 snapshot,
-                include,
-                chunksOnly);
+                include);
         }
         else
         {
@@ -278,14 +274,12 @@ public sealed class DiffCommand
         SnapshotStore snapshotStore,
         int firstSnapshotId,
         int secondSnapshotId,
-        Fuzzy include,
-        bool chunksOnly)
+        Fuzzy include)
     {
         SnapshotStore = snapshotStore;
         FirstSnapshotId = firstSnapshotId;
         SecondSnapshotId = secondSnapshotId;
         Include = include;
-        ChunksOnly = chunksOnly;
     }
 
     public SnapshotStore SnapshotStore { get; }
@@ -295,8 +289,6 @@ public sealed class DiffCommand
     public int SecondSnapshotId { get; }
 
     public Fuzzy Include { get; }
-
-    public bool ChunksOnly { get; }
 }
 
 public sealed class KeepCommand
@@ -371,13 +363,11 @@ public sealed class ShowCommand
     public ShowCommand(
         SnapshotStore snapshotStore,
         int snapshotId,
-        Fuzzy include,
-        bool chunksOnly)
+        Fuzzy include)
     {
         SnapshotStore = snapshotStore;
         SnapshotId = snapshotId;
         Include = include;
-        ChunksOnly = chunksOnly;
     }
 
     public SnapshotStore SnapshotStore { get; }
@@ -385,8 +375,6 @@ public sealed class ShowCommand
     public int SnapshotId { get; }
 
     public Fuzzy Include { get; }
-
-    public bool ChunksOnly { get; }
 }
 
 public sealed class StoreCommand
@@ -480,15 +468,5 @@ public static class ArgConsumerExtensions
             "--preview",
             "Show only a preview",
             out preview);
-    }
-
-    public static bool TryChunksOnly(
-        this FlagConsumer consumer,
-        out bool chunksOnly)
-    {
-        return consumer.TryBool(
-            "--chunks-only",
-            "Show chunk IDs",
-            out chunksOnly);
     }
 }

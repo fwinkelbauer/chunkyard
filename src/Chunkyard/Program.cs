@@ -41,15 +41,10 @@ public static class Program
         var first = c.SnapshotStore.FilterSnapshot(c.FirstSnapshotId, c.Include);
         var second = c.SnapshotStore.FilterSnapshot(c.SecondSnapshotId, c.Include);
 
-        var diff = c.ChunksOnly
-            ? DiffSet.Create(
-                first.SelectMany(br => br.ChunkIds),
-                second.SelectMany(br => br.ChunkIds),
-                chunkId => chunkId)
-            : DiffSet.Create(
-                first,
-                second,
-                br => br.Blob.Name);
+        var diff = DiffSet.Create(
+            first,
+            second,
+            br => br.Blob.Name);
 
         PrintDiff(diff);
     }
@@ -104,13 +99,11 @@ public static class Program
             c.SnapshotId,
             c.Include);
 
-        var contents = c.ChunksOnly
-            ? blobReferences.SelectMany(br => br.ChunkIds)
-            : blobReferences.Select(br => br.Blob.Name);
+        var blobNames = blobReferences.Select(br => br.Blob.Name);
 
-        foreach (var content in contents)
+        foreach (var blobName in blobNames)
         {
-            Console.WriteLine(content);
+            Console.WriteLine(blobName);
         }
     }
 
