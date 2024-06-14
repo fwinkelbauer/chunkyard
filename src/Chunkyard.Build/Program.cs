@@ -144,7 +144,7 @@ public static class Program
     {
         var match = Regex.Match(
             GitQuery("describe --long"),
-            @"(?<tag>.*)-(?<distance>\d+)-g(?<hash>[a-f0-9]+)",
+            @"^(?<tag>.*)-(?<distance>\d+)-g(?<hash>[a-f0-9]+)$",
             RegexOptions.None,
             TimeSpan.FromSeconds(1));
 
