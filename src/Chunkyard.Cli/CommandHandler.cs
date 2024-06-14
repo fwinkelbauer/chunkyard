@@ -54,7 +54,7 @@ public class CommandHandler
     {
         Console.Error.WriteLine("Error:");
 
-        IReadOnlyCollection<Exception> exceptions = e is AggregateException a
+        IEnumerable<Exception> exceptions = e is AggregateException a
             ? a.InnerExceptions
             : new[] { e };
 

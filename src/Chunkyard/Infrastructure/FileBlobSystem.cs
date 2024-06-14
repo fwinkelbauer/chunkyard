@@ -9,11 +9,6 @@ public sealed class FileBlobSystem : IBlobSystem
     private readonly string _parent;
 
     public FileBlobSystem(params string[] paths)
-        : this((IEnumerable<string>)paths)
-    {
-    }
-
-    public FileBlobSystem(IEnumerable<string> paths)
     {
         _paths = paths.Select(Path.GetFullPath).ToArray();
 

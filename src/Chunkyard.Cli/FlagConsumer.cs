@@ -20,12 +20,12 @@ public sealed class FlagConsumer
     public bool TryStrings(
         string flag,
         string info,
-        out IReadOnlyCollection<string> list)
+        out string[] list)
     {
         if (_flags.TryGetValue(flag, out var value))
         {
             _flags.Remove(flag);
-            list = value;
+            list = value.ToArray();
         }
         else
         {

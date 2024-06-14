@@ -19,11 +19,6 @@ public sealed class Fuzzy
     private readonly bool _initialMatch;
 
     public Fuzzy(params string[] patterns)
-        : this((IEnumerable<string>)patterns)
-    {
-    }
-
-    public Fuzzy(IEnumerable<string> patterns)
     {
         _expressions = new();
 
