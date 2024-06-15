@@ -5,20 +5,20 @@ public static class CryptoTests
     [Theory]
     [InlineData("Hello!")]
     [InlineData("")]
-    public static void Encrypt_And_Decrypt_Return_Input(string plain)
+    public static void Encrypt_And_Decrypt_Return_Input(string input)
     {
         var crypto = Some.Crypto("secret");
 
-        var plainBytes = Encoding.UTF8.GetBytes(plain);
+        var plain = Encoding.UTF8.GetBytes(input);
 
-        var encryptedBytes = crypto.Encrypt(
-            RandomNumberGenerator.GetBytes(Crypto.NonceBytes),
-            plainBytes);
+        var encrypted = crypto.Encrypt(
+            Some.World.GenerateNonce(),
+            plain);
 
-        var decryptedBytes = crypto.Decrypt(encryptedBytes);
+        var decrypted = crypto.Decrypt(encrypted);
 
-        Assert.NotEqual(plainBytes, encryptedBytes);
-        Assert.Equal(plainBytes, decryptedBytes);
+        Assert.NotEqual(plain, encrypted);
+        Assert.Equal(plain, decrypted);
     }
 
     [Fact]
@@ -27,12 +27,12 @@ public static class CryptoTests
         var someCrypto = Some.Crypto("some secret");
         var otherCrypto = Some.Crypto("other secret");
 
-        var encryptedBytes = someCrypto.Encrypt(
-            RandomNumberGenerator.GetBytes(Crypto.NonceBytes),
+        var encrypted = someCrypto.Encrypt(
+            Some.World.GenerateNonce(),
             "Hello!"u8);
 
         Assert.Throws<AuthenticationTagMismatchException>(
-            () => otherCrypto.Decrypt(encryptedBytes));
+            () => otherCrypto.Decrypt(encrypted));
     }
 
     [Fact]

@@ -13,5 +13,5 @@ public interface IWorld
 
     byte[] GenerateNonce();
 
-    DateTime NowUtc();
+    DateTime UtcNow();
 }

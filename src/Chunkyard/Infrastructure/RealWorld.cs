@@ -29,7 +29,7 @@ internal sealed class RealWorld : IWorld
         return RandomNumberGenerator.GetBytes(Crypto.NonceBytes);
     }
 
-    public DateTime NowUtc()
+    public DateTime UtcNow()
     {
         return DateTime.UtcNow;
     }

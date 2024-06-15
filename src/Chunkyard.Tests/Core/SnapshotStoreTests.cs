@@ -251,25 +251,24 @@ public static class SnapshotStoreTests
         var fastCdc = new FastCdc(256, 1024, 2048);
         var snapshotStore = Some.SnapshotStore(fastCdc: fastCdc);
 
-        // Create data that is large enough to create at least two chunks
+        // Generate data that is large enough to create a few chunks
         var inputBlobSystem = Some.BlobSystem(
             Some.Blobs(),
-            _ => RandomNumberGenerator.GetBytes(2 * fastCdc.MaxSize));
-
-        var outputBlobSystem = Some.BlobSystem();
+            _ => RandomNumberGenerator.GetBytes(8 * fastCdc.MaxSize));
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
+        var outputBlobSystem = Some.BlobSystem();
         snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
+
+        Assert.Equal(
+            ToDictionary(inputBlobSystem),
+            ToDictionary(outputBlobSystem));
 
         var blobReferences = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
             .ToArray();
 
         var chunkIds = blobReferences.SelectMany(br => br.ChunkIds).ToArray();
-
-        Assert.Equal(
-            ToDictionary(inputBlobSystem),
-            ToDictionary(outputBlobSystem));
 
         Assert.NotEmpty(blobReferences);
         Assert.True(blobReferences.Length * 2 <= chunkIds.Length);

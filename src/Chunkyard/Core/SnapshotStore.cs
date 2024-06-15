@@ -83,7 +83,7 @@ public sealed class SnapshotStore
         Fuzzy? fuzzy = null)
     {
         var snapshot = new Snapshot(
-            _world.NowUtc(),
+            _world.UtcNow(),
             StoreBlobs(blobSystem, fuzzy));
 
         var snapshotId = StoreSnapshotReference(

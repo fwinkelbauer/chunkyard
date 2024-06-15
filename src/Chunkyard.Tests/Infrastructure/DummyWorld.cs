@@ -2,13 +2,6 @@ namespace Chunkyard.Tests.Infrastructure;
 
 internal sealed class DummyWorld : IWorld
 {
-    private DateTime _nowUtc;
-
-    public DummyWorld(DateTime nowUtc)
-    {
-        _nowUtc = nowUtc;
-    }
-
     public int Parallelism => 2;
 
     public int Iterations => 1;
@@ -23,12 +16,8 @@ internal sealed class DummyWorld : IWorld
         return RandomNumberGenerator.GetBytes(Crypto.NonceBytes);
     }
 
-    public DateTime NowUtc()
+    public DateTime UtcNow()
     {
-        var temp = _nowUtc;
-
-        _nowUtc = _nowUtc.AddHours(1);
-
-        return temp;
+        return DateTime.UtcNow;
     }
 }
