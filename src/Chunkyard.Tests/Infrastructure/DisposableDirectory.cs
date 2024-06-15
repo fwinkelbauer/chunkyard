@@ -4,9 +4,7 @@ internal sealed class DisposableDirectory : IDisposable
 {
     public DisposableDirectory()
     {
-        Name = Path.Combine(
-            Path.GetTempPath(),
-            $"chunkyard-test-{Path.GetRandomFileName()}");
+        Name = Some.Directory();
     }
 
     public string Name { get; }

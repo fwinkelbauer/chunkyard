@@ -64,4 +64,11 @@ internal static class Some
 
         return blobSystem;
     }
+
+    public static string Directory()
+    {
+        return Path.Combine(
+            Path.GetTempPath(),
+            $"chunkyard-test-{Path.GetRandomFileName()}");
+    }
 }
