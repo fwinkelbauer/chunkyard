@@ -1,7 +1,6 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-public sealed class MemoryRepositoryTests
-    : RepositoryTests
+public sealed class MemoryRepositoryTests : RepositoryTests
 {
     public MemoryRepositoryTests()
         : base(new MemoryRepository<string>())
