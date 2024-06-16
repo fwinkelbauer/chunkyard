@@ -66,67 +66,20 @@ chunkyard help
 chunkyard store --help
 
 # See which files chunkyard would backup
-chunkyard store --repository '../repository' --paths 'Music' --include '!Desktop\.ini' '!thumbs\.db' --preview
+chunkyard store --repository 'MyBackup' --paths 'Music' 'Pictures' 'Videos' --preview
 
 # Store a backup
-chunkyard store --repository '../repository' --paths 'Music' --include '!Desktop\.ini' '!thumbs\.db'
+chunkyard store --repository 'MyBackup' --paths 'Music' 'Pictures' 'Videos' --include '!Desktop\.ini' '!thumbs\.db'
 
 # Check if the latest backup is valid
-chunkyard check --repository '../repository'
+chunkyard check --repository 'MyBackup'
 
 # Restore parts of the latest backup
-chunkyard restore --repository '../repository' --destination . --include 'mp3$'
-#+end_src
-
-Here's an example of a bash script:
-
-#+begin_src sh
-#!/bin/bash -eu
-
-repo=/backup/location
-
-directories=(
-    ~/Music
-    ~/Pictures
-    ~/Videos
-)
-
-# Store backup
-chunkyard store --repository "$repo" --paths "${directories[@]}"
-
-# Optional: Store password in ~/.config/chunkyard and use more threads
-# chunkyard store --repository "$repo" --paths "${directories[@]}" --prompt Store --parallel 2
+chunkyard restore --repository 'MyBackup' --destination '.' --include 'mp3$'
 
 # Keep the latest four backups
-chunkyard keep --repository "$repo" --latest 4
-chunkyard gc --repository "$repo"
-#+end_src
-
-And here is the same script written in PowerShell:
-
-#+begin_src powershell
-$repo = 'D:\backup\location'
-
-$directories = @(
-    "$env:UserProfile\Music",
-    "$env:UserProfile\Pictures",
-    "$env:UserProfile\Videos"
-)
-
-# Store backup
-chunkyard store --repository $repo --paths $directories
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-# Optional: Store password in ~/.config/chunkyard and use more threads
-# chunkyard store --repository $repo --paths $directories --prompt Store --parallel 2
-# if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-# Keep the latest four backups
-chunkyard keep --repository $repo --latest 4
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-chunkyard gc --repository $repo
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+chunkyard keep --repository 'MyBackup' --latest '4'
+chunkyard gc --repository 'MyBackup'
 #+end_src
 
 * Architecture
