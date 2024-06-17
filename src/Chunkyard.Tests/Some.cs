@@ -31,14 +31,14 @@ internal static class Some
     public static SnapshotStore SnapshotStore(
         IRepository? repository = null,
         FastCdc? fastCdc = null,
-        string password = "secret")
+        IPrompt? prompt = null)
     {
         return new SnapshotStore(
             repository ?? Repository(),
             fastCdc ?? new FastCdc(),
             new DummyProbe(),
             World,
-            new DummyPrompt(password));
+            prompt ?? new DummyPrompt("secret"));
     }
 
     public static IRepository Repository()
