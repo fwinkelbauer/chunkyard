@@ -8,30 +8,11 @@ public sealed class MemoryRepositoryTests : RepositoryTests
     }
 }
 
-public sealed class FileRepositoryTests
-    : RepositoryTests, IDisposable
+public sealed class FileRepositoryTests : RepositoryTests
 {
-    private static DisposableDirectory? _tempDirectory;
-
     public FileRepositoryTests()
-        : base(CreateRepository())
+        : base(new FileRepository<string>(Some.Directory(), k => k, f => f))
     {
-    }
-
-    public void Dispose()
-    {
-        _tempDirectory?.Dispose();
-        _tempDirectory = null;
-    }
-
-    private static FileRepository<string> CreateRepository()
-    {
-        _tempDirectory = new();
-
-        return new FileRepository<string>(
-            _tempDirectory.Name,
-            key => key,
-            file => file);
     }
 }
 

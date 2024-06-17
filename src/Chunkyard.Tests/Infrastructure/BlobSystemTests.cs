@@ -8,54 +8,11 @@ public sealed class MemoryBlobSystemTests : BlobSystemTests
     }
 }
 
-public sealed class FileBlobSystemTests
-    : BlobSystemTests, IDisposable
+public sealed class FileBlobSystemTests : BlobSystemTests
 {
-    private static DisposableDirectory? _tempDirectory;
-
     public FileBlobSystemTests()
-        : base(CreateBlobSystem())
+        : base(new FileBlobSystem(Some.Directory()))
     {
-    }
-
-    [Fact]
-    public static void Constructor_Finds_Parent_Given_More_Paths()
-    {
-        using var directory = new DisposableDirectory();
-
-        var subDirectories = new[]
-        {
-            Path.Combine(directory.Name, "sub1"),
-            Path.Combine(directory.Name, "sub2")
-        };
-
-        foreach (var subDirectory in subDirectories)
-        {
-            Directory.CreateDirectory(subDirectory);
-
-            File.WriteAllText(
-                Path.Combine(subDirectory, "file.txt"),
-                "some text");
-        }
-
-        var blobSystem = new FileBlobSystem(subDirectories);
-
-        Assert.Equal(
-            new[] { "sub1/file.txt", "sub2/file.txt" },
-            blobSystem.ListBlobs().Select(b => b.Name));
-    }
-
-    public void Dispose()
-    {
-        _tempDirectory?.Dispose();
-        _tempDirectory = null;
-    }
-
-    private static FileBlobSystem CreateBlobSystem()
-    {
-        _tempDirectory = new();
-
-        return new FileBlobSystem(_tempDirectory.Name);
     }
 }
 

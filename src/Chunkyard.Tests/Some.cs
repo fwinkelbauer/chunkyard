@@ -69,6 +69,7 @@ internal static class Some
     {
         return Path.Combine(
             Path.GetTempPath(),
-            $"chunkyard-test-{Path.GetRandomFileName()}");
+            "chunkyard-test",
+            Path.GetRandomFileName());
     }
 }
