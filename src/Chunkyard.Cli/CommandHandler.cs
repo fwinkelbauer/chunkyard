@@ -13,15 +13,15 @@ public class CommandHandler
         _parsers = new();
         _handlers = new();
 
-        Handle<HelpCommand>(Help);
-        Handle<VersionCommand>(_ => Version());
+        Use<HelpCommand>(Help);
+        Use<VersionCommand>(_ => Version());
     }
 
     public CommandHandler With<T>(ICommandParser parser, Action<T> handler)
     {
         _parsers.Add(parser);
 
-        Handle<T>(handler);
+        Use<T>(handler);
 
         return this;
     }
@@ -35,7 +35,7 @@ public class CommandHandler
 
             _handlers[command.GetType()](command);
 
-            return Convert.ToInt32(command is HelpCommand);
+            return command is HelpCommand ? 1 : 0;
         }
         catch (Exception e)
         {
@@ -45,7 +45,7 @@ public class CommandHandler
         }
     }
 
-    private void Handle<T>(Action<T> handler)
+    private void Use<T>(Action<T> handler)
     {
         _handlers[typeof(T)] = o => handler((T)o);
     }
