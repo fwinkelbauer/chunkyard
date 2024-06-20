@@ -265,25 +265,17 @@ public static class FastCdcTests
         0x32E8EA7E
     };
 
-    public static TheoryData<FastCdc, int[]> TheoryData => new()
+    [Theory]
+    [InlineData(8, new[] { 22366, 8282, 16303, 18696, 32768, 11051 })]
+    [InlineData(16, new[] { 32857, 16408, 60201 })]
+    [InlineData(32, new[] { 32857, 76609 })]
+    public static void SplitIntoChunks_Splits_Data_Into_Ordered_List_Of_Pieces(int factor, int[] chunkSizes)
     {
-        {
-            new FastCdc(8 * 1024, 16 * 1024, 32 * 1024),
-            new[] { 22366, 8282, 16303, 18696, 32768, 11051 }
-        },
-        {
-            new FastCdc(16 * 1024, 32 * 1024, 64 * 1024),
-            new[] { 32857, 16408, 60201 }
-        },
-        {
-            new FastCdc(32 * 1024, 64 * 1024, 128 * 1024),
-            new[] { 32857, 76609 }
-        }
-    };
+        var minSize = factor * 1024;
+        var avgSize = factor * 2 * 1024;
+        var maxSize = factor * 4 * 1024;
+        var fastCdc = new FastCdc(minSize, avgSize, maxSize);
 
-    [Theory, MemberData(nameof(TheoryData))]
-    public static void SplitIntoChunks_Splits_Data_Into_Ordered_List_Of_Pieces(FastCdc fastCdc, int[] chunkSizes)
-    {
         using var stream = new MemoryStream(PictureBytes);
         var chunks = fastCdc.SplitIntoChunks(stream, GearTable).ToArray();
 
