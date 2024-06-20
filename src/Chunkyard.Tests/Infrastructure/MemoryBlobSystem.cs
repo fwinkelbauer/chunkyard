@@ -2,15 +2,15 @@ namespace Chunkyard.Tests.Infrastructure;
 
 internal sealed class MemoryBlobSystem : IBlobSystem
 {
+    private readonly object _lock;
     private readonly Dictionary<string, Blob> _blobs;
     private readonly Dictionary<string, byte[]> _values;
-    private readonly object _lock;
 
     public MemoryBlobSystem()
     {
+        _lock = new();
         _blobs = new();
         _values = new();
-        _lock = new();
     }
 
     public bool BlobExists(string blobName)
