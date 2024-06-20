@@ -142,19 +142,32 @@ public static class FlagConsumerTests
     public static void NoHelp_Returns_True_If_No_Issues()
     {
         var consumer = new FlagConsumer(
-            Some.Flags(("--list", Some.Strings("element"))));
+            Some.Flags(("--list", Some.Strings())));
 
         Assert.True(consumer.TryStrings("--list", "info", out _));
         Assert.True(consumer.NoHelp(out _));
     }
 
     [Fact]
-    public static void NoHelp_Returns_False_If_User_Requests_Help()
+    public static void NoHelp_Returns_True_If_Not_Requested()
     {
         var consumer = new FlagConsumer(
-            Some.Flags(("--help", Some.Strings())));
+            Some.Flags(("--help", Some.Strings("false"))));
 
-        Assert.False(consumer.NoHelp(out _));
+        Assert.True(consumer.NoHelp(out _));
+    }
+
+    [Fact]
+    public static void NoHelp_Returns_False_If_Requested()
+    {
+        Assert.False(new FlagConsumer(Some.Flags(("--help", Some.Strings())))
+            .NoHelp(out _));
+
+        Assert.False(new FlagConsumer(Some.Flags(("--help", Some.Strings("true"))))
+            .NoHelp(out _));
+
+        Assert.False(new FlagConsumer(Some.Flags(("--help", Some.Strings("not-a-bool"))))
+            .NoHelp(out _));
     }
 
     [Fact]
