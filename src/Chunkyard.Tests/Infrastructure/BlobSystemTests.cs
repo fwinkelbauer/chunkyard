@@ -57,6 +57,7 @@ public abstract class BlobSystemTests
     public void OpenWrite_Overwrites_Previous_Content()
     {
         var blob = Some.Blob("some blob");
+        var expected = new byte[] { 0x11 };
 
         using (var writeStream = BlobSystem.OpenWrite(blob))
         {
@@ -65,11 +66,11 @@ public abstract class BlobSystemTests
 
         using (var writeStream = BlobSystem.OpenWrite(blob))
         {
-            writeStream.Write(new byte[] { 0x11 });
+            writeStream.Write(expected);
         }
 
         Assert.Equal(
-            new byte[] { 0x11 },
+            expected,
             StreamUtils.AsBytes(() => BlobSystem.OpenRead(blob.Name)));
     }
 }
