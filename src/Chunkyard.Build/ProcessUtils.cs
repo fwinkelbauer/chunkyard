@@ -1,86 +1,46 @@
 namespace Chunkyard.Build;
 
 /// <summary>
-/// A set of process utility methods.
+/// A set of process related utility methods.
 /// </summary>
 public static class ProcessUtils
 {
-    public static void Run(
-        ProcessStartInfo startInfo,
-        Func<int, bool>? isValidExitCode = null,
-        Action<string>? processOutput = null)
+    public static void Run(string fileName, string arguments)
     {
-        using var process = Process.Start(startInfo);
+        using var process = Process.Start(fileName, arguments)!;
 
-        if (process == null)
-        {
-            return;
-        }
-
-        if (processOutput != null)
-        {
-            string? line;
-
-            if (startInfo.RedirectStandardOutput)
-            {
-                while ((line = process.StandardOutput.ReadLine()) != null)
-                {
-                    processOutput(line);
-                }
-            }
-
-            if (startInfo.RedirectStandardError)
-            {
-                while ((line = process.StandardError.ReadLine()) != null)
-                {
-                    processOutput(line);
-                }
-            }
-        }
-
-        process.WaitForExit();
-
-        isValidExitCode ??= exitCode => exitCode == 0;
-
-        if (!isValidExitCode(process.ExitCode))
-        {
-            throw new InvalidOperationException(
-                $"Exit code of '{startInfo.FileName}' was {process.ExitCode}");
-        }
+        WaitForSuccess(process);
     }
 
-    public static void Run(
-        string fileName,
-        string arguments,
-        Func<int, bool>? isValidExitCode = null)
+    public static string RunQuery(string fileName, string arguments)
     {
-        Run(new ProcessStartInfo(fileName, arguments), isValidExitCode);
-    }
+        using var process = Process.Start(
+            new ProcessStartInfo(fileName, arguments)
+            {
+                RedirectStandardOutput = true
+            })!;
 
-    public static string RunQuery(
-        ProcessStartInfo startInfo,
-        Func<int, bool>? isValidExitCode = null)
-    {
         var builder = new StringBuilder();
+        string? line;
 
-        Run(
-            startInfo,
-            isValidExitCode,
-            line => builder.AppendLine(line));
+        while ((line = process.StandardOutput.ReadLine()) != null)
+        {
+            builder.AppendLine(line);
+        }
+
+        WaitForSuccess(process);
 
         return builder.ToString().TrimEnd();
     }
 
-    public static string RunQuery(
-        string fileName,
-        string arguments,
-        Func<int, bool>? isValidExitCode = null)
+    private static void WaitForSuccess(Process process)
     {
-        return RunQuery(
-            new ProcessStartInfo(fileName, arguments)
-            {
-                RedirectStandardOutput = true
-            },
-            isValidExitCode);
+        process.WaitForExit();
+
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException(
+                $"Exit code of '{process.StartInfo.FileName}' was {process.ExitCode}");
+        }
     }
 }

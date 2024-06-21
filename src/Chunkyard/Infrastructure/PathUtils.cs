@@ -1,9 +1,9 @@
 namespace Chunkyard.Infrastructure;
 
 /// <summary>
-/// A set of directory utility methods.
+/// A set of path related utility methods.
 /// </summary>
-public static class DirectoryUtils
+public static class PathUtils
 {
     public static void EnsureParent(string path)
     {
@@ -63,21 +63,5 @@ public static class DirectoryUtils
         }
 
         return parent;
-    }
-
-    public static string[] ListFiles(string path)
-    {
-        if (Directory.Exists(path))
-        {
-            return Directory.GetFiles(path, "*", SearchOption.AllDirectories);
-        }
-        else if (File.Exists(path))
-        {
-            return new[] { path };
-        }
-        else
-        {
-            return Array.Empty<string>();
-        }
     }
 }

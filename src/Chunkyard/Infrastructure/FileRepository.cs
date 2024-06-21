@@ -44,7 +44,7 @@ public sealed class FileRepository<T> : IRepository<T>
     {
         var file = ToFile(key);
 
-        DirectoryUtils.EnsureParent(file);
+        PathUtils.EnsureParent(file);
 
         using var fileStream = new FileStream(
             file,

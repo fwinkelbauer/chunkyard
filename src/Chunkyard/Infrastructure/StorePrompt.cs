@@ -36,7 +36,7 @@ internal sealed class StorePrompt : IPrompt
     {
         var file = ToFile(key);
 
-        DirectoryUtils.EnsureParent(file);
+        PathUtils.EnsureParent(file);
         File.WriteAllText(file, password);
 
         return password;

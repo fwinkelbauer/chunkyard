@@ -14,7 +14,7 @@ public sealed class FileBlobSystem : IBlobSystem
 
         _parent = _paths.Length == 1 && !File.Exists(_paths[0])
             ? _paths[0]
-            : DirectoryUtils.GetCommonParent(
+            : PathUtils.GetCommonParent(
                 _paths,
                 Path.DirectorySeparatorChar);
     }
@@ -28,7 +28,7 @@ public sealed class FileBlobSystem : IBlobSystem
     public Blob[] ListBlobs()
     {
         return _paths
-            .SelectMany(DirectoryUtils.ListFiles)
+            .SelectMany(ListFiles)
             .Distinct()
             .OrderBy(file => file)
             .Select(ToBlob)
@@ -53,7 +53,7 @@ public sealed class FileBlobSystem : IBlobSystem
     {
         var file = ToFile(blob.Name);
 
-        DirectoryUtils.EnsureParent(file);
+        PathUtils.EnsureParent(file);
 
         return new WriteStream(file, blob);
     }
@@ -81,6 +81,22 @@ public sealed class FileBlobSystem : IBlobSystem
     private string ToFile(string blobName)
     {
         return Path.Combine(_parent, blobName);
+    }
+
+    private static string[] ListFiles(string path)
+    {
+        if (Directory.Exists(path))
+        {
+            return Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+        }
+        else if (File.Exists(path))
+        {
+            return new[] { path };
+        }
+        else
+        {
+            return Array.Empty<string>();
+        }
     }
 
     private sealed class WriteStream : FileStream

@@ -1,6 +1,6 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-public static class DirectoryUtilsTests
+public static class PathUtilsTests
 {
     [Theory]
     [InlineData(new[] { "/foo/bar" }, "/foo")]
@@ -20,6 +20,6 @@ public static class DirectoryUtilsTests
     {
         Assert.Equal(
             expectedParent,
-            DirectoryUtils.GetCommonParent(paths, '/'));
+            PathUtils.GetCommonParent(paths, '/'));
     }
 }
