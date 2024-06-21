@@ -5,12 +5,15 @@ public static class SerializeTests
     [Fact]
     public static void Serialize_Can_Convert_Snapshot()
     {
+        var date = DateTime.Parse("2024-06-07T12:06:43.6536137Z")
+            .ToUniversalTime();
+
         var expected = new Snapshot(
-            DateTime.UtcNow,
+            date,
             new[]
             {
                 new BlobReference(
-                    Some.Blob("some blob"),
+                    new Blob("some blob", date),
                     new[] { "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e" })
             });
 
@@ -24,8 +27,8 @@ public static class SerializeTests
     public static void Serialize_Can_Convert_SnapshotReference()
     {
         var expected = new SnapshotReference(
-            RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
-            Crypto.DefaultIterations,
+            new byte[] { 158, 128, 181, 90, 139, 201, 73, 163, 30, 55, 127, 23 },
+            100000,
             new[] { "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e" });
 
         var actual = Serialize.BytesToSnapshotReference(
