@@ -107,12 +107,10 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
-        var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
-
-        if (!CheckSnapshotExists(resolvedSnapshotId, fuzzy))
+        if (!CheckSnapshotExists(snapshotId, fuzzy))
         {
             throw new ChunkyardException(
-                $"Found missing chunks for snapshot: #{resolvedSnapshotId}");
+                "Snapshot contains missing chunks");
         }
     }
 
@@ -120,12 +118,10 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
-        var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
-
-        if (!CheckSnapshotValid(resolvedSnapshotId, fuzzy))
+        if (!CheckSnapshotValid(snapshotId, fuzzy))
         {
             throw new ChunkyardException(
-                $"Found invalid or missing chunks for snapshot: #{resolvedSnapshotId}");
+                "Snapshot contains invalid or missing chunks");
         }
     }
 
@@ -185,8 +181,7 @@ public sealed class SnapshotStore
             .Select(br => RestoreBlob(blobSystem, br))
             .ToArray();
 
-        _probe.RestoredSnapshot(
-            ResolveSnapshotId(snapshotId));
+        _probe.RestoredSnapshot(snapshotId);
     }
 
     public int[] ListSnapshotIds()
@@ -212,10 +207,8 @@ public sealed class SnapshotStore
 
     public void RemoveSnapshot(int snapshotId)
     {
-        var resolvedSnapshotId = ResolveSnapshotId(snapshotId);
-
-        _repository.Snapshots.Remove(resolvedSnapshotId);
-        _probe.RemovedSnapshot(resolvedSnapshotId);
+        _repository.Snapshots.Remove(ResolveSnapshotId(snapshotId));
+        _probe.RemovedSnapshot(snapshotId);
     }
 
     public void KeepSnapshots(int latestCount)
@@ -467,9 +460,7 @@ public sealed class SnapshotStore
             .WithDegreeOfParallelism(_world.Parallelism)
             .All(br => CheckBlobReference(br, checkChunkIdFunc));
 
-        _probe.SnapshotValid(
-            ResolveSnapshotId(snapshotId),
-            snapshotValid);
+        _probe.SnapshotValid(snapshotId, snapshotValid);
 
         return snapshotValid;
     }
