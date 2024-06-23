@@ -71,6 +71,7 @@ public static class Program
     private static void Remove(RemoveCommand c)
     {
         c.SnapshotStore.RemoveSnapshot(c.SnapshotId);
+        c.SnapshotStore.GarbageCollect();
     }
 
     private static void Restore(RestoreCommand c)
