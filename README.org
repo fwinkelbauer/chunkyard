@@ -79,7 +79,6 @@ chunkyard restore --repository 'MyBackup' --destination '.' --include 'mp3$'
 
 # Keep the latest four backups
 chunkyard keep --repository 'MyBackup' --latest '4'
-chunkyard gc --repository 'MyBackup'
 #+end_src
 
 * Architecture
