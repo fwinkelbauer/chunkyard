@@ -77,13 +77,15 @@ public static class Program
         Dotnet(
             $"build {Solution}",
             $"-c {Configuration}",
-            "-warnaserror");
+            "-warnaserror",
+            "--tl:auto");
 
         Dotnet(
             $"test {Solution}",
             $"-c {Configuration}",
             "--no-build",
-            "--nologo");
+            "--nologo",
+            "--tl:auto");
     }
 
     private static void Publish()
@@ -91,14 +93,14 @@ public static class Program
         Clean();
         Build();
 
-        Announce("Publish");
-
         var directory = "artifacts";
         var (tag, _, commit) = GitDescribe();
         var version = tag.TrimStart('v');
 
         foreach (var runtime in new[] { "linux-x64", "win-x64" })
         {
+            Announce($"Publish {runtime}");
+
             Dotnet(
                 "publish src/Chunkyard/Chunkyard.csproj",
                 $"-c {Configuration}",
@@ -109,7 +111,8 @@ public static class Program
                 $"-p:SourceRevisionId={commit}",
                 "-p:PublishSingleFile=true",
                 "-p:PublishTrimmed=true",
-                "-p:DebugType=none");
+                "-p:DebugType=none",
+                "--tl:auto");
         }
     }
 
@@ -119,7 +122,7 @@ public static class Program
 
         var solution = Path.GetFullPath(Solution);
 
-        Dotnet($"restore {solution}");
+        Dotnet($"restore {solution} --tl:auto");
         Dotnet($"list {solution} package --outdated");
     }
 
