@@ -120,10 +120,8 @@ public static class Program
     {
         Announce("Check");
 
-        var solution = Path.GetFullPath(Solution);
-
-        Dotnet($"restore {solution} --tl:auto");
-        Dotnet($"list {solution} package --outdated");
+        Dotnet($"restore {Solution} --tl:auto");
+        Dotnet($"list {Path.GetFullPath(Solution)} package --outdated");
     }
 
     private static void Release()
