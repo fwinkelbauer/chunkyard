@@ -6,34 +6,47 @@ public static class SnapshotStoreTests
     public static void StoreSnapshot_Creates_Snapshot_Of_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
-        var blobs = Some.Blobs();
-        var blobSystem = Some.BlobSystem(blobs);
+        var blobSystem = Some.BlobSystem(Some.Blobs());
 
         var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
         var snapshot = snapshotStore.GetSnapshot(snapshotId);
 
         Assert.Equal(
-            blobs,
+            blobSystem.ListBlobs(),
             snapshot.BlobReferences.Select(br => br.Blob));
     }
 
     [Fact]
-    public static void StoreSnapshot_Does_Not_Read_Blob_With_Unchanged_LastWriteTimeUtc()
+    public static void StoreSnapshot_Skips_Blobs_With_Unchanged_LastWriteTimeUtc()
     {
         var snapshotStore = Some.SnapshotStore();
-        var blobs = Some.Blobs();
+        var sharedBlob = Some.Blob("some blob");
 
-        var blobSystem1 = Some.BlobSystem(blobs, _ => new byte[] { 0x01 });
+        var blobSystem1 = Some.BlobSystem(
+            new[] { sharedBlob },
+            _ => new byte[] { 0x01 });
+
+        var blobSystem2 = Some.BlobSystem(
+            new[] { sharedBlob, Some.Blob("other blob") },
+            _ => new byte[] { 0x02 });
+
         var snapshotId1 = snapshotStore.StoreSnapshot(blobSystem1);
-        var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
-
-        var blobSystem2 = Some.BlobSystem(blobs, _ => new byte[] { 0x02 });
         var snapshotId2 = snapshotStore.StoreSnapshot(blobSystem2);
+
+        var snapshot1 = snapshotStore.GetSnapshot(snapshotId1);
         var snapshot2 = snapshotStore.GetSnapshot(snapshotId2);
 
         Assert.Equal(
-            snapshot1.BlobReferences,
-            snapshot2.BlobReferences);
+            blobSystem1.ListBlobs(),
+            snapshot1.BlobReferences.Select(br => br.Blob));
+
+        Assert.Equal(
+            blobSystem2.ListBlobs(),
+            snapshot2.BlobReferences.Select(br => br.Blob));
+
+        Assert.Equal(
+            snapshot1.BlobReferences.Where(br => br.Blob == sharedBlob),
+            snapshot2.BlobReferences.Where(br => br.Blob == sharedBlob));
     }
 
     [Fact]
@@ -192,14 +205,11 @@ public static class SnapshotStoreTests
         var snapshotStore = Some.SnapshotStore();
 
         var inputBlobSystem = Some.BlobSystem(
-            Some.Blobs(
-                "blob to restore",
-                "blob to update"),
+            Some.Blobs("blob to restore", "blob to update"),
             _ => new byte[] { 0x01 });
 
         var outputBlobSystem = Some.BlobSystem(
-            Some.Blobs(
-                "blob to update"),
+            Some.Blobs("blob to update"),
             _ => new byte[] { 0x02 });
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
@@ -278,10 +288,10 @@ public static class SnapshotStoreTests
     public static void FilterSnapshot_Lists_Matching_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
-        var expectedBlob = Some.Blob("blob1");
+        var expectedBlob = Some.Blob("some blob");
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(new[] { expectedBlob, Some.Blob("blob2") }));
+            Some.BlobSystem(new[] { expectedBlob, Some.Blob("other blob") }));
 
         var blobReferences = snapshotStore.FilterSnapshot(
             snapshotId,
