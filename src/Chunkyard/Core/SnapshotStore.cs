@@ -149,8 +149,10 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
+        fuzzy ??= new();
+
         return GetSnapshot(snapshotId).BlobReferences
-            .Where(br => (fuzzy ?? new()).IsMatch(br.Blob.Name))
+            .Where(br => fuzzy.IsMatch(br.Blob.Name))
             .ToArray();
     }
 
@@ -175,11 +177,20 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
-        _ = FilterSnapshot(snapshotId, fuzzy)
-            .AsParallel()
-            .WithDegreeOfParallelism(_world.Parallelism)
-            .Select(br => RestoreBlob(blobSystem, br))
+        var blobReferencesToRestore = FilterSnapshot(snapshotId, fuzzy)
+            .Where(br => !blobSystem.BlobExists(br.Blob.Name)
+                || !blobSystem.GetBlob(br.Blob.Name).Equals(br.Blob))
             .ToArray();
+
+        var options = new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = _world.Parallelism
+        };
+
+        Parallel.ForEach(
+            blobReferencesToRestore,
+            options,
+            blobReference => RestoreBlob(blobSystem, blobReference));
 
         _probe.RestoredSnapshot(snapshotId);
     }
@@ -214,7 +225,9 @@ public sealed class SnapshotStore
     public void KeepSnapshots(int latestCount)
     {
         var snapshotIds = ListSnapshotIds();
-        var snapshotIdsToRemove = snapshotIds.Take(snapshotIds.Length - latestCount)
+
+        var snapshotIdsToRemove = snapshotIds
+            .Take(snapshotIds.Length - latestCount)
             .ToArray();
 
         foreach (var snapshotId in snapshotIdsToRemove)
@@ -251,7 +264,8 @@ public sealed class SnapshotStore
 
         if (last > 0)
         {
-            snapshotIdsToCopy = snapshotIdsToCopy.TakeLast(last)
+            snapshotIdsToCopy = snapshotIdsToCopy
+                .TakeLast(last)
                 .ToArray();
         }
 
@@ -304,7 +318,8 @@ public sealed class SnapshotStore
         var otherSnapshotId = otherSnapshotIds.Max(id => id as int?);
 
         var snapshotIdsToCopy = otherSnapshotId != null
-            ? snapshotIds.Where(id => id > otherSnapshotId)
+            ? snapshotIds
+                .Where(id => id > otherSnapshotId)
                 .ToArray()
             : snapshotIds;
 
@@ -372,37 +387,36 @@ public sealed class SnapshotStore
         IBlobSystem blobSystem,
         Fuzzy? fuzzy = null)
     {
-        var currentBlobReferences = _repository.Snapshots.TryLast(out var snapshotId)
+        fuzzy ??= new();
+
+        var existingBlobReferences = _repository.Snapshots.TryLast(out var snapshotId)
             ? GetSnapshot(snapshotId).BlobReferences
                 .ToDictionary(br => br.Blob, br => br)
             : new Dictionary<Blob, BlobReference>();
 
-        BlobReference StoreBlob(Blob blob)
+        var blobs = blobSystem.ListBlobs().Where(b => fuzzy.IsMatch(b.Name));
+        var newBlobReferences = new List<BlobReference>();
+        var blobsToStore = new List<Blob>();
+
+        foreach (var blob in blobs)
         {
-            if (currentBlobReferences.TryGetValue(blob, out var current))
+            if (existingBlobReferences.TryGetValue(blob, out var blobReference))
             {
-                return current;
+                newBlobReferences.Add(blobReference);
             }
-
-            using var stream = blobSystem.OpenRead(blob.Name);
-
-            var blobReference = new BlobReference(
-                blob,
-                StoreChunks(stream));
-
-            _probe.StoredBlob(blobReference.Blob);
-
-            return blobReference;
+            else
+            {
+                blobsToStore.Add(blob);
+            }
         }
 
-        fuzzy ??= new();
-
-        return blobSystem.ListBlobs()
-            .Where(b => fuzzy.IsMatch(b.Name))
+        newBlobReferences.AddRange(blobsToStore
             .AsParallel()
-            .AsOrdered()
             .WithDegreeOfParallelism(_world.Parallelism)
-            .Select(StoreBlob)
+            .Select(b => StoreBlob(blobSystem, b)));
+
+        return newBlobReferences
+            .OrderBy(br => br.Blob.Name)
             .ToArray();
     }
 
@@ -482,26 +496,29 @@ public sealed class SnapshotStore
         return blobValid;
     }
 
-    private Blob RestoreBlob(
+    private BlobReference StoreBlob(IBlobSystem blobSystem, Blob blob)
+    {
+        using var stream = blobSystem.OpenRead(blob.Name);
+
+        var blobReference = new BlobReference(
+            blob,
+            StoreChunks(stream));
+
+        _probe.StoredBlob(blobReference.Blob);
+
+        return blobReference;
+    }
+
+    private void RestoreBlob(
         IBlobSystem blobSystem,
         BlobReference blobReference)
     {
-        var blob = blobReference.Blob;
-
-        if (blobSystem.BlobExists(blob.Name)
-            && blobSystem.GetBlob(blob.Name).Equals(blob))
-        {
-            return blob;
-        }
-
-        using (var stream = blobSystem.OpenWrite(blob))
+        using (var stream = blobSystem.OpenWrite(blobReference.Blob))
         {
             RestoreChunks(blobReference.ChunkIds, stream);
         }
 
         _probe.RestoredBlob(blobReference.Blob);
-
-        return blob;
     }
 
     private HashSet<string> ListChunkIds(IEnumerable<int> snapshotIds)
