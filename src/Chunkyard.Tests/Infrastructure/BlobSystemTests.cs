@@ -73,4 +73,25 @@ public abstract class BlobSystemTests
             expected,
             StreamUtils.AsBytes(() => BlobSystem.OpenRead(blob.Name)));
     }
+
+    [Fact]
+    public void ListBlobs_Sorts_By_Name()
+    {
+        var blob1 = Some.Blob("z");
+        var blob2 = Some.Blob("a");
+
+        using (var writeStream = BlobSystem.OpenWrite(blob1))
+        {
+            writeStream.Write(new byte[] { 0xFF });
+        }
+
+        using (var writeStream = BlobSystem.OpenWrite(blob2))
+        {
+            writeStream.Write(new byte[] { 0xFF });
+        }
+
+        Assert.Equal(
+            new[] { blob2, blob1 },
+            BlobSystem.ListBlobs());
+    }
 }
