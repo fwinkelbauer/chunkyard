@@ -31,4 +31,7 @@ public sealed class HelpCommand
     }
 }
 
+/// <summary>
+/// A command to show the current version of this application.
+/// </summary>
 public sealed class VersionCommand;
