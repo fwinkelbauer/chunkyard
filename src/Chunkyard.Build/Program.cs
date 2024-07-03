@@ -173,6 +173,7 @@ public static class Program
 
     private static void Announce(string text)
     {
+        Console.WriteLine();
         Console.WriteLine(text);
         Console.WriteLine("========================================");
     }
