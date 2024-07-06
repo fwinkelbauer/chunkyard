@@ -166,12 +166,6 @@ public static class SnapshotStoreTests
 
         Assert.False(
             snapshotStore.CheckSnapshotValid(snapshotId));
-
-        Assert.Throws<ChunkyardException>(
-            () => snapshotStore.EnsureSnapshotExists(snapshotId));
-
-        Assert.Throws<ChunkyardException>(
-            () => snapshotStore.EnsureSnapshotValid(snapshotId));
     }
 
     [Fact]
@@ -194,9 +188,6 @@ public static class SnapshotStoreTests
 
         Assert.False(
             snapshotStore.CheckSnapshotValid(snapshotId));
-
-        Assert.Throws<ChunkyardException>(
-            () => snapshotStore.EnsureSnapshotValid(snapshotId));
     }
 
     [Fact]

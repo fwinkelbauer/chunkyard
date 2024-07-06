@@ -103,28 +103,6 @@ public sealed class SnapshotStore
             GetSnapshotReference(snapshotId).ChunkIds);
     }
 
-    public void EnsureSnapshotExists(
-        int snapshotId,
-        Fuzzy? fuzzy = null)
-    {
-        if (!CheckSnapshotExists(snapshotId, fuzzy))
-        {
-            throw new ChunkyardException(
-                "Snapshot contains missing chunks");
-        }
-    }
-
-    public void EnsureSnapshotValid(
-        int snapshotId,
-        Fuzzy? fuzzy = null)
-    {
-        if (!CheckSnapshotValid(snapshotId, fuzzy))
-        {
-            throw new ChunkyardException(
-                "Snapshot contains invalid or missing chunks");
-        }
-    }
-
     public bool CheckSnapshotExists(
         int snapshotId,
         Fuzzy? fuzzy = null)

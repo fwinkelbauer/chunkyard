@@ -19,13 +19,21 @@ public static class Program
 
     private static void Check(CheckCommand c)
     {
+        var valid = true;
+
         if (c.Shallow)
         {
-            c.SnapshotStore.EnsureSnapshotExists(c.SnapshotId, c.Include);
+            valid = c.SnapshotStore.CheckSnapshotExists(c.SnapshotId, c.Include);
         }
         else
         {
-            c.SnapshotStore.EnsureSnapshotValid(c.SnapshotId, c.Include);
+            valid = c.SnapshotStore.CheckSnapshotValid(c.SnapshotId, c.Include);
+        }
+
+        if (!valid)
+        {
+            throw new ChunkyardException(
+                "Snapshot contains invalid or missing chunks");
         }
     }
 
