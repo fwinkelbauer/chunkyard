@@ -6,25 +6,34 @@ public static class DiffSetTests
     public static void DiffSet_Outlines_Differences_Between_Collections()
     {
         var date = DateTime.UtcNow;
+        var unchangedBlob = new Blob("some blob", date);
+        var changedBlob = new Blob("changed date blob", date.AddSeconds(1));
+        var removedBlob = new Blob("removed blob", date);
 
         var first = new[]
         {
-            new Blob("some blob", date),
-            new Blob("changed date blob", date),
-            new Blob("removed blob", date)
+            unchangedBlob,
+            changedBlob,
+            removedBlob
         };
+
+        changedBlob = new Blob(
+            changedBlob.Name,
+            changedBlob.LastWriteTimeUtc.AddSeconds(1));
+
+        var newBlob = new Blob("new blob", date);
 
         var second = new[]
         {
-            new Blob("some blob", date),
-            new Blob("changed date blob", date.AddSeconds(1)),
-            new Blob("new blob", date)
+            unchangedBlob,
+            changedBlob,
+            newBlob
         };
 
-        var expectedDiff = new DiffSet(
-            new[] { "new blob" },
-            new[] { "changed date blob" },
-            new[] { "removed blob" });
+        var expectedDiff = new DiffSet<Blob>(
+            new[] { newBlob },
+            new[] { changedBlob },
+            new[] { removedBlob });
 
         Assert.Equal(
             expectedDiff,

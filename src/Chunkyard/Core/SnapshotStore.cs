@@ -60,7 +60,7 @@ public sealed class SnapshotStore
             () => FastCdc.GenerateGearTable(_crypto.Value));
     }
 
-    public DiffSet StoreSnapshotPreview(
+    public DiffSet<Blob> StoreSnapshotPreview(
         IBlobSystem blobSystem,
         Fuzzy? fuzzy = null)
     {
@@ -123,31 +123,32 @@ public sealed class SnapshotStore
             fuzzy);
     }
 
-    public BlobReference[] FilterSnapshot(
+    public Blob[] ListBlobs(
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
         fuzzy ??= new();
 
         return GetSnapshot(snapshotId).BlobReferences
-            .Where(br => fuzzy.IsMatch(br.Blob.Name))
+            .Select(br => br.Blob)
+            .Where(b => fuzzy.IsMatch(b.Name))
             .ToArray();
     }
 
-    public DiffSet RestoreSnapshotPreview(
+    public DiffSet<Blob> RestoreSnapshotPreview(
         IBlobSystem blobSystem,
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
         var diffSet = DiffSet.Create(
             blobSystem.ListBlobs(),
-            FilterSnapshot(snapshotId, fuzzy).Select(br => br.Blob),
+            ListBlobs(snapshotId, fuzzy),
             blob => blob.Name);
 
-        return new DiffSet(
+        return new DiffSet<Blob>(
             diffSet.Added,
             diffSet.Changed,
-            Array.Empty<string>());
+            Array.Empty<Blob>());
     }
 
     public void RestoreSnapshot(
@@ -155,7 +156,7 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
-        var blobReferencesToRestore = FilterSnapshot(snapshotId, fuzzy)
+        var blobReferencesToRestore = ListBlobReferences(snapshotId, fuzzy)
             .Where(br => !blobSystem.BlobExists(br.Blob.Name)
                 || !blobSystem.GetBlob(br.Blob.Name).Equals(br.Blob))
             .ToArray();
@@ -361,6 +362,17 @@ public sealed class SnapshotStore
         return Serialize.BytesToSnapshot(memoryStream.ToArray());
     }
 
+    private BlobReference[] ListBlobReferences(
+        int snapshotId,
+        Fuzzy? fuzzy = null)
+    {
+        fuzzy ??= new();
+
+        return GetSnapshot(snapshotId).BlobReferences
+            .Where(br => fuzzy.IsMatch(br.Blob.Name))
+            .ToArray();
+    }
+
     private BlobReference[] StoreBlobs(
         IBlobSystem blobSystem,
         Fuzzy? fuzzy = null)
@@ -447,7 +459,7 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
-        var snapshotValid = FilterSnapshot(snapshotId, fuzzy)
+        var snapshotValid = ListBlobReferences(snapshotId, fuzzy)
             .AsParallel()
             .WithDegreeOfParallelism(_world.Parallelism)
             .All(br => CheckBlobReference(br, checkChunkIdFunc));

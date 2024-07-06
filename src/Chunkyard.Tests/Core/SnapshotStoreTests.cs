@@ -53,25 +53,27 @@ public static class SnapshotStoreTests
     public static void StoreSnapshotPreview_Shows_Preview()
     {
         var snapshotStore = Some.SnapshotStore();
-        var initialBlobSystem = Some.BlobSystem(Some.Blobs("some blob"));
-        var changedBlobSystem = Some.BlobSystem(Some.Blobs("other blob"));
+        var initialBlobs = Some.Blobs("some blob");
+        var initialBlobSystem = Some.BlobSystem(initialBlobs);
+        var changedBlobs = Some.Blobs("other blob");
+        var changedBlobSystem = Some.BlobSystem(changedBlobs);
 
         var initialDiff = snapshotStore.StoreSnapshotPreview(initialBlobSystem);
         _ = snapshotStore.StoreSnapshot(initialBlobSystem);
         var changedDiff = snapshotStore.StoreSnapshotPreview(changedBlobSystem);
 
         Assert.Equal(
-            new DiffSet(
-                new[] { "some blob" },
-                Array.Empty<string>(),
-                Array.Empty<string>()),
+            new DiffSet<Blob>(
+                initialBlobs,
+                Array.Empty<Blob>(),
+                Array.Empty<Blob>()),
             initialDiff);
 
         Assert.Equal(
-            new DiffSet(
-                new[] { "other blob" },
-                Array.Empty<string>(),
-                new[] { "some blob" }),
+            new DiffSet<Blob>(
+                changedBlobs,
+                Array.Empty<Blob>(),
+                initialBlobs),
             changedDiff);
     }
 
@@ -229,20 +231,21 @@ public static class SnapshotStoreTests
     [Fact]
     public static void RestoreSnapshotPreview_Shows_Preview()
     {
+        var blobs = Some.Blobs("some blob");
         var snapshotStore = Some.SnapshotStore();
 
         var snapshotId = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(Some.Blobs("some blob")));
+            Some.BlobSystem(blobs));
 
         var actualDiff = snapshotStore.RestoreSnapshotPreview(
             Some.BlobSystem(),
             snapshotId);
 
         Assert.Equal(
-            new DiffSet(
-                new[] { "some blob" },
-                Array.Empty<string>(),
-                Array.Empty<string>()),
+            new DiffSet<Blob>(
+                blobs,
+                Array.Empty<Blob>(),
+                Array.Empty<Blob>()),
             actualDiff);
     }
 
@@ -284,13 +287,13 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(new[] { expectedBlob, Some.Blob("other blob") }));
 
-        var blobReferences = snapshotStore.FilterSnapshot(
+        var blobs = snapshotStore.ListBlobs(
             snapshotId,
             new Fuzzy(expectedBlob.Name));
 
         Assert.Equal(
             new[] { expectedBlob },
-            blobReferences.Select(br => br.Blob));
+            blobs);
     }
 
     [Fact]

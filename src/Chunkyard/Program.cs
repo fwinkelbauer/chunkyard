@@ -46,13 +46,9 @@ public static class Program
 
     private static void Diff(DiffCommand c)
     {
-        var first = c.SnapshotStore.FilterSnapshot(c.FirstSnapshotId, c.Include);
-        var second = c.SnapshotStore.FilterSnapshot(c.SecondSnapshotId, c.Include);
-
-        var diff = DiffSet.Create(
-            first,
-            second,
-            br => br.Blob.Name);
+        var first = c.SnapshotStore.ListBlobs(c.FirstSnapshotId, c.Include);
+        var second = c.SnapshotStore.ListBlobs(c.SecondSnapshotId, c.Include);
+        var diff = DiffSet.Create(first, second, b => b.Name);
 
         PrintDiff(diff);
     }
@@ -104,15 +100,11 @@ public static class Program
 
     private static void Show(ShowCommand c)
     {
-        var blobReferences = c.SnapshotStore.FilterSnapshot(
-            c.SnapshotId,
-            c.Include);
+        var blobs = c.SnapshotStore.ListBlobs(c.SnapshotId, c.Include);
 
-        var blobNames = blobReferences.Select(br => br.Blob.Name);
-
-        foreach (var blobName in blobNames)
+        foreach (var blob in blobs)
         {
-            Console.WriteLine(blobName);
+            Console.WriteLine(blob.Name);
         }
     }
 
@@ -134,21 +126,21 @@ public static class Program
         }
     }
 
-    private static void PrintDiff(DiffSet diff)
+    private static void PrintDiff(DiffSet<Blob> diff)
     {
         foreach (var added in diff.Added)
         {
-            Console.WriteLine($"+ {added}");
+            Console.WriteLine($"+ {added.Name}");
         }
 
         foreach (var changed in diff.Changed)
         {
-            Console.WriteLine($"~ {changed}");
+            Console.WriteLine($"~ {changed.Name}");
         }
 
         foreach (var removed in diff.Removed)
         {
-            Console.WriteLine($"- {removed}");
+            Console.WriteLine($"- {removed.Name}");
         }
     }
 }
