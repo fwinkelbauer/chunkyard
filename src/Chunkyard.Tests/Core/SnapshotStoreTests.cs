@@ -279,7 +279,7 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void FilterSnapshot_Lists_Matching_Blobs()
+    public static void ListBlobs_Lists_Matching_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
         var expectedBlob = Some.Blob("some blob");
