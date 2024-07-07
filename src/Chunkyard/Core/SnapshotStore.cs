@@ -68,8 +68,10 @@ public sealed class SnapshotStore
             ? GetSnapshot(snapshotId).BlobReferences
             : Array.Empty<BlobReference>();
 
+        fuzzy ??= new();
+
         var blobs = blobSystem.ListBlobs()
-            .Where(b => (fuzzy ?? new()).IsMatch(b.Name))
+            .Where(b => fuzzy.IsMatch(b.Name))
             .ToArray();
 
         return DiffSet.Create(
