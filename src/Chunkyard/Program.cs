@@ -19,16 +19,9 @@ public static class Program
 
     private static void Check(CheckCommand c)
     {
-        var valid = true;
-
-        if (c.Shallow)
-        {
-            valid = c.SnapshotStore.CheckSnapshotExists(c.SnapshotId, c.Include);
-        }
-        else
-        {
-            valid = c.SnapshotStore.CheckSnapshotValid(c.SnapshotId, c.Include);
-        }
+        var valid = c.Shallow
+            ? c.SnapshotStore.CheckSnapshotExists(c.SnapshotId, c.Include)
+            : c.SnapshotStore.CheckSnapshotValid(c.SnapshotId, c.Include);
 
         if (!valid)
         {
