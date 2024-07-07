@@ -12,32 +12,30 @@ public static class DiffSet
     {
         var dict1 = first.ToDictionary(toKey, f => f);
         var dict2 = second.ToDictionary(toKey, s => s);
+        var added = new List<T>();
+        var changed = new List<T>();
+        var removed = new List<T>();
 
-        var added = dict2.Keys
-            .Except(dict1.Keys)
-            .ToHashSet();
+        foreach (var key in dict1.Keys.Union(dict2.Keys))
+        {
+            var exists1 = dict1.TryGetValue(key, out var value1);
+            var exists2 = dict2.TryGetValue(key, out var value2);
 
-        var changed = dict1.Keys
-            .Intersect(dict2.Keys)
-            .Where(key => !EqualityComparer<T>.Default.Equals(dict1[key], dict2[key]))
-            .ToHashSet();
+            if (exists1 && exists2 && !value1!.Equals(value2!))
+            {
+                changed.Add(value2!);
+            }
+            else if (exists1 && !exists2)
+            {
+                removed.Add(value1!);
+            }
+            else if (!exists1 && exists2)
+            {
+                added.Add(value2!);
+            }
+        }
 
-        var removed = dict1.Keys
-            .Except(dict2.Keys)
-            .ToHashSet();
-
-        return new DiffSet<T>(
-            Filter(dict2, added),
-            Filter(dict2, changed),
-            Filter(dict1, removed));
-    }
-
-    private static T[] Filter<T>(Dictionary<string, T> dict, HashSet<string> keys)
-    {
-        return dict
-            .Where(p => keys.Contains(p.Key))
-            .Select(p => p.Value)
-            .ToArray();
+        return new DiffSet<T>(added, changed, removed);
     }
 }
 
