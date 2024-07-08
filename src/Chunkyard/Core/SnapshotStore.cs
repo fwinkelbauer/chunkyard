@@ -125,18 +125,6 @@ public sealed class SnapshotStore
             fuzzy);
     }
 
-    public Blob[] ListBlobs(
-        int snapshotId,
-        Fuzzy? fuzzy = null)
-    {
-        fuzzy ??= new();
-
-        return GetSnapshot(snapshotId).BlobReferences
-            .Select(br => br.Blob)
-            .Where(b => fuzzy.IsMatch(b.Name))
-            .ToArray();
-    }
-
     public DiffSet<Blob> RestoreSnapshotPreview(
         IBlobSystem blobSystem,
         int snapshotId,
@@ -144,7 +132,7 @@ public sealed class SnapshotStore
     {
         var diffSet = DiffSet.Create(
             blobSystem.ListBlobs(),
-            ListBlobs(snapshotId, fuzzy),
+            GetSnapshot(snapshotId).ListBlobs(fuzzy),
             blob => blob.Name);
 
         return new DiffSet<Blob>(
@@ -158,7 +146,8 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
-        var blobReferencesToRestore = ListBlobReferences(snapshotId, fuzzy)
+        var blobReferencesToRestore = GetSnapshot(snapshotId)
+            .ListBlobReferences(fuzzy)
             .Where(br => !blobSystem.BlobExists(br.Blob.Name)
                 || !blobSystem.GetBlob(br.Blob.Name).Equals(br.Blob))
             .ToArray();
@@ -364,17 +353,6 @@ public sealed class SnapshotStore
         return Serialize.BytesToSnapshot(memoryStream.ToArray());
     }
 
-    private BlobReference[] ListBlobReferences(
-        int snapshotId,
-        Fuzzy? fuzzy = null)
-    {
-        fuzzy ??= new();
-
-        return GetSnapshot(snapshotId).BlobReferences
-            .Where(br => fuzzy.IsMatch(br.Blob.Name))
-            .ToArray();
-    }
-
     private BlobReference[] StoreBlobs(
         IBlobSystem blobSystem,
         Fuzzy? fuzzy = null)
@@ -461,7 +439,7 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
-        var snapshotValid = ListBlobReferences(snapshotId, fuzzy)
+        var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(fuzzy)
             .AsParallel()
             .WithDegreeOfParallelism(_world.Parallelism)
             .All(br => CheckBlobReference(br, checkChunkIdFunc));

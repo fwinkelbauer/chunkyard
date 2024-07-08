@@ -279,24 +279,6 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void ListBlobs_Lists_Matching_Blobs()
-    {
-        var snapshotStore = Some.SnapshotStore();
-        var expectedBlob = Some.Blob("some blob");
-
-        var snapshotId = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(new[] { expectedBlob, Some.Blob("other blob") }));
-
-        var blobs = snapshotStore.ListBlobs(
-            snapshotId,
-            new Fuzzy(expectedBlob.Name));
-
-        Assert.Equal(
-            new[] { expectedBlob },
-            blobs);
-    }
-
-    [Fact]
     public static void GarbageCollect_Removes_Unused_Ids()
     {
         var repository = Some.Repository();

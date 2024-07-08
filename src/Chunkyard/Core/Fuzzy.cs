@@ -66,3 +66,30 @@ public sealed class Fuzzy
         return match;
     }
 }
+
+/// <summary>
+/// Extension methods based on <see cref="Fuzzy"/>.
+/// </summary>
+public static class FuzzyExtensions
+{
+    public static IEnumerable<Blob> ListBlobs(
+        this Snapshot snapshot,
+        Fuzzy? fuzzy = null)
+    {
+        fuzzy ??= new();
+
+        return snapshot.BlobReferences
+            .Select(br => br.Blob)
+            .Where(b => fuzzy.IsMatch(b.Name));
+    }
+
+    public static IEnumerable<BlobReference> ListBlobReferences(
+        this Snapshot snapshot,
+        Fuzzy? fuzzy = null)
+    {
+        fuzzy ??= new();
+
+        return snapshot.BlobReferences
+            .Where(b => fuzzy.IsMatch(b.Blob.Name));
+    }
+}

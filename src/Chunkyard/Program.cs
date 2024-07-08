@@ -39,8 +39,12 @@ public static class Program
 
     private static void Diff(DiffCommand c)
     {
-        var first = c.SnapshotStore.ListBlobs(c.FirstSnapshotId, c.Include);
-        var second = c.SnapshotStore.ListBlobs(c.SecondSnapshotId, c.Include);
+        var first = c.SnapshotStore.GetSnapshot(c.FirstSnapshotId)
+            .ListBlobs(c.Include);
+
+        var second = c.SnapshotStore.GetSnapshot(c.SecondSnapshotId)
+            .ListBlobs(c.Include);
+
         var diff = DiffSet.Create(first, second, b => b.Name);
 
         PrintDiff(diff);
@@ -93,7 +97,8 @@ public static class Program
 
     private static void Show(ShowCommand c)
     {
-        var blobs = c.SnapshotStore.ListBlobs(c.SnapshotId, c.Include);
+        var blobs = c.SnapshotStore.GetSnapshot(c.SnapshotId)
+            .ListBlobs(c.Include);
 
         foreach (var blob in blobs)
         {
