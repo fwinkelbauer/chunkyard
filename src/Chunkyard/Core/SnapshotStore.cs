@@ -206,7 +206,26 @@ public sealed class SnapshotStore
         }
     }
 
-    public void RestoreChunks(
+    public void CopyTo(IRepository otherRepository, int last = 0)
+    {
+        var snapshotIdsToCopy = ListSnapshotIdsToCopy(otherRepository);
+
+        if (last > 0)
+        {
+            snapshotIdsToCopy = snapshotIdsToCopy
+                .TakeLast(last)
+                .ToArray();
+        }
+
+        var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
+            .Except(otherRepository.Chunks.UnorderedList())
+            .ToArray();
+
+        CopyChunkIds(otherRepository, chunkIdsToCopy);
+        CopySnapshotIds(otherRepository, snapshotIdsToCopy);
+    }
+
+    private void RestoreChunks(
         IEnumerable<string> chunkIds,
         Stream outputStream)
     {
@@ -226,25 +245,6 @@ public sealed class SnapshotStore
                     e);
             }
         }
-    }
-
-    public void CopyTo(IRepository otherRepository, int last = 0)
-    {
-        var snapshotIdsToCopy = ListSnapshotIdsToCopy(otherRepository);
-
-        if (last > 0)
-        {
-            snapshotIdsToCopy = snapshotIdsToCopy
-                .TakeLast(last)
-                .ToArray();
-        }
-
-        var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
-            .Except(otherRepository.Chunks.UnorderedList())
-            .ToArray();
-
-        CopyChunkIds(otherRepository, chunkIdsToCopy);
-        CopySnapshotIds(otherRepository, snapshotIdsToCopy);
     }
 
     private SnapshotReference GetSnapshotReference(int snapshotId)
