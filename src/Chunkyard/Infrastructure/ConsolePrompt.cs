@@ -33,29 +33,24 @@ internal sealed class ConsolePrompt : IPrompt
 
         while (true)
         {
-            var key = Console.ReadKey(true);
+            var info = Console.ReadKey(true);
 
-            switch (key.Key)
+            if (info.Key == ConsoleKey.Enter)
             {
-                case ConsoleKey.Enter:
-                    Console.WriteLine();
+                Console.WriteLine();
 
-                    return result.ToString();
-                case ConsoleKey.Backspace:
-                    if (result.Length == 0)
-                    {
-                        continue;
-                    }
-
-                    result.Length--;
-                    Console.Write("\b \b");
-
-                    continue;
-                default:
-                    result.Append(key.KeyChar);
-                    Console.Write("*");
-
-                    continue;
+                return result.ToString();
+            }
+            else if (info.Key == ConsoleKey.Backspace
+                && result.Length > 0)
+            {
+                Console.Write("\b \b");
+                result.Length--;
+            }
+            else if (!char.IsControl(info.KeyChar))
+            {
+                result.Append(info.KeyChar);
+                Console.Write("*");
             }
         }
     }
