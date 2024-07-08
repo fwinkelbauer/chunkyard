@@ -30,7 +30,7 @@ public sealed class SnapshotStore
 
         _crypto = new(() =>
         {
-            if (_repository.Snapshots.TryLast(out var snapshotId))
+            if (TryLastSnapshotId(_repository, out var snapshotId))
             {
                 var snapshotReference = GetSnapshotReference(snapshotId);
 
@@ -64,7 +64,7 @@ public sealed class SnapshotStore
         IBlobSystem blobSystem,
         Fuzzy? fuzzy = null)
     {
-        var blobReferences = _repository.Snapshots.TryLast(out var snapshotId)
+        var blobReferences = TryLastSnapshotId(_repository, out var snapshotId)
             ? GetSnapshot(snapshotId).BlobReferences
             : Array.Empty<BlobReference>();
 
@@ -359,7 +359,7 @@ public sealed class SnapshotStore
     {
         fuzzy ??= new();
 
-        var existingBlobReferences = _repository.Snapshots.TryLast(out var snapshotId)
+        var existingBlobReferences = TryLastSnapshotId(_repository, out var snapshotId)
             ? GetSnapshot(snapshotId).BlobReferences
                 .ToDictionary(br => br.Blob, br => br)
             : new Dictionary<Blob, BlobReference>();
@@ -400,7 +400,7 @@ public sealed class SnapshotStore
 
     private int StoreSnapshotReference(SnapshotReference snapshotReference)
     {
-        var nextId = _repository.Snapshots.TryLast(out var snapshotId)
+        var nextId = TryLastSnapshotId(_repository, out var snapshotId)
             ? snapshotId + 1
             : 0;
 
@@ -519,7 +519,7 @@ public sealed class SnapshotStore
             return snapshotId;
         }
         else if (snapshotId == LatestSnapshotId
-            && _repository.Snapshots.TryLast(out var lastId))
+            && TryLastSnapshotId(_repository, out var lastId))
         {
             return lastId;
         }
@@ -536,6 +536,18 @@ public sealed class SnapshotStore
         Array.Sort(snapshotIds);
 
         return snapshotIds[position];
+    }
+
+    private static bool TryLastSnapshotId(IRepository repository, out int key)
+    {
+        var keys = repository.Snapshots.UnorderedList();
+        var any = keys.Any();
+
+        key = any
+            ? keys.Max()
+            : 0;
+
+        return any;
     }
 
     private static string ToPromptKey(byte[] salt, int iterations)

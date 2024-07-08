@@ -24,7 +24,5 @@ public interface IRepository<T>
 
     T[] UnorderedList();
 
-    bool TryLast(out T? key);
-
     void Remove(T key);
 }

@@ -29,7 +29,6 @@ public abstract class RepositoryTests
     public void Repository_Can_Read_Write()
     {
         Assert.Empty(Repository.UnorderedList());
-        Assert.False(Repository.TryLast(out _));
 
         var dict = new Dictionary<string, byte[]>
         {
@@ -47,8 +46,6 @@ public abstract class RepositoryTests
         }
 
         Assert.Equal(dict.Keys, Repository.UnorderedList().OrderBy(k => k));
-        Assert.True(Repository.TryLast(out var maxKey));
-        Assert.Equal(Repository.UnorderedList().Max(), maxKey);
 
         foreach (var pair in dict)
         {

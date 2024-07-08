@@ -61,18 +61,6 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         }
     }
 
-    public bool TryLast(out T? key)
-    {
-        var keys = UnorderedList();
-        var any = keys.Any();
-
-        key = any
-            ? keys.Max()
-            : default;
-
-        return any;
-    }
-
     public void Remove(T key)
     {
         lock (_lock)

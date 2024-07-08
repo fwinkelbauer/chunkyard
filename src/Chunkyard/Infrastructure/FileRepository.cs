@@ -78,18 +78,6 @@ public sealed class FileRepository<T> : IRepository<T>
             .ToArray();
     }
 
-    public bool TryLast(out T? key)
-    {
-        var keys = UnorderedList();
-        var any = keys.Any();
-
-        key = any
-            ? keys.Max()
-            : default;
-
-        return any;
-    }
-
     public void Remove(T key)
     {
         File.Delete(
