@@ -111,7 +111,8 @@ public static class Program
                 $"-p:SourceRevisionId={commit}",
                 "-p:PublishSingleFile=true",
                 "-p:PublishTrimmed=true",
-                "-p:DebugType=none",
+                "-p:DebugType=embedded",
+                "-p:ContinuousIntegrationBuild=true",
                 "--tl:auto");
         }
     }
