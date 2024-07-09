@@ -38,7 +38,6 @@ internal sealed class ConsolePrompt : IPrompt
             if (info.Key == ConsoleKey.Enter)
             {
                 Console.WriteLine();
-
                 return result.ToString();
             }
             else if (info.Key == ConsoleKey.Backspace
@@ -49,8 +48,8 @@ internal sealed class ConsolePrompt : IPrompt
             }
             else if (!char.IsControl(info.KeyChar))
             {
-                result.Append(info.KeyChar);
                 Console.Write("*");
+                result.Append(info.KeyChar);
             }
         }
     }
