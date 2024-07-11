@@ -225,45 +225,6 @@ public sealed class SnapshotStore
         CopySnapshotIds(otherRepository, snapshotIdsToCopy);
     }
 
-    private void RestoreChunks(
-        IEnumerable<string> chunkIds,
-        Stream outputStream)
-    {
-        foreach (var chunkId in chunkIds)
-        {
-            try
-            {
-                var decrypted = _crypto.Value.Decrypt(
-                    _repository.Chunks.Retrieve(chunkId));
-
-                outputStream.Write(decrypted);
-            }
-            catch (CryptographicException e)
-            {
-                throw new ChunkyardException(
-                    $"Could not decrypt chunk: {chunkId}",
-                    e);
-            }
-        }
-    }
-
-    private SnapshotReference GetSnapshotReference(int snapshotId)
-    {
-        var bytes = _repository.Snapshots.Retrieve(
-            ResolveSnapshotId(snapshotId));
-
-        try
-        {
-            return Serialize.BytesToSnapshotReference(bytes);
-        }
-        catch (Exception e)
-        {
-            throw new ChunkyardException(
-                $"Could not retrieve snapshot: #{snapshotId}",
-                e);
-        }
-    }
-
     private int[] ListSnapshotIdsToCopy(IRepository otherRepository)
     {
         var snapshotIds = ListSnapshotIds();
@@ -339,6 +300,23 @@ public sealed class SnapshotStore
             });
     }
 
+    private SnapshotReference GetSnapshotReference(int snapshotId)
+    {
+        var bytes = _repository.Snapshots.Retrieve(
+            ResolveSnapshotId(snapshotId));
+
+        try
+        {
+            return Serialize.BytesToSnapshotReference(bytes);
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not retrieve snapshot: #{snapshotId}",
+                e);
+        }
+    }
+
     private Snapshot GetSnapshot(IEnumerable<string> chunkIds)
     {
         using var memoryStream = new MemoryStream();
@@ -406,29 +384,6 @@ public sealed class SnapshotStore
         return nextId;
     }
 
-    private string[] StoreChunks(Stream stream)
-    {
-        return _fastCdc.SplitIntoChunks(stream, _gearTable.Value)
-            .AsParallel()
-            .AsOrdered()
-            .WithDegreeOfParallelism(_world.Parallelism)
-            .Select(StoreChunk)
-            .ToArray();
-    }
-
-    private string StoreChunk(byte[] chunk)
-    {
-        var encrypted = _crypto.Value.Encrypt(
-            _world.GenerateNonce(),
-            chunk);
-
-        var chunkId = ChunkId.Compute(encrypted);
-
-        _repository.Chunks.Store(chunkId, encrypted);
-
-        return chunkId;
-    }
-
     private bool CheckSnapshot(
         Func<string, bool> checkChunkIdFunc,
         int snapshotId,
@@ -474,6 +429,29 @@ public sealed class SnapshotStore
         return blobReference;
     }
 
+    private string[] StoreChunks(Stream stream)
+    {
+        return _fastCdc.SplitIntoChunks(stream, _gearTable.Value)
+            .AsParallel()
+            .AsOrdered()
+            .WithDegreeOfParallelism(_world.Parallelism)
+            .Select(StoreChunk)
+            .ToArray();
+    }
+
+    private string StoreChunk(byte[] chunk)
+    {
+        var encrypted = _crypto.Value.Encrypt(
+            _world.GenerateNonce(),
+            chunk);
+
+        var chunkId = ChunkId.Compute(encrypted);
+
+        _repository.Chunks.Store(chunkId, encrypted);
+
+        return chunkId;
+    }
+
     private void RestoreBlob(
         IBlobSystem blobSystem,
         BlobReference blobReference)
@@ -486,6 +464,28 @@ public sealed class SnapshotStore
         _probe.RestoredBlob(blobReference.Blob);
     }
 
+    private void RestoreChunks(
+        IEnumerable<string> chunkIds,
+        Stream outputStream)
+    {
+        foreach (var chunkId in chunkIds)
+        {
+            try
+            {
+                var decrypted = _crypto.Value.Decrypt(
+                    _repository.Chunks.Retrieve(chunkId));
+
+                outputStream.Write(decrypted);
+            }
+            catch (CryptographicException e)
+            {
+                throw new ChunkyardException(
+                    $"Could not decrypt chunk: {chunkId}",
+                    e);
+            }
+        }
+    }
+
     private HashSet<string> ListChunkIds(IEnumerable<int> snapshotIds)
     {
         var chunkIds = new HashSet<string>();
@@ -493,6 +493,7 @@ public sealed class SnapshotStore
         foreach (var snapshotId in snapshotIds)
         {
             var snapshotChunkIds = GetSnapshotReference(snapshotId).ChunkIds;
+
             var blobChunkIds = GetSnapshot(snapshotChunkIds).BlobReferences
                 .SelectMany(br => br.ChunkIds);
 
@@ -512,11 +513,6 @@ public sealed class SnapshotStore
         if (snapshotId >= 0)
         {
             return snapshotId;
-        }
-        else if (snapshotId == LatestSnapshotId
-            && TryLastSnapshotId(_repository, out var lastId))
-        {
-            return lastId;
         }
 
         var snapshotIds = _repository.Snapshots.UnorderedList();
