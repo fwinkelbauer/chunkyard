@@ -310,15 +310,10 @@ public sealed class SnapshotStore
             options,
             chunkId =>
             {
-                var bytes = _repository.Chunks.Retrieve(chunkId);
+                otherRepository.Chunks.Store(
+                    chunkId,
+                    _repository.Chunks.Retrieve(chunkId));
 
-                if (!ChunkId.Valid(chunkId, bytes))
-                {
-                    throw new ChunkyardException(
-                        $"Aborting copy operation. Found invalid chunk: {chunkId}");
-                }
-
-                otherRepository.Chunks.Store(chunkId, bytes);
                 _probe.CopiedChunk(chunkId);
             });
     }

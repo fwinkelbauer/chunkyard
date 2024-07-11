@@ -405,25 +405,6 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void CopyTo_Throws_On_Corrupt_Chunks()
-    {
-        var repository = Some.Repository();
-        var snapshotStore = Some.SnapshotStore(repository);
-
-        var snapshotId = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(Some.Blobs()));
-
-        var chunkIds = snapshotStore.GetSnapshot(snapshotId)
-            .BlobReferences
-            .SelectMany(b => b.ChunkIds);
-
-        Corrupt(repository.Chunks, chunkIds);
-
-        Assert.Throws<AggregateException>(
-            () => snapshotStore.CopyTo(Some.Repository()));
-    }
-
-    [Fact]
     public static void CopyTo_Throws_On_Corrupt_References()
     {
         var repository = Some.Repository();
