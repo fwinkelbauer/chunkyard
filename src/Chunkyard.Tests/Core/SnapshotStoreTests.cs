@@ -252,7 +252,7 @@ public static class SnapshotStoreTests
     [Fact]
     public static void RestoreSnapshot_Keeps_Chunks_Order()
     {
-        var fastCdc = new FastCdc(256, 1024, 2048);
+        var fastCdc = new FastCdc(256, 512, 1024);
         var snapshotStore = Some.SnapshotStore(fastCdc: fastCdc);
 
         // Generate data that is large enough to create a few chunks
