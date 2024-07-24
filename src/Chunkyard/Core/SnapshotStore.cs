@@ -14,7 +14,6 @@ public sealed class SnapshotStore
     private readonly IProbe _probe;
     private readonly IWorld _world;
     private readonly Lazy<Crypto> _crypto;
-    private readonly Lazy<uint[]> _gearTable;
 
     public SnapshotStore(
         IRepository repository,
@@ -55,9 +54,6 @@ public sealed class SnapshotStore
                     iterations);
             }
         });
-
-        _gearTable = new Lazy<uint[]>(
-            () => FastCdc.GenerateGearTable(_crypto.Value));
     }
 
     public DiffSet<Blob> StoreSnapshotPreview(
@@ -431,7 +427,7 @@ public sealed class SnapshotStore
 
     private string[] StoreChunks(Stream stream)
     {
-        return _fastCdc.SplitIntoChunks(stream, _gearTable.Value)
+        return _fastCdc.SplitIntoChunks(stream)
             .AsParallel()
             .AsOrdered()
             .WithDegreeOfParallelism(_world.Parallelism)
