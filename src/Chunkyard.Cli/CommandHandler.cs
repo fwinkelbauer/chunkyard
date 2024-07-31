@@ -5,16 +5,53 @@ namespace Chunkyard.Cli;
 /// </summary>
 public class CommandHandler
 {
+    private const int ExitCodeOk = 0;
+    private const int ExitCodeError = 1;
+
     private readonly List<ICommandParser> _parsers;
-    private readonly Dictionary<Type, Action<object>> _handlers;
+    private readonly Dictionary<Type, Func<object, int>> _handlers;
 
     public CommandHandler()
     {
         _parsers = new();
         _handlers = new();
 
-        Use<HelpCommand>(Help);
-        Use<VersionCommand>(_ => Version());
+        Use<HelpCommand>(WriteHelp);
+        Use<VersionCommand>(WriteVersion);
+        Use<Exception>(WriteError);
+    }
+
+    public int Handle(params string[] args)
+    {
+        try
+        {
+            var parser = new CommandParser(_parsers);
+            var command = parser.Parse(args);
+
+            return _handlers[command.GetType()](command);
+        }
+        catch (Exception e)
+        {
+            return _handlers[typeof(Exception)](e);
+        }
+    }
+
+    public CommandHandler With<T>(ICommandParser parser, Func<T, int> handler)
+    {
+        _parsers.Add(parser);
+
+        Use<T>(handler);
+
+        return this;
+    }
+
+    public CommandHandler With<T>(ICommandParser parser, Func<int> handler)
+    {
+        _parsers.Add(parser);
+
+        Use<T>(handler);
+
+        return this;
     }
 
     public CommandHandler With<T>(ICommandParser parser, Action<T> handler)
@@ -26,31 +63,45 @@ public class CommandHandler
         return this;
     }
 
-    public int Handle(params string[] args)
+    public CommandHandler With<T>(ICommandParser parser, Action handler)
     {
-        try
-        {
-            var parser = new CommandParser(_parsers);
-            var command = parser.Parse(args);
+        _parsers.Add(parser);
 
-            _handlers[command.GetType()](command);
+        Use<T>(handler);
 
-            return command is HelpCommand ? 1 : 0;
-        }
-        catch (Exception e)
-        {
-            Error(e);
-
-            return 1;
-        }
+        return this;
     }
 
-    private void Use<T>(Action<T> handler)
+    public CommandHandler Use<T>(Func<T, int> handler)
     {
         _handlers[typeof(T)] = o => handler((T)o);
+
+        return this;
     }
 
-    private static void Error(Exception e)
+    public CommandHandler Use<T>(Func<int> handler)
+    {
+        _handlers[typeof(T)] = _ => handler();
+
+        return this;
+    }
+
+    public CommandHandler Use<T>(Action<T> handler)
+    {
+        return Use<T>(t =>
+        {
+            handler(t);
+
+            return ExitCodeOk;
+        });
+    }
+
+    public CommandHandler Use<T>(Action handler)
+    {
+        return Use<T>(_ => handler());
+    }
+
+    private static int WriteError(Exception e)
     {
         Console.Error.WriteLine("Error:");
 
@@ -62,9 +113,11 @@ public class CommandHandler
         {
             Console.Error.WriteLine(exception.ToString());
         }
+
+        return ExitCodeError;
     }
 
-    private static void Help(HelpCommand c)
+    private static int WriteHelp(HelpCommand c)
     {
         Console.Error.WriteLine();
         Console.Error.WriteLine("Usage:");
@@ -94,9 +147,11 @@ public class CommandHandler
         }
 
         Console.Error.WriteLine();
+
+        return ExitCodeError;
     }
 
-    private static void Version()
+    private static int WriteVersion()
     {
         var attribute = typeof(VersionCommand).Assembly
             .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
@@ -106,5 +161,7 @@ public class CommandHandler
             .InformationalVersion;
 
         Console.Error.WriteLine(version);
+
+        return ExitCodeOk;
     }
 }

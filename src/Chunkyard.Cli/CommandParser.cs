@@ -26,12 +26,6 @@ public sealed class CommandParser
             new HelpCommand(_infos, Array.Empty<string>()));
     }
 
-    private void Add(string command, string info, object result)
-    {
-        _infos[command] = info;
-        _parsers[command] = new SimpleCommandParser(command, info, result);
-    }
-
     public object Parse(params string[] args)
     {
         var arg = Args.Parse(args);
@@ -51,5 +45,11 @@ public sealed class CommandParser
                 _infos,
                 new[] { $"Unknown command: {arg.Command}" });
         }
+    }
+
+    private void Add(string command, string info, object result)
+    {
+        _parsers[command] = new SimpleCommandParser(command, info, result);
+        _infos[command] = info;
     }
 }

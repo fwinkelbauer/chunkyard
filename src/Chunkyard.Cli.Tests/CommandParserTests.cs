@@ -2,20 +2,21 @@ namespace Chunkyard.Cli.Tests;
 
 public static class CommandParserTests
 {
-    [Theory]
-    [InlineData("cmd")]
-    [InlineData("cmd --help false")]
-    public static void Parse_Returns_Parsed_Command(string args)
+    [Fact]
+    public static void Parse_Dispatches_To_Correct_Parser()
     {
-        var expected = "the result";
-
         var parser = new CommandParser(
             new[]
             {
-                new SimpleCommandParser("cmd", "info", expected)
+                new SimpleCommandParser("one", "info", "result-one"),
+                new SimpleCommandParser("two", "info", "result-two"),
+                new SimpleCommandParser("three", "info", "result-three")
             });
 
-        Assert.Equal(expected, parser.Parse(args.Split(' ')));
+        Assert.Equal("result-one", parser.Parse("one"));
+        Assert.Equal("result-one", parser.Parse("one", "--help", "false"));
+        Assert.Equal("result-two", parser.Parse("two"));
+        Assert.Equal("result-three", parser.Parse("three"));
     }
 
     [Theory]
@@ -37,21 +38,5 @@ public static class CommandParserTests
 
         Assert.IsType<HelpCommand>(
             parser.Parse(args.Split(' ')));
-    }
-
-    [Fact]
-    public static void Parse_Dispatches_To_Correct_Parser()
-    {
-        var parser = new CommandParser(
-            new[]
-            {
-                new SimpleCommandParser("one", "info", "result-one"),
-                new SimpleCommandParser("two", "info", "result-two"),
-                new SimpleCommandParser("three", "info", "result-three")
-            });
-
-        Assert.Equal("result-one", parser.Parse("one"));
-        Assert.Equal("result-two", parser.Parse("two"));
-        Assert.Equal("result-three", parser.Parse("three"));
     }
 }

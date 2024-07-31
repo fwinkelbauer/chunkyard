@@ -20,31 +20,31 @@ public static class Program
                     "build",
                     "Build the repository",
                     new BuildCommand()),
-                _ => Build())
+                Build)
             .With<CheckCommand>(
                 new SimpleCommandParser(
                     "check",
                     "Check for dependency updates",
                     new CheckCommand()),
-                _ => Check())
+                Check)
             .With<CleanCommand>(
                 new SimpleCommandParser(
                     "clean",
                     "Clean the repository",
                     new CleanCommand()),
-                _ => Clean())
+                Clean)
             .With<PublishCommand>(
                 new SimpleCommandParser(
                     "publish",
                     "Publish the main project",
                     new PublishCommand()),
-                _ => Publish())
+                Publish)
             .With<ReleaseCommand>(
                 new SimpleCommandParser(
                     "release",
                     "Create a release commit",
                     new ReleaseCommand()),
-                _ => Release())
+                Release)
             .Handle(args);
     }
 
