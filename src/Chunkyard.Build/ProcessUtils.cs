@@ -5,32 +5,41 @@ namespace Chunkyard.Build;
 /// </summary>
 public static class ProcessUtils
 {
-    public static void Run(string fileName, string arguments)
+    public static void Run(string fileName, string[] arguments)
     {
-        using var process = Process.Start(fileName, arguments)!;
+        using var process = Process.Start(
+            fileName,
+            string.Join(' ', arguments))!;
 
         WaitForSuccess(process);
     }
 
-    public static string RunQuery(string fileName, string arguments)
+    public static string[] Capture(string fileName, string[] arguments)
     {
         using var process = Process.Start(
-            new ProcessStartInfo(fileName, arguments)
+            new ProcessStartInfo(fileName, string.Join(' ', arguments))
             {
                 RedirectStandardOutput = true
             })!;
 
-        var builder = new StringBuilder();
+        var lines = CaptureStandardOutput(process);
+
+        WaitForSuccess(process);
+
+        return lines;
+    }
+
+    private static string[] CaptureStandardOutput(Process process)
+    {
+        var lines = new List<string>();
         string? line;
 
         while ((line = process.StandardOutput.ReadLine()) != null)
         {
-            builder.AppendLine(line);
+            lines.Add(line);
         }
 
-        WaitForSuccess(process);
-
-        return builder.ToString().TrimEnd();
+        return lines.ToArray();
     }
 
     private static void WaitForSuccess(Process process)

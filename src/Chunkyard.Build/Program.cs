@@ -5,18 +5,15 @@ public static class Program
     private const string Solution = "src/Chunkyard.sln";
     private const string Configuration = "Release";
 
-    static Program()
+    public static int Main(string[] args)
     {
         Directory.SetCurrentDirectory(
-            GitQuery("rev-parse --show-toplevel"));
+            GitCapture("rev-parse --show-toplevel").First());
 
         Environment.SetEnvironmentVariable(
             "DOTNET_CLI_TELEMETRY_OPTOUT",
             "1");
-    }
 
-    public static int Main(string[] args)
-    {
         return new CommandHandler()
             .With<BuildCommand>(
                 new SimpleCommandParser(
@@ -54,12 +51,6 @@ public static class Program
     private static void Clean()
     {
         Announce("Cleanup");
-
-        if (GitQuery("status --porcelain").Contains("??"))
-        {
-            throw new InvalidOperationException(
-                "Found untracked files. Aborting cleanup");
-        }
 
         Git(
             "clean -dfx",
@@ -99,7 +90,7 @@ public static class Program
 
         foreach (var runtime in new[] { "linux-x64", "win-x64" })
         {
-            Announce($"Publish {runtime}");
+            Announce($"Publish {tag} ({runtime})");
 
             Dotnet(
                 "publish src/Chunkyard/Chunkyard.csproj",
@@ -129,7 +120,7 @@ public static class Program
     {
         Announce("Release");
 
-        var currentTag = GitQuery("describe --abbrev=0");
+        var currentTag = GitCapture("describe --abbrev=0").First();
         Console.WriteLine($"Current tag: {currentTag}");
         Console.Write("New tag: ");
         var newTag = Console.ReadLine()?.Trim();
@@ -145,7 +136,7 @@ public static class Program
     private static (string Tag, int Distance, string Commit) GitDescribe()
     {
         var match = Regex.Match(
-            GitQuery("describe --long"),
+            GitCapture("describe --long").First(),
             @"^(?<tag>.*)-(?<distance>\d+)-g(?<hash>[a-f0-9]+)$",
             RegexOptions.None,
             TimeSpan.FromSeconds(1));
@@ -159,17 +150,17 @@ public static class Program
 
     private static void Dotnet(params string[] arguments)
     {
-        ProcessUtils.Run("dotnet", string.Join(' ', arguments));
+        ProcessUtils.Run("dotnet", arguments);
     }
 
     private static void Git(params string[] arguments)
     {
-        ProcessUtils.Run("git", string.Join(' ', arguments));
+        ProcessUtils.Run("git", arguments);
     }
 
-    private static string GitQuery(params string[] arguments)
+    private static string[] GitCapture(params string[] arguments)
     {
-        return ProcessUtils.RunQuery("git", string.Join(' ', arguments));
+        return ProcessUtils.Capture("git", arguments);
     }
 
     private static void Announce(string text)
