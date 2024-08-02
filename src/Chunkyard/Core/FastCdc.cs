@@ -308,7 +308,7 @@ public sealed class FastCdc
         if (MaxSize - MinSize <= AvgSize)
         {
             throw new ArgumentException(
-                "Invariant violation: maxSize - minSize > avgSize");
+                $"Invariant violation: {nameof(maxSize)} - {nameof(minSize)} > {nameof(avgSize)}");
         }
 
         var bits = Logarithm2(AvgSize);
