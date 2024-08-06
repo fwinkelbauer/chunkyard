@@ -14,16 +14,6 @@ public sealed class CommandParser
     {
         _parsers = parsers.ToDictionary(p => p.Command, p => p);
         _infos = parsers.ToDictionary(p => p.Command, p => p.Info);
-
-        Add(
-            "version",
-            "Print version information",
-            new VersionCommand());
-
-        Add(
-            "help",
-            "Print all available commands",
-            new HelpCommand(_infos, Array.Empty<string>()));
     }
 
     public object Parse(params string[] args)
@@ -45,11 +35,5 @@ public sealed class CommandParser
                 _infos,
                 new[] { $"Unknown command: {arg.Command}" });
         }
-    }
-
-    private void Add(string command, string info, object result)
-    {
-        _parsers[command] = new SimpleCommandParser(command, info, result);
-        _infos[command] = info;
     }
 }

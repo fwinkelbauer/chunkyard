@@ -5,9 +5,6 @@ namespace Chunkyard.Cli;
 /// </summary>
 public class CommandHandler
 {
-    private const int ExitCodeOk = 0;
-    private const int ExitCodeError = 1;
-
     private readonly List<ICommandParser> _parsers;
     private readonly Dictionary<Type, Func<object, int>> _handlers;
 
@@ -15,10 +12,6 @@ public class CommandHandler
     {
         _parsers = new();
         _handlers = new();
-
-        Use<HelpCommand>(WriteHelp);
-        Use<VersionCommand>(WriteVersion);
-        Use<Exception>(WriteError);
     }
 
     public int Handle(params string[] args)
@@ -92,76 +85,12 @@ public class CommandHandler
         {
             handler(t);
 
-            return ExitCodeOk;
+            return 0;
         });
     }
 
     public CommandHandler Use<T>(Action handler)
     {
         return Use<T>(_ => handler());
-    }
-
-    private static int WriteError(Exception e)
-    {
-        Console.Error.WriteLine("Error:");
-
-        IEnumerable<Exception> exceptions = e is AggregateException a
-            ? a.InnerExceptions
-            : new[] { e };
-
-        foreach (var exception in exceptions)
-        {
-            Console.Error.WriteLine(exception.ToString());
-        }
-
-        return ExitCodeError;
-    }
-
-    private static int WriteHelp(HelpCommand c)
-    {
-        Console.Error.WriteLine();
-        Console.Error.WriteLine("Usage:");
-        Console.Error.WriteLine("  <command> <flags>");
-
-        if (c.Infos.Any())
-        {
-            Console.Error.WriteLine();
-            Console.Error.WriteLine("Help:");
-
-            foreach (var info in c.Infos.OrderBy(i => i.Key))
-            {
-                Console.Error.WriteLine($"  {info.Key}");
-                Console.Error.WriteLine($"    {info.Value}");
-            }
-        }
-
-        if (c.Errors.Any())
-        {
-            Console.Error.WriteLine();
-            Console.Error.WriteLine(c.Errors.Count == 1 ? "Error:" : "Errors:");
-
-            foreach (var error in c.Errors.OrderBy(e => e))
-            {
-                Console.Error.WriteLine($"  {error}");
-            }
-        }
-
-        Console.Error.WriteLine();
-
-        return ExitCodeError;
-    }
-
-    private static int WriteVersion()
-    {
-        var attribute = typeof(VersionCommand).Assembly
-            .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
-            .First();
-
-        var version = ((AssemblyInformationalVersionAttribute)attribute)
-            .InformationalVersion;
-
-        Console.Error.WriteLine(version);
-
-        return ExitCodeOk;
     }
 }

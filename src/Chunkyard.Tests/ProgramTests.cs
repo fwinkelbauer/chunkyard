@@ -14,10 +14,4 @@ public static class ProgramTests
     {
         Assert.Equal(1, Program.Main(args.Split(' ')));
     }
-
-    [Fact]
-    public static void Valid_Arguments_Return_ExitCode_Zero()
-    {
-        Assert.Equal(0, Program.Main(new[] { "version" }));
-    }
 }

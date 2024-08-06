@@ -8,21 +8,20 @@ public static class CommandParserTests
         var parser = new CommandParser(
             new[]
             {
-                new SimpleCommandParser("one", "info", "result-one"),
-                new SimpleCommandParser("two", "info", "result-two"),
-                new SimpleCommandParser("three", "info", "result-three")
+                new DummyCommandParser("one"),
+                new DummyCommandParser("two"),
+                new DummyCommandParser("three")
             });
 
-        Assert.Equal("result-one", parser.Parse("one"));
-        Assert.Equal("result-one", parser.Parse("one", "--help", "false"));
-        Assert.Equal("result-two", parser.Parse("two"));
-        Assert.Equal("result-three", parser.Parse("three"));
+        Assert.Equal("one", parser.Parse("one"));
+        Assert.Equal("one", parser.Parse("one", "--help", "false"));
+        Assert.Equal("two", parser.Parse("two"));
+        Assert.Equal("three", parser.Parse("three"));
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("unknown")]
-    [InlineData("help")]
     [InlineData("cmd --unknown value")]
     [InlineData("cmd --help")]
     [InlineData("cmd --help true")]
@@ -33,7 +32,7 @@ public static class CommandParserTests
         var parser = new CommandParser(
             new[]
             {
-                new SimpleCommandParser("cmd", "info", "the result")
+                new DummyCommandParser("cmd")
             });
 
         Assert.IsType<HelpCommand>(

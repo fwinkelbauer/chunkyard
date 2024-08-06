@@ -14,6 +14,8 @@ public static class Program
             .With<RestoreCommand>(new RestoreCommandParser(), Restore)
             .With<ShowCommand>(new ShowCommandParser(), Show)
             .With<StoreCommand>(new StoreCommandParser(), Store)
+            .Use<HelpCommand>(Help)
+            .Use<Exception>(Error)
             .Handle(args);
     }
 
@@ -122,6 +124,67 @@ public static class Program
                 c.BlobSystem,
                 c.Include);
         }
+    }
+
+    private static int Help(HelpCommand c)
+    {
+        Console.Error.WriteLine($"Chunkyard v{GetVersion()}");
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("Usage:");
+        Console.Error.WriteLine("  <command> <flags>");
+
+        if (c.Infos.Any())
+        {
+            Console.Error.WriteLine();
+            Console.Error.WriteLine("Help:");
+
+            foreach (var info in c.Infos.OrderBy(i => i.Key))
+            {
+                Console.Error.WriteLine($"  {info.Key}");
+                Console.Error.WriteLine($"    {info.Value}");
+            }
+        }
+
+        if (c.Errors.Any())
+        {
+            Console.Error.WriteLine();
+            Console.Error.WriteLine(c.Errors.Count == 1 ? "Error:" : "Errors:");
+
+            foreach (var error in c.Errors.OrderBy(e => e))
+            {
+                Console.Error.WriteLine($"  {error}");
+            }
+        }
+
+        Console.Error.WriteLine();
+
+        return 1;
+    }
+
+    private static int Error(Exception e)
+    {
+        Console.Error.WriteLine("Error:");
+
+        IEnumerable<Exception> exceptions = e is AggregateException a
+            ? a.InnerExceptions
+            : new[] { e };
+
+        foreach (var exception in exceptions)
+        {
+            Console.Error.WriteLine(exception.ToString());
+        }
+
+        return 1;
+    }
+
+    private static string GetVersion()
+    {
+        var attribute = typeof(Program).Assembly
+            .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
+            .First();
+
+        return ((AssemblyInformationalVersionAttribute)attribute)
+            .InformationalVersion;
     }
 
     private static void PrintDiff(DiffSet<Blob> diff)
