@@ -1,4 +1,4 @@
-namespace Chunkyard.Build;
+namespace Publish;
 
 /// <summary>
 /// A set of process related utility methods.

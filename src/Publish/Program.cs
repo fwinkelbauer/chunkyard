@@ -1,10 +1,7 @@
-namespace Chunkyard.Build;
+namespace Publish;
 
 public static class Program
 {
-    private const int ExitCodeOk = 0;
-    private const int ExitCodeError = 1;
-
     public static int Main(string[] args)
     {
         Directory.SetCurrentDirectory(
@@ -17,12 +14,12 @@ public static class Program
         try
         {
             Publish();
-            return ExitCodeOk;
+            return 0;
         }
         catch (Exception e)
         {
             Console.Error.WriteLine(e.ToString());
-            return ExitCodeError;
+            return 1;
         }
     }
 

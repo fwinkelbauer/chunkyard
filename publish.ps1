@@ -1,2 +1,2 @@
-dotnet run --project 'src/Chunkyard.Build/Chunkyard.Build.csproj' -- $args
+dotnet run --project 'src/Publish/Publish.csproj' -- $args
 exit $LASTEXITCODE
