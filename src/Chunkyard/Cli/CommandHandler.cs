@@ -29,40 +29,15 @@ public class CommandHandler
         }
     }
 
-    public CommandHandler With<T>(ICommandParser parser, Func<T, int> handler)
-    {
-        _parsers.Add(parser);
-
-        Use<T>(handler);
-
-        return this;
-    }
-
-    public CommandHandler With<T>(ICommandParser parser, Func<int> handler)
-    {
-        _parsers.Add(parser);
-
-        Use<T>(handler);
-
-        return this;
-    }
-
     public CommandHandler With<T>(ICommandParser parser, Action<T> handler)
     {
         _parsers.Add(parser);
 
-        Use<T>(handler);
-
-        return this;
-    }
-
-    public CommandHandler With<T>(ICommandParser parser, Action handler)
-    {
-        _parsers.Add(parser);
-
-        Use<T>(handler);
-
-        return this;
+        return Use<T>(t =>
+        {
+            handler(t);
+            return 0;
+        });
     }
 
     public CommandHandler Use<T>(Func<T, int> handler)
@@ -70,27 +45,5 @@ public class CommandHandler
         _handlers[typeof(T)] = o => handler((T)o);
 
         return this;
-    }
-
-    public CommandHandler Use<T>(Func<int> handler)
-    {
-        _handlers[typeof(T)] = _ => handler();
-
-        return this;
-    }
-
-    public CommandHandler Use<T>(Action<T> handler)
-    {
-        return Use<T>(t =>
-        {
-            handler(t);
-
-            return 0;
-        });
-    }
-
-    public CommandHandler Use<T>(Action handler)
-    {
-        return Use<T>(_ => handler());
     }
 }
