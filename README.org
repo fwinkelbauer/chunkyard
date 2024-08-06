@@ -35,20 +35,14 @@ sophisticated tools. Here's a list of [[https://github.com/restic/others][option
 * Build
 
 - Install the .NET SDK
-- Run ~./pls build~ to build and test Chunkyard
-
-~./pls~ runs the project [[./src/Chunkyard.Build/][src/Chunkyard.Build/]], a CLI tool which can be used to
-build, test and publish Chunkyard. You can type commands such as ~./pls help~ or
-~./pls build --help~ to learn more.
+- Run ~dotnet build src~ and ~dotnet test src~ to build and test Chunkyard
 
 * Publish
 
-- Commit all your work
-- Update the ~Tag~ variable in [[./src/Chunkyard.Build/Program.cs][Program.cs]] and run ~./pls release~ to create a
-  tagged release commit
-- Run ~git push --follow-tags~
-- Run ~./pls publish~ to create Linux and Windows binaries in the ~artifacts~
+- Run ~./publish~ to create Linux and Windows binaries in the ~artifacts~
   directory
+- Run ~git push --follow-tags~ if you have created a new tag in the previous
+  step
 
 * Usage
 

@@ -2,8 +2,8 @@ namespace Chunkyard.Build;
 
 public static class Program
 {
-    private const string Solution = "src/Chunkyard.sln";
-    private const string Configuration = "Release";
+    private const int ExitCodeOk = 0;
+    private const int ExitCodeError = 1;
 
     public static int Main(string[] args)
     {
@@ -14,77 +14,30 @@ public static class Program
             "DOTNET_CLI_TELEMETRY_OPTOUT",
             "1");
 
-        return new CommandHandler()
-            .With<BuildCommand>(
-                new SimpleCommandParser(
-                    "build",
-                    "Build the repository",
-                    new BuildCommand()),
-                Build)
-            .With<CheckCommand>(
-                new SimpleCommandParser(
-                    "check",
-                    "Check for dependency updates",
-                    new CheckCommand()),
-                Check)
-            .With<CleanCommand>(
-                new SimpleCommandParser(
-                    "clean",
-                    "Clean the repository",
-                    new CleanCommand()),
-                Clean)
-            .With<PublishCommand>(
-                new SimpleCommandParser(
-                    "publish",
-                    "Publish the main project",
-                    new PublishCommand()),
-                Publish)
-            .With<ReleaseCommand>(
-                new SimpleCommandParser(
-                    "release",
-                    "Create a release commit",
-                    new ReleaseCommand()),
-                Release)
-            .Handle(args);
-    }
-
-    private static void Clean()
-    {
-        Announce("Cleanup");
-
-        Git(
-            "clean -dfx",
-            $"-e *{typeof(Program).Namespace}",
-            "-e .vs/",
-            "-e launchSettings.json");
-    }
-
-    private static void Build()
-    {
-        Announce("Build");
-
-        Dotnet($"format {Solution} --verify-no-changes");
-
-        Dotnet(
-            $"build {Solution}",
-            $"-c {Configuration}",
-            "-warnaserror",
-            "--tl:auto");
-
-        Dotnet(
-            $"test {Solution}",
-            $"-c {Configuration}",
-            "--no-build",
-            "--nologo",
-            "--tl:auto");
+        try
+        {
+            Publish();
+            return ExitCodeOk;
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e.ToString());
+            return ExitCodeError;
+        }
     }
 
     private static void Publish()
     {
-        Clean();
         Build();
+        Release();
 
         var directory = "artifacts";
+
+        if (Directory.Exists(directory))
+        {
+            Directory.Delete(directory, true);
+        }
+
         var (tag, _, commit) = GitDescribe();
         var version = tag.TrimStart('v');
 
@@ -94,12 +47,12 @@ public static class Program
 
             Dotnet(
                 "publish src/Chunkyard/Chunkyard.csproj",
-                $"-c {Configuration}",
+                "-c Release",
                 $"-r {runtime}",
-                "--self-contained",
                 $"-o {directory}",
                 $"-p:Version={version}",
                 $"-p:SourceRevisionId={commit}",
+                "--self-contained",
                 "-p:PublishSingleFile=true",
                 "-p:PublishTrimmed=true",
                 "-p:DebugType=embedded",
@@ -108,21 +61,34 @@ public static class Program
         }
     }
 
-    private static void Check()
+    private static void Build()
     {
-        Announce("Check");
+        Announce("Build");
 
-        Dotnet($"restore {Solution} --tl:auto");
-        Dotnet($"list {Path.GetFullPath(Solution)} package --outdated");
+        var solution = "src/Chunkyard.sln";
+
+        Dotnet($"format {solution} --verify-no-changes");
+        Dotnet($"build {solution} -warnaserror --tl:auto");
+
+        Announce("Test");
+
+        Dotnet($"test {solution} --no-build");
     }
 
     private static void Release()
     {
+        var (currentTag, distance, _) = GitDescribe();
+
+        if (distance == 0)
+        {
+            return;
+        }
+
         Announce("Release");
 
-        var currentTag = GitCapture("describe --abbrev=0").First();
         Console.WriteLine($"Current tag: {currentTag}");
-        Console.Write("New tag: ");
+        Console.Write("Enter new tag. Leave empty to skip: ");
+
         var newTag = Console.ReadLine()?.Trim();
 
         if (string.IsNullOrEmpty(newTag))

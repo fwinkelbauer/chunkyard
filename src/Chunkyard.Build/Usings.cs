@@ -1,4 +1,3 @@
-global using Chunkyard.Cli;
 global using System;
 global using System.Collections.Generic;
 global using System.Diagnostics;
