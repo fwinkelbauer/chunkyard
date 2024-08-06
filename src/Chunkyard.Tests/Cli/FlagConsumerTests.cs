@@ -1,4 +1,4 @@
-namespace Chunkyard.Cli.Tests;
+namespace Chunkyard.Tests.Cli;
 
 public static class FlagConsumerTests
 {

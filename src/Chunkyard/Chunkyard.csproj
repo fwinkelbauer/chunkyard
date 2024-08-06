@@ -5,8 +5,4 @@
     <AssemblyName>chunkyard</AssemblyName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Chunkyard.Cli\Chunkyard.Cli.csproj" />
-  </ItemGroup>
-
 </Project>

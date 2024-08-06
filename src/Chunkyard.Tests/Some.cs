@@ -72,4 +72,15 @@ internal static class Some
             "chunkyard-test",
             Path.GetRandomFileName());
     }
+
+    public static Dictionary<string, IReadOnlyCollection<string>> Flags(
+        params (string Key, IReadOnlyCollection<string> Value)[] pairs)
+    {
+        return pairs.ToDictionary(p => p.Key, p => p.Value);
+    }
+
+    public static string[] Strings(params string[] values)
+    {
+        return values;
+    }
 }

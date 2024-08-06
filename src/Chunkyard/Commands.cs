@@ -291,6 +291,33 @@ public sealed class DiffCommand
     public Fuzzy Include { get; }
 }
 
+public sealed class HelpCommand
+{
+    public HelpCommand(
+        IReadOnlyDictionary<string, string> infos,
+        IReadOnlyCollection<string> errors)
+    {
+        Infos = infos;
+        Errors = errors;
+    }
+
+    public IReadOnlyDictionary<string, string> Infos { get; }
+
+    public IReadOnlyCollection<string> Errors { get; }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is HelpCommand other
+            && Infos.SequenceEqual(other.Infos)
+            && Errors.SequenceEqual(other.Errors);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Infos, Errors);
+    }
+}
+
 public sealed class KeepCommand
 {
     public KeepCommand(
@@ -399,6 +426,8 @@ public sealed class StoreCommand
 
     public bool Preview { get; }
 }
+
+public sealed class VersionCommand;
 
 public enum Prompt
 {
