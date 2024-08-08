@@ -30,16 +30,16 @@ public static class DiffSetTests
             newBlob
         };
 
-        var expectedDiff = new DiffSet<Blob>(
+        var expected = new DiffSet<Blob>(
             new[] { newBlob },
             new[] { changedBlob },
             new[] { removedBlob });
 
-        Assert.Equal(
-            expectedDiff,
-            DiffSet.Create(
-                first,
-                second,
-                br => br.Name));
+        var actual = DiffSet.Create(
+            first,
+            second,
+            br => br.Name);
+
+        Assert.Equal(expected, actual);
     }
 }

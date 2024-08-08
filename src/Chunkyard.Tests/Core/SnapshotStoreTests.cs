@@ -237,16 +237,16 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(blobs));
 
-        var actualDiff = snapshotStore.RestoreSnapshotPreview(
+        var expected = new DiffSet<Blob>(
+            blobs,
+            Array.Empty<Blob>(),
+            Array.Empty<Blob>());
+
+        var actual = snapshotStore.RestoreSnapshotPreview(
             Some.BlobSystem(),
             snapshotId);
 
-        Assert.Equal(
-            new DiffSet<Blob>(
-                blobs,
-                Array.Empty<Blob>(),
-                Array.Empty<Blob>()),
-            actualDiff);
+        Assert.Equal(expected, actual);
     }
 
     [Fact]

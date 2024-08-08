@@ -6,9 +6,10 @@ public static class ChunkIdTests
     public static void Compute_Creates_ChunkId_From_Chunk()
     {
         var chunk = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-        var expectedId = "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e";
 
-        Assert.Equal(expectedId, ChunkId.Compute(chunk));
+        Assert.Equal(
+            "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e",
+            ChunkId.Compute(chunk));
     }
 
     [Theory]
@@ -16,10 +17,10 @@ public static class ChunkIdTests
     [InlineData("badbadbad", false)]
     public static void Valid_Checks_Chunk_Validity_Using_ChunkId(
         string chunkId,
-        bool expectedValidity)
+        bool expected)
     {
         var chunk = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
 
-        Assert.Equal(expectedValidity, ChunkId.Valid(chunkId, chunk));
+        Assert.Equal(expected, ChunkId.Valid(chunkId, chunk));
     }
 }

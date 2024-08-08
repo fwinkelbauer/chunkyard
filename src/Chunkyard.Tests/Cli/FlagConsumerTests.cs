@@ -20,15 +20,15 @@ public static class FlagConsumerTests
     [Fact]
     public static void TryStrings_Returns_List_On_Non_Empty_Input()
     {
-        var expectedList = Some.Strings("one", "two");
+        var expected = Some.Strings("one", "two");
 
         var consumer = new FlagConsumer(
-            Some.Flags(("--list", expectedList)));
+            Some.Flags(("--list", expected)));
 
-        var success = consumer.TryStrings("--list", "info", out var actualList);
+        var success = consumer.TryStrings("--list", "info", out var actual);
 
         Assert.True(success);
-        Assert.Equal(expectedList, actualList);
+        Assert.Equal(expected, actual);
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public static class FlagConsumerTests
     [Fact]
     public static void TryString_Returns_Default_On_Empty_Optional_Input()
     {
-        var expectedValue = "default value";
+        var expected = "default value";
 
         var consumer = new FlagConsumer(
             Some.Flags());
@@ -54,10 +54,10 @@ public static class FlagConsumerTests
             "--some",
             "info",
             out var actual,
-            expectedValue);
+            expected);
 
         Assert.True(success);
-        Assert.Equal(expectedValue, actual);
+        Assert.Equal(expected, actual);
     }
 
     [Fact]

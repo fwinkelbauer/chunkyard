@@ -29,13 +29,13 @@ public abstract class BlobSystemTests
     public void BlobSystem_Can_Read_Write()
     {
         var blob = Some.Blob("some blob");
-        var expectedBytes = new byte[] { 0x12, 0x34 };
+        var expected = new byte[] { 0x12, 0x34 };
 
         Assert.False(BlobSystem.BlobExists(blob.Name));
 
         using (var writeStream = BlobSystem.OpenWrite(blob))
         {
-            writeStream.Write(expectedBytes);
+            writeStream.Write(expected);
         }
 
         Assert.True(BlobSystem.BlobExists(blob.Name));
@@ -49,7 +49,7 @@ public abstract class BlobSystemTests
             BlobSystem.ListBlobs());
 
         Assert.Equal(
-            expectedBytes,
+            expected,
             StreamUtils.AsBytes(() => BlobSystem.OpenRead(blob.Name)));
     }
 
