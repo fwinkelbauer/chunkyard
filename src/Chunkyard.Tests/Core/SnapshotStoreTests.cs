@@ -123,10 +123,10 @@ public static class SnapshotStoreTests
 
         Missing(repository.Chunks, repository.Chunks.UnorderedList());
 
-        Assert.ThrowsAny<Exception>(
+        Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(snapshotId));
 
-        Assert.ThrowsAny<Exception>(
+        Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotValid(snapshotId));
     }
 
@@ -463,11 +463,12 @@ public static class SnapshotStoreTests
         }
     }
 
-    private static Dictionary<Blob, byte[]> ToDictionary(
+    private static Dictionary<Blob, string> ToDictionary(
         IBlobSystem blobSystem)
     {
         return blobSystem.ListBlobs().ToDictionary(
             blob => blob,
-            blob => StreamUtils.AsBytes(() => blobSystem.OpenRead(blob.Name)));
+            blob => Convert.ToHexString(
+                StreamUtils.AsBytes(() => blobSystem.OpenRead(blob.Name))));
     }
 }

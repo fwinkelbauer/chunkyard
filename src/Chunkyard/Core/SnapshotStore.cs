@@ -479,6 +479,12 @@ public sealed class SnapshotStore
                     $"Could not decrypt chunk: {chunkId}",
                     e);
             }
+            catch (Exception e)
+            {
+                throw new ChunkyardException(
+                    $"Could not restore chunk: {chunkId}",
+                    e);
+            }
         }
     }
 

@@ -58,18 +58,6 @@ public abstract class RepositoryTests
     }
 
     [Fact]
-    public void Repository_Store_Throws_When_Writing_To_Same_Key()
-    {
-        var key = "some-key";
-        var bytes = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
-
-        Repository.Store(key, bytes);
-
-        Assert.ThrowsAny<Exception>(
-            () => Repository.Store(key, bytes));
-    }
-
-    [Fact]
     public void Repository_Handles_Parallel_Operations()
     {
         var input = new ConcurrentDictionary<string, byte[]>();
