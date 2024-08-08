@@ -25,6 +25,7 @@ public static class Program
 
     private static void Publish()
     {
+        Clean();
         Build();
         Release();
 
@@ -58,17 +59,32 @@ public static class Program
         }
     }
 
+    private static void Clean()
+    {
+        Announce("Cleanup");
+
+        if (GitCapture("status --porcelain").Contains("??"))
+        {
+            throw new InvalidOperationException(
+                "Found untracked files. Aborting cleanup");
+        }
+
+        Git(
+            "clean -dfx",
+            $"-e *{typeof(Program).Namespace}",
+            "-e .vs/",
+            "-e launchSettings.json");
+    }
+
     private static void Build()
     {
-        Announce("Build");
-
         var solution = "src/Chunkyard.sln";
 
+        Announce("Build");
         Dotnet($"format {solution} --verify-no-changes");
         Dotnet($"build {solution} -warnaserror --tl:auto");
 
         Announce("Test");
-
         Dotnet($"test {solution} --no-build");
     }
 
