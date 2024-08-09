@@ -378,12 +378,12 @@ public static class SnapshotStoreTests
         snapshotStore.CopyTo(otherRepository);
 
         Assert.Equal(
-            repository.Chunks.UnorderedList().OrderBy(k => k),
-            otherRepository.Chunks.UnorderedList().OrderBy(k => k));
+            repository.Chunks.UnorderedList().ToHashSet(),
+            otherRepository.Chunks.UnorderedList().ToHashSet());
 
         Assert.Equal(
-            repository.Snapshots.UnorderedList().OrderBy(k => k),
-            otherRepository.Snapshots.UnorderedList().OrderBy(k => k));
+            repository.Snapshots.UnorderedList().ToHashSet(),
+            otherRepository.Snapshots.UnorderedList().ToHashSet());
     }
 
     [Fact]
