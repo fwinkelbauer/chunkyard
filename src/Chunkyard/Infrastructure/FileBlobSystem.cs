@@ -95,7 +95,7 @@ public sealed class FileBlobSystem : IBlobSystem
         }
         else
         {
-            throw new IOException($"Path does not exist: {path}");
+            return Array.Empty<string>();
         }
     }
 
