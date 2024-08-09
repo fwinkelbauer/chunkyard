@@ -399,9 +399,7 @@ public static class SnapshotStoreTests
         snapshotStore.CopyTo(otherRepository, 1);
 
         Assert.Single(otherSnapshotStore.ListSnapshotIds());
-
-        Assert.True(
-            otherSnapshotStore.CheckSnapshotValid(snapshotId));
+        Assert.True(otherSnapshotStore.CheckSnapshotValid(snapshotId));
     }
 
     [Fact]
