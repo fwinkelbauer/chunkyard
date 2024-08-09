@@ -203,7 +203,7 @@ public static class SnapshotStoreTests
 
         var outputBlobSystem = Some.BlobSystem(
             Some.Blobs("blob to update"),
-            _ => new byte[] { 0x02 });
+            _ => new byte[] { 0x01, 0x02 });
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
         snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
@@ -468,7 +468,14 @@ public static class SnapshotStoreTests
     {
         return blobSystem.ListBlobs().ToDictionary(
             blob => blob,
-            blob => Convert.ToHexString(
-                StreamUtils.AsBytes(() => blobSystem.OpenRead(blob.Name))));
+            blob =>
+            {
+                using var memoryStream = new MemoryStream();
+                using var blobStream = blobSystem.OpenRead(blob.Name);
+
+                blobStream.CopyTo(memoryStream);
+
+                return Convert.ToHexString(memoryStream.ToArray());
+            });
     }
 }
