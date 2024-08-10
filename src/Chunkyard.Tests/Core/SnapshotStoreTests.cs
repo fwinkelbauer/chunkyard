@@ -398,7 +398,10 @@ public static class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
         snapshotStore.CopyTo(otherRepository, 1);
 
-        Assert.Single(otherSnapshotStore.ListSnapshotIds());
+        Assert.Equal(
+            new[] { snapshotId },
+            otherSnapshotStore.ListSnapshotIds());
+
         Assert.True(otherSnapshotStore.CheckSnapshotValid(snapshotId));
     }
 
