@@ -16,17 +16,10 @@ public class CommandHandler
 
     public int Handle(params string[] args)
     {
-        try
-        {
-            var parser = new CommandParser(_parsers);
-            var command = parser.Parse(args);
+        var parser = new CommandParser(_parsers);
+        var command = parser.Parse(args);
 
-            return _handlers[command.GetType()](command);
-        }
-        catch (Exception e)
-        {
-            return _handlers[typeof(Exception)](e);
-        }
+        return _handlers[command.GetType()](command);
     }
 
     public CommandHandler With<T>(ICommandParser parser, Action<T> handler)

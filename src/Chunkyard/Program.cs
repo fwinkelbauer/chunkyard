@@ -4,19 +4,25 @@ public static class Program
 {
     public static int Main(string[] args)
     {
-        return new CommandHandler()
-            .With<CheckCommand>(new CheckCommandParser(), Check)
-            .With<CopyCommand>(new CopyCommandParser(), Copy)
-            .With<DiffCommand>(new DiffCommandParser(), Diff)
-            .With<KeepCommand>(new KeepCommandParser(), Keep)
-            .With<ListCommand>(new ListCommandParser(), List)
-            .With<RemoveCommand>(new RemoveCommandParser(), Remove)
-            .With<RestoreCommand>(new RestoreCommandParser(), Restore)
-            .With<ShowCommand>(new ShowCommandParser(), Show)
-            .With<StoreCommand>(new StoreCommandParser(), Store)
-            .Use<HelpCommand>(Help)
-            .Use<Exception>(Error)
-            .Handle(args);
+        try
+        {
+            return new CommandHandler()
+                .With<CheckCommand>(new CheckCommandParser(), Check)
+                .With<CopyCommand>(new CopyCommandParser(), Copy)
+                .With<DiffCommand>(new DiffCommandParser(), Diff)
+                .With<KeepCommand>(new KeepCommandParser(), Keep)
+                .With<ListCommand>(new ListCommandParser(), List)
+                .With<RemoveCommand>(new RemoveCommandParser(), Remove)
+                .With<RestoreCommand>(new RestoreCommandParser(), Restore)
+                .With<ShowCommand>(new ShowCommandParser(), Show)
+                .With<StoreCommand>(new StoreCommandParser(), Store)
+                .Use<HelpCommand>(Help)
+                .Handle(args);
+        }
+        catch (Exception e)
+        {
+            return Error(e);
+        }
     }
 
     private static void Check(CheckCommand c)
