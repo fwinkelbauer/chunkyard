@@ -1,9 +1,10 @@
 namespace Chunkyard.Tests.Cli;
 
-public static class CommandParserTests
+[TestClass]
+public sealed class CommandParserTests
 {
-    [Fact]
-    public static void Parse_Dispatches_To_Correct_Parser()
+    [TestMethod]
+    public void Parse_Dispatches_To_Correct_Parser()
     {
         var parser = new CommandParser(
             new[]
@@ -13,20 +14,20 @@ public static class CommandParserTests
                 new DummyCommandParser("three")
             });
 
-        Assert.Equal("one", parser.Parse("one"));
-        Assert.Equal("one", parser.Parse("one", "--help", "false"));
-        Assert.Equal("two", parser.Parse("two"));
-        Assert.Equal("three", parser.Parse("three"));
+        Assert.AreEqual("one", parser.Parse("one"));
+        Assert.AreEqual("one", parser.Parse("one", "--help", "false"));
+        Assert.AreEqual("two", parser.Parse("two"));
+        Assert.AreEqual("three", parser.Parse("three"));
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("unknown")]
-    [InlineData("cmd --unknown value")]
-    [InlineData("cmd --help")]
-    [InlineData("cmd --help true")]
-    [InlineData("cmd --help invalid")]
-    public static void Parse_Returns_Help_For_Unknown_Invalid_Or_Help_Command(
+    [TestMethod]
+    [DataRow("")]
+    [DataRow("unknown")]
+    [DataRow("cmd --unknown value")]
+    [DataRow("cmd --help")]
+    [DataRow("cmd --help true")]
+    [DataRow("cmd --help invalid")]
+    public void Parse_Returns_Help_For_Unknown_Invalid_Or_Help_Command(
         string args)
     {
         var parser = new CommandParser(
@@ -35,7 +36,7 @@ public static class CommandParserTests
                 new DummyCommandParser("cmd")
             });
 
-        Assert.IsType<HelpCommand>(
+        Assert.IsInstanceOfType<HelpCommand>(
             parser.Parse(args.Split(' ')));
     }
 }

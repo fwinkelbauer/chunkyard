@@ -1,9 +1,10 @@
 namespace Chunkyard.Tests.Core;
 
-public static class SerializeTests
+[TestClass]
+public sealed class SerializeTests
 {
-    [Fact]
-    public static void Serialize_Can_Convert_Snapshot()
+    [TestMethod]
+    public void Serialize_Can_Convert_Snapshot()
     {
         var date = DateTime.Parse("2024-06-07T12:06:43.6536137Z")
             .ToUniversalTime();
@@ -20,11 +21,11 @@ public static class SerializeTests
         var actual = Serialize.BytesToSnapshot(
             Serialize.SnapshotToBytes(expected));
 
-        Assert.Equal(expected, actual);
+        Assert.AreEqual(expected, actual);
     }
 
-    [Fact]
-    public static void Serialize_Can_Convert_SnapshotReference()
+    [TestMethod]
+    public void Serialize_Can_Convert_SnapshotReference()
     {
         var expected = new SnapshotReference(
             new byte[] { 158, 128, 181, 90, 139, 201, 73, 163, 30, 55, 127, 23 },
@@ -34,11 +35,11 @@ public static class SerializeTests
         var actual = Serialize.BytesToSnapshotReference(
             Serialize.SnapshotReferenceToBytes(expected));
 
-        Assert.Equal(expected, actual);
+        Assert.AreEqual(expected, actual);
     }
 
-    [Fact]
-    public static void Serialize_Respects_Serialized_Snapshot()
+    [TestMethod]
+    public void Serialize_Respects_Serialized_Snapshot()
     {
         var date = DateTime.Parse("2024-06-07T12:06:43.6536137Z")
             .ToUniversalTime();
@@ -72,13 +73,13 @@ public static class SerializeTests
         var actual = Serialize.BytesToSnapshot(
             Encoding.UTF8.GetBytes(json));
 
-        Assert.True(
+        Assert.IsTrue(
             expected.Equals(actual),
             "Backups of previous Chunkyard versions cannot be read");
     }
 
-    [Fact]
-    public static void Serialize_Respects_Serialized_SnapshotReference()
+    [TestMethod]
+    public void Serialize_Respects_Serialized_SnapshotReference()
     {
         var expected = new SnapshotReference(
             new byte[] { 158, 128, 181, 90, 139, 201, 73, 163, 30, 55, 127, 23 },
@@ -98,7 +99,7 @@ public static class SerializeTests
         var actual = Serialize.BytesToSnapshotReference(
             Encoding.UTF8.GetBytes(json));
 
-        Assert.True(
+        Assert.IsTrue(
             expected.Equals(actual),
             "Backups of previous Chunkyard versions cannot be read");
     }

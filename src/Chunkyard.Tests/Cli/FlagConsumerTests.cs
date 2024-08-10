@@ -1,9 +1,10 @@
 namespace Chunkyard.Tests.Cli;
 
-public static class FlagConsumerTests
+[TestClass]
+public sealed class FlagConsumerTests
 {
-    [Fact]
-    public static void TryStrings_Returns_Empty_List_On_Empty_Input()
+    [TestMethod]
+    public void TryStrings_Returns_Empty_List_On_Empty_Input()
     {
         var consumer = new FlagConsumer(
             Some.Flags());
@@ -13,12 +14,12 @@ public static class FlagConsumerTests
             "info",
             out var list);
 
-        Assert.True(success);
-        Assert.Empty(list);
+        Assert.IsTrue(success);
+        Assert.IsFalse(list.Any());
     }
 
-    [Fact]
-    public static void TryStrings_Returns_List_On_Non_Empty_Input()
+    [TestMethod]
+    public void TryStrings_Returns_List_On_Non_Empty_Input()
     {
         var expected = Some.Strings("one", "two");
 
@@ -27,23 +28,23 @@ public static class FlagConsumerTests
 
         var success = consumer.TryStrings("--list", "info", out var actual);
 
-        Assert.True(success);
-        Assert.Equal(expected, actual);
+        Assert.IsTrue(success);
+        CollectionAssert.AreEqual(expected, actual);
     }
 
-    [Fact]
-    public static void TryString_Returns_Nothing_On_Empty_Required_Input()
+    [TestMethod]
+    public void TryString_Returns_Nothing_On_Empty_Required_Input()
     {
         var consumer = new FlagConsumer(
             Some.Flags());
 
         var success = consumer.TryString("--some", "info", out _);
 
-        Assert.False(success);
+        Assert.IsFalse(success);
     }
 
-    [Fact]
-    public static void TryString_Returns_Default_On_Empty_Optional_Input()
+    [TestMethod]
+    public void TryString_Returns_Default_On_Empty_Optional_Input()
     {
         var expected = "default value";
 
@@ -56,146 +57,146 @@ public static class FlagConsumerTests
             out var actual,
             expected);
 
-        Assert.True(success);
-        Assert.Equal(expected, actual);
+        Assert.IsTrue(success);
+        Assert.AreEqual(expected, actual);
     }
 
-    [Fact]
-    public static void TryString_Returns_Last_String_On_Non_Empty_Input()
+    [TestMethod]
+    public void TryString_Returns_Last_String_On_Non_Empty_Input()
     {
         var consumer = new FlagConsumer(
             Some.Flags(("--value", Some.Strings("one", "two"))));
 
         var success = consumer.TryString("--value", "info", out var actual);
 
-        Assert.True(success);
-        Assert.Equal("two", actual);
+        Assert.IsTrue(success);
+        Assert.AreEqual("two", actual);
     }
 
-    [Fact]
-    public static void TryBool_Returns_False_On_Empty_Input()
+    [TestMethod]
+    public void TryBool_Returns_False_On_Empty_Input()
     {
         var consumer = new FlagConsumer(
             Some.Flags());
 
         var success = consumer.TryBool("--bool", "info", out var actual);
 
-        Assert.True(success);
-        Assert.False(actual);
+        Assert.IsTrue(success);
+        Assert.IsFalse(actual);
     }
 
-    [Fact]
-    public static void TryBool_Returns_True_On_Empty_Flag()
+    [TestMethod]
+    public void TryBool_Returns_True_On_Empty_Flag()
     {
         var consumer = new FlagConsumer(
             Some.Flags(("--bool", Some.Strings())));
 
         var success = consumer.TryBool("--bool", "info", out var actual);
 
-        Assert.True(success);
-        Assert.True(actual);
+        Assert.IsTrue(success);
+        Assert.IsTrue(actual);
     }
 
-    [Fact]
-    public static void TryBool_Returns_False_On_Invalid_Input()
+    [TestMethod]
+    public void TryBool_Returns_False_On_Invalid_Input()
     {
         var consumer = new FlagConsumer(
             Some.Flags(("--bool", Some.Strings("not-a-bool"))));
 
         var success = consumer.TryBool("--bool", "info", out _);
 
-        Assert.False(success);
+        Assert.IsFalse(success);
     }
 
-    [Theory]
-    [InlineData("true", true)]
-    [InlineData("TrUe", true)]
-    [InlineData("false", false)]
-    [InlineData("FALSE", false)]
-    public static void TryBool_Ignores_Case(string arg, bool expected)
+    [TestMethod]
+    [DataRow("true", true)]
+    [DataRow("TrUe", true)]
+    [DataRow("false", false)]
+    [DataRow("FALSE", false)]
+    public void TryBool_Ignores_Case(string arg, bool expected)
     {
         var consumer = new FlagConsumer(
             Some.Flags(("--bool", Some.Strings(arg))));
 
         var success = consumer.TryBool("--bool", "info", out var actual);
 
-        Assert.True(success);
-        Assert.Equal(expected, actual);
+        Assert.IsTrue(success);
+        Assert.AreEqual(expected, actual);
     }
 
-    [Theory]
-    [InlineData("Monday", Day.Monday)]
-    [InlineData("monday", Day.Monday)]
-    [InlineData("TUESDAY", Day.Tuesday)]
-    public static void TryEnum_Ignores_Case(string arg, Day expected)
+    [TestMethod]
+    [DataRow("Monday", Day.Monday)]
+    [DataRow("monday", Day.Monday)]
+    [DataRow("TUESDAY", Day.Tuesday)]
+    public void TryEnum_Ignores_Case(string arg, Day expected)
     {
         var consumer = new FlagConsumer(
             Some.Flags(("--enum", Some.Strings(arg))));
 
         var success = consumer.TryEnum<Day>("--enum", "info", out var actual);
 
-        Assert.True(success);
-        Assert.Equal(expected, actual);
+        Assert.IsTrue(success);
+        Assert.AreEqual(expected, actual);
     }
 
-    [Fact]
-    public static void NoHelp_Returns_True_If_No_Issues()
+    [TestMethod]
+    public void NoHelp_Returns_True_If_No_Issues()
     {
         var consumer = new FlagConsumer(
             Some.Flags(("--list", Some.Strings())));
 
-        Assert.True(consumer.TryStrings("--list", "info", out _));
-        Assert.True(consumer.NoHelp(out _));
+        Assert.IsTrue(consumer.TryStrings("--list", "info", out _));
+        Assert.IsTrue(consumer.NoHelp(out _));
     }
 
-    [Fact]
-    public static void NoHelp_Returns_True_If_Not_Requested()
+    [TestMethod]
+    public void NoHelp_Returns_True_If_Not_Requested()
     {
         var consumer = new FlagConsumer(
             Some.Flags(("--help", Some.Strings("false"))));
 
-        Assert.True(consumer.NoHelp(out _));
+        Assert.IsTrue(consumer.NoHelp(out _));
     }
 
-    [Fact]
-    public static void NoHelp_Returns_False_If_Requested()
+    [TestMethod]
+    public void NoHelp_Returns_False_If_Requested()
     {
-        Assert.False(new FlagConsumer(Some.Flags(("--help", Some.Strings())))
+        Assert.IsFalse(new FlagConsumer(Some.Flags(("--help", Some.Strings())))
             .NoHelp(out _));
 
-        Assert.False(new FlagConsumer(Some.Flags(("--help", Some.Strings("true"))))
+        Assert.IsFalse(new FlagConsumer(Some.Flags(("--help", Some.Strings("true"))))
             .NoHelp(out _));
 
-        Assert.False(new FlagConsumer(Some.Flags(("--help", Some.Strings("not-a-bool"))))
+        Assert.IsFalse(new FlagConsumer(Some.Flags(("--help", Some.Strings("not-a-bool"))))
             .NoHelp(out _));
     }
 
-    [Fact]
-    public static void NoHelp_Returns_False_On_Unconsumed_Arguments()
+    [TestMethod]
+    public void NoHelp_Returns_False_On_Unconsumed_Arguments()
     {
         var consumer = new FlagConsumer(
             Some.Flags(("--list", Some.Strings("element"))));
 
-        Assert.False(consumer.NoHelp(out _));
+        Assert.IsFalse(consumer.NoHelp(out _));
     }
 
-    [Fact]
-    public static void NoHelp_Returns_False_On_Invalid_Arguments()
+    [TestMethod]
+    public void NoHelp_Returns_False_On_Invalid_Arguments()
     {
         var consumer = new FlagConsumer(
             Some.Flags(("--bool", Some.Strings("not-a-bool"))));
 
-        Assert.False(consumer.TryBool("--bool", "info", out _));
-        Assert.False(consumer.NoHelp(out _));
+        Assert.IsFalse(consumer.TryBool("--bool", "info", out _));
+        Assert.IsFalse(consumer.NoHelp(out _));
     }
 
-    [Fact]
-    public static void NoHelp_Returns_False_On_Missing_Arguments()
+    [TestMethod]
+    public void NoHelp_Returns_False_On_Missing_Arguments()
     {
         var consumer = new FlagConsumer(Some.Flags());
 
-        Assert.False(consumer.TryString("--some", "info", out _));
-        Assert.False(consumer.NoHelp(out _));
+        Assert.IsFalse(consumer.TryString("--some", "info", out _));
+        Assert.IsFalse(consumer.NoHelp(out _));
     }
 
     public enum Day
