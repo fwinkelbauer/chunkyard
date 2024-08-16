@@ -1,12 +1,11 @@
 namespace Chunkyard.Tests.Core;
 
-[TestClass]
-public sealed class CryptoTests
+public static class CryptoTests
 {
-    [TestMethod]
-    [DataRow("Hello!")]
-    [DataRow("")]
-    public void Encrypt_And_Decrypt_Return_Input(string input)
+    [Theory]
+    [InlineData("Hello!")]
+    [InlineData("")]
+    public static void Encrypt_And_Decrypt_Return_Input(string input)
     {
         var crypto = Some.Crypto("secret");
 
@@ -18,12 +17,12 @@ public sealed class CryptoTests
 
         var decrypted = crypto.Decrypt(encrypted);
 
-        CollectionAssert.AreNotEqual(plain, encrypted);
-        CollectionAssert.AreEqual(plain, decrypted);
+        Assert.NotEqual(plain, encrypted);
+        Assert.Equal(plain, decrypted);
     }
 
-    [TestMethod]
-    public void Decrypt_Throws_Given_Wrong_Key()
+    [Fact]
+    public static void Decrypt_Throws_Given_Wrong_Key()
     {
         var someCrypto = Some.Crypto("some secret");
         var otherCrypto = Some.Crypto("other secret");
@@ -32,14 +31,14 @@ public sealed class CryptoTests
             Some.World.GenerateNonce(),
             "Hello!"u8);
 
-        Assert.ThrowsException<AuthenticationTagMismatchException>(
+        Assert.Throws<AuthenticationTagMismatchException>(
             () => otherCrypto.Decrypt(encrypted));
     }
 
-    [TestMethod]
-    public void Constructor_Throws_On_EmptyPassword()
+    [Fact]
+    public static void Constructor_Throws_On_EmptyPassword()
     {
-        Assert.ThrowsException<ArgumentException>(
+        Assert.Throws<ArgumentException>(
             () => Some.Crypto(""));
     }
 }

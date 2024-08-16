@@ -1,10 +1,9 @@
 namespace Chunkyard.Tests.Core;
 
-[TestClass]
-public sealed class DiffSetTests
+public static class DiffSetTests
 {
-    [TestMethod]
-    public void DiffSet_Outlines_Differences_Between_Collections()
+    [Fact]
+    public static void DiffSet_Outlines_Differences_Between_Collections()
     {
         var date = DateTime.UtcNow;
         var unchangedBlob = new Blob("some blob", date);
@@ -41,6 +40,6 @@ public sealed class DiffSetTests
             second,
             br => br.Name);
 
-        Assert.AreEqual(expected, actual);
+        Assert.Equal(expected, actual);
     }
 }

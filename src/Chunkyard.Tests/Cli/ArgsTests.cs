@@ -1,20 +1,19 @@
 namespace Chunkyard.Tests.Cli;
 
-[TestClass]
-public sealed class ArgsTests
+public static class ArgsTests
 {
-    [TestMethod]
-    public void Parse_Treats_Single_Argument_As_Command()
+    [Fact]
+    public static void Parse_Treats_Single_Argument_As_Command()
     {
         var expected = new Args("help", Some.Flags());
 
         var actual = Args.Parse("help");
 
-        Assert.AreEqual(expected, actual);
+        Assert.Equal(expected, actual);
     }
 
-    [TestMethod]
-    public void Parse_Distinguishes_Between_Flags_And_Values()
+    [Fact]
+    public static void Parse_Distinguishes_Between_Flags_And_Values()
     {
         var expected = new Args(
             "list",
@@ -32,18 +31,18 @@ public sealed class ArgsTests
             "--preview",
             "--force");
 
-        Assert.AreEqual(expected, actual);
+        Assert.Equal(expected, actual);
     }
 
-    [TestMethod]
-    public void Parse_Must_Have_Flag_To_Accept_Values()
+    [Fact]
+    public static void Parse_Must_Have_Flag_To_Accept_Values()
     {
-        Assert.IsNull(Args.Parse("help", "bad-value", "--version"));
+        Assert.Null(Args.Parse("help", "bad-value", "--version"));
     }
 
-    [TestMethod]
-    public void Parse_Treats_Empty_Arguments_As_Error()
+    [Fact]
+    public static void Parse_Treats_Empty_Arguments_As_Error()
     {
-        Assert.IsNull(Args.Parse());
+        Assert.Null(Args.Parse());
     }
 }
