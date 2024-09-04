@@ -1,9 +1,2 @@
-try {
-    Push-Location $PSScriptRoot
-    dotnet run --project 'src/Publish/Publish.csproj' -- $args
-}
-finally {
-    Pop-Location
-}
-
+dotnet run --project "$PSScriptRoot/src/Publish/Publish.csproj" -- $args
 exit $LASTEXITCODE

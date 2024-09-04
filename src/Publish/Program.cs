@@ -4,8 +4,11 @@ public static class Program
 {
     public static int Main()
     {
+        var assemblyDirectory = Path.GetDirectoryName(
+            Assembly.GetExecutingAssembly().Location);
+
         Directory.SetCurrentDirectory(
-            GitCapture("rev-parse --show-toplevel").First());
+            GitCapture($"-C {assemblyDirectory} rev-parse --show-toplevel").First());
 
         Environment.SetEnvironmentVariable(
             "DOTNET_CLI_TELEMETRY_OPTOUT",

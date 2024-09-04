@@ -2,6 +2,4 @@
 
 script=$(readlink -f "${BASH_SOURCE[0]}")
 directory=$(dirname "$script")
-cd "$directory"
-
-dotnet run --project 'src/Publish/Publish.csproj' -- "$@"
+dotnet run --project "$directory/src/Publish/Publish.csproj" -- "$@"
