@@ -57,6 +57,17 @@ public static class Program
                 "-p:ContinuousIntegrationBuild=true",
                 "--tl:auto");
         }
+
+        Announce($"Publish {tag} (dotnet tools)");
+
+        Dotnet(
+            "pack src/Chunkyard/Chunkyard.csproj",
+            "-c Release",
+            $"-o {directory}",
+            $"-p:Version={version}",
+            $"-p:SourceRevisionId={commit}",
+            "-p:ContinuousIntegrationBuild=true",
+            "--tl:auto");
     }
 
     private static void Clean()

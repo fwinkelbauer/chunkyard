@@ -3,6 +3,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>chunkyard</AssemblyName>
+    <Authors>Florian Winkelbauer</Authors>
+    <Description>A backup tool</Description>
+    <RepositoryUrl>https://github.com/fwinkelbauer/chunkyard</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackAsTool>True</PackAsTool>
   </PropertyGroup>
 
 </Project>
