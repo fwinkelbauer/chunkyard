@@ -9,6 +9,11 @@ The [[https://www.usenix.org/system/files/conference/atc16/atc16-paper-xia.pdf][
 I am building Chunkyard for myself. You might want to consider more
 sophisticated tools. Here's a list of [[https://github.com/restic/others][options]].
 
+You can install Chunkyard by:
+
+- Downloading a release (no dependencies required)
+- Installing it as a [[https://www.nuget.org/packages/chunkyard][dotnet tool]]
+
 * Goals
 
 - Cross platform support. Chunkyard is shipped as two binaries ~chunkyard~
