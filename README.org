@@ -54,7 +54,7 @@ Example:
 
 #+begin_src sh
 # List all available commands
-chunkyard help
+chunkyard
 
 # Learn more about the store command
 chunkyard store --help
@@ -63,17 +63,19 @@ chunkyard store --help
 chunkyard store --repository 'MyBackup' --paths 'Music' 'Pictures' 'Videos' --preview
 
 # Store a backup
-chunkyard store --repository 'MyBackup' --paths 'Music' 'Pictures' 'Videos' --include '!Desktop\.ini' '!thumbs\.db'
+chunkyard store --repository 'MyBackup' --paths 'Music' 'Pictures' 'Videos' --includes '!Desktop\.ini' '!thumbs\.db'
 
 # Check if the latest backup is valid
 chunkyard check --repository 'MyBackup'
 
 # Restore parts of the latest backup
-chunkyard restore --repository 'MyBackup' --destination '.' --include 'mp3$'
+chunkyard restore --repository 'MyBackup' --directory '.' --includes 'mp3$'
 
 # Keep the latest four backups
 chunkyard keep --repository 'MyBackup' --latest '4'
 #+end_src
+
+You can find examples of how I use Chunkyard in my [[https://github.com/fwinkelbauer/dotfiles][dotfiles]].
 
 * Architecture
 
