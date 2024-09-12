@@ -169,16 +169,7 @@ public static class Program
 
     private static int Error(Exception e)
     {
-        Console.Error.WriteLine("Error:");
-
-        IEnumerable<Exception> exceptions = e is AggregateException a
-            ? a.InnerExceptions
-            : new[] { e };
-
-        foreach (var exception in exceptions)
-        {
-            Console.Error.WriteLine(exception.ToString());
-        }
+        Console.Error.WriteLine(e);
 
         return 1;
     }
