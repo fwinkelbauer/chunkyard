@@ -4,7 +4,7 @@ namespace Chunkyard.Cli;
 /// A class to encapsulate usage and error information when dealing with command
 /// line arguments.
 /// </summary>
-public sealed class HelpCommand
+public sealed class HelpCommand : ICommand
 {
     public HelpCommand(
         IReadOnlyDictionary<string, string> infos,
@@ -18,15 +18,48 @@ public sealed class HelpCommand
 
     public IReadOnlyCollection<string> Errors { get; }
 
-    public override bool Equals(object? obj)
+    public int Run()
     {
-        return obj is HelpCommand other
-            && Infos.SequenceEqual(other.Infos)
-            && Errors.SequenceEqual(other.Errors);
+        Console.Error.WriteLine($"Chunkyard v{GetVersion()}");
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("Usage:");
+        Console.Error.WriteLine("  <command> <flags>");
+
+        if (Infos.Any())
+        {
+            Console.Error.WriteLine();
+            Console.Error.WriteLine("Help:");
+
+            foreach (var info in Infos.OrderBy(i => i.Key))
+            {
+                Console.Error.WriteLine($"  {info.Key}");
+                Console.Error.WriteLine($"    {info.Value}");
+            }
+        }
+
+        if (Errors.Any())
+        {
+            Console.Error.WriteLine();
+            Console.Error.WriteLine(Errors.Count == 1 ? "Error:" : "Errors:");
+
+            foreach (var error in Errors.OrderBy(e => e))
+            {
+                Console.Error.WriteLine($"  {error}");
+            }
+        }
+
+        Console.Error.WriteLine();
+
+        return 1;
     }
 
-    public override int GetHashCode()
+    private static string GetVersion()
     {
-        return HashCode.Combine(Infos, Errors);
+        var attribute = typeof(Program).Assembly
+            .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
+            .First();
+
+        return ((AssemblyInformationalVersionAttribute)attribute)
+            .InformationalVersion;
     }
 }

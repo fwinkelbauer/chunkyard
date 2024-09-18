@@ -10,13 +10,13 @@ public sealed class CommandParser
     private readonly Dictionary<string, ICommandParser> _parsers;
     private readonly Dictionary<string, string> _infos;
 
-    public CommandParser(IReadOnlyCollection<ICommandParser> parsers)
+    public CommandParser(params ICommandParser[] parsers)
     {
         _parsers = parsers.ToDictionary(p => p.Command, p => p);
         _infos = parsers.ToDictionary(p => p.Command, p => p.Info);
     }
 
-    public object Parse(params string[] args)
+    public ICommand Parse(params string[] args)
     {
         var arg = Args.Parse(args);
 
