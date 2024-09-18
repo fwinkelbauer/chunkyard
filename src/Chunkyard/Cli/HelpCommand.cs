@@ -25,7 +25,7 @@ public sealed class HelpCommand : ICommand
         Console.Error.WriteLine("Usage:");
         Console.Error.WriteLine("  <command> <flags>");
 
-        if (Infos.Any())
+        if (Infos.Count > 0)
         {
             Console.Error.WriteLine();
             Console.Error.WriteLine("Help:");
@@ -37,7 +37,7 @@ public sealed class HelpCommand : ICommand
             }
         }
 
-        if (Errors.Any())
+        if (Errors.Count > 0)
         {
             Console.Error.WriteLine();
             Console.Error.WriteLine(Errors.Count == 1 ? "Error:" : "Errors:");

@@ -51,7 +51,7 @@ public sealed class FlagConsumer
         }
 
         if (TryStrings(flag, info, out var list)
-            && list.Any())
+            && list.Length > 0)
         {
             parsed = list.Last();
         }
@@ -143,7 +143,7 @@ public sealed class FlagConsumer
             new Dictionary<string, string>(_infos),
             new HashSet<string>(_errors));
 
-        return !(helpRequested || _errors.Any());
+        return !(helpRequested || _errors.Count > 0);
     }
 
     private bool TryStruct<T>(

@@ -534,7 +534,7 @@ public sealed class SnapshotStore
     private static bool TryLastSnapshotId(IRepository repository, out int key)
     {
         var keys = repository.Snapshots.UnorderedList();
-        var any = keys.Any();
+        var any = keys.Length > 0;
 
         key = any
             ? keys.Max()

@@ -19,7 +19,7 @@ internal static class Some
 
     public static Blob[] Blobs(params string[] blobNames)
     {
-        blobNames = blobNames.Any()
+        blobNames = blobNames.Length > 0
             ? blobNames
             : new[] { "blob 1", "dir/blob-2" };
 
