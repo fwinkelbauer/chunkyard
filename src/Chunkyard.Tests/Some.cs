@@ -79,6 +79,14 @@ internal static class Some
         return pairs.ToDictionary(p => p.Key, p => p.Value);
     }
 
+    public static FlagConsumer FlagConsumer(
+        params (string Key, IReadOnlyCollection<string> Value)[] pairs)
+    {
+        return new FlagConsumer(
+            Flags(pairs),
+            new HelpCommandBuilder("Chunkyard.Tests"));
+    }
+
     public static string[] Strings(params string[] values)
     {
         return values;

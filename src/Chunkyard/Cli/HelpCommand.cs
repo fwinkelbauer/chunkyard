@@ -7,35 +7,31 @@ namespace Chunkyard.Cli;
 public sealed class HelpCommand : ICommand
 {
     public HelpCommand(
-        IReadOnlyDictionary<string, string> infos,
+        string headline,
+        IReadOnlyDictionary<string, string> commandInfos,
+        IReadOnlyDictionary<string, string> flagInfos,
         IReadOnlyCollection<string> errors)
     {
-        Infos = infos;
+        Headline = headline;
+        CommandInfos = commandInfos;
+        FlagInfos = flagInfos;
         Errors = errors;
     }
 
-    public IReadOnlyDictionary<string, string> Infos { get; }
+    public string Headline { get; }
+
+    public IReadOnlyDictionary<string, string> CommandInfos { get; }
+
+    public IReadOnlyDictionary<string, string> FlagInfos { get; }
 
     public IReadOnlyCollection<string> Errors { get; }
 
     public int Run()
     {
-        Console.Error.WriteLine($"Chunkyard v{GetVersion()}");
-        Console.Error.WriteLine();
-        Console.Error.WriteLine("Usage:");
-        Console.Error.WriteLine("  <command> <flags>");
+        Console.Error.WriteLine(Headline);
 
-        if (Infos.Count > 0)
-        {
-            Console.Error.WriteLine();
-            Console.Error.WriteLine("Help:");
-
-            foreach (var info in Infos.OrderBy(i => i.Key))
-            {
-                Console.Error.WriteLine($"  {info.Key}");
-                Console.Error.WriteLine($"    {info.Value}");
-            }
-        }
+        WriteInfos("Commands:", CommandInfos);
+        WriteInfos("Flags:", FlagInfos);
 
         if (Errors.Count > 0)
         {
@@ -53,13 +49,20 @@ public sealed class HelpCommand : ICommand
         return 1;
     }
 
-    private static string GetVersion()
+    private static void WriteInfos(
+        string name,
+        IReadOnlyDictionary<string, string> infos)
     {
-        var attribute = typeof(Program).Assembly
-            .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
-            .First();
+        if (infos.Count > 0)
+        {
+            Console.Error.WriteLine();
+            Console.Error.WriteLine(name);
 
-        return ((AssemblyInformationalVersionAttribute)attribute)
-            .InformationalVersion;
+            foreach (var info in infos.OrderBy(i => i.Key))
+            {
+                Console.Error.WriteLine($"  {info.Key}");
+                Console.Error.WriteLine($"    {info.Value}");
+            }
+        }
     }
 }

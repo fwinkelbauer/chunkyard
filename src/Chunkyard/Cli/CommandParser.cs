@@ -8,12 +8,17 @@ namespace Chunkyard.Cli;
 public sealed class CommandParser
 {
     private readonly Dictionary<string, ICommandParser> _parsers;
-    private readonly Dictionary<string, string> _infos;
+    private readonly HelpCommandBuilder _help;
 
     public CommandParser(params ICommandParser[] parsers)
     {
         _parsers = parsers.ToDictionary(p => p.Command, p => p);
-        _infos = parsers.ToDictionary(p => p.Command, p => p.Info);
+        _help = new($"Chunkyard {GetVersion()}");
+
+        foreach (var parser in parsers)
+        {
+            _help.AddCommand(parser.Command, parser.Info);
+        }
     }
 
     public ICommand Parse(params string[] args)
@@ -22,18 +27,28 @@ public sealed class CommandParser
 
         if (arg == null)
         {
-            return new HelpCommand(_infos, Array.Empty<string>());
+            return _help.Build();
         }
         else if (_parsers.TryGetValue(arg.Command, out var parser))
         {
             return parser.Parse(
-                new FlagConsumer(arg.Flags));
+                new FlagConsumer(arg.Flags, _help));
         }
         else
         {
-            return new HelpCommand(
-                _infos,
-                new[] { $"Unknown command: {arg.Command}" });
+            _help.AddError($"Unknown command: {arg.Command}");
+
+            return _help.Build();
         }
+    }
+
+    private static string GetVersion()
+    {
+        var attribute = typeof(Program).Assembly
+            .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
+            .First();
+
+        return ((AssemblyInformationalVersionAttribute)attribute)
+            .InformationalVersion;
     }
 }

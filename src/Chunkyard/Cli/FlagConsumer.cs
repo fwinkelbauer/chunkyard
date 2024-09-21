@@ -6,15 +6,14 @@ namespace Chunkyard.Cli;
 public sealed class FlagConsumer
 {
     private readonly Dictionary<string, IReadOnlyCollection<string>> _flags;
-    private readonly Dictionary<string, string> _infos;
-    private readonly HashSet<string> _errors;
+    private readonly HelpCommandBuilder _help;
 
     public FlagConsumer(
-        IReadOnlyDictionary<string, IReadOnlyCollection<string>> flags)
+        IReadOnlyDictionary<string, IReadOnlyCollection<string>> flags,
+        HelpCommandBuilder help)
     {
         _flags = new(flags);
-        _infos = new();
-        _errors = new();
+        _help = help;
     }
 
     public bool TryStrings(
@@ -32,7 +31,7 @@ public sealed class FlagConsumer
             list = Array.Empty<string>();
         }
 
-        _infos[flag] = info;
+        _help.AddFlag(flag, info);
 
         return true;
     }
@@ -61,7 +60,7 @@ public sealed class FlagConsumer
         }
         else
         {
-            _errors.Add($"Missing mandatory flag: {flag}");
+            _help.AddError($"Missing mandatory flag: {flag}");
         }
 
         value = parsed ?? "";
@@ -91,7 +90,7 @@ public sealed class FlagConsumer
             && list.Count == 0)
         {
             _flags.Remove(flag);
-            _infos[flag] = info;
+            _help.AddFlag(flag, info);
 
             value = true;
             return true;
@@ -135,15 +134,17 @@ public sealed class FlagConsumer
 
         if (_flags.Count != 0)
         {
-            _errors.UnionWith(_flags.Keys.Select(k => $"Extra flag: {k}"));
+            foreach (var flag in _flags.Keys)
+            {
+                _help.AddError($"Unknown flag: {flag}");
+            }
+
             _flags.Clear();
         }
 
-        help = new HelpCommand(
-            new Dictionary<string, string>(_infos),
-            new HashSet<string>(_errors));
+        help = _help.Build();
 
-        return !(helpRequested || _errors.Count > 0);
+        return !(helpRequested || help.Errors.Count > 0);
     }
 
     private bool TryStruct<T>(
@@ -170,7 +171,7 @@ public sealed class FlagConsumer
             }
             else
             {
-                _errors.Add($"Invalid value: {flag}");
+                _help.AddError($"Invalid value: {flag}");
             }
         }
 
