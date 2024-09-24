@@ -79,6 +79,26 @@ public sealed class DiffCommandParser : ICommandParser
     }
 }
 
+public sealed class GarbageCollectParser : ICommandParser
+{
+    public string Command => "gc";
+
+    public string Info => "Remove unreferenced chunks";
+
+    public ICommand Parse(FlagConsumer consumer)
+    {
+        if (consumer.TrySnapshotStore(out var snapshotStore)
+            & consumer.NoHelp(out var help))
+        {
+            return new GarbageCollectCommand(snapshotStore);
+        }
+        else
+        {
+            return help;
+        }
+    }
+}
+
 public sealed class KeepCommandParser : ICommandParser
 {
     public string Command => "keep";

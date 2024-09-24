@@ -101,6 +101,23 @@ public sealed class DiffCommand : ICommand
     }
 }
 
+public sealed class GarbageCollectCommand : ICommand
+{
+    public GarbageCollectCommand(SnapshotStore snapshotStore)
+    {
+        SnapshotStore = snapshotStore;
+    }
+
+    public SnapshotStore SnapshotStore { get; }
+
+    public int Run()
+    {
+        SnapshotStore.GarbageCollect();
+
+        return 0;
+    }
+}
+
 public sealed class KeepCommand : ICommand
 {
     public KeepCommand(
@@ -118,7 +135,6 @@ public sealed class KeepCommand : ICommand
     public int Run()
     {
         SnapshotStore.KeepSnapshots(LatestCount);
-        SnapshotStore.GarbageCollect();
 
         return 0;
     }
@@ -166,7 +182,6 @@ public sealed class RemoveCommand : ICommand
     public int Run()
     {
         SnapshotStore.RemoveSnapshot(SnapshotId);
-        SnapshotStore.GarbageCollect();
 
         return 0;
     }

@@ -10,6 +10,7 @@ public static class Program
                 new CheckCommandParser(),
                 new CopyCommandParser(),
                 new DiffCommandParser(),
+                new GarbageCollectParser(),
                 new KeepCommandParser(),
                 new ListCommandParser(),
                 new RemoveCommandParser(),
