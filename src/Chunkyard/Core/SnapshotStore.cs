@@ -214,7 +214,7 @@ public sealed class SnapshotStore
         }
 
         var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
-            .Except(ListChunkIds(otherRepository.Snapshots.UnorderedList()))
+            .Except(otherRepository.Chunks.UnorderedList())
             .ToArray();
 
         CopyChunkIds(otherRepository, chunkIdsToCopy);
