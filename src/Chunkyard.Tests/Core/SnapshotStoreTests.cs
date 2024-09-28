@@ -387,6 +387,34 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
+    public static void CopyTo_Does_Nothing_If_Behind()
+    {
+        var repository = Some.Repository();
+        var snapshotStore = Some.SnapshotStore(repository);
+        var otherRepository = Some.Repository();
+        var otherSnapshotStore = Some.SnapshotStore(otherRepository);
+
+        _ = otherSnapshotStore.StoreSnapshot(
+            Some.BlobSystem(Some.Blobs("some blob")));
+
+        var expectedChunks = otherRepository.Chunks.UnorderedList()
+            .ToHashSet();
+
+        var expectedSnapshots = otherRepository.Snapshots.UnorderedList()
+            .ToHashSet();
+
+        snapshotStore.CopyTo(otherRepository);
+
+        Assert.Equal(
+            expectedChunks,
+            otherRepository.Chunks.UnorderedList().ToHashSet());
+
+        Assert.Equal(
+            expectedSnapshots,
+            otherRepository.Snapshots.UnorderedList().ToHashSet());
+    }
+
+    [Fact]
     public static void CopyTo_Can_Limit_Copied_Snapshots()
     {
         var snapshotStore = Some.SnapshotStore();
