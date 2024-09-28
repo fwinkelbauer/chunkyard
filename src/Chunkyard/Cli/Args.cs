@@ -64,7 +64,7 @@ public sealed class Args
             }
             else if (string.IsNullOrEmpty(currentFlag))
             {
-                return null;
+                command = $"{command} {token}";
             }
             else
             {

@@ -35,9 +35,16 @@ public static class ArgsTests
     }
 
     [Fact]
-    public static void Parse_Must_Have_Flag_To_Accept_Values()
+    public static void Parse_Accepts_Multi_Word_Command()
     {
-        Assert.Null(Args.Parse("help", "bad-value", "--version"));
+        var expected = new Args(
+            "command with spaces",
+            Some.Flags(
+                ("--help", Some.Strings())));
+
+        var actual = Args.Parse("command", "with", "spaces", "--help");
+
+        Assert.Equal(expected, actual);
     }
 
     [Fact]
