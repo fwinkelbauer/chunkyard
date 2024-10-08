@@ -127,15 +127,15 @@ public static class Program
     {
         var match = Regex.Match(
             GitCapture("describe --long").First(),
-            @"^(?<tag>.*)-(?<distance>\d+)-g(?<hash>[a-f0-9]+)$",
+            @"^(?<tag>.*)-(?<distance>\d+)-g(?<commit>[a-f0-9]+)$",
             RegexOptions.None,
             TimeSpan.FromSeconds(1));
 
         var tag = match.Groups["tag"].Value;
         var distance = Convert.ToInt32(match.Groups["distance"].Value);
-        var hash = match.Groups["hash"].Value;
+        var commit = match.Groups["commit"].Value;
 
-        return (tag, distance, hash);
+        return (tag, distance, commit);
     }
 
     private static void Dotnet(params string[] arguments)
