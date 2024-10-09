@@ -36,12 +36,11 @@ public static class Program
             Directory.Delete(directory, true);
         }
 
-        var (tag, _, commit) = GitDescribe();
-        var version = tag.TrimStart('v');
+        var (version, _) = GitDescribe();
 
         foreach (var runtime in new[] { "linux-x64", "win-x64" })
         {
-            Announce($"Publish {tag} ({runtime})");
+            Announce($"Publish {version} ({runtime})");
 
             Dotnet(
                 "publish src/Chunkyard/Chunkyard.csproj",
@@ -49,7 +48,6 @@ public static class Program
                 $"-r {runtime}",
                 $"-o {directory}",
                 $"-p:Version={version}",
-                $"-p:SourceRevisionId={commit}",
                 "--self-contained",
                 "-p:PublishSingleFile=true",
                 "-p:PublishTrimmed=true",
@@ -58,14 +56,13 @@ public static class Program
                 "--tl:auto");
         }
 
-        Announce($"Publish {tag} (dotnet tools)");
+        Announce($"Publish {version} (dotnet tools)");
 
         Dotnet(
             "pack src/Chunkyard/Chunkyard.csproj",
             "-c Release",
             $"-o {directory}",
             $"-p:Version={version}",
-            $"-p:SourceRevisionId={commit}",
             "-p:ContinuousIntegrationBuild=true",
             "--tl:auto");
     }
@@ -101,7 +98,7 @@ public static class Program
 
     private static void Release()
     {
-        var (currentTag, distance, _) = GitDescribe();
+        var (currentVersion, distance) = GitDescribe();
 
         if (distance == 0)
         {
@@ -110,21 +107,27 @@ public static class Program
 
         Announce("Release");
 
-        Console.WriteLine($"Current tag: {currentTag}");
-        Console.Write("Enter new tag. Leave empty to skip: ");
+        Console.WriteLine($"Current version tag: {currentVersion}");
+        Console.Write("Create new version tag. Leave empty to skip: ");
 
-        var newTag = Console.ReadLine()?.Trim();
+        var newVersion = Console.ReadLine()?.Trim();
+        var newTag = $"v{newVersion}";
 
-        if (string.IsNullOrEmpty(newTag))
+        if (string.IsNullOrEmpty(newVersion))
         {
             return;
         }
 
-        Git($"tag -a \"{newTag}\" -m \"Prepare Chunkyard release {newTag}\"");
+        Git($"tag -a \"{newTag}\" -m \"Prepare release {newTag}\"");
     }
 
-    private static (string Tag, int Distance, string Commit) GitDescribe()
+    private static (string Version, int Distance) GitDescribe()
     {
+        if (GitCapture("tag -l").Length == 0)
+        {
+            return ("0.0.0", -1);
+        }
+
         var match = Regex.Match(
             GitCapture("describe --long").First(),
             @"^(?<tag>.*)-(?<distance>\d+)-g(?<commit>[a-f0-9]+)$",
@@ -133,9 +136,8 @@ public static class Program
 
         var tag = match.Groups["tag"].Value;
         var distance = Convert.ToInt32(match.Groups["distance"].Value);
-        var commit = match.Groups["commit"].Value;
 
-        return (tag, distance, commit);
+        return (tag.TrimStart('v'), distance);
     }
 
     private static void Dotnet(params string[] arguments)
