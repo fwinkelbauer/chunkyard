@@ -22,19 +22,19 @@ public static class ProcessUtils
                 RedirectStandardOutput = true
             })!;
 
-        var lines = CaptureStandardOutput(process);
+        var lines = Capture(process.StandardOutput);
 
         WaitForSuccess(process);
 
         return lines;
     }
 
-    private static string[] CaptureStandardOutput(Process process)
+    private static string[] Capture(StreamReader reader)
     {
         var lines = new List<string>();
         string? line;
 
-        while ((line = process.StandardOutput.ReadLine()) != null)
+        while ((line = reader.ReadLine()) != null)
         {
             lines.Add(line);
         }
