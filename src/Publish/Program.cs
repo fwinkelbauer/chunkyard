@@ -30,12 +30,6 @@ public static class Program
         Release();
 
         var directory = "artifacts";
-
-        if (Directory.Exists(directory))
-        {
-            Directory.Delete(directory, true);
-        }
-
         var (version, _) = GitDescribe();
 
         foreach (var runtime in new[] { "linux-x64", "win-x64" })
