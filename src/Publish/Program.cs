@@ -29,6 +29,7 @@ public static class Program
         Build();
         Release();
 
+        var csproj = "src/Chunkyard/Chunkyard.csproj";
         var directory = "artifacts";
         var (version, _) = GitDescribe();
 
@@ -37,8 +38,7 @@ public static class Program
             Announce($"Publish {version} ({runtime})");
 
             Dotnet(
-                "publish src/Chunkyard/Chunkyard.csproj",
-                "-c Release",
+                $"publish {csproj}",
                 $"-r {runtime}",
                 $"-o {directory}",
                 $"-p:Version={version}",
@@ -53,8 +53,7 @@ public static class Program
         Announce($"Publish {version} (dotnet tools)");
 
         Dotnet(
-            "pack src/Chunkyard/Chunkyard.csproj",
-            "-c Release",
+            $"pack {csproj}",
             $"-o {directory}",
             $"-p:Version={version}",
             "-p:ContinuousIntegrationBuild=true",
