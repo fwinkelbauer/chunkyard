@@ -32,8 +32,9 @@ public sealed class Crypto
 
     public int Iterations { get; }
 
-    public byte[] Encrypt(ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> plain)
+    public byte[] Encrypt(ReadOnlySpan<byte> plain)
     {
+        var nonce = RandomNumberGenerator.GetBytes(NonceBytes);
         var cipher = new byte[nonce.Length + plain.Length + TagBytes];
 
         nonce.CopyTo(new Span<byte>(cipher, 0, nonce.Length));

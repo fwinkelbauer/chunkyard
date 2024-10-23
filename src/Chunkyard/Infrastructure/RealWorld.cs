@@ -24,11 +24,6 @@ internal sealed class RealWorld : IWorld
         return RandomNumberGenerator.GetBytes(Crypto.SaltBytes);
     }
 
-    public byte[] GenerateNonce()
-    {
-        return RandomNumberGenerator.GetBytes(Crypto.NonceBytes);
-    }
-
     public DateTime UtcNow()
     {
         return DateTime.UtcNow;

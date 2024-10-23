@@ -11,7 +11,5 @@ public interface IWorld
 
     byte[] GenerateSalt();
 
-    byte[] GenerateNonce();
-
     DateTime UtcNow();
 }

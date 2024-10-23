@@ -437,10 +437,7 @@ public sealed class SnapshotStore
 
     private string StoreChunk(byte[] chunk)
     {
-        var encrypted = _crypto.Value.Encrypt(
-            _world.GenerateNonce(),
-            chunk);
-
+        var encrypted = _crypto.Value.Encrypt(chunk);
         var chunkId = ChunkId.Compute(encrypted);
 
         _repository.Chunks.Store(chunkId, encrypted);
