@@ -7,7 +7,7 @@ public static class CryptoTests
     [InlineData("")]
     public static void Encrypt_And_Decrypt_Return_Input(string input)
     {
-        var crypto = Some.Crypto("secret");
+        var crypto = Some.Crypto();
 
         var plain = Encoding.UTF8.GetBytes(input);
         var encrypted = crypto.Encrypt(plain);
@@ -32,7 +32,7 @@ public static class CryptoTests
     [Fact]
     public static void Encrypt_Uses_Different_Nonce_On_Every_Input()
     {
-        var crypto = Some.Crypto("secret");
+        var crypto = Some.Crypto();
         var plain = "Hello!"u8;
 
         Assert.NotEqual(

@@ -4,7 +4,7 @@ internal static class Some
 {
     public static readonly IWorld World = new DummyWorld();
 
-    public static Crypto Crypto(string password)
+    public static Crypto Crypto(string password = "secret")
     {
         return new Crypto(
             password,
