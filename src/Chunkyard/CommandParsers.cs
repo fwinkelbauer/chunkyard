@@ -228,7 +228,7 @@ public sealed class StoreCommandParser : ICommandParser
     public ICommand Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TryStrings("--paths", "The files and directories (blobs) to store", out var paths)
+            & consumer.TryStrings("--path", "A list of files and directories (blobs) to store", out var paths)
             & consumer.TryInclude(out var include)
             & consumer.TryPreview(out var preview)
             & consumer.NoHelp(out var help))
@@ -297,8 +297,8 @@ public static class ArgConsumerExtensions
         out Fuzzy include)
     {
         var success = consumer.TryStrings(
-            "--includes",
-            "The fuzzy patterns for blobs to include",
+            "--include",
+            "A list of fuzzy patterns for blobs to include",
             out var includePatterns);
 
         include = new Fuzzy(includePatterns);
