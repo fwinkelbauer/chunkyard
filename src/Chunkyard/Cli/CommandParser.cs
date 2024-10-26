@@ -29,6 +29,12 @@ public sealed class CommandParser
         {
             return _help.Build();
         }
+        else if (string.IsNullOrEmpty(arg.Command))
+        {
+            _help.AddError("No command provided");
+
+            return _help.Build();
+        }
         else if (_parsers.TryGetValue(arg.Command, out var parser))
         {
             return parser.Parse(

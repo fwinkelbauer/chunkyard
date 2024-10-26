@@ -48,6 +48,19 @@ public static class ArgsTests
     }
 
     [Fact]
+    public static void Command_Can_Be_Empty()
+    {
+        var expected = new Args(
+            "",
+            Some.Flags(
+                ("--help", Some.Strings())));
+
+        var actual = Args.Parse("--help");
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
     public static void Parse_Treats_Empty_Arguments_As_Error()
     {
         Assert.Null(Args.Parse());

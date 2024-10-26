@@ -44,11 +44,11 @@ public sealed class Args
             return null;
         }
 
-        var command = args[0];
+        var command = "";
         var currentFlag = "";
         var flags = new Dictionary<string, List<string>>();
 
-        for (var i = 1; i < args.Length; i++)
+        for (var i = 0; i < args.Length; i++)
         {
             var token = args[i];
 
@@ -64,7 +64,7 @@ public sealed class Args
             }
             else if (string.IsNullOrEmpty(currentFlag))
             {
-                command = $"{command} {token}";
+                command = $"{command} {token}".Trim();
             }
             else
             {
