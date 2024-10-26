@@ -148,7 +148,7 @@ public sealed class SnapshotStore
                 || !blobSystem.GetBlob(br.Blob.Name).Equals(br.Blob))
             .ToArray();
 
-        var options = new ParallelOptions()
+        var options = new ParallelOptions
         {
             MaxDegreeOfParallelism = _world.Parallelism
         };

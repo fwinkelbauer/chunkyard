@@ -45,8 +45,8 @@ public static class SnapshotStoreTests
             snapshot2.BlobReferences.Select(br => br.Blob));
 
         Assert.Equal(
-            snapshot1.BlobReferences.Where(br => br.Blob == sharedBlob),
-            snapshot2.BlobReferences.Where(br => br.Blob == sharedBlob));
+            snapshot1.BlobReferences.Where(br => Equals(br.Blob, sharedBlob)),
+            snapshot2.BlobReferences.Where(br => Equals(br.Blob, sharedBlob)));
     }
 
     [Fact]
@@ -186,7 +186,7 @@ public static class SnapshotStoreTests
         Corrupt(repository.Chunks, chunkIds);
 
         Assert.True(
-           snapshotStore.CheckSnapshotExists(snapshotId));
+            snapshotStore.CheckSnapshotExists(snapshotId));
 
         Assert.False(
             snapshotStore.CheckSnapshotValid(snapshotId));

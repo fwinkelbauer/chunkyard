@@ -9,7 +9,7 @@ public static class ProcessUtils
     {
         using var process = Process.Start(
             fileName,
-            string.Join(' ', arguments))!;
+            string.Join(' ', arguments));
 
         WaitForSuccess(process);
     }
@@ -32,9 +32,8 @@ public static class ProcessUtils
     private static string[] Capture(StreamReader reader)
     {
         var lines = new List<string>();
-        string? line;
 
-        while ((line = reader.ReadLine()) != null)
+        while (reader.ReadLine() is { } line)
         {
             lines.Add(line);
         }

@@ -21,15 +21,9 @@ public sealed class FlagConsumer
         string info,
         out string[] list)
     {
-        if (_flags.TryGetValue(flag, out var value))
-        {
-            _flags.Remove(flag);
-            list = value.ToArray();
-        }
-        else
-        {
-            list = Array.Empty<string>();
-        }
+        list = _flags.Remove(flag, out var value)
+            ? value.ToArray()
+            : Array.Empty<string>();
 
         _help.AddFlag(flag, info);
 

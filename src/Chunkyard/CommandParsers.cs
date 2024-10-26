@@ -260,7 +260,7 @@ public static class ArgConsumerExtensions
         out SnapshotStore snapshotStore)
     {
         var success = consumer.TryString("--repository", "The repository path", out var repository)
-            & consumer.TryEnum("--prompt", $"The password prompt method", out Prompt promptValue, Prompt.Console)
+            & consumer.TryEnum("--prompt", "The password prompt method", out Prompt promptValue, Prompt.Console)
             & consumer.TryInt("--parallel", "The degree of parallelism", out var parallel, 1);
 
         IPrompt prompt = promptValue switch

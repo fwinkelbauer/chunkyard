@@ -64,11 +64,11 @@ public sealed class FileBlobSystem : IBlobSystem
             ? file
             : Path.GetRelativePath(_parent, file);
 
-        // Using a blob name with backslashes will not create
-        // sub-directories when restoring a file on Linux.
+        // Using a blob name with backslashes will not create subdirectories
+        // when restoring a file on Linux.
         //
-        // Also we don't want to include any ":" so that Windows
-        // drive letters can be turned into valid paths.
+        // Also, we don't want to include any ":" so that Windows drive letters
+        // can be turned into valid paths.
         blobName = blobName
             .Replace('\\', '/')
             .Replace(":", "");

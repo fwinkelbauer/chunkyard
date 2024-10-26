@@ -2,7 +2,7 @@ namespace Chunkyard.Tests.Infrastructure;
 
 internal sealed class DummyPrompt : IPrompt
 {
-    private static readonly Dictionary<string, string> _passwords = new();
+    private static readonly Dictionary<string, string> Passwords = new();
 
     private readonly string _password;
 
@@ -13,13 +13,13 @@ internal sealed class DummyPrompt : IPrompt
 
     public string NewPassword(string key)
     {
-        _passwords[key] = _password;
+        Passwords[key] = _password;
 
         return _password;
     }
 
     public string ExistingPassword(string key)
     {
-        return _passwords[key];
+        return Passwords[key];
     }
 }

@@ -48,10 +48,8 @@ public sealed class Args
         var currentFlag = "";
         var flags = new Dictionary<string, List<string>>();
 
-        for (var i = 0; i < args.Length; i++)
+        foreach (var token in args)
         {
-            var token = args[i];
-
             if (token.StartsWith('-')
                 && !int.TryParse(token, out _))
             {
@@ -74,7 +72,7 @@ public sealed class Args
 
         var flagsCasted = flags.ToDictionary(
             pair => pair.Key,
-            pair => (IReadOnlyCollection<string>)pair.Value);
+            IReadOnlyCollection<string> (pair) => pair.Value);
 
         return new Args(command, flagsCasted);
     }
