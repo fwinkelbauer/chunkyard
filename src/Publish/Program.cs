@@ -64,7 +64,7 @@ public static class Program
     {
         Announce("Cleanup");
 
-        if (GitCapture("status --porcelain").Contains("??"))
+        if (GitCapture("status --porcelain").Any(l => l.Contains("??")))
         {
             throw new InvalidOperationException(
                 "Found untracked files. Aborting cleanup");
