@@ -123,14 +123,14 @@ public static class Program
 
         var match = Regex.Match(
             GitCapture("describe --long").First(),
-            @"^(?<tag>.*)-(?<distance>\d+)-g(?<commit>[a-f0-9]+)$",
+            @"^v(?<version>.*)-(?<distance>\d+)-g(?<commit>[a-f\d]+)$",
             RegexOptions.None,
             TimeSpan.FromSeconds(1));
 
-        var tag = match.Groups["tag"].Value;
+        var version = match.Groups["version"].Value;
         var distance = Convert.ToInt32(match.Groups["distance"].Value);
 
-        return (tag.TrimStart('v'), distance);
+        return (version, distance);
     }
 
     private static void Dotnet(params string[] arguments)
