@@ -72,7 +72,7 @@ public sealed class Fuzzy
 /// </summary>
 public static class FuzzyExtensions
 {
-    public static IEnumerable<Blob> ListBlobs(
+    public static Blob[] ListBlobs(
         this Snapshot snapshot,
         Fuzzy? fuzzy = null)
     {
@@ -80,16 +80,18 @@ public static class FuzzyExtensions
 
         return snapshot.BlobReferences
             .Select(br => br.Blob)
-            .Where(b => fuzzy.IsMatch(b.Name));
+            .Where(b => fuzzy.IsMatch(b.Name))
+            .ToArray();
     }
 
-    public static IEnumerable<BlobReference> ListBlobReferences(
+    public static BlobReference[] ListBlobReferences(
         this Snapshot snapshot,
         Fuzzy? fuzzy = null)
     {
         fuzzy ??= new();
 
         return snapshot.BlobReferences
-            .Where(b => fuzzy.IsMatch(b.Blob.Name));
+            .Where(b => fuzzy.IsMatch(b.Blob.Name))
+            .ToArray();
     }
 }

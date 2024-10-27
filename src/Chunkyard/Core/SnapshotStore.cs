@@ -126,9 +126,11 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy? fuzzy = null)
     {
+        var storedBlobs = GetSnapshot(snapshotId).ListBlobs(fuzzy);
+
         var diffSet = DiffSet.Create(
-            blobSystem.ListBlobs(),
-            GetSnapshot(snapshotId).ListBlobs(fuzzy),
+            FindExisting(blobSystem, storedBlobs),
+            storedBlobs,
             blob => blob.Name);
 
         return new DiffSet<Blob>(
@@ -526,6 +528,23 @@ public sealed class SnapshotStore
         Array.Sort(snapshotIds);
 
         return snapshotIds[position];
+    }
+
+    private static List<Blob> FindExisting(
+        IBlobSystem blobSystem,
+        IReadOnlyCollection<Blob> blobs)
+    {
+        var existing = new List<Blob>();
+
+        foreach (var blob in blobs)
+        {
+            if (blobSystem.BlobExists(blob.Name))
+            {
+                existing.Add(blobSystem.GetBlob(blob.Name));
+            }
+        }
+
+        return existing;
     }
 
     private static bool TryLastSnapshotId(IRepository repository, out int key)
