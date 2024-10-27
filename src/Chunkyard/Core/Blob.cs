@@ -8,7 +8,7 @@ public sealed class Blob
     public Blob(string name, DateTime lastWriteTimeUtc)
     {
         Name = name;
-        LastWriteTimeUtc = lastWriteTimeUtc;
+        LastWriteTimeUtc = Standardize(lastWriteTimeUtc);
     }
 
     public string Name { get; }
@@ -27,5 +27,18 @@ public sealed class Blob
         return HashCode.Combine(
             Name,
             LastWriteTimeUtc);
+    }
+
+    // Some file systems have a limit on the last write time property, so we'll
+    // unify all Blobs
+    private static DateTime Standardize(DateTime date)
+    {
+        return new DateTime(
+            date.Year,
+            date.Month,
+            date.Day,
+            date.Hour,
+            date.Minute,
+            date.Second);
     }
 }
