@@ -44,10 +44,9 @@ You can install Chunkyard by:
 
 * Publish
 
+- Optional: Create an annotated tag to define a new version number
 - Run ~./publish~ to create Linux and Windows binaries in the ~artifacts~
   directory
-- Run ~git push --follow-tags~ if you have created a new version/tag in the
-  previous step
 
 * Usage
 

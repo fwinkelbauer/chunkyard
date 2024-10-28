@@ -27,11 +27,10 @@ public static class Program
     {
         Clean();
         Build();
-        Release();
 
         var csproj = "src/Chunkyard/Chunkyard.csproj";
         var directory = "artifacts";
-        var (version, _) = GitDescribe();
+        var version = GitDescribe();
 
         foreach (var runtime in new[] { "linux-x64", "win-x64" })
         {
@@ -89,36 +88,11 @@ public static class Program
         Dotnet($"test {solution} --no-build");
     }
 
-    private static void Release()
-    {
-        var (currentVersion, distance) = GitDescribe();
-
-        if (distance == 0)
-        {
-            return;
-        }
-
-        Announce("Release");
-
-        Console.WriteLine($"Current version tag: {currentVersion}");
-        Console.Write("Create new version tag. Leave empty to skip: ");
-
-        var newVersion = Console.ReadLine()?.Trim();
-        var newTag = $"v{newVersion}";
-
-        if (string.IsNullOrEmpty(newVersion))
-        {
-            return;
-        }
-
-        Git($"tag -a \"{newTag}\" -m \"Prepare release {newTag}\"");
-    }
-
-    private static (string Version, int Distance) GitDescribe()
+    private static string GitDescribe()
     {
         if (GitCapture("tag -l").Length == 0)
         {
-            return ("0.0.0", -1);
+            return "0.0.0";
         }
 
         var match = Regex.Match(
@@ -127,10 +101,7 @@ public static class Program
             RegexOptions.None,
             TimeSpan.FromSeconds(1));
 
-        var version = match.Groups["version"].Value;
-        var distance = Convert.ToInt32(match.Groups["distance"].Value);
-
-        return (version, distance);
+        return match.Groups["version"].Value;
     }
 
     private static void Dotnet(params string[] arguments)
