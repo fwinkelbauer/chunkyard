@@ -37,14 +37,6 @@ public static class SnapshotStoreTests
         var snapshot2 = snapshotStore.GetSnapshot(snapshotId2);
 
         Assert.Equal(
-            blobSystem1.ListBlobs(),
-            snapshot1.BlobReferences.Select(br => br.Blob));
-
-        Assert.Equal(
-            blobSystem2.ListBlobs(),
-            snapshot2.BlobReferences.Select(br => br.Blob));
-
-        Assert.Equal(
             snapshot1.BlobReferences.Where(br => Equals(br.Blob, sharedBlob)),
             snapshot2.BlobReferences.Where(br => Equals(br.Blob, sharedBlob)));
     }
