@@ -71,9 +71,7 @@ public static class Program
 
         Git(
             "clean -dfx",
-            $"-e *{typeof(Program).Namespace}",
-            "-e .vs/",
-            "-e launchSettings.json");
+            $"-e *{typeof(Program).Namespace}");
     }
 
     private static void Build()
