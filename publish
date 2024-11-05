@@ -1,7 +1,49 @@
 #!/bin/bash -eu
 
+announce () {
+    echo ''
+    echo "$1"
+    echo '============================================================'
+}
+
+git_describe () {
+    tags=$(git tag -l)
+
+    if [ -z "$tags" ]; then
+        echo '0.0.0'
+        return
+    fi
+
+    tag=$(git describe --abbrev=0)
+    echo "${tag:1}"
+}
+
 script=$(readlink -f "${BASH_SOURCE[0]}")
 directory=$(dirname "$script")
 cd "$directory"
 
-dotnet run --no-launch-profile --project 'src/Publish/Publish.csproj' -- "$@"
+export DOTNET_CLI_TELEMETRY_OPTOUT='1'
+
+solution='src/Chunkyard.sln'
+csproj='src/Chunkyard/Chunkyard.csproj'
+artifacts='artifacts'
+version=$(git_describe)
+runtimes=('linux-x64' 'win-x64')
+
+announce 'Cleanup'
+git clean -dfX
+
+announce 'Build'
+dotnet format "$solution" --verify-no-changes
+dotnet build "$solution" -warnaserror --tl:auto
+
+announce 'Test'
+dotnet test "$solution" --no-build
+
+for runtime in "${runtimes[@]}"; do
+    announce "Publish $version ($runtime)"
+    dotnet publish "$csproj" -r "$runtime" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto --self-contained -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=embedded
+done
+
+announce "Publish $version (dotnet tools)"
+dotnet pack "$csproj" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto
