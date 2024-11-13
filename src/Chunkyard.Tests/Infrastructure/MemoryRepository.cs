@@ -16,7 +16,7 @@ internal sealed class MemoryRepository : IRepository
 internal sealed class MemoryRepository<T> : IRepository<T>
     where T : notnull
 {
-    private readonly object _lock;
+    private readonly Lock _lock;
     private readonly Dictionary<T, byte[]> _valuesPerKey;
 
     public MemoryRepository()
