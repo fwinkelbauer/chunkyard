@@ -25,7 +25,7 @@ public static class CryptoTests
 
         var encrypted = someCrypto.Encrypt("Hello!"u8);
 
-        Assert.Throws<AuthenticationTagMismatchException>(
+        _ = Assert.Throws<AuthenticationTagMismatchException>(
             () => otherCrypto.Decrypt(encrypted));
     }
 
@@ -43,7 +43,7 @@ public static class CryptoTests
     [Fact]
     public static void Constructor_Throws_On_EmptyPassword()
     {
-        Assert.Throws<ArgumentException>(
+        _ = Assert.Throws<ArgumentException>(
             () => Some.Crypto(""));
     }
 }

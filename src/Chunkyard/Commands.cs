@@ -296,7 +296,7 @@ public sealed class StoreCommand : ICommand
         }
         else
         {
-            SnapshotStore.StoreSnapshot(BlobSystem, Include);
+            _ = SnapshotStore.StoreSnapshot(BlobSystem, Include);
         }
 
         return 0;

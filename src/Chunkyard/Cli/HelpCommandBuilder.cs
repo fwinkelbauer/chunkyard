@@ -30,7 +30,7 @@ public sealed class HelpCommandBuilder
 
     public void AddError(string error)
     {
-        _errors.Add(error);
+        _ = _errors.Add(error);
     }
 
     public HelpCommand Build()

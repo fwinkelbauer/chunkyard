@@ -49,7 +49,7 @@ internal sealed class ConsolePrompt : IPrompt
             else if (!char.IsControl(info.KeyChar))
             {
                 Console.Write("*");
-                result.Append(info.KeyChar);
+                _ = result.Append(info.KeyChar);
             }
         }
     }

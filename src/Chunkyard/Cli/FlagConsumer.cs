@@ -83,7 +83,7 @@ public sealed class FlagConsumer
         if (_flags.TryGetValue(flag, out var list)
             && list.Count == 0)
         {
-            _flags.Remove(flag);
+            _ = _flags.Remove(flag);
             _help.AddFlag(flag, info);
 
             value = true;

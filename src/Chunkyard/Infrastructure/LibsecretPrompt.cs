@@ -66,7 +66,7 @@ internal sealed class LibsecretPrompt : IPrompt
 
     private static string Store(string key, string password)
     {
-        secret_password_store_sync(
+        _ = secret_password_store_sync(
             Schema,
             "default",
             $"Chunkyard: {key}",

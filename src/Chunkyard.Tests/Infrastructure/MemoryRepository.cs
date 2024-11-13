@@ -65,7 +65,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
     {
         lock (_lock)
         {
-            _valuesPerKey.Remove(key);
+            _ = _valuesPerKey.Remove(key);
         }
     }
 }

@@ -400,7 +400,7 @@ public sealed class FastCdc
 
     private static int CeilDiv(int x, int y)
     {
-        return 1 + (x - 1) / y;
+        return 1 + ((x - 1) / y);
     }
 
     private static int Logarithm2(int value)
@@ -410,7 +410,7 @@ public sealed class FastCdc
 
     private static uint Mask(int bits)
     {
-        EnsureBetween(bits, 1, 31, nameof(bits));
+        _ = EnsureBetween(bits, 1, 31, nameof(bits));
 
         return (uint)Math.Pow(2, bits) - 1;
     }

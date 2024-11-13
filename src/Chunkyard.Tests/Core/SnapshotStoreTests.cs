@@ -115,10 +115,10 @@ public static class SnapshotStoreTests
 
         Missing(repository.Chunks, repository.Chunks.UnorderedList());
 
-        Assert.Throws<ChunkyardException>(
+        _ = Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(snapshotId));
 
-        Assert.Throws<ChunkyardException>(
+        _ = Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotValid(snapshotId));
     }
 
@@ -133,10 +133,10 @@ public static class SnapshotStoreTests
 
         Corrupt(repository.Chunks, repository.Chunks.UnorderedList());
 
-        Assert.Throws<ChunkyardException>(
+        _ = Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotExists(snapshotId));
 
-        Assert.Throws<ChunkyardException>(
+        _ = Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshotValid(snapshotId));
     }
 
@@ -436,7 +436,7 @@ public static class SnapshotStoreTests
 
         Corrupt(repository.Snapshots, repository.Snapshots.UnorderedList());
 
-        Assert.Throws<ChunkyardException>(
+        _ = Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(Some.Repository()));
     }
 
@@ -455,7 +455,7 @@ public static class SnapshotStoreTests
         _ = otherSnapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs("other blob")));
 
-        Assert.Throws<ChunkyardException>(
+        _ = Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(otherRepository));
     }
 

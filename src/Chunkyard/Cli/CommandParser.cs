@@ -51,10 +51,9 @@ public sealed class CommandParser
     private static string GetVersion()
     {
         var attribute = typeof(Program).Assembly
-            .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
+            .GetCustomAttributes<AssemblyInformationalVersionAttribute>()
             .First();
 
-        return ((AssemblyInformationalVersionAttribute)attribute)
-            .InformationalVersion;
+        return attribute.InformationalVersion;
     }
 }

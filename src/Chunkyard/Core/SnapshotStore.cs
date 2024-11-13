@@ -155,7 +155,7 @@ public sealed class SnapshotStore
             MaxDegreeOfParallelism = _world.Parallelism
         };
 
-        Parallel.ForEach(
+        _ = Parallel.ForEach(
             blobReferencesToRestore,
             options,
             blobReference => RestoreBlob(blobSystem, blobReference));
@@ -264,7 +264,7 @@ public sealed class SnapshotStore
             MaxDegreeOfParallelism = _world.Parallelism
         };
 
-        Parallel.ForEach(
+        _ = Parallel.ForEach(
             chunkIdsToCopy,
             options,
             chunkId =>
@@ -286,7 +286,7 @@ public sealed class SnapshotStore
             MaxDegreeOfParallelism = _world.Parallelism
         };
 
-        Parallel.ForEach(
+        _ = Parallel.ForEach(
             snapshotIdsToCopy,
             options,
             snapshotId =>
