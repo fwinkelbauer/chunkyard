@@ -1,27 +1,11 @@
 namespace Chunkyard;
 
-public sealed class CheckCommand : ICommand
+public sealed record CheckCommand(
+    SnapshotStore SnapshotStore,
+    int SnapshotId,
+    Fuzzy Include,
+    bool Shallow) : ICommand
 {
-    public CheckCommand(
-        SnapshotStore snapshotStore,
-        int snapshotId,
-        Fuzzy include,
-        bool shallow)
-    {
-        SnapshotStore = snapshotStore;
-        SnapshotId = snapshotId;
-        Include = include;
-        Shallow = shallow;
-    }
-
-    public SnapshotStore SnapshotStore { get; }
-
-    public int SnapshotId { get; }
-
-    public Fuzzy Include { get; }
-
-    public bool Shallow { get; }
-
     public int Run()
     {
         var valid = Shallow
@@ -38,24 +22,11 @@ public sealed class CheckCommand : ICommand
     }
 }
 
-public sealed class CopyCommand : ICommand
+public sealed record CopyCommand(
+    SnapshotStore SnapshotStore,
+    IRepository DestinationRepository,
+    int Last) : ICommand
 {
-    public CopyCommand(
-        SnapshotStore snapshotStore,
-        IRepository destinationRepository,
-        int last)
-    {
-        SnapshotStore = snapshotStore;
-        DestinationRepository = destinationRepository;
-        Last = last;
-    }
-
-    public SnapshotStore SnapshotStore { get; }
-
-    public IRepository DestinationRepository { get; }
-
-    public int Last { get; }
-
     public int Run()
     {
         SnapshotStore.CopyTo(DestinationRepository, Last);
@@ -64,28 +35,12 @@ public sealed class CopyCommand : ICommand
     }
 }
 
-public sealed class DiffCommand : ICommand
+public sealed record DiffCommand(
+    SnapshotStore SnapshotStore,
+    int FirstSnapshotId,
+    int SecondSnapshotId,
+    Fuzzy Include) : ICommand
 {
-    public DiffCommand(
-        SnapshotStore snapshotStore,
-        int firstSnapshotId,
-        int secondSnapshotId,
-        Fuzzy include)
-    {
-        SnapshotStore = snapshotStore;
-        FirstSnapshotId = firstSnapshotId;
-        SecondSnapshotId = secondSnapshotId;
-        Include = include;
-    }
-
-    public SnapshotStore SnapshotStore { get; }
-
-    public int FirstSnapshotId { get; }
-
-    public int SecondSnapshotId { get; }
-
-    public Fuzzy Include { get; }
-
     public int Run()
     {
         var first = SnapshotStore.GetSnapshot(FirstSnapshotId)
@@ -101,15 +56,9 @@ public sealed class DiffCommand : ICommand
     }
 }
 
-public sealed class GarbageCollectCommand : ICommand
+public sealed record GarbageCollectCommand(
+    SnapshotStore SnapshotStore) : ICommand
 {
-    public GarbageCollectCommand(SnapshotStore snapshotStore)
-    {
-        SnapshotStore = snapshotStore;
-    }
-
-    public SnapshotStore SnapshotStore { get; }
-
     public int Run()
     {
         SnapshotStore.GarbageCollect();
@@ -118,20 +67,10 @@ public sealed class GarbageCollectCommand : ICommand
     }
 }
 
-public sealed class KeepCommand : ICommand
+public sealed record KeepCommand(
+    SnapshotStore SnapshotStore,
+    int LatestCount) : ICommand
 {
-    public KeepCommand(
-        SnapshotStore snapshotStore,
-        int latestCount)
-    {
-        SnapshotStore = snapshotStore;
-        LatestCount = latestCount;
-    }
-
-    public SnapshotStore SnapshotStore { get; }
-
-    public int LatestCount { get; }
-
     public int Run()
     {
         SnapshotStore.KeepSnapshots(LatestCount);
@@ -140,15 +79,9 @@ public sealed class KeepCommand : ICommand
     }
 }
 
-public sealed class ListCommand : ICommand
+public sealed record ListCommand(
+    SnapshotStore SnapshotStore) : ICommand
 {
-    public ListCommand(SnapshotStore snapshotStore)
-    {
-        SnapshotStore = snapshotStore;
-    }
-
-    public SnapshotStore SnapshotStore { get; }
-
     public int Run()
     {
         foreach (var snapshotId in SnapshotStore.ListSnapshotIds())
@@ -165,20 +98,10 @@ public sealed class ListCommand : ICommand
     }
 }
 
-public sealed class RemoveCommand : ICommand
+public sealed record RemoveCommand(
+    SnapshotStore SnapshotStore,
+    int SnapshotId) : ICommand
 {
-    public RemoveCommand(
-        SnapshotStore snapshotStore,
-        int snapshotId)
-    {
-        SnapshotStore = snapshotStore;
-        SnapshotId = snapshotId;
-    }
-
-    public SnapshotStore SnapshotStore { get; }
-
-    public int SnapshotId { get; }
-
     public int Run()
     {
         SnapshotStore.RemoveSnapshot(SnapshotId);
@@ -187,32 +110,13 @@ public sealed class RemoveCommand : ICommand
     }
 }
 
-public sealed class RestoreCommand : ICommand
+public sealed record RestoreCommand(
+    SnapshotStore SnapshotStore,
+    IBlobSystem BlobSystem,
+    int SnapshotId,
+    Fuzzy Include,
+    bool Preview) : ICommand
 {
-    public RestoreCommand(
-        SnapshotStore snapshotStore,
-        IBlobSystem blobSystem,
-        int snapshotId,
-        Fuzzy include,
-        bool preview)
-    {
-        SnapshotStore = snapshotStore;
-        BlobSystem = blobSystem;
-        SnapshotId = snapshotId;
-        Include = include;
-        Preview = preview;
-    }
-
-    public SnapshotStore SnapshotStore { get; }
-
-    public IBlobSystem BlobSystem { get; }
-
-    public int SnapshotId { get; }
-
-    public Fuzzy Include { get; }
-
-    public bool Preview { get; }
-
     public int Run()
     {
         if (Preview)
@@ -233,24 +137,11 @@ public sealed class RestoreCommand : ICommand
     }
 }
 
-public sealed class ShowCommand : ICommand
+public sealed record ShowCommand(
+    SnapshotStore SnapshotStore,
+    int SnapshotId,
+    Fuzzy Include) : ICommand
 {
-    public ShowCommand(
-        SnapshotStore snapshotStore,
-        int snapshotId,
-        Fuzzy include)
-    {
-        SnapshotStore = snapshotStore;
-        SnapshotId = snapshotId;
-        Include = include;
-    }
-
-    public SnapshotStore SnapshotStore { get; }
-
-    public int SnapshotId { get; }
-
-    public Fuzzy Include { get; }
-
     public int Run()
     {
         var blobs = SnapshotStore.GetSnapshot(SnapshotId)
@@ -265,28 +156,12 @@ public sealed class ShowCommand : ICommand
     }
 }
 
-public sealed class StoreCommand : ICommand
+public sealed record StoreCommand(
+    SnapshotStore SnapshotStore,
+    IBlobSystem BlobSystem,
+    Fuzzy Include,
+    bool Preview) : ICommand
 {
-    public StoreCommand(
-        SnapshotStore snapshotStore,
-        IBlobSystem blobSystem,
-        Fuzzy include,
-        bool preview)
-    {
-        SnapshotStore = snapshotStore;
-        BlobSystem = blobSystem;
-        Include = include;
-        Preview = preview;
-    }
-
-    public SnapshotStore SnapshotStore { get; }
-
-    public IBlobSystem BlobSystem { get; }
-
-    public Fuzzy Include { get; }
-
-    public bool Preview { get; }
-
     public int Run()
     {
         if (Preview)
