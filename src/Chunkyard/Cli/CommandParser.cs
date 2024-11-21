@@ -13,7 +13,7 @@ public sealed class CommandParser
     public CommandParser(params ICommandParser[] parsers)
     {
         _parsers = parsers.ToDictionary(p => p.Command, p => p);
-        _help = new($"Chunkyard {GetVersion()}");
+        _help = new(GetInfo(typeof(CommandParser).Assembly));
 
         foreach (var parser in parsers)
         {
@@ -48,12 +48,20 @@ public sealed class CommandParser
         }
     }
 
-    private static string GetVersion()
+    private static string GetInfo(Assembly assembly)
     {
-        var attribute = typeof(Program).Assembly
-            .GetCustomAttributes<AssemblyInformationalVersionAttribute>()
-            .First();
+        var textInfo = new CultureInfo("en-US").TextInfo;
 
-        return attribute.InformationalVersion;
+        var product = assembly
+            .GetCustomAttributes<AssemblyProductAttribute>()
+            .First()
+            .Product;
+
+        var version = assembly
+            .GetCustomAttributes<AssemblyInformationalVersionAttribute>()
+            .First()
+            .InformationalVersion;
+
+        return $"{textInfo.ToTitleCase(product)} v{version}";
     }
 }
