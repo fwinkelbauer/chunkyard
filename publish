@@ -7,10 +7,10 @@ announce () {
 }
 
 apt_ensure () {
-    if ! dpkg -l | grep -q "$1"; then
-        announce "Install $1"
+    if ! [ -x "$(command -v "$1")" ]; then
+        announce "Install $2"
         sudo apt update
-        sudo apt install "$1" -y
+        sudo apt install "$2" -y
     fi
 }
 
@@ -30,8 +30,8 @@ script=$(readlink -f "${BASH_SOURCE[0]}")
 directory=$(dirname "$script")
 cd "$directory"
 
-apt_ensure 'git'
-apt_ensure 'dotnet-sdk-8.0'
+apt_ensure 'git' 'git'
+apt_ensure 'dotnet' 'dotnet-sdk-8.0'
 
 export DOTNET_CLI_TELEMETRY_OPTOUT='1'
 
