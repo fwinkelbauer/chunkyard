@@ -14,6 +14,7 @@ public sealed class SnapshotStore
     private readonly IProbe _probe;
     private readonly IWorld _world;
     private readonly Lazy<Crypto> _crypto;
+    private readonly ParallelOptions _parallelOptions;
 
     public SnapshotStore(
         IRepository repository,
@@ -54,25 +55,20 @@ public sealed class SnapshotStore
                     iterations);
             }
         });
+
+        _parallelOptions = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = _world.Parallelism
+        };
     }
 
     public DiffSet<Blob> StoreSnapshotPreview(
         IBlobSystem blobSystem,
         Fuzzy? fuzzy = null)
     {
-        var blobReferences = TryLastSnapshotId(_repository, out var snapshotId)
-            ? GetSnapshot(snapshotId).BlobReferences
-            : Array.Empty<BlobReference>();
-
-        fuzzy ??= new();
-
-        var blobs = blobSystem.ListBlobs()
-            .Where(b => fuzzy.IsMatch(b.Name))
-            .ToArray();
-
         return DiffSet.Create(
-            blobReferences.Select(br => br.Blob),
-            blobs,
+            ListLastBlobReferencesOrEmpty().Select(br => br.Blob),
+            blobSystem.ListBlobs(fuzzy),
             blob => blob.Name);
     }
 
@@ -128,8 +124,12 @@ public sealed class SnapshotStore
     {
         var storedBlobs = GetSnapshot(snapshotId).ListBlobs(fuzzy);
 
+        var existingBlobs = storedBlobs
+            .Where(b => blobSystem.BlobExists(b.Name))
+            .Select(b => blobSystem.GetBlob(b.Name));
+
         var diffSet = DiffSet.Create(
-            FindExisting(blobSystem, storedBlobs),
+            existingBlobs,
             storedBlobs,
             blob => blob.Name);
 
@@ -147,17 +147,11 @@ public sealed class SnapshotStore
         var blobReferencesToRestore = GetSnapshot(snapshotId)
             .ListBlobReferences(fuzzy)
             .Where(br => !blobSystem.BlobExists(br.Blob.Name)
-                || !blobSystem.GetBlob(br.Blob.Name).Equals(br.Blob))
-            .ToArray();
-
-        var options = new ParallelOptions
-        {
-            MaxDegreeOfParallelism = _world.Parallelism
-        };
+                || !blobSystem.GetBlob(br.Blob.Name).Equals(br.Blob));
 
         _ = Parallel.ForEach(
             blobReferencesToRestore,
-            options,
+            _parallelOptions,
             blobReference => RestoreBlob(blobSystem, blobReference));
 
         _probe.RestoredSnapshot(snapshotId);
@@ -195,8 +189,7 @@ public sealed class SnapshotStore
         var snapshotIds = ListSnapshotIds();
 
         var snapshotIdsToRemove = snapshotIds
-            .Take(snapshotIds.Length - latestCount)
-            .ToArray();
+            .Take(snapshotIds.Length - latestCount);
 
         foreach (var snapshotId in snapshotIdsToRemove)
         {
@@ -216,8 +209,7 @@ public sealed class SnapshotStore
         }
 
         var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
-            .Except(otherRepository.Chunks.UnorderedList())
-            .ToArray();
+            .Except(otherRepository.Chunks.UnorderedList());
 
         CopyChunkIds(otherRepository, chunkIdsToCopy);
         CopySnapshotIds(otherRepository, snapshotIdsToCopy);
@@ -259,14 +251,9 @@ public sealed class SnapshotStore
         IRepository otherRepository,
         IEnumerable<string> chunkIdsToCopy)
     {
-        var options = new ParallelOptions
-        {
-            MaxDegreeOfParallelism = _world.Parallelism
-        };
-
         _ = Parallel.ForEach(
             chunkIdsToCopy,
-            options,
+            _parallelOptions,
             chunkId =>
             {
                 otherRepository.Chunks.Store(
@@ -281,14 +268,9 @@ public sealed class SnapshotStore
         IRepository otherRepository,
         IEnumerable<int> snapshotIdsToCopy)
     {
-        var options = new ParallelOptions
-        {
-            MaxDegreeOfParallelism = _world.Parallelism
-        };
-
         _ = Parallel.ForEach(
             snapshotIdsToCopy,
-            options,
+            _parallelOptions,
             snapshotId =>
             {
                 var bytes = _repository.Snapshots.Retrieve(snapshotId);
@@ -326,16 +308,12 @@ public sealed class SnapshotStore
 
     private BlobReference[] StoreBlobs(
         IBlobSystem blobSystem,
-        Fuzzy? fuzzy = null)
+        Fuzzy? fuzzy)
     {
-        fuzzy ??= new();
+        var existingBlobReferences = ListLastBlobReferencesOrEmpty()
+            .ToDictionary(br => br.Blob, br => br);
 
-        var existingBlobReferences = TryLastSnapshotId(_repository, out var snapshotId)
-            ? GetSnapshot(snapshotId).BlobReferences
-                .ToDictionary(br => br.Blob, br => br)
-            : new Dictionary<Blob, BlobReference>();
-
-        var blobs = blobSystem.ListBlobs().Where(b => fuzzy.IsMatch(b.Name));
+        var blobs = blobSystem.ListBlobs(fuzzy);
         var newBlobReferences = new List<BlobReference>();
         var blobsToStore = new List<Blob>();
 
@@ -385,7 +363,7 @@ public sealed class SnapshotStore
     private bool CheckSnapshot(
         Func<string, bool> checkChunkIdFunc,
         int snapshotId,
-        Fuzzy? fuzzy = null)
+        Fuzzy? fuzzy)
     {
         var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(fuzzy)
             .AsParallel()
@@ -505,6 +483,13 @@ public sealed class SnapshotStore
         return chunkIds;
     }
 
+    private IReadOnlyCollection<BlobReference> ListLastBlobReferencesOrEmpty()
+    {
+        return TryLastSnapshotId(_repository, out var snapshotId)
+            ? GetSnapshot(snapshotId).BlobReferences
+            : Array.Empty<BlobReference>();
+    }
+
     private int ResolveSnapshotId(int snapshotId)
     {
         //  0: the first element
@@ -528,23 +513,6 @@ public sealed class SnapshotStore
         Array.Sort(snapshotIds);
 
         return snapshotIds[position];
-    }
-
-    private static List<Blob> FindExisting(
-        IBlobSystem blobSystem,
-        IReadOnlyCollection<Blob> blobs)
-    {
-        var existing = new List<Blob>();
-
-        foreach (var blob in blobs)
-        {
-            if (blobSystem.BlobExists(blob.Name))
-            {
-                existing.Add(blobSystem.GetBlob(blob.Name));
-            }
-        }
-
-        return existing;
     }
 
     private static bool TryLastSnapshotId(IRepository repository, out int key)

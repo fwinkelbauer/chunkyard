@@ -261,13 +261,12 @@ public static class SnapshotStoreTests
             ToDictionary(outputBlobSystem));
 
         var blobReferences = snapshotStore.GetSnapshot(snapshotId)
-            .BlobReferences
-            .ToArray();
+            .BlobReferences;
 
         var chunkIds = blobReferences.SelectMany(br => br.ChunkIds).ToArray();
 
         Assert.NotEmpty(blobReferences);
-        Assert.True(blobReferences.Length * 2 <= chunkIds.Length);
+        Assert.True(blobReferences.Count * 2 <= chunkIds.Length);
     }
 
     [Fact]
