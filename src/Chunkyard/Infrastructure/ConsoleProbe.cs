@@ -28,6 +28,7 @@ internal sealed class ConsoleProbe : IProbe
 
     public void RemovedChunk(string chunkId)
     {
+        Console.Error.WriteLine($"Removed chunk: {chunkId}");
     }
 
     public void CopiedSnapshot(int snapshotId)
@@ -44,6 +45,7 @@ internal sealed class ConsoleProbe : IProbe
 
     public void RemovedSnapshot(int snapshotId)
     {
+        Console.Error.WriteLine($"Removed snapshot: {snapshotId}");
     }
 
     public void SnapshotValid(int snapshotId, bool valid)

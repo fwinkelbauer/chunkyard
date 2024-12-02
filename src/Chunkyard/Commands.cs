@@ -50,7 +50,21 @@ public sealed record DiffCommand(
             .ListBlobs(Include);
 
         var diff = DiffSet.Create(first, second, b => b.Name);
-        ConsoleUtils.PrintDiff(diff);
+
+        foreach (var added in diff.Added)
+        {
+            Console.WriteLine($"+ {added.Name}");
+        }
+
+        foreach (var changed in diff.Changed)
+        {
+            Console.WriteLine($"~ {changed.Name}");
+        }
+
+        foreach (var removed in diff.Removed)
+        {
+            Console.WriteLine($"- {removed.Name}");
+        }
 
         return 0;
     }
@@ -114,24 +128,11 @@ public sealed record RestoreCommand(
     SnapshotStore SnapshotStore,
     IBlobSystem BlobSystem,
     int SnapshotId,
-    Fuzzy Include,
-    bool Preview) : ICommand
+    Fuzzy Include) : ICommand
 {
     public int Run()
     {
-        if (Preview)
-        {
-            var diff = SnapshotStore.RestoreSnapshotPreview(
-                BlobSystem,
-                SnapshotId,
-                Include);
-
-            ConsoleUtils.PrintDiff(diff);
-        }
-        else
-        {
-            SnapshotStore.RestoreSnapshot(BlobSystem, SnapshotId, Include);
-        }
+        SnapshotStore.RestoreSnapshot(BlobSystem, SnapshotId, Include);
 
         return 0;
     }
@@ -159,20 +160,11 @@ public sealed record ShowCommand(
 public sealed record StoreCommand(
     SnapshotStore SnapshotStore,
     IBlobSystem BlobSystem,
-    Fuzzy Include,
-    bool Preview) : ICommand
+    Fuzzy Include) : ICommand
 {
     public int Run()
     {
-        if (Preview)
-        {
-            var diff = SnapshotStore.StoreSnapshotPreview(BlobSystem, Include);
-            ConsoleUtils.PrintDiff(diff);
-        }
-        else
-        {
-            _ = SnapshotStore.StoreSnapshot(BlobSystem, Include);
-        }
+        _ = SnapshotStore.StoreSnapshot(BlobSystem, Include);
 
         return 0;
     }

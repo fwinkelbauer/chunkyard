@@ -64,7 +64,7 @@ chunkyard
 chunkyard store --help
 
 # See which files chunkyard would backup
-chunkyard store --repository 'MyBackup' --paths 'Music' 'Pictures' 'Videos' --preview
+chunkyard store --repository 'MyBackup' --paths 'Music' 'Pictures' 'Videos' --dry-run
 
 # Store a backup
 chunkyard store --repository 'MyBackup' --paths 'Music' 'Pictures' 'Videos' --includes '!Desktop\.ini' '!thumbs\.db'

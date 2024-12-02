@@ -62,16 +62,6 @@ public sealed class SnapshotStore
         };
     }
 
-    public DiffSet<Blob> StoreSnapshotPreview(
-        IBlobSystem blobSystem,
-        Fuzzy? fuzzy = null)
-    {
-        return DiffSet.Create(
-            ListLastBlobReferencesOrEmpty().Select(br => br.Blob),
-            blobSystem.ListBlobs(fuzzy),
-            blob => blob.Name);
-    }
-
     public int StoreSnapshot(
         IBlobSystem blobSystem,
         Fuzzy? fuzzy = null)
@@ -115,28 +105,6 @@ public sealed class SnapshotStore
             ChunkValid,
             snapshotId,
             fuzzy);
-    }
-
-    public DiffSet<Blob> RestoreSnapshotPreview(
-        IBlobSystem blobSystem,
-        int snapshotId,
-        Fuzzy? fuzzy = null)
-    {
-        var storedBlobs = GetSnapshot(snapshotId).ListBlobs(fuzzy);
-
-        var existingBlobs = storedBlobs
-            .Where(b => blobSystem.BlobExists(b.Name))
-            .Select(b => blobSystem.GetBlob(b.Name));
-
-        var diffSet = DiffSet.Create(
-            existingBlobs,
-            storedBlobs,
-            blob => blob.Name);
-
-        return new DiffSet<Blob>(
-            diffSet.Added,
-            diffSet.Changed,
-            Array.Empty<Blob>());
     }
 
     public void RestoreSnapshot(
@@ -310,8 +278,9 @@ public sealed class SnapshotStore
         IBlobSystem blobSystem,
         Fuzzy? fuzzy)
     {
-        var existingBlobReferences = ListLastBlobReferencesOrEmpty()
-            .ToDictionary(br => br.Blob, br => br);
+        var existingBlobReferences = TryLastSnapshotId(_repository, out var snapshotId)
+            ? GetSnapshot(snapshotId).BlobReferences.ToDictionary(br => br.Blob, br => br)
+            : new Dictionary<Blob, BlobReference>();
 
         var blobs = blobSystem.ListBlobs(fuzzy);
         var newBlobReferences = new List<BlobReference>();
@@ -481,13 +450,6 @@ public sealed class SnapshotStore
         }
 
         return chunkIds;
-    }
-
-    private IReadOnlyCollection<BlobReference> ListLastBlobReferencesOrEmpty()
-    {
-        return TryLastSnapshotId(_repository, out var snapshotId)
-            ? GetSnapshot(snapshotId).BlobReferences
-            : Array.Empty<BlobReference>();
     }
 
     private int ResolveSnapshotId(int snapshotId)

@@ -42,34 +42,6 @@ public static class SnapshotStoreTests
     }
 
     [Fact]
-    public static void StoreSnapshotPreview_Shows_Preview()
-    {
-        var snapshotStore = Some.SnapshotStore();
-        var initialBlobs = Some.Blobs("some blob");
-        var initialBlobSystem = Some.BlobSystem(initialBlobs);
-        var changedBlobs = Some.Blobs("other blob");
-        var changedBlobSystem = Some.BlobSystem(changedBlobs);
-
-        var initialDiff = snapshotStore.StoreSnapshotPreview(initialBlobSystem);
-        _ = snapshotStore.StoreSnapshot(initialBlobSystem);
-        var changedDiff = snapshotStore.StoreSnapshotPreview(changedBlobSystem);
-
-        Assert.Equal(
-            new DiffSet<Blob>(
-                initialBlobs,
-                Array.Empty<Blob>(),
-                Array.Empty<Blob>()),
-            initialDiff);
-
-        Assert.Equal(
-            new DiffSet<Blob>(
-                changedBlobs,
-                Array.Empty<Blob>(),
-                initialBlobs),
-            changedDiff);
-    }
-
-    [Fact]
     public static void GetSnapshot_Accepts_Negative_SnapshotIds_With_Gaps()
     {
         var snapshotStore = Some.SnapshotStore();
@@ -218,27 +190,6 @@ public static class SnapshotStoreTests
         Assert.Equal(
             ToDictionary(inputBlobSystem),
             ToDictionary(outputBlobSystem));
-    }
-
-    [Fact]
-    public static void RestoreSnapshotPreview_Shows_Preview()
-    {
-        var blobs = Some.Blobs("some blob");
-        var snapshotStore = Some.SnapshotStore();
-
-        var snapshotId = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(blobs));
-
-        var expected = new DiffSet<Blob>(
-            blobs,
-            Array.Empty<Blob>(),
-            Array.Empty<Blob>());
-
-        var actual = snapshotStore.RestoreSnapshotPreview(
-            Some.BlobSystem(),
-            snapshotId);
-
-        Assert.Equal(expected, actual);
     }
 
     [Fact]

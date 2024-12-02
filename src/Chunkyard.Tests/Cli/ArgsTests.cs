@@ -20,7 +20,7 @@ public static class ArgsTests
             Some.Flags(
                 ("--snapshot", Some.Strings("-2")),
                 ("-f", Some.Strings("foo", "bar", "baz")),
-                ("--preview", Some.Strings()),
+                ("--dry-run", Some.Strings()),
                 ("--force", Some.Strings())));
 
         var actual = Args.Parse(
@@ -28,7 +28,7 @@ public static class ArgsTests
             "--snapshot", "-2",
             "-f", "foo", "bar",
             "-f", "baz",
-            "--preview",
+            "--dry-run",
             "--force");
 
         Assert.Equal(expected, actual);
