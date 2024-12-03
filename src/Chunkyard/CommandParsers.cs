@@ -247,8 +247,7 @@ public sealed class StoreCommandParser : ICommandParser
 public enum Prompt
 {
     Console = 0,
-    Store = 1,
-    Libsecret = 2
+    Libsecret = 1
 }
 
 public static class ArgConsumerExtensions
@@ -266,7 +265,6 @@ public static class ArgConsumerExtensions
         IPrompt prompt = promptValue switch
         {
             Prompt.Console => new ConsolePrompt(),
-            Prompt.Store => new StorePrompt(new ConsolePrompt()),
             Prompt.Libsecret => new LibsecretPrompt(new ConsolePrompt()),
             _ => new ConsolePrompt()
         };
