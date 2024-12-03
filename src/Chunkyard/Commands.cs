@@ -44,26 +44,30 @@ public sealed record DiffCommand(
     public int Run()
     {
         var first = SnapshotStore.GetSnapshot(FirstSnapshotId)
-            .ListBlobs(Include);
+            .ListBlobs(Include)
+            .ToDictionary(b => b.Name, b => b);
 
         var second = SnapshotStore.GetSnapshot(SecondSnapshotId)
-            .ListBlobs(Include);
+            .ListBlobs(Include)
+            .ToDictionary(b => b.Name, b => b);
 
-        var diff = DiffSet.Create(first, second, b => b.Name);
+        var changes = first.Keys
+            .Intersect(second.Keys)
+            .Where(key => !first[key].Equals(second[key]));
 
-        foreach (var added in diff.Added)
+        foreach (var added in second.Keys.Except(first.Keys))
         {
-            Console.WriteLine($"+ {added.Name}");
+            Console.WriteLine($"+ {added}");
         }
 
-        foreach (var changed in diff.Changed)
+        foreach (var changed in changes)
         {
-            Console.WriteLine($"~ {changed.Name}");
+            Console.WriteLine($"~ {changed}");
         }
 
-        foreach (var removed in diff.Removed)
+        foreach (var removed in first.Keys.Except(second.Keys))
         {
-            Console.WriteLine($"- {removed.Name}");
+            Console.WriteLine($"- {removed}");
         }
 
         return 0;
