@@ -64,16 +64,16 @@ chunkyard
 chunkyard store --help
 
 # See which files chunkyard would backup
-chunkyard store --repository 'MyBackup' --paths 'Music' 'Pictures' 'Videos' --dry-run
+chunkyard store --repository 'MyBackup' --path 'Music' 'Pictures' 'Videos' --dry-run
 
 # Store a backup
-chunkyard store --repository 'MyBackup' --paths 'Music' 'Pictures' 'Videos' --includes '!Desktop\.ini' '!thumbs\.db'
+chunkyard store --repository 'MyBackup' --path 'Music' 'Pictures' 'Videos'
 
 # Check if the latest backup is valid
 chunkyard check --repository 'MyBackup'
 
 # Restore parts of the latest backup
-chunkyard restore --repository 'MyBackup' --directory '.' --includes 'mp3$'
+chunkyard restore --repository 'MyBackup' --directory '.' --include 'mp3$'
 
 # Keep the latest four backups
 chunkyard keep --repository 'MyBackup' --latest '4'
