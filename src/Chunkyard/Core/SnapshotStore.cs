@@ -347,7 +347,7 @@ public sealed class SnapshotStore
     private bool ChunkValid(string chunkId)
     {
         return _repository.Chunks.Exists(chunkId)
-            && ChunkId.Valid(chunkId, _repository.Chunks.Retrieve(chunkId));
+            && chunkId.Equals(ToChunkId(_repository.Chunks.Retrieve(chunkId)));
     }
 
     private bool CheckBlobReference(
@@ -387,7 +387,7 @@ public sealed class SnapshotStore
     private string StoreChunk(byte[] chunk)
     {
         var encrypted = _crypto.Value.Encrypt(chunk);
-        var chunkId = ChunkId.Compute(encrypted);
+        var chunkId = ToChunkId(encrypted);
 
         _repository.Chunks.Store(chunkId, encrypted);
 
@@ -487,6 +487,12 @@ public sealed class SnapshotStore
             : 0;
 
         return any;
+    }
+
+    private static string ToChunkId(ReadOnlySpan<byte> chunk)
+    {
+        return Convert.ToHexString(SHA256.HashData(chunk))
+            .ToLowerInvariant();
     }
 
     private static string ToPromptKey(byte[] salt, int iterations)
