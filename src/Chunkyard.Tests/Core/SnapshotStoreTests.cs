@@ -319,13 +319,15 @@ public static class SnapshotStoreTests
 
         snapshotStore.CopyTo(otherRepository);
 
-        Assert.Equal(
-            repository.Chunks.UnorderedList().ToHashSet(),
-            otherRepository.Chunks.UnorderedList().ToHashSet());
+        Assert.Equivalent(
+            repository.Chunks.UnorderedList(),
+            otherRepository.Chunks.UnorderedList(),
+            true);
 
-        Assert.Equal(
-            repository.Snapshots.UnorderedList().ToHashSet(),
-            otherRepository.Snapshots.UnorderedList().ToHashSet());
+        Assert.Equivalent(
+            repository.Snapshots.UnorderedList(),
+            otherRepository.Snapshots.UnorderedList(),
+            true);
     }
 
     [Fact]
@@ -339,21 +341,20 @@ public static class SnapshotStoreTests
         _ = otherSnapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs("some blob")));
 
-        var expectedChunks = otherRepository.Chunks.UnorderedList()
-            .ToHashSet();
-
-        var expectedSnapshots = otherRepository.Snapshots.UnorderedList()
-            .ToHashSet();
+        var expectedChunks = otherRepository.Chunks.UnorderedList();
+        var expectedSnapshots = otherRepository.Snapshots.UnorderedList();
 
         snapshotStore.CopyTo(otherRepository);
 
-        Assert.Equal(
+        Assert.Equivalent(
             expectedChunks,
-            otherRepository.Chunks.UnorderedList().ToHashSet());
+            otherRepository.Chunks.UnorderedList(),
+            true);
 
-        Assert.Equal(
+        Assert.Equivalent(
             expectedSnapshots,
-            otherRepository.Snapshots.UnorderedList().ToHashSet());
+            otherRepository.Snapshots.UnorderedList(),
+            true);
     }
 
     [Fact]
