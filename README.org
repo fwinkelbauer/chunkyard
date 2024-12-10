@@ -79,7 +79,7 @@ chunkyard restore --repository 'MyBackup' --directory '.' --include 'mp3$'
 chunkyard keep --repository 'MyBackup' --latest '4'
 #+end_src
 
-You can find examples of how I use Chunkyard in my [[https://github.com/fwinkelbauer/dotfiles][dotfiles]].
+You can find examples of how I use Chunkyard in my [[https://florianwinkelbauer.com/notes/dotfiles][dotfiles]].
 
 * Architecture
 
