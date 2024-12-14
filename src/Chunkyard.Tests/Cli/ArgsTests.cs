@@ -1,19 +1,20 @@
 namespace Chunkyard.Tests.Cli;
 
-public static class ArgsTests
+[TestClass]
+public sealed class ArgsTests
 {
-    [Fact]
-    public static void Parse_Treats_Single_Argument_As_Command()
+    [TestMethod]
+    public void Parse_Treats_Single_Argument_As_Command()
     {
         var expected = new Args("help", Some.Flags());
 
         var actual = Args.Parse("help");
 
-        Assert.Equal(expected, actual);
+        Assert.AreEqual(expected, actual);
     }
 
-    [Fact]
-    public static void Parse_Distinguishes_Between_Flags_And_Values()
+    [TestMethod]
+    public void Parse_Distinguishes_Between_Flags_And_Values()
     {
         var expected = new Args(
             "list",
@@ -31,11 +32,11 @@ public static class ArgsTests
             "--dry-run",
             "--force");
 
-        Assert.Equal(expected, actual);
+        Assert.AreEqual(expected, actual);
     }
 
-    [Fact]
-    public static void Parse_Accepts_Multi_Word_Command()
+    [TestMethod]
+    public void Parse_Accepts_Multi_Word_Command()
     {
         var expected = new Args(
             "command with spaces",
@@ -44,11 +45,11 @@ public static class ArgsTests
 
         var actual = Args.Parse("command", "with", "spaces", "--help");
 
-        Assert.Equal(expected, actual);
+        Assert.AreEqual(expected, actual);
     }
 
-    [Fact]
-    public static void Command_Can_Be_Empty()
+    [TestMethod]
+    public void Command_Can_Be_Empty()
     {
         var expected = new Args(
             "",
@@ -57,12 +58,12 @@ public static class ArgsTests
 
         var actual = Args.Parse("--help");
 
-        Assert.Equal(expected, actual);
+        Assert.AreEqual(expected, actual);
     }
 
-    [Fact]
-    public static void Parse_Treats_Empty_Arguments_As_Error()
+    [TestMethod]
+    public void Parse_Treats_Empty_Arguments_As_Error()
     {
-        Assert.Null(Args.Parse());
+        Assert.IsNull(Args.Parse());
     }
 }
