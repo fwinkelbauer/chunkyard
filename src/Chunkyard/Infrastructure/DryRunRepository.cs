@@ -35,6 +35,7 @@ public sealed class DryRunRepository<T> : IRepository<T>
 
     public void Store(T key, ReadOnlySpan<byte> value)
     {
+        // Do nothing
     }
 
     public byte[] Retrieve(T key)
@@ -54,5 +55,6 @@ public sealed class DryRunRepository<T> : IRepository<T>
 
     public void Remove(T key)
     {
+        // Do nothing
     }
 }

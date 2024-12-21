@@ -62,9 +62,7 @@ public sealed class SnapshotStore
         };
     }
 
-    public int StoreSnapshot(
-        IBlobSystem blobSystem,
-        Fuzzy? fuzzy = null)
+    public int StoreSnapshot(IBlobSystem blobSystem, Fuzzy? fuzzy = null)
     {
         var snapshot = new Snapshot(
             _world.UtcNow(),
@@ -84,27 +82,17 @@ public sealed class SnapshotStore
     public Snapshot GetSnapshot(int snapshotId)
     {
         return GetSnapshot(
-            GetSnapshotReference(snapshotId).ChunkIds);
+            GetSnapshotReference(snapshotId));
     }
 
-    public bool CheckSnapshotExists(
-        int snapshotId,
-        Fuzzy? fuzzy = null)
+    public bool CheckSnapshotExists(int snapshotId, Fuzzy? fuzzy = null)
     {
-        return CheckSnapshot(
-            _repository.Chunks.Exists,
-            snapshotId,
-            fuzzy);
+        return CheckSnapshot(_repository.Chunks.Exists, snapshotId, fuzzy);
     }
 
-    public bool CheckSnapshotValid(
-        int snapshotId,
-        Fuzzy? fuzzy = null)
+    public bool CheckSnapshotValid(int snapshotId, Fuzzy? fuzzy = null)
     {
-        return CheckSnapshot(
-            ChunkValid,
-            snapshotId,
-            fuzzy);
+        return CheckSnapshot(ChunkValid, snapshotId, fuzzy);
     }
 
     public void RestoreSnapshot(
@@ -120,7 +108,7 @@ public sealed class SnapshotStore
         _ = Parallel.ForEach(
             blobReferencesToRestore,
             _parallelOptions,
-            blobReference => RestoreBlob(blobSystem, blobReference));
+            br => RestoreBlob(blobSystem, br));
 
         _probe.RestoredSnapshot(snapshotId);
     }
@@ -241,9 +229,10 @@ public sealed class SnapshotStore
             _parallelOptions,
             snapshotId =>
             {
-                var bytes = _repository.Snapshots.Retrieve(snapshotId);
+                otherRepository.Snapshots.Store(
+                    snapshotId,
+                    _repository.Snapshots.Retrieve(snapshotId));
 
-                otherRepository.Snapshots.Store(snapshotId, bytes);
                 _probe.CopiedSnapshot(snapshotId);
             });
     }
@@ -265,11 +254,11 @@ public sealed class SnapshotStore
         }
     }
 
-    private Snapshot GetSnapshot(IEnumerable<string> chunkIds)
+    private Snapshot GetSnapshot(SnapshotReference snapshotReference)
     {
         using var memoryStream = new MemoryStream();
 
-        RestoreChunks(chunkIds, memoryStream);
+        RestoreChunks(snapshotReference.ChunkIds, memoryStream);
 
         return Serialize.BytesToSnapshot(memoryStream.ToArray());
     }
@@ -440,12 +429,12 @@ public sealed class SnapshotStore
 
         foreach (var snapshotId in snapshotIds)
         {
-            var snapshotChunkIds = GetSnapshotReference(snapshotId).ChunkIds;
+            var snapshotReference = GetSnapshotReference(snapshotId);
 
-            var blobChunkIds = GetSnapshot(snapshotChunkIds).BlobReferences
+            var blobChunkIds = GetSnapshot(snapshotReference).BlobReferences
                 .SelectMany(br => br.ChunkIds);
 
-            chunkIds.UnionWith(snapshotChunkIds);
+            chunkIds.UnionWith(snapshotReference.ChunkIds);
             chunkIds.UnionWith(blobChunkIds);
         }
 
