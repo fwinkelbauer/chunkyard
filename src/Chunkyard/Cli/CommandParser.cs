@@ -37,8 +37,12 @@ public sealed class CommandParser
         }
         else if (_parsers.TryGetValue(arg.Command, out var parser))
         {
-            return parser.Parse(
-                new FlagConsumer(arg.Flags, _help));
+            var consumer = new FlagConsumer(arg.Flags, _help);
+            var command = parser.Parse(consumer);
+
+            return consumer.HelpNeeded(out var help) || command == null
+                ? help
+                : command;
         }
         else
         {

@@ -136,63 +136,63 @@ public sealed class FlagConsumerTests
     }
 
     [TestMethod]
-    public void NoHelp_Returns_True_If_No_Issues()
+    public void HelpNeeded_Returns_False_If_No_Issues()
     {
         var consumer = Some.FlagConsumer(
             ("--list", Some.Strings()));
 
         Assert.IsTrue(consumer.TryStrings("--list", "info", out _));
-        Assert.IsTrue(consumer.NoHelp(out _));
+        Assert.IsFalse(consumer.HelpNeeded(out _));
     }
 
     [TestMethod]
-    public void NoHelp_Returns_True_If_Not_Requested()
+    public void HelpNeeded_Returns_False_If_Not_Requested()
     {
         var consumer = Some.FlagConsumer(
             ("--help", Some.Strings("false")));
 
-        Assert.IsTrue(consumer.NoHelp(out _));
+        Assert.IsFalse(consumer.HelpNeeded(out _));
     }
 
     [TestMethod]
-    public void NoHelp_Returns_False_If_Requested()
+    public void HelpNeeded_Returns_True_If_Requested()
     {
-        Assert.IsFalse(Some.FlagConsumer(("--help", Some.Strings()))
-            .NoHelp(out _));
+        Assert.IsTrue(Some.FlagConsumer(("--help", Some.Strings()))
+            .HelpNeeded(out _));
 
-        Assert.IsFalse(Some.FlagConsumer(("--help", Some.Strings("true")))
-            .NoHelp(out _));
+        Assert.IsTrue(Some.FlagConsumer(("--help", Some.Strings("true")))
+            .HelpNeeded(out _));
 
-        Assert.IsFalse(Some.FlagConsumer(("--help", Some.Strings("not-a-bool")))
-            .NoHelp(out _));
+        Assert.IsTrue(Some.FlagConsumer(("--help", Some.Strings("not-a-bool")))
+            .HelpNeeded(out _));
     }
 
     [TestMethod]
-    public void NoHelp_Returns_False_On_Unconsumed_Arguments()
+    public void HelpNeeded_Returns_True_On_Unconsumed_Arguments()
     {
         var consumer = Some.FlagConsumer(
             ("--list", Some.Strings("element")));
 
-        Assert.IsFalse(consumer.NoHelp(out _));
+        Assert.IsTrue(consumer.HelpNeeded(out _));
     }
 
     [TestMethod]
-    public void NoHelp_Returns_False_On_Invalid_Arguments()
+    public void HelpNeeded_Returns_True_On_Invalid_Arguments()
     {
         var consumer = Some.FlagConsumer(
             ("--bool", Some.Strings("not-a-bool")));
 
         Assert.IsFalse(consumer.TryBool("--bool", "info", out _));
-        Assert.IsFalse(consumer.NoHelp(out _));
+        Assert.IsTrue(consumer.HelpNeeded(out _));
     }
 
     [TestMethod]
-    public void NoHelp_Returns_False_On_Missing_Arguments()
+    public void HelpNeeded_Returns_True_On_Missing_Arguments()
     {
         var consumer = Some.FlagConsumer();
 
         Assert.IsFalse(consumer.TryString("--some", "info", out _));
-        Assert.IsFalse(consumer.NoHelp(out _));
+        Assert.IsTrue(consumer.HelpNeeded(out _));
     }
 
     public enum Day

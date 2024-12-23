@@ -6,13 +6,12 @@ public sealed class CheckCommandParser : ICommandParser
 
     public string Info => "Check if a snapshot is valid";
 
-    public ICommand Parse(FlagConsumer consumer)
+    public ICommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore, out _)
             & consumer.TrySnapshot(out var snapshotId)
             & consumer.TryInclude(out var include)
-            & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow)
-            & consumer.NoHelp(out var help))
+            & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow))
         {
             return new CheckCommand(
                 snapshotStore,
@@ -22,7 +21,7 @@ public sealed class CheckCommandParser : ICommandParser
         }
         else
         {
-            return help;
+            return null;
         }
     }
 }
@@ -33,12 +32,11 @@ public sealed class CopyCommandParser : ICommandParser
 
     public string Info => "Copy snapshots from one repository to another";
 
-    public ICommand Parse(FlagConsumer consumer)
+    public ICommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore, out var dryRun)
             & consumer.TryString("--destination", "The destination repository path", out var destinationRepository)
-            & consumer.TryInt("--last", "The maximum amount of snapshots to copy. Zero or a negative number copies all", out var last, 0)
-            & consumer.NoHelp(out var help))
+            & consumer.TryInt("--last", "The maximum amount of snapshots to copy. Zero or a negative number copies all", out var last, 0))
         {
             return new CopyCommand(
                 snapshotStore,
@@ -49,7 +47,7 @@ public sealed class CopyCommandParser : ICommandParser
         }
         else
         {
-            return help;
+            return null;
         }
     }
 }
@@ -60,13 +58,12 @@ public sealed class DiffCommandParser : ICommandParser
 
     public string Info => "Show the difference between two snapshots";
 
-    public ICommand Parse(FlagConsumer consumer)
+    public ICommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore, out _)
             & consumer.TryInt("--first", "The first snapshot ID", out var firstSnapshotId, SnapshotStore.SecondLatestSnapshotId)
             & consumer.TryInt("--second", "The second snapshot ID", out var secondSnapshotId, SnapshotStore.LatestSnapshotId)
-            & consumer.TryInclude(out var include)
-            & consumer.NoHelp(out var help))
+            & consumer.TryInclude(out var include))
         {
             return new DiffCommand(
                 snapshotStore,
@@ -76,7 +73,7 @@ public sealed class DiffCommandParser : ICommandParser
         }
         else
         {
-            return help;
+            return null;
         }
     }
 }
@@ -87,16 +84,15 @@ public sealed class GarbageCollectParser : ICommandParser
 
     public string Info => "Remove unreferenced chunks";
 
-    public ICommand Parse(FlagConsumer consumer)
+    public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out _)
-            & consumer.NoHelp(out var help))
+        if (consumer.TrySnapshotStore(out var snapshotStore, out _))
         {
             return new GarbageCollectCommand(snapshotStore);
         }
         else
         {
-            return help;
+            return null;
         }
     }
 }
@@ -107,11 +103,10 @@ public sealed class KeepCommandParser : ICommandParser
 
     public string Info => "Keep only the given list of snapshots";
 
-    public ICommand Parse(FlagConsumer consumer)
+    public ICommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore, out _)
-            & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount)
-            & consumer.NoHelp(out var help))
+            & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount))
         {
             return new KeepCommand(
                 snapshotStore,
@@ -119,7 +114,7 @@ public sealed class KeepCommandParser : ICommandParser
         }
         else
         {
-            return help;
+            return null;
         }
     }
 }
@@ -130,16 +125,15 @@ public sealed class ListCommandParser : ICommandParser
 
     public string Info => "List all snapshots";
 
-    public ICommand Parse(FlagConsumer consumer)
+    public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out _)
-            & consumer.NoHelp(out var help))
+        if (consumer.TrySnapshotStore(out var snapshotStore, out _))
         {
             return new ListCommand(snapshotStore);
         }
         else
         {
-            return help;
+            return null;
         }
     }
 }
@@ -150,11 +144,10 @@ public sealed class RemoveCommandParser : ICommandParser
 
     public string Info => "Remove a snapshot or a set of chunk IDs";
 
-    public ICommand Parse(FlagConsumer consumer)
+    public ICommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore, out _)
-            & consumer.TrySnapshot(out var snapshot)
-            & consumer.NoHelp(out var help))
+            & consumer.TrySnapshot(out var snapshot))
         {
             return new RemoveCommand(
                 snapshotStore,
@@ -162,7 +155,7 @@ public sealed class RemoveCommandParser : ICommandParser
         }
         else
         {
-            return help;
+            return null;
         }
     }
 }
@@ -173,13 +166,12 @@ public sealed class RestoreCommandParser : ICommandParser
 
     public string Info => "Restore a snapshot";
 
-    public ICommand Parse(FlagConsumer consumer)
+    public ICommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore, out var dryRun)
             & consumer.TryString("--directory", "The directory to restore into", out var directory)
             & consumer.TrySnapshot(out var snapshot)
-            & consumer.TryInclude(out var include)
-            & consumer.NoHelp(out var help))
+            & consumer.TryInclude(out var include))
         {
             return new RestoreCommand(
                 snapshotStore,
@@ -189,7 +181,7 @@ public sealed class RestoreCommandParser : ICommandParser
         }
         else
         {
-            return help;
+            return null;
         }
     }
 }
@@ -200,12 +192,11 @@ public sealed class ShowCommandParser : ICommandParser
 
     public string Info => "Show the content of a snapshot";
 
-    public ICommand Parse(FlagConsumer consumer)
+    public ICommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore, out _)
             & consumer.TrySnapshot(out var snapshot)
-            & consumer.TryInclude(out var include)
-            & consumer.NoHelp(out var help))
+            & consumer.TryInclude(out var include))
         {
             return new ShowCommand(
                 snapshotStore,
@@ -214,7 +205,7 @@ public sealed class ShowCommandParser : ICommandParser
         }
         else
         {
-            return help;
+            return null;
         }
     }
 }
@@ -225,12 +216,11 @@ public sealed class StoreCommandParser : ICommandParser
 
     public string Info => "Store a new snapshot";
 
-    public ICommand Parse(FlagConsumer consumer)
+    public ICommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore, out var dryRun)
             & consumer.TryStrings("--path", "A list of files and directories to store", out var paths)
-            & consumer.TryInclude(out var include)
-            & consumer.NoHelp(out var help))
+            & consumer.TryInclude(out var include))
         {
             return new StoreCommand(
                 snapshotStore,
@@ -239,7 +229,7 @@ public sealed class StoreCommandParser : ICommandParser
         }
         else
         {
-            return help;
+            return null;
         }
     }
 }

@@ -9,5 +9,5 @@ public interface ICommandParser
 
     string Info { get; }
 
-    ICommand Parse(FlagConsumer consumer);
+    ICommand? Parse(FlagConsumer consumer);
 }

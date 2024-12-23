@@ -121,7 +121,7 @@ public sealed class FlagConsumer
             defaultValue);
     }
 
-    public bool NoHelp(out HelpCommand help)
+    public bool HelpNeeded(out HelpCommand help)
     {
         var helpRequested = TryBool("--help", "Print usage information", out var h)
             && h;
@@ -138,7 +138,7 @@ public sealed class FlagConsumer
 
         help = _help.Build();
 
-        return !(helpRequested || help.Errors.Count > 0);
+        return (helpRequested || help.Errors.Count > 0);
     }
 
     private bool TryStruct<T>(
