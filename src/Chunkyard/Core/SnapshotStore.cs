@@ -136,8 +136,10 @@ public sealed class SnapshotStore
 
     public void RemoveSnapshot(int snapshotId)
     {
-        _repository.Snapshots.Remove(ResolveSnapshotId(snapshotId));
-        _probe.RemovedSnapshot(snapshotId);
+        var resolved = ResolveSnapshotId(snapshotId);
+
+        _repository.Snapshots.Remove(resolved);
+        _probe.RemovedSnapshot(resolved);
     }
 
     public void KeepSnapshots(int latestCount)
@@ -239,8 +241,8 @@ public sealed class SnapshotStore
 
     private SnapshotReference GetSnapshotReference(int snapshotId)
     {
-        var bytes = _repository.Snapshots.Retrieve(
-            ResolveSnapshotId(snapshotId));
+        var resolved = ResolveSnapshotId(snapshotId);
+        var bytes = _repository.Snapshots.Retrieve(resolved);
 
         try
         {
@@ -249,7 +251,7 @@ public sealed class SnapshotStore
         catch (Exception e)
         {
             throw new ChunkyardException(
-                $"Could not retrieve snapshot: #{snapshotId}",
+                $"Could not retrieve snapshot: #{resolved}",
                 e);
         }
     }
