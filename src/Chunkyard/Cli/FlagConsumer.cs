@@ -19,15 +19,36 @@ public sealed class FlagConsumer
     public bool TryStrings(
         string flag,
         string info,
-        out string[] list)
+        out string[] list,
+        string[]? defaultList = null)
     {
-        list = _flags.Remove(flag, out var value)
-            ? value.ToArray()
-            : Array.Empty<string>();
+        if (defaultList != null)
+        {
+            var line = defaultList.Length == 0
+                ? "<empty>"
+                : string.Join(", ", defaultList);
+
+            info = $"{info}. Default: {line}";
+        }
 
         _help.AddFlag(flag, info);
 
-        return true;
+        if (_flags.Remove(flag, out var value))
+        {
+            list = value.ToArray();
+            return true;
+        }
+        else if (defaultList != null)
+        {
+            list = defaultList;
+            return true;
+        }
+        else
+        {
+            _help.AddError($"Missing mandatory flag: {flag}");
+            list = Array.Empty<string>();
+            return false;
+        }
     }
 
     public bool TryString(
@@ -36,30 +57,26 @@ public sealed class FlagConsumer
         out string value,
         string? defaultValue = null)
     {
-        string? parsed = null;
+        var defaultList = defaultValue == null
+            ? null
+            : new[] { defaultValue };
 
-        if (!string.IsNullOrEmpty(defaultValue))
+        value = "";
+
+        if (TryStrings(flag, info, out var list, defaultList))
         {
-            info = $"{info}. Default: {defaultValue}";
+            if (list.Length > 0)
+            {
+                value = list[^1];
+                return true;
+            }
+            else
+            {
+                _help.AddError($"Empty flag: {flag}");
+            }
         }
 
-        if (TryStrings(flag, info, out var list)
-            && list.Length > 0)
-        {
-            parsed = list[^1];
-        }
-        else if (defaultValue != null)
-        {
-            parsed = defaultValue;
-        }
-        else
-        {
-            _help.AddError($"Missing mandatory flag: {flag}");
-        }
-
-        value = parsed ?? "";
-
-        return parsed != null;
+        return false;
     }
 
     public bool TryInt(
@@ -151,26 +168,25 @@ public sealed class FlagConsumer
         T? defaultValue = null)
         where T : struct
     {
-        T? parsed = null;
-
         var defaultStringValue = defaultValue == null
             ? null
             : convertTo(defaultValue.Value);
+
+        value = default;
 
         if (TryString(flag, info, out var stringValue, defaultStringValue))
         {
             if (check(stringValue))
             {
-                parsed = convertFrom(stringValue);
+                value = convertFrom(stringValue);
+                return true;
             }
             else
             {
-                _help.AddError($"Invalid value: {flag}");
+                _help.AddError($"Invalid value for flag: {flag}");
             }
         }
 
-        value = parsed ?? default;
-
-        return parsed != null;
+        return false;
     }
 }

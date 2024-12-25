@@ -4,21 +4,29 @@ namespace Chunkyard.Tests.Cli;
 public sealed class FlagConsumerTests
 {
     [TestMethod]
-    public void TryStrings_Returns_Empty_List_On_Empty_Input()
+    public void TryStrings_Returns_Nothing_For_Missing_Flag()
     {
         var consumer = Some.FlagConsumer();
 
-        var success = consumer.TryStrings(
-            "--something",
-            "info",
-            out var list);
+        var success = consumer.TryStrings("--some", "info", out var list);
 
-        Assert.IsTrue(success);
-        CollectionAssert.Equals(0, list.Length);
+        Assert.IsFalse(success);
     }
 
     [TestMethod]
-    public void TryStrings_Returns_List_On_Non_Empty_Input()
+    public void TryStrings_Returns_Empty_List_For_Empty_Flag()
+    {
+        var consumer = Some.FlagConsumer(
+            ("--some", Some.Strings()));
+
+        var success = consumer.TryStrings("--some", "info", out var list);
+
+        Assert.IsTrue(success);
+        Assert.AreEqual(0, list.Length);
+    }
+
+    [TestMethod]
+    public void TryStrings_Returns_List_For_Non_Empty_Flag()
     {
         var expected = Some.Strings("one", "two");
 
@@ -32,7 +40,24 @@ public sealed class FlagConsumerTests
     }
 
     [TestMethod]
-    public void TryString_Returns_Nothing_On_Empty_Required_Input()
+    public void TryStrings_Returns_Default_For_Missing_Optional_Flag()
+    {
+        var expected = Some.Strings("one", "two");
+
+        var consumer = Some.FlagConsumer();
+
+        var success = consumer.TryStrings(
+            "--list",
+            "info",
+            out var actual,
+            expected);
+
+        Assert.IsTrue(success);
+        CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void TryString_Returns_Nothing_For_Missing_Flag()
     {
         var consumer = Some.FlagConsumer();
 
@@ -42,7 +67,7 @@ public sealed class FlagConsumerTests
     }
 
     [TestMethod]
-    public void TryString_Returns_Default_On_Empty_Optional_Input()
+    public void TryString_Returns_Default_For_Missing_Optional_Flag()
     {
         var expected = "default value";
 
@@ -59,19 +84,34 @@ public sealed class FlagConsumerTests
     }
 
     [TestMethod]
-    public void TryString_Returns_Last_String_On_Non_Empty_Input()
+    public void TryString_Returns_Nothing_For_Empty_Flag()
     {
         var consumer = Some.FlagConsumer(
-            ("--value", Some.Strings("one", "two")));
+            ("--some", Some.Strings()));
 
-        var success = consumer.TryString("--value", "info", out var actual);
+        var success = consumer.TryString(
+            "--some",
+            "info",
+            out _,
+            "default value");
+
+        Assert.IsFalse(success);
+    }
+
+    [TestMethod]
+    public void TryString_Returns_Last_String_For_Non_Empty_Flag()
+    {
+        var consumer = Some.FlagConsumer(
+            ("--some", Some.Strings("one", "two")));
+
+        var success = consumer.TryString("--some", "info", out var actual);
 
         Assert.IsTrue(success);
         Assert.AreEqual("two", actual);
     }
 
     [TestMethod]
-    public void TryBool_Returns_False_On_Empty_Input()
+    public void TryBool_Returns_False_For_Missing_Flag()
     {
         var consumer = Some.FlagConsumer();
 
@@ -82,7 +122,7 @@ public sealed class FlagConsumerTests
     }
 
     [TestMethod]
-    public void TryBool_Returns_True_On_Empty_Flag()
+    public void TryBool_Returns_True_For_Empty_Flag()
     {
         var consumer = Some.FlagConsumer(
             ("--bool", Some.Strings()));
@@ -94,7 +134,7 @@ public sealed class FlagConsumerTests
     }
 
     [TestMethod]
-    public void TryBool_Returns_False_On_Invalid_Input()
+    public void TryBool_Returns_False_For_Invalid_Flag()
     {
         var consumer = Some.FlagConsumer(
             ("--bool", Some.Strings("not-a-bool")));
@@ -168,7 +208,7 @@ public sealed class FlagConsumerTests
     }
 
     [TestMethod]
-    public void HelpNeeded_Returns_True_On_Unconsumed_Arguments()
+    public void HelpNeeded_Returns_True_For_Unconsumed_Arguments()
     {
         var consumer = Some.FlagConsumer(
             ("--list", Some.Strings("element")));
@@ -177,7 +217,7 @@ public sealed class FlagConsumerTests
     }
 
     [TestMethod]
-    public void HelpNeeded_Returns_True_On_Invalid_Arguments()
+    public void HelpNeeded_Returns_True_For_Invalid_Arguments()
     {
         var consumer = Some.FlagConsumer(
             ("--bool", Some.Strings("not-a-bool")));
@@ -187,7 +227,7 @@ public sealed class FlagConsumerTests
     }
 
     [TestMethod]
-    public void HelpNeeded_Returns_True_On_Missing_Arguments()
+    public void HelpNeeded_Returns_True_For_Missing_Arguments()
     {
         var consumer = Some.FlagConsumer();
 
