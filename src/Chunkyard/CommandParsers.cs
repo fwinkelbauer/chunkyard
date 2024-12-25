@@ -284,13 +284,13 @@ public static class ArgConsumerExtensions
         this FlagConsumer consumer,
         out Fuzzy include)
     {
-        var success = consumer.TryStrings(
+        include = consumer.TryStrings(
             "--include",
             "A list of fuzzy patterns for files to include",
-            out var includePatterns);
+            out var includePatterns)
+            ? new Fuzzy(includePatterns)
+            : new Fuzzy();
 
-        include = new Fuzzy(includePatterns);
-
-        return success;
+        return true;
     }
 }

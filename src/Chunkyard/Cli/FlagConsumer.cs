@@ -46,7 +46,7 @@ public sealed class FlagConsumer
         if (TryStrings(flag, info, out var list)
             && list.Length > 0)
         {
-            parsed = list.Last();
+            parsed = list[^1];
         }
         else if (defaultValue != null)
         {
