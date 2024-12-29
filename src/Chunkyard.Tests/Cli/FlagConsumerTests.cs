@@ -57,6 +57,21 @@ public sealed class FlagConsumerTests
     }
 
     [TestMethod]
+    public void TryStrings_Returns_Same_Value_When_Asked_Again()
+    {
+        var expected = Some.Strings("one", "two");
+
+        var consumer = Some.FlagConsumer(
+            ("--list", expected));
+
+        Assert.IsTrue(consumer.TryStrings("--list", "info", out var actual1));
+        CollectionAssert.AreEqual(expected, actual1);
+
+        Assert.IsTrue(consumer.TryStrings("--list", "info", out var actual2));
+        CollectionAssert.AreEqual(expected, actual2);
+    }
+
+    [TestMethod]
     public void TryString_Returns_Nothing_For_Missing_Flag()
     {
         var consumer = Some.FlagConsumer();
@@ -142,6 +157,19 @@ public sealed class FlagConsumerTests
         var success = consumer.TryBool("--bool", "info", out _);
 
         Assert.IsFalse(success);
+    }
+
+    [TestMethod]
+    public void TryBool_Returns_Same_Value_When_Asked_Again()
+    {
+        var consumer = Some.FlagConsumer(
+            ("--bool", Some.Strings()));
+
+        Assert.IsTrue(consumer.TryBool("--bool", "info", out var actual1));
+        Assert.IsTrue(actual1);
+
+        Assert.IsTrue(consumer.TryBool("--bool", "info", out var actual2));
+        Assert.IsTrue(actual2);
     }
 
     [TestMethod]

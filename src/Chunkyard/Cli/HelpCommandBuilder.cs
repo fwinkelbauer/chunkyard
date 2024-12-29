@@ -20,12 +20,12 @@ public sealed class HelpCommandBuilder
 
     public void AddCommand(string name, string info)
     {
-        _commandInfos.Add(name, info);
+        _commandInfos[name] = info;
     }
 
     public void AddFlag(string name, string info)
     {
-        _flagInfos.Add(name, info);
+        _flagInfos[name] = info;
     }
 
     public void AddError(string error)

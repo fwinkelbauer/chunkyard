@@ -8,7 +8,7 @@ public sealed class CheckCommandParser : ICommandParser
 
     public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out _)
+        if (consumer.TrySnapshotStore(out var snapshotStore)
             & consumer.TrySnapshot(out var snapshotId)
             & consumer.TryInclude(out var include)
             & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow))
@@ -34,7 +34,8 @@ public sealed class CopyCommandParser : ICommandParser
 
     public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out var dryRun)
+        if (consumer.TrySnapshotStore(out var snapshotStore)
+            & consumer.TryDryRun(out var dryRun)
             & consumer.TryString("--destination", "The destination repository path", out var destinationRepository)
             & consumer.TryInt("--last", "The maximum amount of snapshots to copy. Zero or a negative number copies all", out var last, 0))
         {
@@ -60,7 +61,7 @@ public sealed class DiffCommandParser : ICommandParser
 
     public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out _)
+        if (consumer.TrySnapshotStore(out var snapshotStore)
             & consumer.TryInt("--first", "The first snapshot ID", out var firstSnapshotId, SnapshotStore.SecondLatestSnapshotId)
             & consumer.TryInt("--second", "The second snapshot ID", out var secondSnapshotId, SnapshotStore.LatestSnapshotId)
             & consumer.TryInclude(out var include))
@@ -86,7 +87,7 @@ public sealed class GarbageCollectParser : ICommandParser
 
     public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out _))
+        if (consumer.TrySnapshotStore(out var snapshotStore))
         {
             return new GarbageCollectCommand(snapshotStore);
         }
@@ -105,7 +106,7 @@ public sealed class KeepCommandParser : ICommandParser
 
     public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out _)
+        if (consumer.TrySnapshotStore(out var snapshotStore)
             & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount))
         {
             return new KeepCommand(
@@ -127,7 +128,7 @@ public sealed class ListCommandParser : ICommandParser
 
     public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out _))
+        if (consumer.TrySnapshotStore(out var snapshotStore))
         {
             return new ListCommand(snapshotStore);
         }
@@ -146,7 +147,7 @@ public sealed class RemoveCommandParser : ICommandParser
 
     public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out _)
+        if (consumer.TrySnapshotStore(out var snapshotStore)
             & consumer.TrySnapshot(out var snapshot))
         {
             return new RemoveCommand(
@@ -168,7 +169,8 @@ public sealed class RestoreCommandParser : ICommandParser
 
     public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out var dryRun)
+        if (consumer.TrySnapshotStore(out var snapshotStore)
+            & consumer.TryDryRun(out var dryRun)
             & consumer.TryString("--directory", "The directory to restore into", out var directory)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryInclude(out var include))
@@ -194,7 +196,7 @@ public sealed class ShowCommandParser : ICommandParser
 
     public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out _)
+        if (consumer.TrySnapshotStore(out var snapshotStore)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryInclude(out var include))
         {
@@ -218,7 +220,8 @@ public sealed class StoreCommandParser : ICommandParser
 
     public ICommand? Parse(FlagConsumer consumer)
     {
-        if (consumer.TrySnapshotStore(out var snapshotStore, out var dryRun)
+        if (consumer.TrySnapshotStore(out var snapshotStore)
+            & consumer.TryDryRun(out var dryRun)
             & consumer.TryStrings("--path", "A list of files and directories to store", out var paths)
             & consumer.TryInclude(out var include))
         {
@@ -244,13 +247,12 @@ public static class ArgConsumerExtensions
 {
     public static bool TrySnapshotStore(
         this FlagConsumer consumer,
-        out SnapshotStore snapshotStore,
-        out bool dryRun)
+        out SnapshotStore snapshotStore)
     {
         var success = consumer.TryString("--repository", "The repository path", out var repository)
             & consumer.TryEnum("--prompt", "The password prompt method", out Prompt promptValue, Prompt.Console)
             & consumer.TryInt("--parallel", "The degree of parallelism", out var parallel, 1)
-            & consumer.TryBool("--dry-run", "Do not persist any data changes", out dryRun);
+            & consumer.TryDryRun(out var dryRun);
 
         IPrompt prompt = promptValue switch
         {
@@ -295,5 +297,15 @@ public static class ArgConsumerExtensions
             : new Fuzzy();
 
         return success;
+    }
+
+    public static bool TryDryRun(
+        this FlagConsumer consumer,
+        out bool dryRun)
+    {
+        return consumer.TryBool(
+            "--dry-run",
+            "Do not persist any data changes",
+            out dryRun);
     }
 }

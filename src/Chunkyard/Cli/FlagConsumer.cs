@@ -5,14 +5,16 @@ namespace Chunkyard.Cli;
 /// </summary>
 public sealed class FlagConsumer
 {
-    private readonly Dictionary<string, IReadOnlyCollection<string>> _flags;
+    private readonly Dictionary<string, IReadOnlyCollection<string>> _availableFlags;
+    private readonly Dictionary<string, IReadOnlyCollection<string>> _consumedFlags;
     private readonly HelpCommandBuilder _help;
 
     public FlagConsumer(
         IReadOnlyDictionary<string, IReadOnlyCollection<string>> flags,
         HelpCommandBuilder help)
     {
-        _flags = new(flags);
+        _availableFlags = new(flags);
+        _consumedFlags = new();
         _help = help;
     }
 
@@ -33,9 +35,15 @@ public sealed class FlagConsumer
 
         _help.AddFlag(flag, info);
 
-        if (_flags.Remove(flag, out var value))
+        if (_availableFlags.Remove(flag, out var value))
         {
             list = value.ToArray();
+            _consumedFlags[flag] = value;
+            return true;
+        }
+        else if (_consumedFlags.TryGetValue(flag, out var consumed))
+        {
+            list = consumed.ToArray();
             return true;
         }
         else if (defaultList != null)
@@ -97,10 +105,19 @@ public sealed class FlagConsumer
 
     public bool TryBool(string flag, string info, out bool value)
     {
-        if (_flags.TryGetValue(flag, out var list)
+        if (_availableFlags.TryGetValue(flag, out var list)
             && list.Count == 0)
         {
-            _ = _flags.Remove(flag);
+            _ = _availableFlags.Remove(flag);
+            _consumedFlags[flag] = list;
+            _help.AddFlag(flag, info);
+
+            value = true;
+            return true;
+        }
+        else if (_consumedFlags.TryGetValue(flag, out var consumed)
+            && consumed.Count == 0)
+        {
             _help.AddFlag(flag, info);
 
             value = true;
@@ -143,14 +160,14 @@ public sealed class FlagConsumer
         var helpRequested = TryBool("--help", "Print usage information", out var h)
             && h;
 
-        if (_flags.Count != 0)
+        if (_availableFlags.Count != 0)
         {
-            foreach (var flag in _flags.Keys)
+            foreach (var flag in _availableFlags.Keys)
             {
                 _help.AddError($"Unknown flag: {flag}");
             }
 
-            _flags.Clear();
+            _availableFlags.Clear();
         }
 
         help = _help.Build();
