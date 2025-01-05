@@ -11,7 +11,7 @@ sophisticated tools. Here's a list of [[https://github.com/restic/others][option
 
 You can install Chunkyard by:
 
-- Downloading a release (no dependencies required)
+- Downloading a [[https://github.com/fwinkelbauer/chunkyard/releases][release]] (no dependencies required)
 - Installing it as a [[https://www.nuget.org/packages/chunkyard][dotnet tool]]
 
 * Goals
