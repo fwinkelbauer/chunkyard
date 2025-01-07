@@ -8,6 +8,11 @@
     <RepositoryUrl>https://github.com/fwinkelbauer/chunkyard</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackAsTool>True</PackAsTool>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>
