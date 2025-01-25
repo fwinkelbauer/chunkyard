@@ -17,7 +17,7 @@ The [[https://www.usenix.org/system/files/conference/atc16/atc16-paper-xia.pdf][
 * Goals
 
 - Cross platform support. Chunkyard is shipped as two binaries ~chunkyard~
-  (Linux) and ~chunkyard.exe~ (Windows) and they work without having to install
+  (Linux) and ~chunkyard.exe~ (Windows). They work without having to install
   .NET on your computer
 - Favor simplicity and readability over features and elaborate performance
   tricks

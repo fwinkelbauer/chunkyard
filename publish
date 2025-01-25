@@ -6,14 +6,6 @@ announce () {
     echo '============================================================'
 }
 
-apt_ensure () {
-    if ! [ -x "$(command -v "$1")" ]; then
-        announce "Install $2"
-        sudo apt update
-        sudo apt install "$2" -y
-    fi
-}
-
 git_describe () {
     tags=$(git tag -l)
 
@@ -30,8 +22,19 @@ script=$(readlink -f "${BASH_SOURCE[0]}")
 directory=$(dirname "$script")
 cd "$directory"
 
-apt_ensure 'git' 'git'
-apt_ensure 'dotnet' 'dotnet-sdk-8.0'
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if ! [ -x "$(command -v dotnet)" ]; then
+        announce "Install dependencies"
+        sudo apt update
+        sudo apt install git dotnet-sdk-8.0 clang zlib1g-dev
+    fi
+
+    native=('linux-x64')
+    contained=('win-x64')
+else
+    native=()
+    contained=('win-x64' 'linux-x64')
+fi
 
 export DOTNET_CLI_TELEMETRY_OPTOUT='1'
 
@@ -39,7 +42,6 @@ solution='src/Chunkyard.sln'
 csproj='src/Chunkyard/Chunkyard.csproj'
 artifacts='artifacts'
 version=$(git_describe)
-runtimes=('linux-x64' 'win-x64')
 
 announce 'Cleanup'
 git clean -dfX
@@ -51,8 +53,13 @@ dotnet build "$solution" -warnaserror --tl:auto
 announce 'Test'
 dotnet test "$solution" --no-build
 
-for runtime in "${runtimes[@]}"; do
-    announce "Publish $version ($runtime)"
+for runtime in "${native[@]}"; do
+    announce "Publish $version (native $runtime)"
+    dotnet publish "$csproj" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto -r "$runtime" -p:PublishAot=true -p:StripSymbols=false
+done
+
+for runtime in "${contained[@]}"; do
+    announce "Publish $version (self-contained $runtime)"
     dotnet publish "$csproj" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto -r "$runtime" --self-contained -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=embedded
 done
 
