@@ -1,4 +1,4 @@
-namespace Chunkyard.Tests.Cli;
+namespace Chunkyard.Tests.CommandLine;
 
 [TestClass]
 public sealed class ArgsTests

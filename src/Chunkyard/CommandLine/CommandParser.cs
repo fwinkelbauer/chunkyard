@@ -1,4 +1,4 @@
-namespace Chunkyard.Cli;
+namespace Chunkyard.CommandLine;
 
 /// <summary>
 /// This class dispatches args to instances of <see cref="ICommandParser"/>.

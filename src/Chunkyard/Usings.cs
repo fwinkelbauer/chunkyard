@@ -1,4 +1,4 @@
-global using Chunkyard.Cli;
+global using Chunkyard.CommandLine;
 global using Chunkyard.Core;
 global using Chunkyard.Infrastructure;
 global using System;

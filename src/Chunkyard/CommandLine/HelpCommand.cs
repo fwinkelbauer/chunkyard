@@ -1,4 +1,4 @@
-namespace Chunkyard.Cli;
+namespace Chunkyard.CommandLine;
 
 /// <summary>
 /// A class to encapsulate usage and error information when dealing with command

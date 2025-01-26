@@ -1,4 +1,4 @@
-namespace Chunkyard.Cli;
+namespace Chunkyard.CommandLine;
 
 /// <summary>
 /// A helper class to create instances of <see cref="HelpCommand"/>.

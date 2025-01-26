@@ -1,4 +1,4 @@
-namespace Chunkyard.Cli;
+namespace Chunkyard.CommandLine;
 
 /// <summary>
 /// A stateful helper class used by instances of <see cref="ICommandParser"/>.
@@ -172,7 +172,7 @@ public sealed class FlagConsumer
 
         help = _help.Build();
 
-        return (helpRequested || help.Errors.Count > 0);
+        return helpRequested || help.Errors.Count > 0;
     }
 
     private bool TryStruct<T>(

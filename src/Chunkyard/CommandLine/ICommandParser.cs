@@ -1,4 +1,4 @@
-namespace Chunkyard.Cli;
+namespace Chunkyard.CommandLine;
 
 /// <summary>
 /// An interface to describe a specific command line parser.
