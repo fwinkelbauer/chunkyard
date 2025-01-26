@@ -222,12 +222,12 @@ public sealed class StoreCommandParser : ICommandParser
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
             & consumer.TryDryRun(out var dryRun)
-            & consumer.TryStrings("--path", "A list of files and directories to store", out var paths)
+            & consumer.TryStrings("--directory", "A list of directories to store", out var directories)
             & consumer.TryInclude(out var include))
         {
             return new StoreCommand(
                 snapshotStore,
-                DryRunBlobSystem.Create(new FileBlobSystem(paths), dryRun),
+                DryRunBlobSystem.Create(new FileBlobSystem(directories), dryRun),
                 include);
         }
         else

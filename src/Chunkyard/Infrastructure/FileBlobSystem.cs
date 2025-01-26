@@ -5,18 +5,13 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 public sealed class FileBlobSystem : IBlobSystem
 {
-    private readonly string[] _paths;
-    private readonly string _parent;
+    private readonly string[] _directories;
+    private readonly string _common;
 
-    public FileBlobSystem(params string[] paths)
+    public FileBlobSystem(params string[] directories)
     {
-        _paths = paths.Select(Path.GetFullPath).ToArray();
-
-        _parent = _paths.Length == 1 && !File.Exists(_paths[0])
-            ? _paths[0]
-            : PathUtils.GetCommonParent(
-                _paths,
-                Path.DirectorySeparatorChar);
+        _directories = directories.Select(Path.GetFullPath).ToArray();
+        _common = PathUtils.GetCommon(_directories);
     }
 
     public bool BlobExists(string blobName)
@@ -27,10 +22,10 @@ public sealed class FileBlobSystem : IBlobSystem
 
     public Blob[] ListBlobs()
     {
-        return _paths
-            .SelectMany(ListFiles)
+        return _directories
+            .SelectMany(d => Directory.GetFiles(d, "*", SearchOption.AllDirectories))
             .Distinct()
-            .OrderBy(file => file)
+            .OrderBy(f => f)
             .Select(ToBlob)
             .ToArray();
     }
@@ -60,9 +55,9 @@ public sealed class FileBlobSystem : IBlobSystem
 
     private Blob ToBlob(string file)
     {
-        var blobName = string.IsNullOrEmpty(_parent)
+        var blobName = string.IsNullOrEmpty(_common)
             ? file
-            : Path.GetRelativePath(_parent, file);
+            : Path.GetRelativePath(_common, file);
 
         // Using a blob name with backslashes will not create subdirectories
         // when restoring a file on Linux.
@@ -80,23 +75,7 @@ public sealed class FileBlobSystem : IBlobSystem
 
     private string ToFile(string blobName)
     {
-        return Path.Combine(_parent, blobName);
-    }
-
-    private static string[] ListFiles(string path)
-    {
-        if (Directory.Exists(path))
-        {
-            return Directory.GetFiles(path, "*", SearchOption.AllDirectories);
-        }
-        else if (File.Exists(path))
-        {
-            return new[] { path };
-        }
-        else
-        {
-            return Array.Empty<string>();
-        }
+        return Path.Combine(_common, blobName);
     }
 
     private sealed class WriteStream : FileStream

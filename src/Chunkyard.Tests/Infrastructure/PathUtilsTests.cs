@@ -4,8 +4,9 @@ namespace Chunkyard.Tests.Infrastructure;
 public sealed class PathUtilsTests
 {
     [TestMethod]
-    [DataRow(new[] { "/foo/bar" }, "/foo")]
-    [DataRow(new[] { "foo/bar" }, "foo")]
+    [DataRow(new[] { "/foo/bar" }, "/foo/bar")]
+    [DataRow(new[] { "foo/bar" }, "foo/bar")]
+    [DataRow(new[] { "foo/bar/" }, "foo/bar/")]
     [DataRow(new[] { "/foo/bar", "/foo/baz" }, "/foo")]
     [DataRow(new[] { "foo/bar", "foo/baz" }, "foo")]
     [DataRow(new[] { "foo/bar/hurr", "foo/baz" }, "foo")]
@@ -15,12 +16,12 @@ public sealed class PathUtilsTests
     [DataRow(new[] { "/foo", "/bar" }, "/")]
     [DataRow(new[] { "C:/foo", "D:/bar" }, "")]
     [DataRow(new[] { "C:/foo", "C:/bar" }, "C:")]
-    public void GetCommonParent_Returns_Parent(
-        string[] paths,
-        string expectedParent)
+    public void GetCommon_Returns_Common_Name(
+        string[] directories,
+        string expected)
     {
         Assert.AreEqual(
-            expectedParent,
-            PathUtils.GetCommonParent(paths, '/'));
+            expected,
+            PathUtils.GetCommon(directories, '/'));
     }
 }

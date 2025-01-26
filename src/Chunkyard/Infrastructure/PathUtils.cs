@@ -18,37 +18,41 @@ public static class PathUtils
         _ = Directory.CreateDirectory(parent);
     }
 
-    public static string GetCommonParent(string[] paths, char separatorChar)
+    public static string GetCommon(string[] directories)
     {
-        if (paths.Length == 0)
+        return GetCommon(directories, Path.DirectorySeparatorChar);
+    }
+
+    public static string GetCommon(string[] directories, char separatorChar)
+    {
+        if (directories.Length == 0)
         {
             return "";
         }
-        else if (paths.Length == 1)
+        else if (directories.Length == 1)
         {
-            return (Path.GetDirectoryName(paths[0]) ?? "")
-                .Replace(Path.DirectorySeparatorChar, separatorChar);
+            return directories[0];
         }
 
-        var parent = "";
-        var segments = paths
-            .OrderBy(p => p)
+        var common = "";
+        var segments = directories
+            .OrderBy(d => d)
             .Last()
             .Split(separatorChar, StringSplitOptions.RemoveEmptyEntries)
             .ToArray();
 
         foreach (var segment in segments)
         {
-            var newParent = parent + separatorChar + segment;
+            var newCommon = common + separatorChar + segment;
 
-            if (parent.Length == 0
-                && paths.All(p => p.StartsWith(segment)))
+            if (common.Length == 0
+                && directories.All(d => d.StartsWith(segment)))
             {
-                parent = segment;
+                common = segment;
             }
-            else if (paths.All(p => p.StartsWith(newParent)))
+            else if (directories.All(d => d.StartsWith(newCommon)))
             {
-                parent = newParent;
+                common = newCommon;
             }
             else
             {
@@ -56,12 +60,12 @@ public static class PathUtils
             }
         }
 
-        if (string.IsNullOrEmpty(parent)
-            && paths.All(p => p.StartsWith(separatorChar)))
+        if (string.IsNullOrEmpty(common)
+            && directories.All(d => d.StartsWith(separatorChar)))
         {
-            parent += separatorChar;
+            common += separatorChar;
         }
 
-        return parent;
+        return common;
     }
 }
