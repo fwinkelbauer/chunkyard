@@ -13,11 +13,7 @@ public sealed class CheckCommandParser : ICommandParser
             & consumer.TryInclude(out var include)
             & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow))
         {
-            return new CheckCommand(
-                snapshotStore,
-                snapshotId,
-                include,
-                shallow);
+            return new CheckCommand(snapshotStore, snapshotId, include, shallow);
         }
         else
         {
@@ -35,16 +31,11 @@ public sealed class CopyCommandParser : ICommandParser
     public ICommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TryDryRun(out var dryRun)
-            & consumer.TryString("--destination", "The destination repository path", out var destinationRepository)
+            & consumer.TryString("--destination", "The destination repository path", out var path)
+            & consumer.TryDryRun<IRepository>(new FileRepository(path), r => new DryRunRepository(r), out var repository)
             & consumer.TryInt("--last", "The maximum amount of snapshots to copy. Zero or a negative number copies all", out var last, 0))
         {
-            return new CopyCommand(
-                snapshotStore,
-                DryRunRepository.Create(
-                    new FileRepository(destinationRepository),
-                    dryRun),
-                last);
+            return new CopyCommand(snapshotStore, repository, last);
         }
         else
         {
@@ -66,11 +57,7 @@ public sealed class DiffCommandParser : ICommandParser
             & consumer.TryInt("--second", "The second snapshot ID", out var secondSnapshotId, SnapshotStore.LatestSnapshotId)
             & consumer.TryInclude(out var include))
         {
-            return new DiffCommand(
-                snapshotStore,
-                firstSnapshotId,
-                secondSnapshotId,
-                include);
+            return new DiffCommand(snapshotStore, firstSnapshotId, secondSnapshotId, include);
         }
         else
         {
@@ -109,9 +96,7 @@ public sealed class KeepCommandParser : ICommandParser
         if (consumer.TrySnapshotStore(out var snapshotStore)
             & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount))
         {
-            return new KeepCommand(
-                snapshotStore,
-                latestCount);
+            return new KeepCommand(snapshotStore, latestCount);
         }
         else
         {
@@ -150,9 +135,7 @@ public sealed class RemoveCommandParser : ICommandParser
         if (consumer.TrySnapshotStore(out var snapshotStore)
             & consumer.TrySnapshot(out var snapshot))
         {
-            return new RemoveCommand(
-                snapshotStore,
-                snapshot);
+            return new RemoveCommand(snapshotStore, snapshot);
         }
         else
         {
@@ -170,16 +153,12 @@ public sealed class RestoreCommandParser : ICommandParser
     public ICommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TryDryRun(out var dryRun)
             & consumer.TryString("--directory", "The directory to restore into", out var directory)
+            & consumer.TryDryRun<IBlobSystem>(new FileBlobSystem(directory), b => new DryRunBlobSystem(b), out var blobSystem)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryInclude(out var include))
         {
-            return new RestoreCommand(
-                snapshotStore,
-                DryRunBlobSystem.Create(new FileBlobSystem(directory), dryRun),
-                snapshot,
-                include);
+            return new RestoreCommand(snapshotStore, blobSystem, snapshot, include);
         }
         else
         {
@@ -200,10 +179,7 @@ public sealed class ShowCommandParser : ICommandParser
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryInclude(out var include))
         {
-            return new ShowCommand(
-                snapshotStore,
-                snapshot,
-                include);
+            return new ShowCommand(snapshotStore, snapshot, include);
         }
         else
         {
@@ -221,14 +197,11 @@ public sealed class StoreCommandParser : ICommandParser
     public ICommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TryDryRun(out var dryRun)
             & consumer.TryStrings("--directory", "A list of directories to store", out var directories)
+            & consumer.TryDryRun<IBlobSystem>(new FileBlobSystem(directories), b => new DryRunBlobSystem(b), out var blobSystem)
             & consumer.TryInclude(out var include))
         {
-            return new StoreCommand(
-                snapshotStore,
-                DryRunBlobSystem.Create(new FileBlobSystem(directories), dryRun),
-                include);
+            return new StoreCommand(snapshotStore, blobSystem, include);
         }
         else
         {
@@ -249,10 +222,10 @@ public static class ArgConsumerExtensions
         this FlagConsumer consumer,
         out SnapshotStore snapshotStore)
     {
-        var success = consumer.TryString("--repository", "The repository path", out var repository)
+        var success = consumer.TryString("--repository", "The repository path", out var path)
             & consumer.TryEnum("--prompt", "The password prompt method", out Prompt promptValue, Prompt.Console)
             & consumer.TryInt("--parallel", "The degree of parallelism", out var parallel, 1)
-            & consumer.TryDryRun(out var dryRun);
+            & consumer.TryDryRun<IRepository>(new FileRepository(path), r => new DryRunRepository(r), out var repository);
 
         IPrompt prompt = promptValue switch
         {
@@ -262,7 +235,7 @@ public static class ArgConsumerExtensions
         };
 
         snapshotStore = new SnapshotStore(
-            DryRunRepository.Create(new FileRepository(repository), dryRun),
+            repository,
             new FastCdc(),
             new ConsoleProbe(),
             new RealWorld(parallel),
@@ -299,13 +272,19 @@ public static class ArgConsumerExtensions
         return success;
     }
 
-    public static bool TryDryRun(
+    public static bool TryDryRun<T>(
         this FlagConsumer consumer,
-        out bool dryRun)
+        T input,
+        Func<T, T> decorator,
+        out T output)
     {
-        return consumer.TryBool(
+        var success = consumer.TryBool(
             "--dry-run",
             "Do not persist any data changes",
-            out dryRun);
+            out var dryRun);
+
+        output = dryRun ? decorator(input) : input;
+
+        return success;
     }
 }

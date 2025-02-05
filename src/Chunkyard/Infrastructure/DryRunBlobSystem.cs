@@ -38,11 +38,4 @@ public sealed class DryRunBlobSystem : IBlobSystem
         // Do nothing
         return Stream.Null;
     }
-
-    public static IBlobSystem Create(IBlobSystem blobSystem, bool dryRun)
-    {
-        return dryRun
-            ? new DryRunBlobSystem(blobSystem)
-            : blobSystem;
-    }
 }

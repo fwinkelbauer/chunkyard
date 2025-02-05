@@ -14,13 +14,6 @@ public sealed class DryRunRepository : IRepository
     public IRepository<int> Snapshots { get; }
 
     public IRepository<string> Chunks { get; }
-
-    public static IRepository Create(IRepository repository, bool dryRun)
-    {
-        return dryRun
-            ? new DryRunRepository(repository)
-            : repository;
-    }
 }
 
 public sealed class DryRunRepository<T> : IRepository<T>
