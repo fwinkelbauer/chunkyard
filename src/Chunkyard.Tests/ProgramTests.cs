@@ -1,5 +1,6 @@
 namespace Chunkyard.Tests;
 
+[TestClass]
 public sealed class ProgramTests
 {
     [TestMethod]

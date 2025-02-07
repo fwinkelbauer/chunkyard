@@ -8,7 +8,7 @@ public sealed class FlagConsumerTests
     {
         var consumer = Some.FlagConsumer();
 
-        var success = consumer.TryStrings("--some", "info", out var list);
+        var success = consumer.TryStrings("--some", "info", out _);
 
         Assert.IsFalse(success);
     }

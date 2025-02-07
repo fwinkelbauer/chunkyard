@@ -11,3 +11,4 @@ global using System.Security.Cryptography;
 global using System.Text;
 
 [assembly: CLSCompliant(false)]
+[assembly: Parallelize]
