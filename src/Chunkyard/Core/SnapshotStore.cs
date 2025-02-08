@@ -10,7 +10,7 @@ public sealed class SnapshotStore
     public const int SecondLatestSnapshotId = -2;
 
     private readonly IRepository _repository;
-    private readonly FastCdc _fastCdc;
+    private readonly IChunker _chunker;
     private readonly IProbe _probe;
     private readonly IWorld _world;
     private readonly Lazy<Crypto> _crypto;
@@ -18,13 +18,13 @@ public sealed class SnapshotStore
 
     public SnapshotStore(
         IRepository repository,
-        FastCdc fastCdc,
+        IChunker chunker,
         IProbe probe,
         IWorld world,
         IPrompt prompt)
     {
         _repository = repository;
-        _fastCdc = fastCdc;
+        _chunker = chunker;
         _probe = probe;
         _world = world;
 
@@ -367,7 +367,7 @@ public sealed class SnapshotStore
 
     private string[] StoreChunks(Stream stream)
     {
-        return _fastCdc.SplitIntoChunks(stream)
+        return _chunker.Chunkify(stream)
             .AsParallel()
             .AsOrdered()
             .WithDegreeOfParallelism(_world.Parallelism)

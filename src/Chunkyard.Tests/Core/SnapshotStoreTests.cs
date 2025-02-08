@@ -158,17 +158,17 @@ public sealed class SnapshotStoreTests
     }
 
     [TestMethod]
-    public void RestoreSnapshot_Updates_Known_Blobs()
+    public void RestoreSnapshot_Overwrites_Known_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
 
         var inputBlobSystem = Some.BlobSystem(
             Some.Blobs("blob to restore", "blob to update"),
-            _ => new byte[] { 0x01 });
+            _ => new byte[] { 0x01, 0x02 });
 
         var outputBlobSystem = Some.BlobSystem(
             Some.Blobs("blob to update"),
-            _ => new byte[] { 0x01, 0x02 });
+            _ => new byte[] { 0x01, 0x02, 0x03, 0x04 });
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
         snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
@@ -191,34 +191,6 @@ public sealed class SnapshotStoreTests
         CollectionAssert.AreEqual(
             ToDictionary(inputBlobSystem),
             ToDictionary(outputBlobSystem));
-    }
-
-    [TestMethod]
-    public void RestoreSnapshot_Keeps_Chunks_Order()
-    {
-        var fastCdc = new FastCdc(256, 512, 1024);
-        var snapshotStore = Some.SnapshotStore(fastCdc: fastCdc);
-
-        // Generate data that is large enough to create a few chunks
-        var inputBlobSystem = Some.BlobSystem(
-            Some.Blobs(),
-            _ => RandomNumberGenerator.GetBytes(8 * fastCdc.MaxSize));
-
-        var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
-        var outputBlobSystem = Some.BlobSystem();
-        snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
-
-        CollectionAssert.AreEqual(
-            ToDictionary(inputBlobSystem),
-            ToDictionary(outputBlobSystem));
-
-        var blobReferences = snapshotStore.GetSnapshot(snapshotId)
-            .BlobReferences;
-
-        var chunkIds = blobReferences.SelectMany(br => br.ChunkIds).ToArray();
-
-        Assert.IsTrue(blobReferences.Count > 0);
-        Assert.IsTrue(blobReferences.Count * 2 <= chunkIds.Length);
     }
 
     [TestMethod]

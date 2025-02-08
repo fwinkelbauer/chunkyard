@@ -7,7 +7,7 @@ namespace Chunkyard.Core;
 ///
 /// The FastCdc algorithm can be used to split data into chunks.
 /// </summary>
-public sealed class FastCdc
+public sealed class FastCdc : IChunker
 {
     private static readonly uint[] GearTable =
     {
@@ -327,7 +327,7 @@ public sealed class FastCdc
 
     public int MaxSize { get; }
 
-    public IEnumerable<byte[]> SplitIntoChunks(Stream stream)
+    public IEnumerable<byte[]> Chunkify(Stream stream)
     {
         var buffer = new byte[MaxSize];
         var bytesCarryOver = 0;

@@ -30,12 +30,12 @@ internal static class Some
 
     public static SnapshotStore SnapshotStore(
         IRepository? repository = null,
-        FastCdc? fastCdc = null,
+        IChunker? chunker = null,
         IPrompt? prompt = null)
     {
         return new SnapshotStore(
             repository ?? Repository(),
-            fastCdc ?? new FastCdc(),
+            chunker ?? new DummyChunker(),
             new DummyProbe(),
             World,
             prompt ?? new DummyPrompt("secret"));
