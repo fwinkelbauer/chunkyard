@@ -10,7 +10,11 @@ public sealed class FileBlobSystem : IBlobSystem
 
     public FileBlobSystem(params string[] directories)
     {
-        _directories = directories.Select(Path.GetFullPath).ToArray();
+        _directories = directories
+            .Where(d => !string.IsNullOrEmpty(d))
+            .Select(Path.GetFullPath)
+            .ToArray();
+
         _common = PathUtils.GetCommon(_directories);
     }
 
