@@ -1,4 +1,4 @@
-<Project Sdk="MSTest.Sdk/3.7.3">
+<Project Sdk="MSTest.Sdk/3.8.2">
 
   <ItemGroup>
     <ProjectReference Include="..\Chunkyard\Chunkyard.csproj" />
