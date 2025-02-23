@@ -15,4 +15,18 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Chunkyard.CommandLine" />
+    <Using Include="Chunkyard.Core" />
+    <Using Include="Chunkyard.Infrastructure" />
+    <Using Include="System.Globalization" />
+    <Using Include="System.Reflection" />
+    <Using Include="System.Runtime.InteropServices" />
+    <Using Include="System.Security.Cryptography" />
+    <Using Include="System.Text" />
+    <Using Include="System.Text.Json" />
+    <Using Include="System.Text.Json.Serialization" />
+    <Using Include="System.Text.RegularExpressions" />
+  </ItemGroup>
+
 </Project>

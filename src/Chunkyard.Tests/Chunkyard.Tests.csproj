@@ -10,4 +10,14 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Chunkyard" />
+    <Using Include="Chunkyard.CommandLine" />
+    <Using Include="Chunkyard.Core" />
+    <Using Include="Chunkyard.Infrastructure" />
+    <Using Include="Chunkyard.Tests.Infrastructure" />
+    <Using Include="System.Security.Cryptography" />
+    <Using Include="System.Text" />
+  </ItemGroup>
+
 </Project>
