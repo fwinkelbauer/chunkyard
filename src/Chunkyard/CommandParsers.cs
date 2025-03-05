@@ -210,7 +210,7 @@ public sealed class StoreCommandParser : ICommandParser
     }
 }
 
-public enum Prompt
+public enum Password
 {
     Console = 0,
     Libsecret = 1
@@ -223,15 +223,15 @@ public static class ArgConsumerExtensions
         out SnapshotStore snapshotStore)
     {
         var success = consumer.TryString("--repository", "The repository path", out var path)
-            & consumer.TryEnum("--prompt", "The password prompt method", out Prompt promptValue, Prompt.Console)
+            & consumer.TryEnum("--password", "The password prompt method", out Password password, Password.Console)
             & consumer.TryInt("--parallel", "The degree of parallelism", out var parallel, 1)
             & consumer.TryDryRun<IRepository>(new FileRepository(path), r => new DryRunRepository(r), out var repository);
 
-        IPrompt prompt = promptValue switch
+        ICryptoFactory cryptoFactory = password switch
         {
-            Prompt.Console => new ConsolePrompt(),
-            Prompt.Libsecret => new LibsecretPrompt(new ConsolePrompt()),
-            _ => new ConsolePrompt()
+            Password.Console => new ConsoleCryptoFactory(),
+            Password.Libsecret => new LibsecretCryptoFactory(new ConsoleCryptoFactory()),
+            _ => new ConsoleCryptoFactory()
         };
 
         snapshotStore = new SnapshotStore(
@@ -239,7 +239,7 @@ public static class ArgConsumerExtensions
             new FastCdc(),
             new ConsoleProbe(),
             new RealWorld(parallel),
-            prompt);
+            cryptoFactory);
 
         return success;
     }

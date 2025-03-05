@@ -1,12 +1,26 @@
 namespace Chunkyard.Infrastructure;
 
-/// <summary>
-/// An implementation of <see cref="IPrompt"/> which prompts the user for a
-/// password using the console.
-/// </summary>
-internal sealed class ConsolePrompt : IPrompt
+internal sealed class ConsoleCryptoFactory : ICryptoFactory
 {
-    public string NewPassword(string key)
+    public Crypto Create(SnapshotReference? snapshotReference)
+    {
+        if (snapshotReference == null)
+        {
+            return new Crypto(
+                NewPassword(),
+                RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
+                Crypto.DefaultIterations);
+        }
+        else
+        {
+            return new Crypto(
+                ExistingPassword(),
+                snapshotReference.Salt,
+                snapshotReference.Iterations);
+        }
+    }
+
+    private static string NewPassword()
     {
         var firstPassword = ReadPassword("Enter new password: ");
         var secondPassword = ReadPassword("Re-enter password: ");
@@ -19,7 +33,7 @@ internal sealed class ConsolePrompt : IPrompt
         return firstPassword;
     }
 
-    public string ExistingPassword(string key)
+    private static string ExistingPassword()
     {
         return ReadPassword("Password: ");
     }

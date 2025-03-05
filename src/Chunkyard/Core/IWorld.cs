@@ -7,9 +7,5 @@ public interface IWorld
 {
     int Parallelism { get; }
 
-    int Iterations { get; }
-
-    byte[] GenerateSalt();
-
     DateTime UtcNow();
 }

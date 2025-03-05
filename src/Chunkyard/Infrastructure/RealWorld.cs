@@ -11,18 +11,9 @@ internal sealed class RealWorld : IWorld
         Parallelism = parallelism < 1
             ? Environment.ProcessorCount
             : parallelism;
-
-        Iterations = Crypto.DefaultIterations;
     }
 
     public int Parallelism { get; }
-
-    public int Iterations { get; }
-
-    public byte[] GenerateSalt()
-    {
-        return RandomNumberGenerator.GetBytes(Crypto.SaltBytes);
-    }
 
     public DateTime UtcNow()
     {

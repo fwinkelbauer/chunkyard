@@ -6,10 +6,7 @@ internal static class Some
 
     public static Crypto Crypto(string password = "secret")
     {
-        return new Crypto(
-            password,
-            World.GenerateSalt(),
-            World.Iterations);
+        return new DummyCryptoFactory(password).Create(null);
     }
 
     public static Blob Blob(string blobName)
@@ -31,14 +28,14 @@ internal static class Some
     public static SnapshotStore SnapshotStore(
         IRepository? repository = null,
         IChunker? chunker = null,
-        IPrompt? prompt = null)
+        ICryptoFactory? cryptoFactory = null)
     {
         return new SnapshotStore(
             repository ?? Repository(),
             chunker ?? new DummyChunker(),
             new DummyProbe(),
             World,
-            prompt ?? new DummyPrompt("secret"));
+            cryptoFactory ?? new DummyCryptoFactory("secret"));
     }
 
     public static IRepository Repository()

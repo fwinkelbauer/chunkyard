@@ -1,10 +1,6 @@
 namespace Chunkyard.Infrastructure;
 
-/// <summary>
-/// An implementation of <see cref="IPrompt"/> using the Linux library
-/// libsecret.
-/// </summary>
-internal sealed class LibsecretPrompt : IPrompt
+internal sealed class LibsecretCryptoFactory : ICryptoFactory
 {
     private static readonly IntPtr Schema = secret_schema_new(
         "chunkyard.libsecret",
@@ -13,27 +9,29 @@ internal sealed class LibsecretPrompt : IPrompt
         0,
         IntPtr.Zero);
 
-    private readonly IPrompt _prompt;
+    private readonly ICryptoFactory _cryptoFactory;
 
-    public LibsecretPrompt(IPrompt prompt)
+    public LibsecretCryptoFactory(ICryptoFactory cryptoFactory)
     {
-        _prompt = prompt;
+        _cryptoFactory = cryptoFactory;
     }
 
-    public string NewPassword(string key)
+    public Crypto Create(SnapshotReference? snapshotReference)
     {
         EnsureLinux();
 
-        return Store(key, _prompt.NewPassword(key));
-    }
-
-    public string ExistingPassword(string key)
-    {
-        EnsureLinux();
-
-        return TryRetrieve(key, out var password)
-            ? password
-            : Store(key, _prompt.ExistingPassword(key));
+        if (snapshotReference != null
+            && TryRetrieve(snapshotReference, out var password))
+        {
+            return new Crypto(
+                password,
+                snapshotReference.Salt,
+                snapshotReference.Iterations);
+        }
+        else
+        {
+            return Store(_cryptoFactory.Create(snapshotReference));
+        }
     }
 
     private static void EnsureLinux()
@@ -41,18 +39,32 @@ internal sealed class LibsecretPrompt : IPrompt
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             throw new NotSupportedException(
-                "The libsecret prompt is only available on Linux");
+                "Libsecret is only available on Linux");
         }
     }
 
-    private static bool TryRetrieve(string key, out string password)
+    private static string ToKeyId(byte[] salt, int iterations)
     {
+        var saltText = Convert.ToHexString(salt)
+            .ToLowerInvariant();
+
+        return $"s-{saltText}-i-{iterations}";
+    }
+
+    private static bool TryRetrieve(
+        SnapshotReference snapshotReference,
+        out string password)
+    {
+        var keyId = ToKeyId(
+            snapshotReference.Salt,
+            snapshotReference.Iterations);
+
         password = secret_password_lookup_sync(
             Schema,
             IntPtr.Zero,
             out var error,
             "chunkyard-repository",
-            key,
+            keyId,
             IntPtr.Zero);
 
         if (error != IntPtr.Zero)
@@ -64,17 +76,19 @@ internal sealed class LibsecretPrompt : IPrompt
         return !string.IsNullOrEmpty(password);
     }
 
-    private static string Store(string key, string password)
+    private static Crypto Store(Crypto crypto)
     {
+        var keyId = ToKeyId(crypto.Salt, crypto.Iterations);
+
         _ = secret_password_store_sync(
             Schema,
             "default",
-            $"Chunkyard: {key}",
-            password,
+            $"Chunkyard: {keyId}",
+            crypto.Password,
             IntPtr.Zero,
             out var error,
             "chunkyard-repository",
-            key,
+            keyId,
             IntPtr.Zero);
 
         if (error != IntPtr.Zero)
@@ -83,7 +97,7 @@ internal sealed class LibsecretPrompt : IPrompt
                 "Could not write to libsecret");
         }
 
-        return password;
+        return crypto;
     }
 
     [DllImport("libsecret-1.so.0", CallingConvention = CallingConvention.StdCall)]

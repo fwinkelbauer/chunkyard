@@ -21,7 +21,7 @@ public sealed class SnapshotStore
         IChunker chunker,
         IProbe probe,
         IWorld world,
-        IPrompt prompt)
+        ICryptoFactory cryptoFactory)
     {
         _repository = repository;
         _chunker = chunker;
@@ -30,30 +30,11 @@ public sealed class SnapshotStore
 
         _crypto = new(() =>
         {
-            if (TryLastSnapshotId(_repository, out var snapshotId))
-            {
-                var snapshotReference = GetSnapshotReference(snapshotId);
+            var snapshotReference = TryLastSnapshotId(_repository, out var snapshotId)
+                ? GetSnapshotReference(snapshotId)
+                : null;
 
-                var promptKey = ToPromptKey(
-                    snapshotReference.Salt,
-                    snapshotReference.Iterations);
-
-                return new Crypto(
-                    prompt.ExistingPassword(promptKey),
-                    snapshotReference.Salt,
-                    snapshotReference.Iterations);
-            }
-            else
-            {
-                var salt = _world.GenerateSalt();
-                var iterations = _world.Iterations;
-                var promptKey = ToPromptKey(salt, iterations);
-
-                return new Crypto(
-                    prompt.NewPassword(promptKey),
-                    salt,
-                    iterations);
-            }
+            return cryptoFactory.Create(snapshotReference);
         });
 
         _parallelOptions = new ParallelOptions
@@ -484,13 +465,5 @@ public sealed class SnapshotStore
     {
         return Convert.ToHexString(SHA256.HashData(chunk))
             .ToLowerInvariant();
-    }
-
-    private static string ToPromptKey(byte[] salt, int iterations)
-    {
-        var saltText = Convert.ToHexString(salt)
-            .ToLowerInvariant();
-
-        return $"s-{saltText}-i-{iterations}";
     }
 }

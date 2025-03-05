@@ -24,9 +24,12 @@ public sealed class Crypto
 
         _key = PasswordToKey(password, salt, iterations);
 
+        Password = password;
         Salt = salt;
         Iterations = iterations;
     }
+
+    public string Password { get; }
 
     public byte[] Salt { get; }
 
