@@ -12,11 +12,6 @@ public sealed class DryRunBlobSystem : IBlobSystem
         _blobSystem = blobSystem;
     }
 
-    public bool BlobExists(string blobName)
-    {
-        return _blobSystem.BlobExists(blobName);
-    }
-
     public Blob[] ListBlobs()
     {
         return _blobSystem.ListBlobs();
@@ -28,7 +23,7 @@ public sealed class DryRunBlobSystem : IBlobSystem
         return Stream.Null;
     }
 
-    public Blob GetBlob(string blobName)
+    public Blob? GetBlob(string blobName)
     {
         return _blobSystem.GetBlob(blobName);
     }

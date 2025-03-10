@@ -5,13 +5,11 @@ namespace Chunkyard.Core;
 /// </summary>
 public interface IBlobSystem
 {
-    bool BlobExists(string blobName);
-
     Blob[] ListBlobs();
 
     Stream OpenRead(string blobName);
 
-    Blob GetBlob(string blobName);
+    Blob? GetBlob(string blobName);
 
     Stream OpenWrite(Blob blob);
 }

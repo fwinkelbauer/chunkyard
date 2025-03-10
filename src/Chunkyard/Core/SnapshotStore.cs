@@ -83,8 +83,7 @@ public sealed class SnapshotStore
     {
         var blobReferencesToRestore = GetSnapshot(snapshotId)
             .ListBlobReferences(fuzzy)
-            .Where(br => !blobSystem.BlobExists(br.Blob.Name)
-                || !blobSystem.GetBlob(br.Blob.Name).Equals(br.Blob));
+            .Where(br => !br.Blob.Equals(blobSystem.GetBlob(br.Blob.Name)));
 
         _ = Parallel.ForEach(
             blobReferencesToRestore,

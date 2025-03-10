@@ -18,12 +18,6 @@ public sealed class FileBlobSystem : IBlobSystem
         _common = PathUtils.GetCommon(_directories);
     }
 
-    public bool BlobExists(string blobName)
-    {
-        return File.Exists(
-            ToFile(blobName));
-    }
-
     public Blob[] ListBlobs()
     {
         return _directories
@@ -40,12 +34,13 @@ public sealed class FileBlobSystem : IBlobSystem
             ToFile(blobName));
     }
 
-    public Blob GetBlob(string blobName)
+    public Blob? GetBlob(string blobName)
     {
-        return new Blob(
-            blobName,
-            File.GetLastWriteTimeUtc(
-                ToFile(blobName)));
+        var file = ToFile(blobName);
+
+        return File.Exists(file)
+            ? new Blob(blobName, File.GetLastWriteTimeUtc(file))
+            : null;
     }
 
     public Stream OpenWrite(Blob blob)

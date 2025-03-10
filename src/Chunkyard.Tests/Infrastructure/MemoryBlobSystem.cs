@@ -13,14 +13,6 @@ internal sealed class MemoryBlobSystem : IBlobSystem
         _values = new();
     }
 
-    public bool BlobExists(string blobName)
-    {
-        lock (_lock)
-        {
-            return _blobs.ContainsKey(blobName);
-        }
-    }
-
     public Blob[] ListBlobs()
     {
         lock (_lock)
@@ -40,11 +32,13 @@ internal sealed class MemoryBlobSystem : IBlobSystem
         }
     }
 
-    public Blob GetBlob(string blobName)
+    public Blob? GetBlob(string blobName)
     {
         lock (_lock)
         {
-            return _blobs[blobName];
+            return _blobs.TryGetValue(blobName, out var blob)
+                ? blob
+                : null;
         }
     }
 
