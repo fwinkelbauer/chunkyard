@@ -1,8 +1,7 @@
 #+TITLE: Chunkyard
 
-Chunkyard is a fast backup application for Windows and Linux which stores files
-in a content addressable storage with support for dynamic chunking and
-encryption.
+Chunkyard is a backup application for Windows and Linux which stores files in an
+encrypted content addressable storage.
 
 *Note:* I am building Chunkyard for myself. You might want to consider more
 sophisticated tools. Here's a list of [[https://github.com/restic/others][options]].
@@ -11,8 +10,6 @@ You can install Chunkyard by:
 
 - Downloading a [[https://github.com/fwinkelbauer/chunkyard/releases][release]] (no dependencies required)
 - Installing it as a [[https://www.nuget.org/packages/chunkyard][dotnet tool]]
-
-The [[https://www.usenix.org/system/files/conference/atc16/atc16-paper-xia.pdf][FastCDC]] chunking algorithm is a C# port of the Rust crate [[https://github.com/nlfiedler/fastcdc-rs][fastcdc-rs]].
 
 * Goals
 
@@ -33,7 +30,7 @@ The [[https://www.usenix.org/system/files/conference/atc16/atc16-paper-xia.pdf][
 - Compression
 - Extended file system features such as OS specific flags or links
 - Extended "version control" features such as branching or tagging
-- Hiding chunk sizes to prevent [[https://borgbackup.readthedocs.io/en/stable/internals/security.html#fingerprinting][CDC fingerprint attacks]]
+- Hiding file sizes
 - Concurrent operations on a single repository using more than one Chunkyard
   process (e.g. creating a new backup while garbage collecting unused data)
 

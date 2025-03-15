@@ -236,7 +236,7 @@ public static class ArgConsumerExtensions
 
         snapshotStore = new SnapshotStore(
             repository,
-            new FastCdc(),
+            new SimpleChunker(),
             new ConsoleProbe(),
             new RealWorld(parallel),
             cryptoFactory);
