@@ -19,7 +19,6 @@ public sealed class DryRunBlobSystem : IBlobSystem
 
     public Stream OpenRead(string blobName)
     {
-        // Do nothing
         return Stream.Null;
     }
 
@@ -30,7 +29,6 @@ public sealed class DryRunBlobSystem : IBlobSystem
 
     public Stream OpenWrite(Blob blob)
     {
-        // Do nothing
         return Stream.Null;
     }
 }
