@@ -16,56 +16,38 @@ internal sealed class MemoryRepository : IRepository
 internal sealed class MemoryRepository<T> : IRepository<T>
     where T : notnull
 {
-    private readonly object _lock;
     private readonly Dictionary<T, byte[]> _valuesPerKey;
 
     public MemoryRepository()
     {
-        _lock = new();
         _valuesPerKey = new();
     }
 
     public void Store(T key, ReadOnlySpan<byte> value)
     {
-        lock (_lock)
-        {
-            _valuesPerKey.Add(key, value.ToArray());
-        }
+        _valuesPerKey.Add(key, value.ToArray());
     }
 
     public byte[] Retrieve(T key)
     {
-        lock (_lock)
-        {
-            return _valuesPerKey[key]
-                .ToArray();
-        }
+        return _valuesPerKey[key].ToArray();
     }
 
     public bool Exists(T key)
     {
-        lock (_lock)
-        {
-            return _valuesPerKey.ContainsKey(key);
-        }
+        return _valuesPerKey.ContainsKey(key);
     }
 
     public T[] UnorderedList()
     {
-        lock (_lock)
-        {
-            return _valuesPerKey.Keys
-                .OrderBy(_ => RandomNumberGenerator.GetInt32(
-                    _valuesPerKey.Count))
-                .ToArray();
-        }
+        return _valuesPerKey.Keys
+            .OrderBy(_ => RandomNumberGenerator.GetInt32(
+                _valuesPerKey.Count))
+            .ToArray();
     }
 
     public void Remove(T key)
     {
-        lock (_lock)
-        {
-            _ = _valuesPerKey.Remove(key);
-        }
+        _ = _valuesPerKey.Remove(key);
     }
 }

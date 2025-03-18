@@ -2,7 +2,7 @@ namespace Chunkyard.Tests;
 
 internal static class Some
 {
-    public static readonly IWorld World = new DummyWorld();
+    public static readonly IClock Clock = new DummyClock();
 
     public static Crypto Crypto(string password = "secret")
     {
@@ -11,7 +11,7 @@ internal static class Some
 
     public static Blob Blob(string blobName)
     {
-        return new Blob(blobName, World.UtcNow());
+        return new Blob(blobName, Clock.UtcNow());
     }
 
     public static Blob[] Blobs(params string[] blobNames)
@@ -34,7 +34,7 @@ internal static class Some
             repository ?? Repository(),
             chunker ?? new DummyChunker(),
             new DummyProbe(),
-            World,
+            Clock,
             cryptoFactory ?? new DummyCryptoFactory("secret"));
     }
 

@@ -12,21 +12,20 @@ public sealed class SnapshotStore
     private readonly IRepository _repository;
     private readonly IChunker _chunker;
     private readonly IProbe _probe;
-    private readonly IWorld _world;
+    private readonly IClock _clock;
     private readonly Lazy<Crypto> _crypto;
-    private readonly ParallelOptions _parallelOptions;
 
     public SnapshotStore(
         IRepository repository,
         IChunker chunker,
         IProbe probe,
-        IWorld world,
+        IClock clock,
         ICryptoFactory cryptoFactory)
     {
         _repository = repository;
         _chunker = chunker;
         _probe = probe;
-        _world = world;
+        _clock = clock;
 
         _crypto = new(() =>
         {
@@ -36,17 +35,12 @@ public sealed class SnapshotStore
 
             return cryptoFactory.Create(snapshotReference);
         });
-
-        _parallelOptions = new ParallelOptions
-        {
-            MaxDegreeOfParallelism = _world.Parallelism
-        };
     }
 
     public int StoreSnapshot(IBlobSystem blobSystem, Fuzzy? fuzzy = null)
     {
         var snapshot = new Snapshot(
-            _world.UtcNow(),
+            _clock.UtcNow(),
             StoreBlobs(blobSystem, fuzzy));
 
         var snapshotId = StoreSnapshotReference(
@@ -85,10 +79,10 @@ public sealed class SnapshotStore
             .ListBlobReferences(fuzzy)
             .Where(br => !br.Blob.Equals(blobSystem.GetBlob(br.Blob.Name)));
 
-        _ = Parallel.ForEach(
-            blobReferencesToRestore,
-            _parallelOptions,
-            br => RestoreBlob(blobSystem, br));
+        foreach (var blobReference in blobReferencesToRestore)
+        {
+            RestoreBlob(blobSystem, blobReference);
+        }
 
         _probe.RestoredSnapshot(snapshotId);
     }
@@ -189,34 +183,28 @@ public sealed class SnapshotStore
         IRepository otherRepository,
         IEnumerable<string> chunkIdsToCopy)
     {
-        _ = Parallel.ForEach(
-            chunkIdsToCopy,
-            _parallelOptions,
-            chunkId =>
-            {
-                otherRepository.Chunks.Store(
-                    chunkId,
-                    _repository.Chunks.Retrieve(chunkId));
+        foreach (var chunkId in chunkIdsToCopy)
+        {
+            otherRepository.Chunks.Store(
+                chunkId,
+                _repository.Chunks.Retrieve(chunkId));
 
-                _probe.CopiedChunk(chunkId);
-            });
+            _probe.CopiedChunk(chunkId);
+        }
     }
 
     private void CopySnapshotIds(
         IRepository otherRepository,
         IEnumerable<int> snapshotIdsToCopy)
     {
-        _ = Parallel.ForEach(
-            snapshotIdsToCopy,
-            _parallelOptions,
-            snapshotId =>
-            {
-                otherRepository.Snapshots.Store(
-                    snapshotId,
-                    _repository.Snapshots.Retrieve(snapshotId));
+        foreach (var snapshotId in snapshotIdsToCopy)
+        {
+            otherRepository.Snapshots.Store(
+                snapshotId,
+                _repository.Snapshots.Retrieve(snapshotId));
 
-                _probe.CopiedSnapshot(snapshotId);
-            });
+            _probe.CopiedSnapshot(snapshotId);
+        }
     }
 
     private SnapshotReference GetSnapshotReference(int snapshotId)
@@ -269,10 +257,8 @@ public sealed class SnapshotStore
             }
         }
 
-        newBlobReferences.AddRange(blobsToStore
-            .AsParallel()
-            .WithDegreeOfParallelism(_world.Parallelism)
-            .Select(b => StoreBlob(blobSystem, b)));
+        newBlobReferences.AddRange(blobsToStore.Select(
+            b => StoreBlob(blobSystem, b)));
 
         return newBlobReferences
             .OrderBy(br => br.Blob.Name)
@@ -306,8 +292,6 @@ public sealed class SnapshotStore
         Fuzzy? fuzzy)
     {
         var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(fuzzy)
-            .AsParallel()
-            .WithDegreeOfParallelism(_world.Parallelism)
             .All(br => CheckBlobReference(br, checkChunkIdFunc));
 
         _probe.SnapshotValid(snapshotId, snapshotValid);
@@ -348,9 +332,6 @@ public sealed class SnapshotStore
     private string[] StoreChunks(Stream stream)
     {
         return _chunker.Chunkify(stream)
-            .AsParallel()
-            .AsOrdered()
-            .WithDegreeOfParallelism(_world.Parallelism)
             .Select(StoreChunk)
             .ToArray();
     }
