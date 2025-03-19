@@ -32,8 +32,8 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     native=('linux-x64')
     contained=('win-x64')
 else
-    native=()
-    contained=('win-x64' 'linux-x64')
+    native=('win-x64')
+    contained=('linux-x64')
 fi
 
 export DOTNET_CLI_TELEMETRY_OPTOUT='1'
@@ -55,12 +55,12 @@ dotnet test "$solution" --no-build
 
 for runtime in "${native[@]}"; do
     announce "Publish $version (native $runtime)"
-    dotnet publish "$csproj" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto -r "$runtime" -p:PublishAot=true -p:StripSymbols=false
+    dotnet publish "$csproj" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto -r "$runtime" -p:PublishAot=true -p:DebugType=none
 done
 
 for runtime in "${contained[@]}"; do
     announce "Publish $version (self-contained $runtime)"
-    dotnet publish "$csproj" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto -r "$runtime" --self-contained -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=embedded
+    dotnet publish "$csproj" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto -r "$runtime" --self-contained -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=none
 done
 
 announce "Publish $version (dotnet tools)"
