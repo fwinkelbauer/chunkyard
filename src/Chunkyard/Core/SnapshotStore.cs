@@ -60,14 +60,14 @@ public sealed class SnapshotStore
             GetSnapshotReference(snapshotId));
     }
 
-    public bool CheckSnapshotExists(int snapshotId, Fuzzy? fuzzy = null)
+    public bool CheckSnapshot(int snapshotId, Fuzzy? fuzzy = null)
     {
-        return CheckSnapshot(_repository.Chunks.Exists, snapshotId, fuzzy);
-    }
+        var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(fuzzy)
+            .All(br => CheckBlobReference(br, ChunkValid));
 
-    public bool CheckSnapshotValid(int snapshotId, Fuzzy? fuzzy = null)
-    {
-        return CheckSnapshot(ChunkValid, snapshotId, fuzzy);
+        _probe.SnapshotValid(snapshotId, snapshotValid);
+
+        return snapshotValid;
     }
 
     public void RestoreSnapshot(
@@ -284,19 +284,6 @@ public sealed class SnapshotStore
             Serialize.SnapshotReferenceToBytes(snapshotReference));
 
         return nextId;
-    }
-
-    private bool CheckSnapshot(
-        Func<string, bool> checkChunkIdFunc,
-        int snapshotId,
-        Fuzzy? fuzzy)
-    {
-        var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(fuzzy)
-            .All(br => CheckBlobReference(br, checkChunkIdFunc));
-
-        _probe.SnapshotValid(snapshotId, snapshotValid);
-
-        return snapshotValid;
     }
 
     private bool ChunkValid(string chunkId)

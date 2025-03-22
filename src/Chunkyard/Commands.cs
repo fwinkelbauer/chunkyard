@@ -3,14 +3,11 @@ namespace Chunkyard;
 public sealed record CheckCommand(
     SnapshotStore SnapshotStore,
     int SnapshotId,
-    Fuzzy Include,
-    bool Shallow) : ICommand
+    Fuzzy Include) : ICommand
 {
     public int Run()
     {
-        var valid = Shallow
-            ? SnapshotStore.CheckSnapshotExists(SnapshotId, Include)
-            : SnapshotStore.CheckSnapshotValid(SnapshotId, Include);
+        var valid = SnapshotStore.CheckSnapshot(SnapshotId, Include);
 
         if (!valid)
         {
