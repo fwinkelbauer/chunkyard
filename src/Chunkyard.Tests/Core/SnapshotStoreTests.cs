@@ -71,10 +71,7 @@ public sealed class SnapshotStoreTests
             Some.BlobSystem(Some.Blobs()));
 
         Assert.IsTrue(
-            snapshotStore.CheckSnapshotExists(snapshotId));
-
-        Assert.IsTrue(
-            snapshotStore.CheckSnapshotValid(snapshotId));
+            snapshotStore.CheckSnapshot(snapshotId));
     }
 
     [TestMethod]
@@ -89,10 +86,7 @@ public sealed class SnapshotStoreTests
         Missing(repository.Chunks, repository.Chunks.UnorderedList());
 
         _ = Assert.ThrowsExactly<ChunkyardException>(
-            () => snapshotStore.CheckSnapshotExists(snapshotId));
-
-        _ = Assert.ThrowsExactly<ChunkyardException>(
-            () => snapshotStore.CheckSnapshotValid(snapshotId));
+            () => snapshotStore.CheckSnapshot(snapshotId));
     }
 
     [TestMethod]
@@ -107,10 +101,7 @@ public sealed class SnapshotStoreTests
         Corrupt(repository.Chunks, repository.Chunks.UnorderedList());
 
         _ = Assert.ThrowsExactly<ChunkyardException>(
-            () => snapshotStore.CheckSnapshotExists(snapshotId));
-
-        _ = Assert.ThrowsExactly<ChunkyardException>(
-            () => snapshotStore.CheckSnapshotValid(snapshotId));
+            () => snapshotStore.CheckSnapshot(snapshotId));
     }
 
     [TestMethod]
@@ -129,10 +120,7 @@ public sealed class SnapshotStoreTests
         Missing(repository.Chunks, chunkIds);
 
         Assert.IsFalse(
-            snapshotStore.CheckSnapshotExists(snapshotId));
-
-        Assert.IsFalse(
-            snapshotStore.CheckSnapshotValid(snapshotId));
+            snapshotStore.CheckSnapshot(snapshotId));
     }
 
     [TestMethod]
@@ -150,11 +138,8 @@ public sealed class SnapshotStoreTests
 
         Corrupt(repository.Chunks, chunkIds);
 
-        Assert.IsTrue(
-            snapshotStore.CheckSnapshotExists(snapshotId));
-
         Assert.IsFalse(
-            snapshotStore.CheckSnapshotValid(snapshotId));
+            snapshotStore.CheckSnapshot(snapshotId));
     }
 
     [TestMethod]
@@ -204,7 +189,7 @@ public sealed class SnapshotStoreTests
 
         snapshotStore.GarbageCollect();
 
-        Assert.IsTrue(snapshotStore.CheckSnapshotValid(snapshotId));
+        Assert.IsTrue(snapshotStore.CheckSnapshot(snapshotId));
 
         snapshotStore.RemoveSnapshot(snapshotId);
 
@@ -342,7 +327,7 @@ public sealed class SnapshotStoreTests
             new[] { snapshotId },
             otherSnapshotStore.ListSnapshotIds());
 
-        Assert.IsTrue(otherSnapshotStore.CheckSnapshotValid(snapshotId));
+        Assert.IsTrue(otherSnapshotStore.CheckSnapshot(snapshotId));
     }
 
     [TestMethod]

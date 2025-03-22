@@ -10,10 +10,9 @@ public sealed class CheckCommandParser : ICommandParser
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
             & consumer.TrySnapshot(out var snapshotId)
-            & consumer.TryInclude(out var include)
-            & consumer.TryBool("--shallow", "Only check if chunks exist", out var shallow))
+            & consumer.TryInclude(out var include))
         {
-            return new CheckCommand(snapshotStore, snapshotId, include, shallow);
+            return new CheckCommand(snapshotStore, snapshotId, include);
         }
         else
         {
