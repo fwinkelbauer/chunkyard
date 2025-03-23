@@ -1,3 +1,4 @@
+[assembly: Parallelize(Scope = ExecutionScope.MethodLevel)]
 namespace Chunkyard.Tests;
 
 [TestClass]
