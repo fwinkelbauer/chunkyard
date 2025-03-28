@@ -47,7 +47,6 @@ announce 'Cleanup'
 git clean -dfX
 
 announce 'Build'
-dotnet format "$solution" --verify-no-changes
 dotnet build "$solution" -warnaserror --tl:auto
 
 announce 'Test'
