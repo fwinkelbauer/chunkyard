@@ -10,17 +10,20 @@ public sealed class SnapshotStore
     public const int SecondLatestSnapshotId = -2;
 
     private readonly IRepository _repository;
+    private readonly IChunker _chunker;
     private readonly IProbe _probe;
     private readonly IClock _clock;
     private readonly Lazy<Crypto> _crypto;
 
     public SnapshotStore(
         IRepository repository,
+        IChunker chunker,
         IProbe probe,
         IClock clock,
         ICryptoFactory cryptoFactory)
     {
         _repository = repository;
+        _chunker = chunker;
         _probe = probe;
         _clock = clock;
 
@@ -267,7 +270,7 @@ public sealed class SnapshotStore
         using var memoryStream = new MemoryStream(
             Serialize.SnapshotToBytes(snapshot));
 
-        return StoreChunks(memoryStream.ToArray());
+        return StoreChunks(memoryStream);
     }
 
     private int StoreSnapshotReference(SnapshotReference snapshotReference)
@@ -297,26 +300,29 @@ public sealed class SnapshotStore
     private BlobReference StoreBlob(IBlobSystem blobSystem, Blob blob)
     {
         using var stream = blobSystem.OpenRead(blob.Name);
-        using var memory = new MemoryStream();
-        stream.CopyTo(memory);
 
         var blobReference = new BlobReference(
             blob,
-            StoreChunks(memory.ToArray()));
+            StoreChunks(stream));
 
         _probe.StoredBlob(blobReference.Blob);
 
         return blobReference;
     }
 
-    private string[] StoreChunks(byte[] bytes)
+    private string[] StoreChunks(Stream stream)
     {
-        var encrypted = _crypto.Value.Encrypt(bytes);
-        var chunkId = ToChunkId(encrypted);
+        return _chunker.Chunkify(stream)
+            .Select(chunk =>
+            {
+                var encrypted = _crypto.Value.Encrypt(chunk);
+                var chunkId = ToChunkId(encrypted);
 
-        _repository.Chunks.Store(chunkId, encrypted);
+                _repository.Chunks.Store(chunkId, encrypted);
 
-        return new[] { chunkId };
+                return chunkId;
+            })
+            .ToArray();
     }
 
     private void RestoreBlob(

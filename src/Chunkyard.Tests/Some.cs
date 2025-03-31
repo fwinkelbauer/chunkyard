@@ -27,10 +27,12 @@ internal static class Some
 
     public static SnapshotStore SnapshotStore(
         IRepository? repository = null,
+        IChunker? chunker = null,
         ICryptoFactory? cryptoFactory = null)
     {
         return new SnapshotStore(
             repository ?? Repository(),
+            chunker ?? new DummyChunker(),
             new DummyProbe(),
             Clock,
             cryptoFactory ?? new DummyCryptoFactory("secret"));
