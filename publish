@@ -38,7 +38,7 @@ fi
 
 export DOTNET_CLI_TELEMETRY_OPTOUT='1'
 
-solution='src/Chunkyard.sln'
+solution='src/Chunkyard.slnx'
 csproj='src/Chunkyard/Chunkyard.csproj'
 artifacts='artifacts'
 version=$(git_describe)
