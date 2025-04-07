@@ -23,12 +23,6 @@ directory=$(dirname "$script")
 cd "$directory"
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    if ! [ -x "$(command -v dotnet)" ]; then
-        announce "Install dependencies"
-        sudo apt update
-        sudo apt install git dotnet-sdk-8.0 clang zlib1g-dev
-    fi
-
     native=('linux-x64')
     contained=('win-x64')
 else

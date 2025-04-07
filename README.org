@@ -39,7 +39,9 @@ the class in commits before [[https://github.com/fwinkelbauer/chunkyard/commit/8
 
 * Build
 
-- Install the .NET SDK
+- [[https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8#prerequisites][Setup]]
+  - Linux: Run ~./setup~
+  - Windows: Install Visual Studio with .NET and C++ workloads
 - Run ~dotnet build src~ and ~dotnet test src~ to build and test Chunkyard
 
 * Publish
