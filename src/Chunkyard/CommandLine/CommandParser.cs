@@ -1,24 +1,29 @@
 namespace Chunkyard.CommandLine;
 
 /// <summary>
-/// This class dispatches args to instances of <see cref="ICommandParser"/>.
-/// Returns a <see cref="HelpCommand"/> if no matching command parser can be
-/// found.
+/// This class dispatches args to instances of a set of command parsers. Returns
+/// a <see cref="HelpCommand"/> if no matching parser can be found.
 /// </summary>
 public sealed class CommandParser
 {
-    private readonly Dictionary<string, ICommandParser> _parsers;
+    private readonly Dictionary<string, Func<FlagConsumer, ICommand?>> _parsers;
     private readonly HelpCommandBuilder _help;
 
-    public CommandParser(params ICommandParser[] parsers)
+    public CommandParser()
     {
-        _parsers = parsers.ToDictionary(p => p.Command, p => p);
+        _parsers = new();
         _help = new(GetInfo(typeof(CommandParser).Assembly));
+    }
 
-        foreach (var parser in parsers)
-        {
-            _help.AddCommand(parser.Command, parser.Info);
-        }
+    public CommandParser With(
+        string command,
+        string info,
+        Func<FlagConsumer, ICommand?> parser)
+    {
+        _parsers[command] = parser;
+        _help.AddCommand(command, info);
+
+        return this;
     }
 
     public ICommand Parse(params string[] args)
@@ -38,7 +43,7 @@ public sealed class CommandParser
         else if (_parsers.TryGetValue(arg.Command, out var parser))
         {
             var consumer = new FlagConsumer(arg.Flags, _help);
-            var command = parser.Parse(consumer);
+            var command = parser(consumer);
 
             return consumer.HelpNeeded(out var help) || command == null
                 ? help
