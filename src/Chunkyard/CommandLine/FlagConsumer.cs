@@ -1,7 +1,7 @@
 namespace Chunkyard.CommandLine;
 
 /// <summary>
-/// A stateful helper class used by instances of <see cref="ICommandParser"/>.
+/// A stateful helper class used to parse commands.
 /// </summary>
 public sealed class FlagConsumer
 {
