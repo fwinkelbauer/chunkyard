@@ -12,20 +12,17 @@ public sealed class SnapshotStore
     private readonly IRepository _repository;
     private readonly IChunker _chunker;
     private readonly IProbe _probe;
-    private readonly IClock _clock;
     private readonly Lazy<Crypto> _crypto;
 
     public SnapshotStore(
         IRepository repository,
         IChunker chunker,
         IProbe probe,
-        IClock clock,
         ICryptoFactory cryptoFactory)
     {
         _repository = repository;
         _chunker = chunker;
         _probe = probe;
-        _clock = clock;
 
         _crypto = new(() =>
         {
@@ -37,10 +34,10 @@ public sealed class SnapshotStore
         });
     }
 
-    public int StoreSnapshot(IBlobSystem blobSystem, Fuzzy? fuzzy = null)
+    public int StoreSnapshot(IBlobSystem blobSystem, DateTime utcNow, Fuzzy fuzzy)
     {
         var snapshot = new Snapshot(
-            _clock.UtcNow(),
+            utcNow,
             StoreBlobs(blobSystem, fuzzy));
 
         var snapshotId = StoreSnapshotReference(
@@ -60,7 +57,7 @@ public sealed class SnapshotStore
             GetSnapshotReference(snapshotId));
     }
 
-    public bool CheckSnapshot(int snapshotId, Fuzzy? fuzzy = null)
+    public bool CheckSnapshot(int snapshotId, Fuzzy fuzzy)
     {
         var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(fuzzy)
             .All(br => CheckBlobReference(br));
@@ -73,7 +70,7 @@ public sealed class SnapshotStore
     public void RestoreSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,
-        Fuzzy? fuzzy = null)
+        Fuzzy fuzzy)
     {
         var blobReferencesToRestore = GetSnapshot(snapshotId)
             .ListBlobReferences(fuzzy)
@@ -235,7 +232,7 @@ public sealed class SnapshotStore
 
     private BlobReference[] StoreBlobs(
         IBlobSystem blobSystem,
-        Fuzzy? fuzzy)
+        Fuzzy fuzzy)
     {
         var existingBlobReferences = TryLastSnapshotId(_repository, out var snapshotId)
             ? GetSnapshot(snapshotId).BlobReferences.ToDictionary(br => br.Blob, br => br)
