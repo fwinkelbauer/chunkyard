@@ -74,20 +74,16 @@ public static class FuzzyExtensions
 {
     public static IEnumerable<Blob> ListBlobs(
         this IBlobSystem blobSystem,
-        Fuzzy? fuzzy)
+        Fuzzy fuzzy)
     {
-        fuzzy ??= new();
-
         return blobSystem.ListBlobs()
             .Where(b => fuzzy.IsMatch(b.Name));
     }
 
     public static Blob[] ListBlobs(
         this Snapshot snapshot,
-        Fuzzy? fuzzy)
+        Fuzzy fuzzy)
     {
-        fuzzy ??= new();
-
         return snapshot.BlobReferences
             .Select(br => br.Blob)
             .Where(b => fuzzy.IsMatch(b.Name))
@@ -96,10 +92,8 @@ public static class FuzzyExtensions
 
     public static BlobReference[] ListBlobReferences(
         this Snapshot snapshot,
-        Fuzzy? fuzzy)
+        Fuzzy fuzzy)
     {
-        fuzzy ??= new();
-
         return snapshot.BlobReferences
             .Where(b => fuzzy.IsMatch(b.Blob.Name))
             .ToArray();

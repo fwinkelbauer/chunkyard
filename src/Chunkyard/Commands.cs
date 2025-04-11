@@ -289,7 +289,7 @@ public sealed record StoreCommand(
 {
     public int Run()
     {
-        _ = SnapshotStore.StoreSnapshot(BlobSystem, Include);
+        _ = SnapshotStore.StoreSnapshot(BlobSystem, DateTime.UtcNow, Include);
 
         return 0;
     }
@@ -337,7 +337,6 @@ public static class ArgConsumerExtensions
             repository,
             new SimpleChunker(),
             new ConsoleProbe(),
-            new RealClock(),
             cryptoFactory);
 
         return success;

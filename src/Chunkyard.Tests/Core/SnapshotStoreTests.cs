@@ -83,7 +83,7 @@ public sealed class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Missing(repository.Chunks, repository.Chunks.UnorderedList());
+        repository.Chunks.Missing(repository.Chunks.UnorderedList());
 
         _ = Assert.ThrowsExactly<ChunkyardException>(
             () => snapshotStore.CheckSnapshot(snapshotId));
@@ -98,7 +98,7 @@ public sealed class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Corrupt(repository.Chunks, repository.Chunks.UnorderedList());
+        repository.Chunks.Corrupt(repository.Chunks.UnorderedList());
 
         _ = Assert.ThrowsExactly<ChunkyardException>(
             () => snapshotStore.CheckSnapshot(snapshotId));
@@ -117,7 +117,7 @@ public sealed class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Missing(repository.Chunks, chunkIds);
+        repository.Chunks.Missing(chunkIds);
 
         Assert.IsFalse(
             snapshotStore.CheckSnapshot(snapshotId));
@@ -136,7 +136,7 @@ public sealed class SnapshotStoreTests
             .BlobReferences
             .SelectMany(b => b.ChunkIds);
 
-        Corrupt(repository.Chunks, chunkIds);
+        repository.Chunks.Corrupt(chunkIds);
 
         Assert.IsFalse(
             snapshotStore.CheckSnapshot(snapshotId));
@@ -159,8 +159,8 @@ public sealed class SnapshotStoreTests
         snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
 
         CollectionAssert.AreEqual(
-            ToDictionary(inputBlobSystem),
-            ToDictionary(outputBlobSystem));
+            inputBlobSystem.ToDictionary(),
+            outputBlobSystem.ToDictionary());
     }
 
     [TestMethod]
@@ -174,8 +174,8 @@ public sealed class SnapshotStoreTests
         snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
 
         CollectionAssert.AreEqual(
-            ToDictionary(inputBlobSystem),
-            ToDictionary(outputBlobSystem));
+            inputBlobSystem.ToDictionary(),
+            outputBlobSystem.ToDictionary());
     }
 
     [TestMethod]
@@ -339,7 +339,7 @@ public sealed class SnapshotStoreTests
         _ = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        Corrupt(repository.Snapshots, repository.Snapshots.UnorderedList());
+        repository.Snapshots.Corrupt(repository.Snapshots.UnorderedList());
 
         _ = Assert.ThrowsExactly<ChunkyardException>(
             () => snapshotStore.CopyTo(Some.Repository()));
@@ -362,46 +362,5 @@ public sealed class SnapshotStoreTests
 
         _ = Assert.ThrowsExactly<ChunkyardException>(
             () => snapshotStore.CopyTo(otherRepository));
-    }
-
-    private static void Missing<T>(
-        IRepository<T> repository,
-        IEnumerable<T> keys)
-    {
-        foreach (var key in keys)
-        {
-            repository.Remove(key);
-        }
-    }
-
-    private static void Corrupt<T>(
-        IRepository<T> repository,
-        IEnumerable<T> keys)
-    {
-        foreach (var key in keys)
-        {
-            var bytes = repository.Retrieve(key);
-
-            repository.Remove(key);
-            repository.Store(
-                key,
-                bytes.Concat(new byte[] { 0xFF }).ToArray());
-        }
-    }
-
-    private static Dictionary<Blob, string> ToDictionary(
-        IBlobSystem blobSystem)
-    {
-        return blobSystem.ListBlobs().ToDictionary(
-            blob => blob,
-            blob =>
-            {
-                using var memoryStream = new MemoryStream();
-                using var blobStream = blobSystem.OpenRead(blob.Name);
-
-                blobStream.CopyTo(memoryStream);
-
-                return Convert.ToHexString(memoryStream.ToArray());
-            });
     }
 }
