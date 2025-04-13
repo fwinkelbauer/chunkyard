@@ -26,7 +26,7 @@ public sealed class FileRepository : IRepository
 public sealed class FileRepository<T> : IRepository<T>
     where T : notnull
 {
-    private readonly string _directory;
+    private readonly Lazy<string> _directory;
     private readonly Func<T, string> _toFile;
     private readonly Func<string, T> _toKey;
 
@@ -35,7 +35,7 @@ public sealed class FileRepository<T> : IRepository<T>
         Func<T, string> toFile,
         Func<string, T> toKey)
     {
-        _directory = Path.GetFullPath(directory);
+        _directory = new(() => Path.GetFullPath(directory));
         _toFile = toFile;
         _toKey = toKey;
     }
@@ -68,12 +68,12 @@ public sealed class FileRepository<T> : IRepository<T>
 
     public T[] UnorderedList()
     {
-        if (!Directory.Exists(_directory))
+        if (!Directory.Exists(_directory.Value))
         {
             return Array.Empty<T>();
         }
 
-        return Directory.GetFiles(_directory, "*", SearchOption.AllDirectories)
+        return Directory.GetFiles(_directory.Value, "*", SearchOption.AllDirectories)
             .Select(ToKey)
             .ToArray();
     }
@@ -86,12 +86,12 @@ public sealed class FileRepository<T> : IRepository<T>
 
     private string ToFile(T key)
     {
-        return Path.Combine(_directory, _toFile(key));
+        return Path.Combine(_directory.Value, _toFile(key));
     }
 
     private T ToKey(string file)
     {
         return _toKey(
-            Path.GetRelativePath(_directory, file));
+            Path.GetRelativePath(_directory.Value, file));
     }
 }
