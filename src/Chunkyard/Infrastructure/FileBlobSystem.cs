@@ -5,21 +5,20 @@ namespace Chunkyard.Infrastructure;
 /// </summary>
 public sealed class FileBlobSystem : IBlobSystem
 {
-    private readonly string[] _directories;
-    private readonly string _common;
+    private readonly Lazy<string[]> _directories;
+    private readonly Lazy<string> _common;
 
     public FileBlobSystem(params string[] directories)
     {
-        _directories = directories
-            .Select(Path.GetFullPath)
-            .ToArray();
+        _directories = new(
+            () => directories.Select(Path.GetFullPath).ToArray());
 
-        _common = PathUtils.GetCommon(_directories);
+        _common = new(() => PathUtils.GetCommon(_directories.Value));
     }
 
     public Blob[] ListBlobs()
     {
-        return _directories
+        return _directories.Value
             .SelectMany(d => Directory.GetFiles(d, "*", SearchOption.AllDirectories))
             .Distinct()
             .OrderBy(f => f)
@@ -53,9 +52,9 @@ public sealed class FileBlobSystem : IBlobSystem
 
     private Blob ToBlob(string file)
     {
-        var blobName = string.IsNullOrEmpty(_common)
+        var blobName = string.IsNullOrEmpty(_common.Value)
             ? file
-            : Path.GetRelativePath(_common, file);
+            : Path.GetRelativePath(_common.Value, file);
 
         return new Blob(
             UnifyForAllOperatingSystems(blobName),
@@ -74,7 +73,7 @@ public sealed class FileBlobSystem : IBlobSystem
 
     private string ToFile(string blobName)
     {
-        return Path.Combine(_common, blobName);
+        return Path.Combine(_common.Value, blobName);
     }
 
     private sealed class WriteStream : FileStream
