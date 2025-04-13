@@ -57,18 +57,19 @@ public sealed class FileBlobSystem : IBlobSystem
             ? file
             : Path.GetRelativePath(_common, file);
 
-        // Using a blob name with backslashes will not create subdirectories
-        // when restoring a file on Linux.
-        //
-        // Also, we don't want to include any ":" so that Windows drive letters
-        // can be turned into valid paths.
-        blobName = blobName
-            .Replace('\\', '/')
-            .Replace(":", "");
-
         return new Blob(
-            blobName,
-            File.GetLastWriteTimeUtc(file));
+            UnifyForAllOperatingSystems(blobName),
+            UnifyForAllFileSystems(File.GetLastWriteTimeUtc(file)));
+    }
+
+    private static string UnifyForAllOperatingSystems(string blobName)
+    {
+        return blobName.Replace('\\', '/').Replace(":", "");
+    }
+
+    private static DateTime UnifyForAllFileSystems(DateTime d)
+    {
+        return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
     }
 
     private string ToFile(string blobName)

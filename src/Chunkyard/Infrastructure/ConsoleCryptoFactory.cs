@@ -38,7 +38,6 @@ internal sealed class ConsoleCryptoFactory : ICryptoFactory
         return ReadPassword("Password: ");
     }
 
-    // https://stackoverflow.com/questions/3404421/password-masking-console-application
     private static string ReadPassword(string prompt)
     {
         Console.Write(prompt);

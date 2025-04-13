@@ -1,7 +1,7 @@
 namespace Chunkyard.Infrastructure;
 
 /// <summary>
-/// A <see cref="IRepository"/> decorator that does not persist data changes.
+/// A <see cref="IRepository"/> decorator that does not store or remove data.
 /// </summary>
 public sealed class DryRunRepository : IRepository
 {
@@ -28,7 +28,6 @@ public sealed class DryRunRepository<T> : IRepository<T>
 
     public void Store(T key, ReadOnlySpan<byte> value)
     {
-        // Do nothing
     }
 
     public byte[] Retrieve(T key)
@@ -48,6 +47,5 @@ public sealed class DryRunRepository<T> : IRepository<T>
 
     public void Remove(T key)
     {
-        // Do nothing
     }
 }
