@@ -48,8 +48,7 @@ public sealed record CopyCommand(
     public static CopyCommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TryString("--destination", "The destination repository path", out var path)
-            & consumer.TryDryRun<IRepository>(new FileRepository(path), r => new DryRunRepository(r), out var repository)
+            & consumer.TryRepository("--destination", "The destination repository path", out var repository)
             & consumer.TryInt("--last", "The maximum amount of snapshots to copy. Zero or a negative number copies all", out var last, 0))
         {
             return new CopyCommand(snapshotStore, repository, last);
