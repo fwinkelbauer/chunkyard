@@ -37,7 +37,7 @@ public sealed class FileBlobSystem : IBlobSystem
         var file = ToFile(blobName);
 
         return File.Exists(file)
-            ? new Blob(blobName, File.GetLastWriteTimeUtc(file))
+            ? ToBlob(file)
             : null;
     }
 
