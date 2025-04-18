@@ -36,9 +36,8 @@ public static class Extensions
         this FlagConsumer consumer,
         out SnapshotStore snapshotStore)
     {
-        var success = consumer.TryString("--repository", "The repository path", out var path)
-            & consumer.TryEnum("--password", "The password prompt method", out Password password, Password.Console)
-            & consumer.TryDryRun<IRepository>(new FileRepository(path), r => new DryRunRepository(r), out var repository);
+        var success = consumer.TryRepository("--repository", "The repository path", out var repository)
+            & consumer.TryEnum("--password", "The password prompt method", out Password password, Password.Console);
 
         ICryptoFactory cryptoFactory = password switch
         {
@@ -52,6 +51,18 @@ public static class Extensions
             new SimpleChunker(),
             new ConsoleProbe(),
             cryptoFactory);
+
+        return success;
+    }
+
+    public static bool TryRepository(
+        this FlagConsumer consumer,
+        string flag,
+        string info,
+        out IRepository repository)
+    {
+        var success = consumer.TryString(flag, info, out var path)
+            & consumer.TryDryRun<IRepository>(new FileRepository(path), r => new DryRunRepository(r), out repository);
 
         return success;
     }
