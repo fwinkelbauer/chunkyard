@@ -67,6 +67,18 @@ public static class Extensions
         return success;
     }
 
+    public static bool TryBlobSystem(
+        this FlagConsumer consumer,
+        string flag,
+        string info,
+        out IBlobSystem blobSystem)
+    {
+        var success = consumer.TryStrings(flag, info, out var directories)
+            & consumer.TryDryRun<IBlobSystem>(new FileBlobSystem(directories), b => new DryRunBlobSystem(b), out blobSystem);
+
+        return success;
+    }
+
     public static bool TrySnapshot(
         this FlagConsumer consumer,
         out int snapshot)

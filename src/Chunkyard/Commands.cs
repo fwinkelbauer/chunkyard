@@ -234,8 +234,7 @@ public sealed record RestoreCommand(
     public static RestoreCommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TryString("--directory", "The directory to restore into", out var directory)
-            & consumer.TryDryRun<IBlobSystem>(new FileBlobSystem(directory), b => new DryRunBlobSystem(b), out var blobSystem)
+            & consumer.TryBlobSystem("--directory", "The directory to restore into", out var blobSystem)
             & consumer.TrySnapshot(out var snapshot)
             & consumer.TryInclude(out var include))
         {
@@ -296,8 +295,7 @@ public sealed record StoreCommand(
     public static StoreCommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TryStrings("--directory", "A list of directories to store", out var directories)
-            & consumer.TryDryRun<IBlobSystem>(new FileBlobSystem(directories), b => new DryRunBlobSystem(b), out var blobSystem)
+            & consumer.TryBlobSystem("--directory", "A list of directories to store", out var blobSystem)
             & consumer.TryInclude(out var include))
         {
             return new StoreCommand(snapshotStore, blobSystem, include);
