@@ -40,11 +40,12 @@ public sealed class SnapshotStore
             utcNow,
             StoreBlobs(blobSystem, fuzzy));
 
-        var snapshotId = StoreSnapshotReference(
-            new SnapshotReference(
-                _crypto.Value.Salt,
-                _crypto.Value.Iterations,
-                StoreSnapshot(snapshot)));
+        var snapshotReference = new SnapshotReference(
+            _crypto.Value.Salt,
+            _crypto.Value.Iterations,
+            StoreSnapshot(snapshot));
+
+        var snapshotId = StoreSnapshotReference(snapshotReference);
 
         _probe.StoredSnapshot(snapshotId);
 
