@@ -85,7 +85,7 @@ public sealed class SnapshotStoreTests
 
         repository.Chunks.Missing(repository.Chunks.UnorderedList());
 
-        _ = Assert.ThrowsExactly<ChunkyardException>(
+        _ = Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshot(snapshotId));
     }
 
@@ -100,7 +100,7 @@ public sealed class SnapshotStoreTests
 
         repository.Chunks.Corrupt(repository.Chunks.UnorderedList());
 
-        _ = Assert.ThrowsExactly<ChunkyardException>(
+        _ = Assert.Throws<ChunkyardException>(
             () => snapshotStore.CheckSnapshot(snapshotId));
     }
 
@@ -193,12 +193,11 @@ public sealed class SnapshotStoreTests
 
         snapshotStore.RemoveSnapshot(snapshotId);
 
-        Assert.IsTrue(repository.Chunks.UnorderedList().Length > 0);
+        Assert.IsNotEmpty(repository.Chunks.UnorderedList());
 
         snapshotStore.GarbageCollect();
 
-        Assert.AreEqual(0, repository.Chunks.UnorderedList().Length);
-        Assert.AreEqual(0, repository.Snapshots.UnorderedList().Length);
+        Assert.IsEmpty(repository.Snapshots.UnorderedList());
     }
 
     [TestMethod]
@@ -213,7 +212,7 @@ public sealed class SnapshotStoreTests
         snapshotStore.RemoveSnapshot(snapshotId);
         snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
 
-        Assert.AreEqual(0, snapshotStore.ListSnapshotIds().Length);
+        Assert.IsEmpty(snapshotStore.ListSnapshotIds());
     }
 
     [TestMethod]
@@ -254,7 +253,7 @@ public sealed class SnapshotStoreTests
 
         snapshotStore.KeepSnapshots(0);
 
-        Assert.AreEqual(0, snapshotStore.ListSnapshotIds().Length);
+        Assert.IsEmpty(snapshotStore.ListSnapshotIds());
     }
 
     [TestMethod]
@@ -341,7 +340,7 @@ public sealed class SnapshotStoreTests
 
         repository.Snapshots.Corrupt(repository.Snapshots.UnorderedList());
 
-        _ = Assert.ThrowsExactly<ChunkyardException>(
+        _ = Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(Some.Repository()));
     }
 
@@ -360,7 +359,7 @@ public sealed class SnapshotStoreTests
         _ = otherSnapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs("other blob")));
 
-        _ = Assert.ThrowsExactly<ChunkyardException>(
+        _ = Assert.Throws<ChunkyardException>(
             () => snapshotStore.CopyTo(otherRepository));
     }
 }

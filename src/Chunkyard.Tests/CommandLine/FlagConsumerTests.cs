@@ -22,7 +22,7 @@ public sealed class FlagConsumerTests
         var success = consumer.TryStrings("--some", "info", out var list);
 
         Assert.IsTrue(success);
-        Assert.AreEqual(0, list.Length);
+        Assert.IsEmpty(list);
     }
 
     [TestMethod]
