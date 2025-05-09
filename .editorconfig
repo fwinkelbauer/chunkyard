@@ -22,6 +22,7 @@ dotnet_diagnostic.CA1861.severity = none
 dotnet_diagnostic.CA1806.severity = none
 dotnet_diagnostic.CA2101.severity = none
 dotnet_diagnostic.CA5392.severity = none
+dotnet_diagnostic.SYSLIB1054.severity = none
 
 # IDE
 dotnet_diagnostic.IDE0008.severity = none
@@ -32,3 +33,4 @@ dotnet_diagnostic.IDE0290.severity = none
 dotnet_diagnostic.IDE0300.severity = none
 dotnet_diagnostic.IDE0301.severity = none
 dotnet_diagnostic.IDE0305.severity = none
+dotnet_diagnostic.IDE0306.severity = none
