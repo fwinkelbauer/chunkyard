@@ -46,6 +46,8 @@ public static class Extensions
             _ => new ConsoleCryptoFactory()
         };
 
+        _ = consumer.TryDryRun(cryptoFactory, c => new DryRunCryptoFactory(c), out cryptoFactory);
+
         snapshotStore = new SnapshotStore(
             repository,
             new SimpleChunker(),
@@ -62,7 +64,7 @@ public static class Extensions
         out IRepository repository)
     {
         var success = consumer.TryString(flag, info, out var path)
-            & consumer.TryDryRun<IRepository>(new FileRepository(path), r => new DryRunRepository(r), out repository);
+            & consumer.TryDryRun(new FileRepository(path), r => new DryRunRepository(r), out repository);
 
         return success;
     }
@@ -74,7 +76,7 @@ public static class Extensions
         out IBlobSystem blobSystem)
     {
         var success = consumer.TryStrings(flag, info, out var directories)
-            & consumer.TryDryRun<IBlobSystem>(new FileBlobSystem(directories), b => new DryRunBlobSystem(b), out blobSystem);
+            & consumer.TryDryRun(new FileBlobSystem(directories), b => new DryRunBlobSystem(b), out blobSystem);
 
         return success;
     }
