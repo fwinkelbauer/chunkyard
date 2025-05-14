@@ -240,14 +240,14 @@ public sealed class SnapshotStore
             : new Dictionary<Blob, BlobReference>();
 
         var blobs = blobSystem.ListBlobs(fuzzy);
-        var newBlobReferences = new List<BlobReference>();
+        var blobReferences = new List<BlobReference>();
         var blobsToStore = new List<Blob>();
 
         foreach (var blob in blobs)
         {
             if (existingBlobReferences.TryGetValue(blob, out var blobReference))
             {
-                newBlobReferences.Add(blobReference);
+                blobReferences.Add(blobReference);
             }
             else
             {
@@ -255,10 +255,10 @@ public sealed class SnapshotStore
             }
         }
 
-        newBlobReferences.AddRange(blobsToStore.Select(
+        blobReferences.AddRange(blobsToStore.Select(
             b => StoreBlob(blobSystem, b)));
 
-        return newBlobReferences
+        return blobReferences
             .OrderBy(br => br.Blob.Name)
             .ToArray();
     }
