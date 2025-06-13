@@ -102,7 +102,6 @@ public sealed class SnapshotStore
         foreach (var chunkId in unusedChunkIds)
         {
             _repository.Chunks.Remove(chunkId);
-            _probe.RemovedChunk(chunkId);
         }
     }
 
@@ -186,8 +185,6 @@ public sealed class SnapshotStore
             otherRepository.Chunks.Store(
                 chunkId,
                 _repository.Chunks.Retrieve(chunkId));
-
-            _probe.CopiedChunk(chunkId);
         }
     }
 
@@ -200,8 +197,6 @@ public sealed class SnapshotStore
             otherRepository.Snapshots.Store(
                 snapshotId,
                 _repository.Snapshots.Retrieve(snapshotId));
-
-            _probe.CopiedSnapshot(snapshotId);
         }
     }
 

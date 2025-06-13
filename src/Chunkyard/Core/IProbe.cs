@@ -12,17 +12,11 @@ public interface IProbe
 
     void BlobValid(Blob blob, bool valid);
 
-    void CopiedChunk(string chunkId);
-
-    void RemovedChunk(string chunkId);
-
-    void CopiedSnapshot(int snapshotId);
-
     void StoredSnapshot(int snapshotId);
 
     void RestoredSnapshot(int snapshotId);
 
-    void RemovedSnapshot(int snapshotId);
-
     void SnapshotValid(int snapshotId, bool valid);
+
+    void RemovedSnapshot(int snapshotId);
 }
