@@ -22,33 +22,25 @@ internal sealed class ConsoleProbe : IProbe
             : $"Invalid blob: {blob.Name}");
     }
 
-    public void CopiedChunk(string chunkId)
-    {
-    }
-
-    public void RemovedChunk(string chunkId)
-    {
-        Console.Error.WriteLine($"Removed chunk: {chunkId}");
-    }
-
-    public void CopiedSnapshot(int snapshotId)
-    {
-    }
-
     public void StoredSnapshot(int snapshotId)
     {
+        Console.Error.WriteLine($"Stored snapshot: {snapshotId}");
     }
 
     public void RestoredSnapshot(int snapshotId)
     {
+        Console.Error.WriteLine($"Restored snapshot: {snapshotId}");
+    }
+
+    public void SnapshotValid(int snapshotId, bool valid)
+    {
+        Console.Error.WriteLine(valid
+            ? $"Valid snapshot: {snapshotId}"
+            : $"Invalid snapshot: {snapshotId}");
     }
 
     public void RemovedSnapshot(int snapshotId)
     {
         Console.Error.WriteLine($"Removed snapshot: {snapshotId}");
-    }
-
-    public void SnapshotValid(int snapshotId, bool valid)
-    {
     }
 }

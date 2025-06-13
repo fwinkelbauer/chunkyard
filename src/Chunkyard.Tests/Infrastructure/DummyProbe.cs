@@ -14,18 +14,6 @@ internal sealed class DummyProbe : IProbe
     {
     }
 
-    public void CopiedChunk(string chunkId)
-    {
-    }
-
-    public void RemovedChunk(string chunkId)
-    {
-    }
-
-    public void CopiedSnapshot(int snapshotId)
-    {
-    }
-
     public void StoredSnapshot(int snapshotId)
     {
     }
@@ -34,11 +22,11 @@ internal sealed class DummyProbe : IProbe
     {
     }
 
-    public void RemovedSnapshot(int snapshotId)
+    public void SnapshotValid(int snapshotId, bool valid)
     {
     }
 
-    public void SnapshotValid(int snapshotId, bool valid)
+    public void RemovedSnapshot(int snapshotId)
     {
     }
 }
