@@ -52,6 +52,32 @@ public sealed class SnapshotStore
         return snapshotId;
     }
 
+    public SnapshotReference GetSnapshotReference(int snapshotId)
+    {
+        var resolved = ResolveSnapshotId(snapshotId);
+        var bytes = _repository.Snapshots.Retrieve(resolved);
+
+        try
+        {
+            return Serialize.BytesToSnapshotReference(bytes);
+        }
+        catch (Exception e)
+        {
+            throw new ChunkyardException(
+                $"Could not retrieve snapshot: #{resolved}",
+                e);
+        }
+    }
+
+    public Snapshot GetSnapshot(SnapshotReference snapshotReference)
+    {
+        using var memoryStream = new MemoryStream();
+
+        RestoreChunks(snapshotReference.ChunkIds, memoryStream);
+
+        return Serialize.BytesToSnapshot(memoryStream.ToArray());
+    }
+
     public Snapshot GetSnapshot(int snapshotId)
     {
         return GetSnapshot(
@@ -198,32 +224,6 @@ public sealed class SnapshotStore
                 snapshotId,
                 _repository.Snapshots.Retrieve(snapshotId));
         }
-    }
-
-    private SnapshotReference GetSnapshotReference(int snapshotId)
-    {
-        var resolved = ResolveSnapshotId(snapshotId);
-        var bytes = _repository.Snapshots.Retrieve(resolved);
-
-        try
-        {
-            return Serialize.BytesToSnapshotReference(bytes);
-        }
-        catch (Exception e)
-        {
-            throw new ChunkyardException(
-                $"Could not retrieve snapshot: #{resolved}",
-                e);
-        }
-    }
-
-    private Snapshot GetSnapshot(SnapshotReference snapshotReference)
-    {
-        using var memoryStream = new MemoryStream();
-
-        RestoreChunks(snapshotReference.ChunkIds, memoryStream);
-
-        return Serialize.BytesToSnapshot(memoryStream.ToArray());
     }
 
     private BlobReference[] StoreBlobs(

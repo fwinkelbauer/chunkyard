@@ -31,12 +31,12 @@ public sealed class CryptoTests
     }
 
     [TestMethod]
-    public void Encrypt_Uses_Different_Nonce_On_Every_Input()
+    public void Encrypt_Derives_Same_Nonce_For_Same_Input()
     {
         var crypto = Some.Crypto();
         var plain = "Hello!"u8;
 
-        CollectionAssert.AreNotEqual(
+        CollectionAssert.AreEqual(
             crypto.Encrypt(plain),
             crypto.Encrypt(plain));
     }
