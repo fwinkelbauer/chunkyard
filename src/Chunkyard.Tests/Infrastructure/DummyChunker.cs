@@ -4,11 +4,9 @@ internal sealed class DummyChunker : IChunker
 {
     public IEnumerable<byte[]> Chunkify(Stream stream)
     {
-        var buffer = new byte[1];
+        using var memory = new MemoryStream();
+        stream.CopyTo(memory);
 
-        while (stream.Read(buffer, 0, buffer.Length) > 0)
-        {
-            yield return buffer.ToArray();
-        }
+        return memory.ToArray().Chunk(4);
     }
 }

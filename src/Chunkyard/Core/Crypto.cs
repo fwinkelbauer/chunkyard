@@ -12,6 +12,7 @@ public sealed class Crypto
     public const int SaltBytes = 12;
 
     private readonly byte[] _key;
+    private readonly byte[] _hashedKey;
 
     public Crypto(string password, byte[] salt, int iterations)
     {
@@ -23,6 +24,7 @@ public sealed class Crypto
         }
 
         _key = PasswordToKey(password, salt, iterations);
+        _hashedKey = SHA256.HashData(_key);
 
         Password = password;
         Salt = salt;
@@ -37,7 +39,11 @@ public sealed class Crypto
 
     public byte[] Encrypt(ReadOnlySpan<byte> plain)
     {
-        var nonce = RandomNumberGenerator.GetBytes(NonceBytes);
+        var nonce = new Span<byte>(
+            HMACSHA256.HashData(_hashedKey, plain),
+            0,
+            NonceBytes);
+
         var cipher = new byte[nonce.Length + plain.Length + TagBytes];
 
         nonce.CopyTo(new Span<byte>(cipher, 0, nonce.Length));

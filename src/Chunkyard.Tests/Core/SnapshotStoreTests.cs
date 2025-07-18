@@ -113,9 +113,12 @@ public sealed class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        var chunkIds = snapshotStore.GetSnapshot(snapshotId)
+        var snapshotReference = snapshotStore.GetSnapshotReference(snapshotId);
+
+        var chunkIds = snapshotStore.GetSnapshot(snapshotReference)
             .BlobReferences
-            .SelectMany(b => b.ChunkIds);
+            .SelectMany(b => b.ChunkIds)
+            .Except(snapshotReference.ChunkIds);
 
         repository.Chunks.Missing(chunkIds);
 
@@ -132,9 +135,12 @@ public sealed class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        var chunkIds = snapshotStore.GetSnapshot(snapshotId)
+        var snapshotReference = snapshotStore.GetSnapshotReference(snapshotId);
+
+        var chunkIds = snapshotStore.GetSnapshot(snapshotReference)
             .BlobReferences
-            .SelectMany(b => b.ChunkIds);
+            .SelectMany(b => b.ChunkIds)
+            .Except(snapshotReference.ChunkIds);
 
         repository.Chunks.Corrupt(chunkIds);
 
