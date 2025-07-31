@@ -19,7 +19,7 @@ the class in commits before [[https://github.com/fwinkelbauer/chunkyard/commit/8
 - Cross platform support. Chunkyard is shipped as two binaries ~chunkyard~
   (Linux) and ~chunkyard.exe~ (Windows). They work without having to install
   .NET on your computer
-- Favor simplicity and readability over features and elaborate performance
+- Favour simplicity and readability over features and elaborate performance
   tricks
 - Strong symmetric encryption (AES Galois/Counter Mode using a 256 bit key)
 - Ability to copy from/to other repositories
