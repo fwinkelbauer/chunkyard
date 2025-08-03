@@ -13,10 +13,7 @@ internal sealed class DummyCryptoFactory : ICryptoFactory
     {
         if (snapshotReference == null)
         {
-            return new Crypto(
-                _password,
-                RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
-                Crypto.DefaultIterations);
+            return new Crypto(_password);
         }
         else
         {

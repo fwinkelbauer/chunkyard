@@ -17,10 +17,7 @@ public class DryRunCryptoFactory : ICryptoFactory
     {
         if (snapshotReference == null)
         {
-            return new Crypto(
-                Guid.NewGuid().ToString(),
-                RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
-                Crypto.DefaultIterations);
+            return new Crypto(Guid.NewGuid().ToString());
         }
         else
         {

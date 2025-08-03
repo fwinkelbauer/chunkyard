@@ -18,7 +18,7 @@ public sealed class Blob
     public override bool Equals(object? obj)
     {
         return obj is Blob other
-            && Name == other.Name
+            && Name.Equals(other.Name)
             && LastWriteTimeUtc.Equals(other.LastWriteTimeUtc);
     }
 
