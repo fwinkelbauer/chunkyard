@@ -21,7 +21,7 @@ public sealed class Snapshot
     public override bool Equals(object? obj)
     {
         return obj is Snapshot other
-            && CreationTimeUtc == other.CreationTimeUtc
+            && CreationTimeUtc.Equals(other.CreationTimeUtc)
             && BlobReferences.SequenceEqual(other.BlobReferences);
     }
 

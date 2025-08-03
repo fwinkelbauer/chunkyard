@@ -5,7 +5,7 @@ namespace Chunkyard.Core;
 /// </summary>
 public sealed class Crypto
 {
-    public const int DefaultIterations = 100000;
+    public const int DefaultIterations = 100_000;
     public const int NonceBytes = 12;
     public const int TagBytes = 16;
     public const int KeyBytes = 32;
@@ -27,13 +27,23 @@ public sealed class Crypto
         _hashedKey = SHA256.HashData(_key);
 
         Password = password;
-        Salt = salt;
+        Salt = Convert.ToBase64String(salt);
         Iterations = iterations;
+    }
+
+    public Crypto(string password, string salt, int iterations)
+        : this(password, Convert.FromBase64String(salt), iterations)
+    {
+    }
+
+    public Crypto(string password)
+        : this(password, RandomNumberGenerator.GetBytes(Crypto.SaltBytes), DefaultIterations)
+    {
     }
 
     public string Password { get; }
 
-    public byte[] Salt { get; }
+    public string Salt { get; }
 
     public int Iterations { get; }
 

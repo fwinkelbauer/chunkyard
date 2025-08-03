@@ -28,7 +28,7 @@ public sealed class SerializeTests
     public void Serialize_Can_Convert_SnapshotReference()
     {
         var expected = new SnapshotReference(
-            new byte[] { 158, 128, 181, 90, 139, 201, 73, 163, 30, 55, 127, 23 },
+            "noC1WovJSaMeN38X",
             100000,
             new[] { "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e" });
 
@@ -82,7 +82,7 @@ public sealed class SerializeTests
     public void Serialize_Respects_Serialized_SnapshotReference()
     {
         var expected = new SnapshotReference(
-            new byte[] { 158, 128, 181, 90, 139, 201, 73, 163, 30, 55, 127, 23 },
+            "noC1WovJSaMeN38X",
             100000,
             new[] { "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e" });
 

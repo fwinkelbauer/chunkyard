@@ -6,10 +6,7 @@ internal sealed class ConsoleCryptoFactory : ICryptoFactory
     {
         if (snapshotReference == null)
         {
-            return new Crypto(
-                NewPassword(),
-                RandomNumberGenerator.GetBytes(Crypto.SaltBytes),
-                Crypto.DefaultIterations);
+            return new Crypto(NewPassword());
         }
         else
         {

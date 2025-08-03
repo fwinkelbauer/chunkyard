@@ -7,7 +7,7 @@ namespace Chunkyard.Core;
 public sealed class SnapshotReference
 {
     public SnapshotReference(
-        byte[] salt,
+        string salt,
         int iterations,
         IReadOnlyCollection<string> chunkIds)
     {
@@ -16,7 +16,7 @@ public sealed class SnapshotReference
         ChunkIds = chunkIds;
     }
 
-    public byte[] Salt { get; }
+    public string Salt { get; }
 
     public int Iterations { get; }
 
@@ -25,7 +25,7 @@ public sealed class SnapshotReference
     public override bool Equals(object? obj)
     {
         return obj is SnapshotReference other
-            && Salt.SequenceEqual(other.Salt)
+            && Salt.Equals(other.Salt)
             && Iterations == other.Iterations
             && ChunkIds.SequenceEqual(other.ChunkIds);
     }
