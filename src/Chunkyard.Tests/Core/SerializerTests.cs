@@ -18,8 +18,8 @@ public sealed class SerializeTests
                     new[] { "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e" })
             });
 
-        var actual = Serialize.BytesToSnapshot(
-            Serialize.SnapshotToBytes(expected));
+        var actual = Serializer.BytesToSnapshot(
+            Serializer.SnapshotToBytes(expected));
 
         Assert.AreEqual(expected, actual);
     }
@@ -32,8 +32,8 @@ public sealed class SerializeTests
             100000,
             new[] { "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e" });
 
-        var actual = Serialize.BytesToSnapshotReference(
-            Serialize.SnapshotReferenceToBytes(expected));
+        var actual = Serializer.BytesToSnapshotReference(
+            Serializer.SnapshotReferenceToBytes(expected));
 
         Assert.AreEqual(expected, actual);
     }
@@ -70,7 +70,7 @@ public sealed class SerializeTests
             }
             """;
 
-        var actual = Serialize.BytesToSnapshot(
+        var actual = Serializer.BytesToSnapshot(
             Encoding.UTF8.GetBytes(json));
 
         Assert.IsTrue(
@@ -96,7 +96,7 @@ public sealed class SerializeTests
             }
             """;
 
-        var actual = Serialize.BytesToSnapshotReference(
+        var actual = Serializer.BytesToSnapshotReference(
             Encoding.UTF8.GetBytes(json));
 
         Assert.IsTrue(

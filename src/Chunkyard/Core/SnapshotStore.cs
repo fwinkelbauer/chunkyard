@@ -59,7 +59,7 @@ public sealed class SnapshotStore
 
         try
         {
-            return Serialize.BytesToSnapshotReference(bytes);
+            return Serializer.BytesToSnapshotReference(bytes);
         }
         catch (Exception e)
         {
@@ -75,7 +75,7 @@ public sealed class SnapshotStore
 
         RestoreChunks(snapshotReference.ChunkIds, memoryStream);
 
-        return Serialize.BytesToSnapshot(memoryStream.ToArray());
+        return Serializer.BytesToSnapshot(memoryStream.ToArray());
     }
 
     public Snapshot GetSnapshot(int snapshotId)
@@ -261,7 +261,7 @@ public sealed class SnapshotStore
     private string[] StoreSnapshot(Snapshot snapshot)
     {
         using var memoryStream = new MemoryStream(
-            Serialize.SnapshotToBytes(snapshot));
+            Serializer.SnapshotToBytes(snapshot));
 
         return StoreChunks(memoryStream);
     }
@@ -274,7 +274,7 @@ public sealed class SnapshotStore
 
         _repository.Snapshots.Store(
             nextId,
-            Serialize.SnapshotReferenceToBytes(snapshotReference));
+            Serializer.SnapshotReferenceToBytes(snapshotReference));
 
         return nextId;
     }
