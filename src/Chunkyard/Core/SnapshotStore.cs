@@ -54,8 +54,8 @@ public sealed class SnapshotStore
 
     public SnapshotReference GetSnapshotReference(int snapshotId)
     {
-        var resolved = ResolveSnapshotId(snapshotId);
-        var bytes = _repository.Snapshots.Retrieve(resolved);
+        snapshotId = ResolveSnapshotId(snapshotId);
+        var bytes = _repository.Snapshots.Retrieve(snapshotId);
 
         try
         {
@@ -64,7 +64,7 @@ public sealed class SnapshotStore
         catch (Exception e)
         {
             throw new ChunkyardException(
-                $"Could not retrieve snapshot: #{resolved}",
+                $"Could not retrieve snapshot: #{snapshotId}",
                 e);
         }
     }
@@ -86,6 +86,8 @@ public sealed class SnapshotStore
 
     public bool CheckSnapshot(int snapshotId, Fuzzy fuzzy)
     {
+        snapshotId = ResolveSnapshotId(snapshotId);
+
         var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(fuzzy)
             .All(br => CheckBlobReference(br));
 
@@ -99,6 +101,8 @@ public sealed class SnapshotStore
         int snapshotId,
         Fuzzy fuzzy)
     {
+        snapshotId = ResolveSnapshotId(snapshotId);
+
         var blobReferencesToRestore = GetSnapshot(snapshotId)
             .ListBlobReferences(fuzzy)
             .Where(br => !br.Blob.Equals(blobSystem.GetBlob(br.Blob.Name)));
@@ -133,10 +137,10 @@ public sealed class SnapshotStore
 
     public void RemoveSnapshot(int snapshotId)
     {
-        var resolved = ResolveSnapshotId(snapshotId);
+        snapshotId = ResolveSnapshotId(snapshotId);
 
-        _repository.Snapshots.Remove(resolved);
-        _probe.RemovedSnapshot(resolved);
+        _repository.Snapshots.Remove(snapshotId);
+        _probe.RemovedSnapshot(snapshotId);
     }
 
     public void KeepSnapshots(int latestCount)
