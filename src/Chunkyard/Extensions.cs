@@ -50,7 +50,6 @@ public static class Extensions
 
         snapshotStore = new SnapshotStore(
             repository,
-            new SimpleChunker(),
             new ConsoleProbe(),
             cryptoFactory);
 

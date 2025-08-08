@@ -10,18 +10,16 @@ public sealed class SnapshotStore
     public const int SecondLatestSnapshotId = -2;
 
     private readonly IRepository _repository;
-    private readonly IChunker _chunker;
     private readonly IProbe _probe;
     private readonly Lazy<Crypto> _crypto;
+    private readonly Lazy<uint[]> _gearTable;
 
     public SnapshotStore(
         IRepository repository,
-        IChunker chunker,
         IProbe probe,
         ICryptoFactory cryptoFactory)
     {
         _repository = repository;
-        _chunker = chunker;
         _probe = probe;
 
         _crypto = new(() =>
@@ -32,6 +30,9 @@ public sealed class SnapshotStore
 
             return cryptoFactory.Create(snapshotReference);
         });
+
+        _gearTable = new Lazy<uint[]>(
+            () => FastChunker.GenerateGearTable(_crypto.Value));
     }
 
     public int StoreSnapshot(IBlobSystem blobSystem, DateTime utcNow, Fuzzy fuzzy)
@@ -262,7 +263,7 @@ public sealed class SnapshotStore
             .ToArray();
     }
 
-    private string[] StoreSnapshot(Snapshot snapshot)
+    private List<string> StoreSnapshot(Snapshot snapshot)
     {
         using var memoryStream = new MemoryStream(
             Serializer.SnapshotToBytes(snapshot));
@@ -307,19 +308,24 @@ public sealed class SnapshotStore
         return blobReference;
     }
 
-    private string[] StoreChunks(Stream stream)
+    private List<string> StoreChunks(Stream stream)
     {
-        return _chunker.Chunkify(stream)
-            .Select(chunk =>
-            {
-                var encrypted = _crypto.Value.Encrypt(chunk);
-                var chunkId = ToChunkId(encrypted);
+        using var chunker = new FastChunker(_gearTable.Value, stream);
 
-                _repository.Chunks.Store(chunkId, encrypted);
+        int chunkSize;
+        var chunkIds = new List<string>();
+        var buffer = new byte[chunker.MaxSize];
 
-                return chunkId;
-            })
-            .ToArray();
+        while ((chunkSize = chunker.Chunk(buffer)) != 0)
+        {
+            var encrypted = _crypto.Value.Encrypt(buffer.AsSpan(0, chunkSize));
+            var chunkId = ToChunkId(encrypted);
+
+            _repository.Chunks.Store(chunkId, encrypted);
+            chunkIds.Add(chunkId);
+        }
+
+        return chunkIds;
     }
 
     private void RestoreBlob(

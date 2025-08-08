@@ -5,6 +5,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Assets\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Chunkyard" />
     <Using Include="Chunkyard.CommandLine" />
     <Using Include="Chunkyard.Core" />
