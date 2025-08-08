@@ -11,9 +11,6 @@ You can install Chunkyard by:
 - Downloading a [[https://github.com/fwinkelbauer/chunkyard/releases][release]] (no dependencies required)
 - Installing it as a [[https://www.nuget.org/packages/chunkyard][dotnet tool]]
 
-Chunkyard used to have an implementation of the [[https://www.usenix.org/system/files/conference/atc16/atc16-paper-xia.pdf][FastCDC]] algorithm. You can find
-the class in commits before [[https://github.com/fwinkelbauer/chunkyard/commit/8cf834bd125c4bf0e8f1e05ab8497366673870a5][8cf834b]].
-
 * Goals
 
 - Cross platform support. Chunkyard is shipped as two binaries ~chunkyard~
