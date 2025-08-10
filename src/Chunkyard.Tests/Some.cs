@@ -25,7 +25,11 @@ internal static class Some
     {
         blobNames = blobNames.Length > 0
             ? blobNames
-            : new[] { "blob 1", "dir/blob-2" };
+            : new[]
+            {
+                Path.GetRandomFileName(),
+                $"dir/{Path.GetRandomFileName()}"
+            };
 
         return blobNames
             .Select(Blob)
@@ -49,10 +53,9 @@ internal static class Some
 
     public static IBlobSystem BlobSystem(
         IEnumerable<Blob>? blobs = null,
-        Func<Blob, byte[]>? generator = null)
+        byte[]? content = null)
     {
         blobs ??= Array.Empty<Blob>();
-        generator ??= b => Encoding.UTF8.GetBytes(b.Name);
 
         var blobSystem = new MemoryBlobSystem();
 
@@ -60,7 +63,10 @@ internal static class Some
         {
             using var stream = blobSystem.OpenWrite(blob);
 
-            stream.Write(generator(blob));
+            content ??= RandomNumberGenerator.GetBytes(
+                RandomNumberGenerator.GetInt32(16, 32));
+
+            stream.Write(content);
         }
 
         return blobSystem;
