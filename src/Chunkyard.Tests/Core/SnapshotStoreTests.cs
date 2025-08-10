@@ -24,12 +24,10 @@ public sealed class SnapshotStoreTests
         var sharedBlob = Some.Blob("some blob");
 
         var blobSystem1 = Some.BlobSystem(
-            new[] { sharedBlob },
-            _ => new byte[] { 0x01 });
+            new[] { sharedBlob });
 
         var blobSystem2 = Some.BlobSystem(
-            new[] { sharedBlob, Some.Blob("other blob") },
-            _ => new byte[] { 0x02 });
+            new[] { sharedBlob, Some.Blob("other blob") });
 
         var snapshotId1 = snapshotStore.StoreSnapshot(blobSystem1);
         var snapshotId2 = snapshotStore.StoreSnapshot(blobSystem2);
@@ -154,12 +152,10 @@ public sealed class SnapshotStoreTests
         var snapshotStore = Some.SnapshotStore();
 
         var inputBlobSystem = Some.BlobSystem(
-            Some.Blobs("blob to restore", "blob to update"),
-            _ => new byte[] { 0x01, 0x02 });
+            Some.Blobs("blob to restore", "blob to update"));
 
         var outputBlobSystem = Some.BlobSystem(
-            Some.Blobs("blob to update"),
-            _ => new byte[] { 0x01, 0x02, 0x03, 0x04 });
+            Some.Blobs("blob to update"));
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
         snapshotStore.RestoreSnapshot(outputBlobSystem, snapshotId);
@@ -173,7 +169,7 @@ public sealed class SnapshotStoreTests
     public void RestoreSnapshot_Can_Write_Empty_Blobs()
     {
         var snapshotStore = Some.SnapshotStore();
-        var inputBlobSystem = Some.BlobSystem(Some.Blobs(), _ => []);
+        var inputBlobSystem = Some.BlobSystem(Some.Blobs(), []);
         var outputBlobSystem = Some.BlobSystem();
 
         var snapshotId = snapshotStore.StoreSnapshot(inputBlobSystem);
