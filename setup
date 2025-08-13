@@ -1,4 +1,0 @@
-#!/bin/bash -eu
-
-sudo apt update
-sudo apt install git dotnet-sdk-8.0 clang zlib1g-dev
