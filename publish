@@ -22,16 +22,9 @@ script=$(readlink -f "${BASH_SOURCE[0]}")
 directory=$(dirname "$script")
 cd "$directory"
 
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    native=('linux-x64')
-    contained=('win-x64')
-else
-    native=('win-x64')
-    contained=('linux-x64')
-fi
-
 export DOTNET_CLI_TELEMETRY_OPTOUT='1'
 
+runtimes=('linux-x64' 'win-x64')
 solution='src/Chunkyard.sln'
 csproj='src/Chunkyard/Chunkyard.csproj'
 artifacts='artifacts'
@@ -46,12 +39,7 @@ dotnet build "$solution" -warnaserror --tl:auto
 announce 'Test'
 dotnet test "$solution" --no-build
 
-for runtime in "${native[@]}"; do
-    announce "Publish $version (native $runtime)"
-    dotnet publish "$csproj" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto -r "$runtime" -p:PublishAot=true -p:DebugType=none
-done
-
-for runtime in "${contained[@]}"; do
+for runtime in "${runtimes[@]}"; do
     announce "Publish $version (self-contained $runtime)"
     dotnet publish "$csproj" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto -r "$runtime" --self-contained -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=none
 done
