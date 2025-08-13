@@ -185,7 +185,9 @@ public sealed class SnapshotStore
 
         if (sharedSnapshotId != null)
         {
-            var bytes = _repository.Snapshots.Retrieve(sharedSnapshotId.Value);
+            var bytes = _repository.Snapshots.Retrieve(
+                sharedSnapshotId.Value);
+
             var otherBytes = otherRepository.Snapshots.Retrieve(
                 sharedSnapshotId.Value);
 
