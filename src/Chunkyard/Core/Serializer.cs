@@ -14,6 +14,11 @@ public sealed partial class Serializer : JsonSerializerContext
             Default.Snapshot);
     }
 
+    public static Snapshot BytesToSnapshot(ReadOnlySpan<byte> json)
+    {
+        return JsonSerializer.Deserialize(json, Default.Snapshot)!;
+    }
+
     public static byte[] SnapshotReferenceToBytes(
         SnapshotReference snapshotReference)
     {
@@ -22,12 +27,8 @@ public sealed partial class Serializer : JsonSerializerContext
             Default.SnapshotReference);
     }
 
-    public static Snapshot BytesToSnapshot(byte[] json)
-    {
-        return JsonSerializer.Deserialize(json, Default.Snapshot)!;
-    }
-
-    public static SnapshotReference BytesToSnapshotReference(byte[] json)
+    public static SnapshotReference BytesToSnapshotReference(
+        ReadOnlySpan<byte> json)
     {
         return JsonSerializer.Deserialize(json, Default.SnapshotReference)!;
     }
