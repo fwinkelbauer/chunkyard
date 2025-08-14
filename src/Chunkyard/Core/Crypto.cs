@@ -5,16 +5,28 @@ namespace Chunkyard.Core;
 /// </summary>
 public sealed class Crypto
 {
-    public const int DefaultIterations = 100_000;
-    public const int NonceBytes = 12;
-    public const int TagBytes = 16;
-    public const int KeyBytes = 32;
-    public const int SaltBytes = 12;
+    public const int CryptoBytes = NonceBytes + TagBytes;
+
+    private const int DefaultIterations = 100_000;
+    private const int SaltBytes = 12;
+    private const int NonceBytes = 12;
+    private const int TagBytes = 16;
+    private const int KeyBytes = 32;
 
     private readonly byte[] _key;
     private readonly byte[] _hashedKey;
 
-    public Crypto(string password, byte[] salt, int iterations)
+    public Crypto(string password, string salt, int iterations)
+        : this(password, Convert.FromBase64String(salt), iterations)
+    {
+    }
+
+    public Crypto(string password)
+        : this(password, RandomNumberGenerator.GetBytes(SaltBytes), DefaultIterations)
+    {
+    }
+
+    private Crypto(string password, byte[] salt, int iterations)
     {
         if (string.IsNullOrEmpty(password))
         {
@@ -31,63 +43,65 @@ public sealed class Crypto
         Iterations = iterations;
     }
 
-    public Crypto(string password, string salt, int iterations)
-        : this(password, Convert.FromBase64String(salt), iterations)
-    {
-    }
-
-    public Crypto(string password)
-        : this(password, RandomNumberGenerator.GetBytes(Crypto.SaltBytes), DefaultIterations)
-    {
-    }
-
     public string Password { get; }
 
     public string Salt { get; }
 
     public int Iterations { get; }
 
+    public static void Deconstruct(
+        ReadOnlySpan<byte> cipher,
+        out ReadOnlySpan<byte> nonce,
+        out ReadOnlySpan<byte> innerCipher,
+        out ReadOnlySpan<byte> tag)
+    {
+        nonce = cipher[..NonceBytes];
+        innerCipher = cipher.Slice(nonce.Length, cipher.Length - CryptoBytes);
+        tag = cipher.Slice(cipher.Length - TagBytes, TagBytes);
+    }
+
     public byte[] Encrypt(ReadOnlySpan<byte> plain)
     {
-        var nonce = new Span<byte>(
-            HMACSHA256.HashData(_hashedKey, plain),
-            0,
-            NonceBytes);
+        var cipher = new byte[plain.Length + CryptoBytes];
 
-        var cipher = new byte[nonce.Length + plain.Length + TagBytes];
+        Encrypt(plain, cipher);
 
-        nonce.CopyTo(new Span<byte>(cipher, 0, nonce.Length));
+        return cipher;
+    }
 
-        var innerCipher = new Span<byte>(
-            cipher,
-            nonce.Length,
-            plain.Length);
+    public ReadOnlySpan<byte> Encrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
+    {
+        var nonce = HMACSHA256.HashData(_hashedKey, plain)
+            .AsSpan(0, NonceBytes);
 
-        var tag = new Span<byte>(
-            cipher,
-            cipher.Length - TagBytes,
-            TagBytes);
+        nonce.CopyTo(cipher[..nonce.Length]);
+
+        var innerCipher = cipher.Slice(nonce.Length, plain.Length);
+        var tag = cipher.Slice(nonce.Length + plain.Length, TagBytes);
 
         using var aesGcm = new AesGcm(_key, TagBytes);
 
         aesGcm.Encrypt(nonce, plain, innerCipher, tag);
 
-        return cipher;
+        return cipher[..(plain.Length + CryptoBytes)];
     }
 
     public byte[] Decrypt(ReadOnlySpan<byte> cipher)
     {
-        var plainLength = cipher.Length - NonceBytes - TagBytes;
-        var plain = new byte[plainLength];
-        var nonce = cipher[..NonceBytes];
-        var innerCipher = cipher.Slice(nonce.Length, plain.Length);
-        var tag = cipher.Slice(cipher.Length - TagBytes, TagBytes);
+        var plain = new byte[cipher.Length - CryptoBytes];
+
+        return Decrypt(cipher, plain).ToArray();
+    }
+
+    public ReadOnlySpan<byte> Decrypt(ReadOnlySpan<byte> cipher, Span<byte> plain)
+    {
+        Deconstruct(cipher, out var nonce, out var innerCipher, out var tag);
 
         using var aesGcm = new AesGcm(_key, TagBytes);
 
-        aesGcm.Decrypt(nonce, innerCipher, tag, plain);
+        aesGcm.Decrypt(nonce, innerCipher, tag, plain[..innerCipher.Length]);
 
-        return plain;
+        return plain[..innerCipher.Length];
     }
 
     private static byte[] PasswordToKey(
