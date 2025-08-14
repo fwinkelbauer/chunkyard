@@ -324,9 +324,9 @@ public sealed class SnapshotStore
             stream);
 
         var chunkIds = new List<string>();
-        var chunkBuffer = new byte[chunker.MaxSize];
+        var chunkBuffer = new byte[DefaultMax];
         ReadOnlySpan<byte> chunk;
-        var cipherBuffer = new byte[chunker.MaxSize + Crypto.CryptoBytes];
+        var cipherBuffer = new byte[DefaultMax + Crypto.CryptoBytes];
 
         while ((chunk = chunker.Chunk(chunkBuffer)).Length != 0)
         {
