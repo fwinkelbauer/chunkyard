@@ -10,9 +10,6 @@ namespace Chunkyard.Core;
 /// </summary>
 public sealed class FastChunker : IDisposable
 {
-    private const int DefaultMin = 4 * 1024 * 1024;
-    private const int DefaultAvg = 8 * 1024 * 1024;
-    private const int DefaultMax = 16 * 1024 * 1024;
     private const int MinimumMin = 64;
     private const int MinimumMax = 64 * 1024 * 1024;
     private const int AverageMin = 256;
@@ -63,11 +60,6 @@ public sealed class FastChunker : IDisposable
         _stream = new BufferedStream(stream, MaxSize);
     }
 
-    public FastChunker(uint[] gearTable, Stream stream)
-        : this(DefaultMin, DefaultAvg, DefaultMax, gearTable, stream)
-    {
-    }
-
     public int MinSize { get; }
 
     public int AvgSize { get; }
@@ -87,8 +79,11 @@ public sealed class FastChunker : IDisposable
     {
         var input = new byte[1024];
 
-        var random = crypto.Encrypt(input)
-            .AsSpan(Crypto.NonceBytes, input.Length);
+        Crypto.Deconstruct(
+            crypto.Encrypt(input),
+            out _,
+            out var random,
+            out _);
 
         var gearTable = new uint[256];
         var mask = Mask(31);
@@ -102,13 +97,13 @@ public sealed class FastChunker : IDisposable
         return gearTable;
     }
 
-    public int Chunk(Span<byte> buffer)
+    public ReadOnlySpan<byte> Chunk(Span<byte> buffer)
     {
         var bytesRead = _stream.Read(buffer);
         var chunkSize = Cut(buffer[..bytesRead]);
         _stream.Position -= (bytesRead - chunkSize);
 
-        return chunkSize;
+        return buffer[..chunkSize];
     }
 
     private int Cut(ReadOnlySpan<byte> buffer)

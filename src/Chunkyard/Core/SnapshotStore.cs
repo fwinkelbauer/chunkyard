@@ -9,6 +9,10 @@ public sealed class SnapshotStore
     public const int LatestSnapshotId = -1;
     public const int SecondLatestSnapshotId = -2;
 
+    private const int DefaultMin = 4 * 1024 * 1024;
+    private const int DefaultAvg = 8 * 1024 * 1024;
+    private const int DefaultMax = 16 * 1024 * 1024;
+
     private readonly IRepository _repository;
     private readonly IProbe _probe;
     private readonly Lazy<Crypto> _crypto;
@@ -312,18 +316,24 @@ public sealed class SnapshotStore
 
     private List<string> StoreChunks(Stream stream)
     {
-        using var chunker = new FastChunker(_gearTable.Value, stream);
+        using var chunker = new FastChunker(
+            DefaultMin,
+            DefaultAvg,
+            DefaultMax,
+            _gearTable.Value,
+            stream);
 
-        int chunkSize;
         var chunkIds = new List<string>();
-        var buffer = new byte[chunker.MaxSize];
+        var chunkBuffer = new byte[chunker.MaxSize];
+        ReadOnlySpan<byte> chunk;
+        var cipherBuffer = new byte[chunker.MaxSize + Crypto.CryptoBytes];
 
-        while ((chunkSize = chunker.Chunk(buffer)) != 0)
+        while ((chunk = chunker.Chunk(chunkBuffer)).Length != 0)
         {
-            var encrypted = _crypto.Value.Encrypt(buffer.AsSpan(0, chunkSize));
-            var chunkId = ToChunkId(encrypted);
+            var cipher = _crypto.Value.Encrypt(chunk, cipherBuffer);
+            var chunkId = ToChunkId(cipher);
 
-            _repository.Chunks.Store(chunkId, encrypted);
+            _repository.Chunks.Store(chunkId, cipher);
             chunkIds.Add(chunkId);
         }
 
@@ -346,14 +356,17 @@ public sealed class SnapshotStore
         IEnumerable<string> chunkIds,
         Stream outputStream)
     {
+        var plainBuffer = new byte[DefaultMax];
+
         foreach (var chunkId in chunkIds)
         {
             try
             {
-                var decrypted = _crypto.Value.Decrypt(
-                    _repository.Chunks.Retrieve(chunkId));
+                var plain = _crypto.Value.Decrypt(
+                    _repository.Chunks.Retrieve(chunkId),
+                    plainBuffer);
 
-                outputStream.Write(decrypted);
+                outputStream.Write(plain);
             }
             catch (CryptographicException e)
             {

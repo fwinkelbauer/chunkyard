@@ -281,15 +281,15 @@ public sealed class FastChunkerTests
             GearTable,
             new MemoryStream(ExpectedBytes));
 
-        int chunkSize;
         var actualChunkSizes = new List<int>();
         var actualBytes = new List<byte>();
         var buffer = new byte[chunker.MaxSize];
+        ReadOnlySpan<byte> chunk;
 
-        while ((chunkSize = chunker.Chunk(buffer)) != 0)
+        while ((chunk = chunker.Chunk(buffer)).Length != 0)
         {
-            actualChunkSizes.Add(chunkSize);
-            actualBytes.AddRange(buffer.AsSpan(0, chunkSize));
+            actualChunkSizes.Add(chunk.Length);
+            actualBytes.AddRange(chunk);
         }
 
         CollectionAssert.AreEqual(expectedChunkSizes, actualChunkSizes);
