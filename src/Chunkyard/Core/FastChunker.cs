@@ -17,6 +17,9 @@ public sealed class FastChunker : IDisposable
     private const int MaximumMin = 1024;
     private const int MaximumMax = 1024 * 1024 * 1024;
 
+    private readonly int _minSize;
+    private readonly int _avgSize;
+    private readonly int _maxSize;
     private readonly uint _maskS;
     private readonly uint _maskL;
     private readonly uint[] _gearTable;
@@ -29,42 +32,36 @@ public sealed class FastChunker : IDisposable
         uint[] gearTable,
         Stream stream)
     {
-        MinSize = EnsureBetween(
+        _minSize = EnsureBetween(
             minSize,
             MinimumMin,
             MinimumMax,
             nameof(minSize));
 
-        AvgSize = EnsureBetween(
+        _avgSize = EnsureBetween(
             avgSize,
             AverageMin,
             AverageMax,
             nameof(avgSize));
 
-        MaxSize = EnsureBetween(
+        _maxSize = EnsureBetween(
             maxSize,
             MaximumMin,
             MaximumMax,
             nameof(maxSize));
 
-        if (MaxSize - MinSize <= AvgSize)
+        if (_maxSize - _minSize <= _avgSize)
         {
             throw new ArgumentException(
                 $"Invariant violation: {nameof(maxSize)} - {nameof(minSize)} > {nameof(avgSize)}");
         }
 
-        var bits = Logarithm2(AvgSize);
+        var bits = Logarithm2(_avgSize);
         _maskS = Mask(bits + 1);
         _maskL = Mask(bits - 1);
         _gearTable = gearTable;
-        _stream = new BufferedStream(stream, MaxSize);
+        _stream = new BufferedStream(stream, _maxSize);
     }
-
-    public int MinSize { get; }
-
-    public int AvgSize { get; }
-
-    public int MaxSize { get; }
 
     public void Dispose()
     {
@@ -108,14 +105,14 @@ public sealed class FastChunker : IDisposable
 
     private int Cut(ReadOnlySpan<byte> buffer)
     {
-        if (buffer.Length <= MinSize)
+        if (buffer.Length <= _minSize)
         {
             return buffer.Length;
         }
 
-        var center = CenterSize(AvgSize, MinSize, buffer.Length);
+        var center = CenterSize(_avgSize, _minSize, buffer.Length);
         uint hash = 0;
-        var offset = MinSize;
+        var offset = _minSize;
 
         while (offset < center)
         {
