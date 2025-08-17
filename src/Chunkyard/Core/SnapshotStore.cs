@@ -18,6 +18,9 @@ public sealed class SnapshotStore
     private readonly Lazy<Crypto> _crypto;
     private readonly Lazy<uint[]> _gearTable;
 
+    private readonly byte[] _plainBuffer = new byte[DefaultMax];
+    private readonly byte[] _cipherBuffer = new byte[DefaultMax + Crypto.CryptoBytes];
+
     public SnapshotStore(
         IRepository repository,
         IProbe probe,
@@ -324,13 +327,11 @@ public sealed class SnapshotStore
             stream);
 
         var chunkIds = new List<string>();
-        var chunkBuffer = new byte[DefaultMax];
         ReadOnlySpan<byte> chunk;
-        var cipherBuffer = new byte[DefaultMax + Crypto.CryptoBytes];
 
-        while ((chunk = chunker.Chunk(chunkBuffer)).Length != 0)
+        while ((chunk = chunker.Chunk(_plainBuffer)).Length != 0)
         {
-            var cipher = _crypto.Value.Encrypt(chunk, cipherBuffer);
+            var cipher = _crypto.Value.Encrypt(chunk, _cipherBuffer);
             var chunkId = ToChunkId(cipher);
 
             _repository.Chunks.Store(chunkId, cipher);
@@ -356,15 +357,13 @@ public sealed class SnapshotStore
         IEnumerable<string> chunkIds,
         Stream outputStream)
     {
-        var plainBuffer = new byte[DefaultMax];
-
         foreach (var chunkId in chunkIds)
         {
             try
             {
                 var plain = _crypto.Value.Decrypt(
                     _repository.Chunks.Retrieve(chunkId),
-                    plainBuffer);
+                    _plainBuffer);
 
                 outputStream.Write(plain);
             }
