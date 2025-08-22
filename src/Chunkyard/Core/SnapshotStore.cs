@@ -166,20 +166,20 @@ public sealed class SnapshotStore
 
     public void CopyTo(IRepository otherRepository, int last = 0)
     {
-        var snapshotIdsToCopy = ListSnapshotIdsToCopy(otherRepository);
+        var snapshotIds = ListSnapshotIdsToCopy(otherRepository);
 
         if (last > 0)
         {
-            snapshotIdsToCopy = snapshotIdsToCopy
+            snapshotIds = snapshotIds
                 .TakeLast(last)
                 .ToArray();
         }
 
-        var chunkIdsToCopy = ListChunkIds(snapshotIdsToCopy)
+        var chunkIds = ListChunkIds(snapshotIds)
             .Except(otherRepository.Chunks.UnorderedList());
 
-        CopyChunkIds(otherRepository, chunkIdsToCopy);
-        CopySnapshotIds(otherRepository, snapshotIdsToCopy);
+        Copy(_repository.Chunks, otherRepository.Chunks, chunkIds);
+        Copy(_repository.Snapshots, otherRepository.Snapshots, snapshotIds);
     }
 
     private int[] ListSnapshotIdsToCopy(IRepository otherRepository)
@@ -216,27 +216,14 @@ public sealed class SnapshotStore
         return snapshotIdsToCopy;
     }
 
-    private void CopyChunkIds(
-        IRepository otherRepository,
-        IEnumerable<string> chunkIdsToCopy)
+    public static void Copy<T>(
+        IRepository<T> repository,
+        IRepository<T> other,
+        IEnumerable<T> keys)
     {
-        foreach (var chunkId in chunkIdsToCopy)
+        foreach (var key in keys)
         {
-            otherRepository.Chunks.Store(
-                chunkId,
-                _repository.Chunks.Retrieve(chunkId));
-        }
-    }
-
-    private void CopySnapshotIds(
-        IRepository otherRepository,
-        IEnumerable<int> snapshotIdsToCopy)
-    {
-        foreach (var snapshotId in snapshotIdsToCopy)
-        {
-            otherRepository.Snapshots.Store(
-                snapshotId,
-                _repository.Snapshots.Retrieve(snapshotId));
+            other.Store(key, repository.Retrieve(key));
         }
     }
 
