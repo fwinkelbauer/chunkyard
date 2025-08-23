@@ -26,13 +26,13 @@ public sealed class DryRunRepository<T> : IRepository<T>
         _repository = repository;
     }
 
-    public void Store(T key, ReadOnlySpan<byte> value)
+    public void Write(T key, ReadOnlySpan<byte> value)
     {
     }
 
-    public byte[] Retrieve(T key)
+    public Stream OpenRead(T key)
     {
-        return _repository.Retrieve(key);
+        return _repository.OpenRead(key);
     }
 
     public bool Exists(T key)

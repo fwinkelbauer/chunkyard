@@ -223,7 +223,7 @@ public sealed class SnapshotStore
     {
         foreach (var key in keys)
         {
-            other.Store(key, repository.Retrieve(key));
+            other.Write(key, repository.Retrieve(key));
         }
     }
 
@@ -273,7 +273,7 @@ public sealed class SnapshotStore
             ? snapshotId + 1
             : 0;
 
-        _repository.Snapshots.Store(
+        _repository.Snapshots.Write(
             nextId,
             Serializer.SnapshotReferenceToBytes(snapshotReference));
 
@@ -284,11 +284,20 @@ public sealed class SnapshotStore
     {
         var blobValid = blobReference.ChunkIds.All(
             chunkId => _repository.Chunks.Exists(chunkId)
-                && chunkId.Equals(ToChunkId(_repository.Chunks.Retrieve(chunkId))));
+                && chunkId.Equals(ToChunkId(RetrieveChunk(chunkId))));
 
         _probe.BlobValid(blobReference.Blob, blobValid);
 
         return blobValid;
+    }
+
+    private ReadOnlySpan<byte> RetrieveChunk(string chunkId)
+    {
+        using var stream = _repository.Chunks.OpenRead(chunkId);
+
+        var bytesRead = stream.Read(_cipherBuffer);
+
+        return _cipherBuffer.AsSpan(0, bytesRead);
     }
 
     private BlobReference StoreBlob(IBlobSystem blobSystem, Blob blob)
@@ -321,7 +330,7 @@ public sealed class SnapshotStore
             var cipher = _crypto.Value.Encrypt(chunk, _cipherBuffer);
             var chunkId = ToChunkId(cipher);
 
-            _repository.Chunks.Store(chunkId, cipher);
+            _repository.Chunks.Write(chunkId, cipher);
             chunkIds.Add(chunkId);
         }
 
@@ -349,7 +358,7 @@ public sealed class SnapshotStore
             try
             {
                 var plain = _crypto.Value.Decrypt(
-                    _repository.Chunks.Retrieve(chunkId),
+                    RetrieveChunk(chunkId),
                     _plainBuffer);
 
                 outputStream.Write(plain);

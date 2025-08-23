@@ -5,6 +5,16 @@ namespace Chunkyard;
 /// </summary>
 public static class Extensions
 {
+    public static byte[] Retrieve<T>(this IRepository<T> repository, T key)
+    {
+        using var memoryStream = new MemoryStream();
+        using var valueStream = repository.OpenRead(key);
+
+        valueStream.CopyTo(memoryStream);
+
+        return memoryStream.ToArray();
+    }
+
     public static IEnumerable<Blob> ListBlobs(
         this IBlobSystem blobSystem,
         Fuzzy fuzzy)
