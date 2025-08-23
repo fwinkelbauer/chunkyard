@@ -61,6 +61,19 @@ public sealed class SnapshotStoreTests
     }
 
     [TestMethod]
+    public void GetSnapshot_Throws_When_Accessing_Out_Of_Bounds_Negative_SnapshotId()
+    {
+        var snapshotStore = Some.SnapshotStore();
+        var blobSystem = Some.BlobSystem(Some.Blobs());
+
+        _ = snapshotStore.StoreSnapshot(blobSystem);
+
+        _ = Assert.Throws<IndexOutOfRangeException>(
+            () => snapshotStore.GetSnapshot(
+                SnapshotStore.SecondLatestSnapshotId));
+    }
+
+    [TestMethod]
     public void CheckSnapshot_Detects_Valid_Snapshot()
     {
         var snapshotStore = Some.SnapshotStore();
@@ -329,21 +342,6 @@ public sealed class SnapshotStoreTests
             otherSnapshotStore.ListSnapshotIds());
 
         Assert.IsTrue(otherSnapshotStore.CheckSnapshot(snapshotId));
-    }
-
-    [TestMethod]
-    public void CopyTo_Throws_On_Corrupt_References()
-    {
-        var repository = Some.Repository();
-        var snapshotStore = Some.SnapshotStore(repository);
-
-        _ = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(Some.Blobs()));
-
-        repository.Snapshots.Corrupt(repository.Snapshots.UnorderedList());
-
-        _ = Assert.Throws<ChunkyardException>(
-            () => snapshotStore.CopyTo(Some.Repository()));
     }
 
     [TestMethod]

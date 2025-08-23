@@ -216,7 +216,7 @@ public sealed class SnapshotStore
         return snapshotIdsToCopy;
     }
 
-    public static void Copy<T>(
+    private static void Copy<T>(
         IRepository<T> repository,
         IRepository<T> other,
         IEnumerable<T> keys)
@@ -396,12 +396,6 @@ public sealed class SnapshotStore
 
         var snapshotIds = _repository.Snapshots.UnorderedList();
         var position = snapshotIds.Length + snapshotId;
-
-        if (position < 0)
-        {
-            throw new ChunkyardException(
-                $"Snapshot does not exist: #{snapshotId}");
-        }
 
         Array.Sort(snapshotIds);
 
