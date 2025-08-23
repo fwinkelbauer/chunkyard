@@ -30,9 +30,7 @@ public sealed class Crypto
     {
         if (string.IsNullOrEmpty(password))
         {
-            throw new ArgumentException(
-                "Password cannot be null or empty",
-                nameof(password));
+            throw new ArgumentException("Password cannot be null or empty");
         }
 
         _key = PasswordToKey(password, salt, iterations);

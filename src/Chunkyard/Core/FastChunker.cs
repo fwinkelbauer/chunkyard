@@ -32,28 +32,14 @@ public sealed class FastChunker : IDisposable
         uint[] gearTable,
         Stream stream)
     {
-        _minSize = EnsureBetween(
-            minSize,
-            MinimumMin,
-            MinimumMax,
-            nameof(minSize));
-
-        _avgSize = EnsureBetween(
-            avgSize,
-            AverageMin,
-            AverageMax,
-            nameof(avgSize));
-
-        _maxSize = EnsureBetween(
-            maxSize,
-            MaximumMin,
-            MaximumMax,
-            nameof(maxSize));
+        _minSize = EnsureBetween(minSize, MinimumMin, MinimumMax);
+        _avgSize = EnsureBetween(avgSize, AverageMin, AverageMax);
+        _maxSize = EnsureBetween(maxSize, MaximumMin, MaximumMax);
 
         if (_maxSize - _minSize <= _avgSize)
         {
             throw new ArgumentException(
-                $"Invariant violation: {nameof(maxSize)} - {nameof(minSize)} > {nameof(avgSize)}");
+                $"Invariant violation: {maxSize} - {minSize} > {avgSize}");
         }
 
         var bits = Logarithm2(_avgSize);
@@ -161,20 +147,15 @@ public sealed class FastChunker : IDisposable
 
     private static uint Mask(int bits)
     {
-        _ = EnsureBetween(bits, 1, 31, nameof(bits));
+        _ = EnsureBetween(bits, 1, 31);
 
         return (uint)Math.Pow(2, bits) - 1;
     }
 
-    private static int EnsureBetween(
-        int value,
-        int min,
-        int max,
-        string paramName)
+    private static int EnsureBetween(int value, int min, int max)
     {
         return value < min || value > max
             ? throw new ArgumentOutOfRangeException(
-                paramName,
                 $"Value must be between {min} and {max}")
             : value;
     }
