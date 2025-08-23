@@ -46,7 +46,7 @@ internal static class Extensions
             var bytes = repository.Retrieve(key);
 
             repository.Remove(key);
-            repository.Store(
+            repository.Write(
                 key,
                 bytes.Concat(new byte[] { 0xFF }).ToArray());
         }

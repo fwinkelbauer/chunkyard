@@ -40,7 +40,7 @@ public sealed class FileRepository<T> : IRepository<T>
         _toKey = toKey;
     }
 
-    public void Store(T key, ReadOnlySpan<byte> value)
+    public void Write(T key, ReadOnlySpan<byte> value)
     {
         var file = ToFile(key);
 
@@ -59,10 +59,11 @@ public sealed class FileRepository<T> : IRepository<T>
         fileStream.Write(value);
     }
 
-    public byte[] Retrieve(T key)
+    public Stream OpenRead(T key)
     {
-        return File.ReadAllBytes(
-            ToFile(key));
+        var file = ToFile(key);
+
+        return File.OpenRead(file);
     }
 
     public bool Exists(T key)

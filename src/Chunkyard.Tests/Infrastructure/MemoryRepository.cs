@@ -23,7 +23,7 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         _valuesPerKey = new();
     }
 
-    public void Store(T key, ReadOnlySpan<byte> value)
+    public void Write(T key, ReadOnlySpan<byte> value)
     {
         if (_valuesPerKey.ContainsKey(key))
         {
@@ -33,9 +33,9 @@ internal sealed class MemoryRepository<T> : IRepository<T>
         _valuesPerKey.Add(key, value.ToArray());
     }
 
-    public byte[] Retrieve(T key)
+    public Stream OpenRead(T key)
     {
-        return _valuesPerKey[key].ToArray();
+        return new MemoryStream(_valuesPerKey[key]);
     }
 
     public bool Exists(T key)
