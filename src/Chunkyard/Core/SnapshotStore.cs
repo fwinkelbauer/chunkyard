@@ -175,7 +175,7 @@ public sealed class SnapshotStore
                 .ToArray();
         }
 
-        var chunkIds = ListChunkIds(snapshotIds)
+        var chunkIds = _repository.Chunks.UnorderedList()
             .Except(otherRepository.Chunks.UnorderedList());
 
         Copy(_repository.Chunks, otherRepository.Chunks, chunkIds);
