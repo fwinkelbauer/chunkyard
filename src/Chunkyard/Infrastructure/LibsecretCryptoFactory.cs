@@ -45,10 +45,7 @@ internal sealed class LibsecretCryptoFactory : ICryptoFactory
 
     private static string ToKeyId(string salt, int iterations)
     {
-        var saltText = Convert.ToHexString(Convert.FromBase64String(salt))
-            .ToLowerInvariant();
-
-        return $"s-{saltText}-i-{iterations}";
+        return $"s-{salt}-i-{iterations}";
     }
 
     private static bool TryRetrieve(
