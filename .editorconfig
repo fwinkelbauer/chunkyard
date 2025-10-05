@@ -16,6 +16,7 @@ dotnet_diagnostic.CA1310.severity = none
 dotnet_diagnostic.CA1515.severity = none
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA2201.severity = none
 
 # Libsecret
 dotnet_diagnostic.CA1806.severity = none
