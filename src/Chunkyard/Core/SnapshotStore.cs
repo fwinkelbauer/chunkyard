@@ -97,7 +97,7 @@ public sealed class SnapshotStore
         snapshotId = ResolveSnapshotId(snapshotId);
 
         var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(fuzzy)
-            .All(br => CheckBlobReference(br));
+            .CheckAll(CheckBlobReference);
 
         _probe.SnapshotValid(snapshotId, snapshotValid);
 
@@ -282,7 +282,7 @@ public sealed class SnapshotStore
 
     private bool CheckBlobReference(BlobReference blobReference)
     {
-        var blobValid = blobReference.ChunkIds.All(
+        var blobValid = blobReference.ChunkIds.CheckAll(
             chunkId => _repository.Chunks.Exists(chunkId)
                 && chunkId.Equals(ToChunkId(RetrieveChunk(chunkId))));
 

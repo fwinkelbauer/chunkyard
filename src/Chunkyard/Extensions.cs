@@ -5,6 +5,25 @@ namespace Chunkyard;
 /// </summary>
 public static class Extensions
 {
+    public static bool CheckAll<T>(
+        this IEnumerable<T> elements,
+        Func<T, bool> checkFunc)
+    {
+        var results = elements.Select(e =>
+        {
+            try
+            {
+                return checkFunc(e);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        });
+
+        return results.Aggregate(true, (total, next) => total && next);
+    }
+
     public static byte[] Retrieve<T>(this IRepository<T> repository, T key)
     {
         using var memoryStream = new MemoryStream();
