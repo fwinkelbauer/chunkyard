@@ -4,10 +4,7 @@ Chunkyard is a backup application for Windows and Linux which stores files in an
 
 *Note:* I am building Chunkyard for myself. You might want to consider more sophisticated tools. Here's a list of [[https://github.com/restic/others][options]].
 
-You can install Chunkyard by:
-
-- Downloading a [[https://github.com/fwinkelbauer/chunkyard/releases][release]] (no dependencies required)
-- Installing it as a [[https://www.nuget.org/packages/chunkyard][dotnet tool]]
+You can install Chunkyard by downloading a [[https://github.com/fwinkelbauer/chunkyard/releases][release]] (no dependencies required)
 
 * Goals
 
