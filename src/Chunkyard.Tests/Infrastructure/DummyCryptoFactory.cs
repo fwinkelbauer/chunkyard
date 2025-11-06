@@ -1,5 +1,9 @@
 namespace Chunkyard.Tests.Infrastructure;
 
+/// <summary>
+/// A <see cref="ICryptoFactory"/> implementation that returns a fixed crypto
+/// key.
+/// </summary>
 internal sealed class DummyCryptoFactory : ICryptoFactory
 {
     private readonly string _password;
