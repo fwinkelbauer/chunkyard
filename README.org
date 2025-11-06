@@ -4,8 +4,6 @@ Chunkyard is a backup application for Windows and Linux which stores files in an
 
 *Note:* I am building Chunkyard for myself. You might want to consider more sophisticated tools. Here's a list of [[https://github.com/restic/others][options]].
 
-You can install Chunkyard by downloading a [[https://github.com/fwinkelbauer/chunkyard/releases][release]] (no dependencies required)
-
 * Goals
 
 - Cross platform support. Chunkyard is shipped as two binaries ~chunkyard~ (Linux) and ~chunkyard.exe~ (Windows). They work without having to install .NET on your computer
@@ -24,18 +22,6 @@ You can install Chunkyard by downloading a [[https://github.com/fwinkelbauer/chu
 - Extended "version control" features such as branching or tagging
 - Hiding file sizes
 - Concurrent operations on a single repository using more than one Chunkyard process (e.g. creating a new backup while garbage collecting unused data)
-
-* Build
-
-- Install [[https://dotnet.microsoft.com/en-us/download][.NET 8.0]]
-  - Debian: ~sudo apt update && sudo apt install dotnet-sdk-8.0 -y~
-  - Windows: Install Visual Studio
-- Run ~dotnet build src~ and ~dotnet test src~ to build and test Chunkyard
-
-* Publish
-
-- Optional: Create an annotated tag to define a new version number
-- Run ~./publish~ to create Linux and Windows binaries in the ~artifacts~ directory
 
 * Usage
 
@@ -67,9 +53,23 @@ chunkyard gc --repository 'MyBackup'
 
 You can find examples of how I use Chunkyard in my [[https://florianwinkelbauer.com/notes/dotfiles][dotfiles]].
 
-* Architecture
+* Development
 
-** Concepts
+** Build
+
+- Install [[https://dotnet.microsoft.com/en-us/download][.NET 8.0]]
+  - Debian: ~sudo apt update && sudo apt install dotnet-sdk-8.0 -y~
+  - Windows: Install Visual Studio
+- Run ~dotnet build src~ and ~dotnet test src~ to build and test Chunkyard
+
+** Publish
+
+- Optional: Create an annotated tag to define a new version number
+- Run ~./publish~ to create Linux and Windows binaries in the ~artifacts~ directory
+
+** Architecture
+
+*** Concepts
 
 - *Blob:* Binary data (e.g. the content of a file) with some meta data
 - *Snapshot:* A set of BlobReferences. It describes the current state of a set of Blobs at a specific point in time
@@ -79,7 +79,7 @@ You can find examples of how I use Chunkyard in my [[https://florianwinkelbauer.
 - *BlobReference:* Contains Chunk IDs and meta data which can be used to restore a Blob
 - *SnapshotReference:* Contains Chunk IDs and meta data which can be used to restore a Snapshot
 
-** Main Components
+*** Main Components
 
 These classes contain the most important logic:
 
@@ -87,13 +87,13 @@ These classes contain the most important logic:
 - [[./src/Chunkyard/Core/IBlobSystem.cs][IBlobSystem.cs]]: Provides an abstraction to read and write Blobs
 - [[./src/Chunkyard/Core/SnapshotStore.cs][SnapshotStore.cs]]: Chunks, encrypts, deduplicates and stores Blobs in an IRepository
 
-** Backup Workflow
+*** Backup Workflow
 
 - Take a set of files
 - Split files into encrypted chunks, store them in a repository and return a list of BlobReferences
 - Bundle all BlobReferences into a Snapshot, store this Snapshot as encrypted chunks and return a SnapshotReference
 
-** Restore Workflow
+*** Restore Workflow
 
 - Retrieve a Snapshot using a SnapshotReference
 - Retrieve, decrypt and reassemble all files using their BlobReferences of the given Snapshot
