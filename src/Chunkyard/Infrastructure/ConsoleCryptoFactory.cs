@@ -1,5 +1,9 @@
 namespace Chunkyard.Infrastructure;
 
+/// <summary>
+/// A <see cref="ICryptoFactory"/> implementation that creates crypto keys based
+/// on console input.
+/// </summary>
 internal sealed class ConsoleCryptoFactory : ICryptoFactory
 {
     public Crypto Create(SnapshotReference? snapshotReference)

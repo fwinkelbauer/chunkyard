@@ -1,5 +1,8 @@
 namespace Chunkyard.Tests.Infrastructure;
 
+/// <summary>
+/// An in-memory implementation of <see cref="IRepository"/>.
+/// </summary>
 internal sealed class MemoryRepository : IRepository
 {
     public MemoryRepository()

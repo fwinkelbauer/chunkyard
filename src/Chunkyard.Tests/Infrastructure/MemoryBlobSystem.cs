@@ -1,5 +1,8 @@
 namespace Chunkyard.Tests.Infrastructure;
 
+/// <summary>
+/// An in-memory implementation of <see cref="IBlobSystem"/>.
+/// </summary>
 internal sealed class MemoryBlobSystem : IBlobSystem
 {
     private readonly Dictionary<string, Blob> _blobs;

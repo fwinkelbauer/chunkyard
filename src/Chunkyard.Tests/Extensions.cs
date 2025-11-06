@@ -1,5 +1,8 @@
 namespace Chunkyard.Tests;
 
+/// <summary>
+/// A collection of extension methods.
+/// </summary>
 internal static class Extensions
 {
     public static int StoreSnapshot(

@@ -1,5 +1,8 @@
 namespace Chunkyard.Tests;
 
+/// <summary>
+/// A collection of object factories that are useful when writing tests.
+/// </summary>
 internal static class Some
 {
     private static DateTime Clock = DateTime.UtcNow;

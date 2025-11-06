@@ -1,5 +1,8 @@
 namespace Chunkyard.Tests.Infrastructure;
 
+/// <summary>
+/// An implementation of <see cref="IProbe"/> which does nothing.
+/// </summary>
 internal sealed class DummyProbe : IProbe
 {
     public void StoredBlob(Blob blob)

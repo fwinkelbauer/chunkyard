@@ -1,5 +1,9 @@
 namespace Chunkyard.Infrastructure;
 
+/// <summary>
+/// A <see cref="ICryptoFactory"/> implementation that retrieves crypto keys
+/// from libsecret.
+/// </summary>
 internal sealed class LibsecretCryptoFactory : ICryptoFactory
 {
     private static readonly IntPtr Schema = secret_schema_new(
