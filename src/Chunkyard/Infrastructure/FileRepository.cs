@@ -23,6 +23,9 @@ public sealed class FileRepository : IRepository
     public IRepository<string> Chunks { get; }
 }
 
+/// <summary>
+/// An implementation of <see cref="IRepository{T}"/> using the file system.
+/// </summary>
 public sealed class FileRepository<T> : IRepository<T>
     where T : notnull
 {

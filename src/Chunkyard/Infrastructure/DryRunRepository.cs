@@ -16,6 +16,9 @@ public sealed class DryRunRepository : IRepository
     public IRepository<string> Chunks { get; }
 }
 
+/// <summary>
+/// A <see cref="IRepository{T}"/> decorator that does not store or remove data.
+/// </summary>
 public sealed class DryRunRepository<T> : IRepository<T>
     where T : notnull
 {

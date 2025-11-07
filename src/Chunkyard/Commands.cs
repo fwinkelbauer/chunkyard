@@ -1,5 +1,8 @@
 namespace Chunkyard;
 
+/// <summary>
+/// An <see cref="ICommand"/> that checks if a snapshot is valid.
+/// </summary>
 public sealed record CheckCommand(
     SnapshotStore SnapshotStore,
     int SnapshotId,
@@ -31,6 +34,10 @@ public sealed record CheckCommand(
     }
 }
 
+/// <summary>
+/// An <see cref="ICommand"/> that copies snapshots from one repository to
+/// another.
+/// </summary>
 public sealed record CopyCommand(
     SnapshotStore SnapshotStore,
     IRepository DestinationRepository,
@@ -58,6 +65,9 @@ public sealed record CopyCommand(
     }
 }
 
+/// <summary>
+/// An <see cref="ICommand"/> that shows the difference between two snapshots.
+/// </summary>
 public sealed record DiffCommand(
     SnapshotStore SnapshotStore,
     int FirstSnapshotId,
@@ -112,6 +122,9 @@ public sealed record DiffCommand(
     }
 }
 
+/// <summary>
+/// An <see cref="ICommand"/> that removes unreferenced chunks.
+/// </summary>
 public sealed record GarbageCollectCommand(
     SnapshotStore SnapshotStore) : ICommand
 {
@@ -135,6 +148,9 @@ public sealed record GarbageCollectCommand(
     }
 }
 
+/// <summary>
+/// An <see cref="ICommand"/> that keeps only a certain amount of snapshots.
+/// </summary>
 public sealed record KeepCommand(
     SnapshotStore SnapshotStore,
     int LatestCount) : ICommand
@@ -160,6 +176,9 @@ public sealed record KeepCommand(
     }
 }
 
+/// <summary>
+/// An <see cref="ICommand"/> that lists all snapshots.
+/// </summary>
 public sealed record ListCommand(
     SnapshotStore SnapshotStore) : ICommand
 {
@@ -191,6 +210,9 @@ public sealed record ListCommand(
     }
 }
 
+/// <summary>
+/// An <see cref="ICommand"/> that removes a snapshot.
+/// </summary>
 public sealed record RemoveCommand(
     SnapshotStore SnapshotStore,
     int SnapshotId) : ICommand
@@ -216,6 +238,9 @@ public sealed record RemoveCommand(
     }
 }
 
+/// <summary>
+/// An <see cref="ICommand"/> that restores a snapshot.
+/// </summary>
 public sealed record RestoreCommand(
     SnapshotStore SnapshotStore,
     IBlobSystem BlobSystem,
@@ -245,6 +270,9 @@ public sealed record RestoreCommand(
     }
 }
 
+/// <summary>
+/// An <see cref="ICommand"/> that shows the content of a snapshot.
+/// </summary>
 public sealed record ShowCommand(
     SnapshotStore SnapshotStore,
     int SnapshotId,
@@ -278,6 +306,9 @@ public sealed record ShowCommand(
     }
 }
 
+/// <summary>
+/// An <see cref="ICommand"/> that stores a new snapshot.
+/// </summary>
 public sealed record StoreCommand(
     SnapshotStore SnapshotStore,
     IBlobSystem BlobSystem,

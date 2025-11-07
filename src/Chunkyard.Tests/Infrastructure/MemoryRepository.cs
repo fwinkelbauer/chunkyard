@@ -16,6 +16,9 @@ internal sealed class MemoryRepository : IRepository
     public IRepository<string> Chunks { get; }
 }
 
+/// <summary>
+/// An in-memory implementation of <see cref="IRepository{T}"/>.
+/// </summary>
 internal sealed class MemoryRepository<T> : IRepository<T>
     where T : notnull
 {
