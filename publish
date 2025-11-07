@@ -40,9 +40,6 @@ announce 'Test'
 dotnet test "$solution" --no-build
 
 for runtime in "${runtimes[@]}"; do
-    announce "Publish $version (self-contained $runtime)"
+    announce "Publish $runtime $version"
     dotnet publish "$csproj" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto -r "$runtime" --self-contained -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=none
 done
-
-announce "Publish $version (dotnet tools)"
-dotnet pack "$csproj" -o "$artifacts" -p:Version="$version" -p:ContinuousIntegrationBuild=true --tl:auto

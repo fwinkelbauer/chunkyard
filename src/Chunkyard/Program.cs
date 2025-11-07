@@ -1,5 +1,8 @@
 namespace Chunkyard;
 
+/// <summary>
+/// Entry point that defines the command line interface.
+/// </summary>
 public static class Program
 {
     public static int Main(string[] args)
