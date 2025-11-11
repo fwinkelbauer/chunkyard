@@ -35,10 +35,10 @@ chunkyard
 chunkyard store --help
 
 # See which files chunkyard would backup
-chunkyard store --repository 'MyBackup' --path 'Music' 'Pictures' 'Videos' --dry-run
+chunkyard store --repository 'MyBackup' --directory 'Music' 'Pictures' 'Videos' --dry-run
 
 # Store a backup
-chunkyard store --repository 'MyBackup' --path 'Music' 'Pictures' 'Videos'
+chunkyard store --repository 'MyBackup' --directory 'Music' 'Pictures' 'Videos'
 
 # Check if the latest backup is valid
 chunkyard check --repository 'MyBackup'
