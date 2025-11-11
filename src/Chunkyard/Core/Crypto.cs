@@ -107,12 +107,11 @@ public sealed class Crypto
         byte[] salt,
         int iterations)
     {
-        using var rfc2898 = new Rfc2898DeriveBytes(
+        return Rfc2898DeriveBytes.Pbkdf2(
             password,
             salt,
             iterations,
-            HashAlgorithmName.SHA256);
-
-        return rfc2898.GetBytes(KeyBytes);
+            HashAlgorithmName.SHA256,
+            KeyBytes);
     }
 }
