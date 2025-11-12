@@ -57,9 +57,7 @@ You can find examples of how I use Chunkyard in my [[https://florianwinkelbauer.
 
 ** Build
 
-- Install [[https://dotnet.microsoft.com/en-us/download][.NET 8.0]]
-  - Debian: ~sudo apt update && sudo apt install dotnet-sdk-8.0 -y~
-  - Windows: Install Visual Studio
+- Install [[https://dotnet.microsoft.com/en-us/download][.NET]]
 - Run ~dotnet build src~ and ~dotnet test src~ to build and test Chunkyard
 
 ** Publish
