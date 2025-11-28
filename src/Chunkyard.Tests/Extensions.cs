@@ -5,69 +5,66 @@ namespace Chunkyard.Tests;
 /// </summary>
 internal static class Extensions
 {
-    public static int StoreSnapshot(
-        this SnapshotStore snapshotStore,
-        IBlobSystem blobSystem)
+    extension(SnapshotStore snapshotStore)
     {
-        return snapshotStore.StoreSnapshot(
-            blobSystem,
-            Some.UtcNow(),
-            new Fuzzy());
-    }
-
-    public static bool CheckSnapshot(
-        this SnapshotStore snapshotStore,
-        int snapshotId)
-    {
-        return snapshotStore.CheckSnapshot(snapshotId, new Fuzzy());
-    }
-
-    public static void RestoreSnapshot(
-        this SnapshotStore snapshotStore,
-        IBlobSystem blobSystem,
-        int snapshotId)
-    {
-        snapshotStore.RestoreSnapshot(blobSystem, snapshotId, new Fuzzy());
-    }
-
-    public static void Missing<T>(
-        this IRepository<T> repository,
-        IEnumerable<T> keys)
-    {
-        foreach (var key in keys)
+        public int StoreSnapshot(
+            IBlobSystem blobSystem)
         {
-            repository.Remove(key);
+            return snapshotStore.StoreSnapshot(
+                blobSystem,
+                Some.UtcNow(),
+                new Fuzzy());
+        }
+
+        public bool CheckSnapshot(
+            int snapshotId)
+        {
+            return snapshotStore.CheckSnapshot(snapshotId, new Fuzzy());
+        }
+
+        public void RestoreSnapshot(
+            IBlobSystem blobSystem,
+            int snapshotId)
+        {
+            snapshotStore.RestoreSnapshot(blobSystem, snapshotId, new Fuzzy());
         }
     }
 
-    public static void Corrupt<T>(
-        this IRepository<T> repository,
-        IEnumerable<T> keys)
+    extension<T>(IRepository<T> repository)
     {
-        foreach (var key in keys)
+        public void Missing(IEnumerable<T> keys)
         {
-            var bytes = repository.Retrieve(key);
-
-            repository.Remove(key);
-            repository.Write(
-                key,
-                bytes.Concat(new byte[] { 0xFF }).ToArray());
-        }
-    }
-
-    public static Dictionary<Blob, string> ToDictionary(
-        this IBlobSystem blobSystem)
-    {
-        return blobSystem.ListBlobs().ToDictionary(
-            blob => blob,
-            blob =>
+            foreach (var key in keys)
             {
-                using var memoryStream = new MemoryStream();
-                using var blobStream = blobSystem.OpenRead(blob.Name);
+                repository.Remove(key);
+            }
+        }
 
-                blobStream.CopyTo(memoryStream);
+        public void Corrupt(IEnumerable<T> keys)
+        {
+            foreach (var key in keys)
+            {
+                repository.Remove(key);
+                repository.Write(key, new byte[] { 0xFF });
+            }
+        }
+    }
 
-                return Convert.ToHexString(memoryStream.ToArray());
-            });
+    extension(IBlobSystem blobSystem)
+    {
+        public Dictionary<Blob, string> ToDictionary()
+        {
+            return blobSystem.ListBlobs().ToDictionary(
+                blob => blob,
+                blob =>
+                {
+                    using var memoryStream = new MemoryStream();
+                    using var blobStream = blobSystem.OpenRead(blob.Name);
+
+                    blobStream.CopyTo(memoryStream);
+
+                    return Convert.ToHexString(memoryStream.ToArray());
+                });
+        }
     }
 }
