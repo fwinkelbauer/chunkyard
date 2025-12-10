@@ -42,7 +42,10 @@ public sealed class SnapshotStore
             () => FastChunker.GenerateGearTable(_crypto.Value));
     }
 
-    public int StoreSnapshot(IBlobSystem blobSystem, DateTime utcNow, Fuzzy fuzzy)
+    public int StoreSnapshot(
+        IBlobSystem blobSystem,
+        DateTime utcNow,
+        Fuzzy fuzzy)
     {
         var snapshot = new Snapshot(
             utcNow,
