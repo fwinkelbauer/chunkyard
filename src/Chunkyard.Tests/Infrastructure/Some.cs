@@ -1,17 +1,25 @@
-namespace Chunkyard.Tests;
+namespace Chunkyard.Tests.Infrastructure;
 
 /// <summary>
 /// A collection of object factories that are useful when writing tests.
 /// </summary>
 internal static class Some
 {
+    private static readonly Lock Lock = new();
+
+    // Randomize which infrastructure we use
+    private static readonly bool UseInMemory = RandomNumberGenerator.GetInt32(2) == 0;
+
     private static DateTime Clock = DateTime.UtcNow;
 
     public static DateTime UtcNow()
     {
-        Clock = Clock.AddSeconds(1);
+        lock (Lock)
+        {
+            Clock = Clock.AddSeconds(1);
 
-        return Clock;
+            return Clock;
+        }
     }
 
     public static Crypto Crypto(string password = "secret")
@@ -51,7 +59,9 @@ internal static class Some
 
     public static IRepository Repository()
     {
-        return new MemoryRepository();
+        return UseInMemory
+            ? new MemoryRepository()
+            : new FileRepository(TempDirectory());
     }
 
     public static IBlobSystem BlobSystem(
@@ -60,7 +70,9 @@ internal static class Some
     {
         blobs ??= Array.Empty<Blob>();
 
-        var blobSystem = new MemoryBlobSystem();
+        IBlobSystem blobSystem = UseInMemory
+            ? new MemoryBlobSystem()
+            : new FileBlobSystem(TempDirectory());
 
         foreach (var blob in blobs)
         {
@@ -75,7 +87,7 @@ internal static class Some
         return blobSystem;
     }
 
-    public static string Directory()
+    public static string TempDirectory()
     {
         return Path.Combine(
             Path.GetTempPath(),
