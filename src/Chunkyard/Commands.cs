@@ -40,12 +40,11 @@ public sealed record CheckCommand(
 /// </summary>
 public sealed record CopyCommand(
     SnapshotStore SnapshotStore,
-    IRepository DestinationRepository,
-    int Last) : ICommand
+    IRepository DestinationRepository) : ICommand
 {
     public int Run()
     {
-        SnapshotStore.CopyTo(DestinationRepository, Last);
+        SnapshotStore.CopyTo(DestinationRepository);
 
         return 0;
     }
@@ -53,10 +52,9 @@ public sealed record CopyCommand(
     public static CopyCommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TryRepository("--destination", "The destination repository path", out var repository)
-            & consumer.TryInt("--last", "The maximum amount of snapshots to copy. Zero or a negative number copies all", out var last, 0))
+            & consumer.TryRepository("--destination", "The destination repository path", out var repository))
         {
-            return new CopyCommand(snapshotStore, repository, last);
+            return new CopyCommand(snapshotStore, repository);
         }
         else
         {

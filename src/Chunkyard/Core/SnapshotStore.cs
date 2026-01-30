@@ -167,19 +167,12 @@ public sealed class SnapshotStore
         }
     }
 
-    public void CopyTo(IRepository otherRepository, int last = 0)
+    public void CopyTo(IRepository otherRepository)
     {
-        var snapshotIds = ListSnapshotIdsToCopy(otherRepository);
-
-        if (last > 0)
-        {
-            snapshotIds = snapshotIds
-                .TakeLast(last)
-                .ToArray();
-        }
-
         var chunkIds = _repository.Chunks.UnorderedList()
             .Except(otherRepository.Chunks.UnorderedList());
+
+        var snapshotIds = ListSnapshotIdsToCopy(otherRepository);
 
         Copy(_repository.Chunks, otherRepository.Chunks, chunkIds);
         Copy(_repository.Snapshots, otherRepository.Snapshots, snapshotIds);

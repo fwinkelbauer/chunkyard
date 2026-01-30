@@ -326,25 +326,6 @@ public sealed class SnapshotStoreTests
     }
 
     [TestMethod]
-    public void CopyTo_Can_Limit_Copied_Snapshots()
-    {
-        var snapshotStore = Some.SnapshotStore();
-        var blobSystem = Some.BlobSystem(Some.Blobs());
-        var otherRepository = Some.Repository();
-        var otherSnapshotStore = Some.SnapshotStore(otherRepository);
-
-        _ = snapshotStore.StoreSnapshot(blobSystem);
-        var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
-        snapshotStore.CopyTo(otherRepository, 1);
-
-        CollectionAssert.AreEqual(
-            new[] { snapshotId },
-            otherSnapshotStore.ListSnapshotIds());
-
-        Assert.IsTrue(otherSnapshotStore.CheckSnapshot(snapshotId));
-    }
-
-    [TestMethod]
     public void CopyTo_Throws_On_Shared_SnapshotReference_Mismatch()
     {
         var repository = Some.Repository();
