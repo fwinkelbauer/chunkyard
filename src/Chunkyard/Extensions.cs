@@ -70,16 +70,7 @@ internal static class Extensions
         public bool TrySnapshotStore(out SnapshotStore snapshotStore)
         {
             var success = consumer.TryRepository("--repository", "The repository path", out var repository)
-                & consumer.TryEnum("--password", "The password prompt method", out Password password, Password.Console);
-
-            ICryptoFactory cryptoFactory = password switch
-            {
-                Password.Console => new ConsoleCryptoFactory(),
-                Password.Libsecret => new LibsecretCryptoFactory(new ConsoleCryptoFactory()),
-                _ => new ConsoleCryptoFactory()
-            };
-
-            _ = consumer.TryDryRun(cryptoFactory, c => new DryRunCryptoFactory(c), out cryptoFactory);
+                & consumer.TryDryRun(new ConsoleCryptoFactory(), c => new DryRunCryptoFactory(c), out ICryptoFactory cryptoFactory);
 
             snapshotStore = new SnapshotStore(
                 repository,
@@ -150,13 +141,4 @@ internal static class Extensions
             return success;
         }
     }
-}
-
-/// <summary>
-/// Describes password retrieval mechanisms.
-/// </summary>
-internal enum Password
-{
-    Console = 0,
-    Libsecret = 1
 }
