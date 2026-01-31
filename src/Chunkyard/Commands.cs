@@ -147,34 +147,6 @@ public sealed record GarbageCollectCommand(
 }
 
 /// <summary>
-/// An <see cref="ICommand"/> that keeps only a certain amount of snapshots.
-/// </summary>
-public sealed record KeepCommand(
-    SnapshotStore SnapshotStore,
-    int LatestCount) : ICommand
-{
-    public int Run()
-    {
-        SnapshotStore.KeepSnapshots(LatestCount);
-
-        return 0;
-    }
-
-    public static KeepCommand? Parse(FlagConsumer consumer)
-    {
-        if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TryInt("--latest", "The count of the latest snapshots to keep", out var latestCount))
-        {
-            return new KeepCommand(snapshotStore, latestCount);
-        }
-        else
-        {
-            return null;
-        }
-    }
-}
-
-/// <summary>
 /// An <see cref="ICommand"/> that lists all snapshots.
 /// </summary>
 public sealed record ListCommand(

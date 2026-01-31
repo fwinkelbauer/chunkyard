@@ -12,7 +12,6 @@ public static class Program
             .With("copy", "Copy snapshots from one repository to another", CopyCommand.Parse)
             .With("diff", "Show the difference between two snapshots", DiffCommand.Parse)
             .With("gc", "Remove unreferenced chunks", GarbageCollectCommand.Parse)
-            .With("keep", "Keep only a certain amount of snapshots", KeepCommand.Parse)
             .With("list", "List all snapshots", ListCommand.Parse)
             .With("remove", "Remove a snapshot", RemoveCommand.Parse)
             .With("restore", "Restore a snapshot", RestoreCommand.Parse)
