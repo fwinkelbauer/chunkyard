@@ -154,19 +154,6 @@ public sealed class SnapshotStore
         _probe.RemovedSnapshot(snapshotId);
     }
 
-    public void KeepSnapshots(int latestCount)
-    {
-        var snapshotIds = ListSnapshotIds();
-
-        var snapshotIdsToRemove = snapshotIds
-            .Take(snapshotIds.Length - latestCount);
-
-        foreach (var snapshotId in snapshotIdsToRemove)
-        {
-            RemoveSnapshot(snapshotId);
-        }
-    }
-
     public void CopyTo(IRepository otherRepository)
     {
         var chunkIds = _repository.Chunks.UnorderedList()

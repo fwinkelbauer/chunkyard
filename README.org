@@ -46,8 +46,8 @@ chunkyard check --repository 'MyBackup'
 # Restore parts of the latest backup
 chunkyard restore --repository 'MyBackup' --directory '.' --include 'mp3$'
 
-# Keep the latest four backups
-chunkyard keep --repository 'MyBackup' --latest '4'
+# Remove a backup
+chunkyard remove --repository 'MyBackup' --snapshot 0
 chunkyard gc --repository 'MyBackup'
 #+end_src
 

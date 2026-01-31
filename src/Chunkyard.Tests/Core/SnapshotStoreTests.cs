@@ -249,29 +249,6 @@ public sealed class SnapshotStoreTests
     }
 
     [TestMethod]
-    public void KeepSnapshots_Removes_Older_Snapshots()
-    {
-        var snapshotStore = Some.SnapshotStore();
-        var blobSystem = Some.BlobSystem(Some.Blobs());
-
-        _ = snapshotStore.StoreSnapshot(blobSystem);
-        _ = snapshotStore.StoreSnapshot(blobSystem);
-
-        var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
-
-        snapshotStore.KeepSnapshots(1);
-        snapshotStore.KeepSnapshots(2);
-
-        CollectionAssert.AreEqual(
-            new[] { snapshotId },
-            snapshotStore.ListSnapshotIds());
-
-        snapshotStore.KeepSnapshots(0);
-
-        Assert.IsEmpty(snapshotStore.ListSnapshotIds());
-    }
-
-    [TestMethod]
     public void CopyTo_Copies_Newer_Snapshots()
     {
         var repository = Some.Repository();
