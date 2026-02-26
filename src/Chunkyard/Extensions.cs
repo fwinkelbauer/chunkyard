@@ -40,27 +40,27 @@ internal static class Extensions
 
     extension(IBlobSystem blobSystem)
     {
-        public IEnumerable<Blob> ListBlobs(Fuzzy fuzzy)
+        public IEnumerable<Blob> ListBlobs(Regex? regex)
         {
             return blobSystem.ListBlobs()
-                .Where(b => fuzzy.IsMatch(b.Name));
+                .Where(b => regex?.IsMatch(b.Name) ?? true);
         }
     }
 
     extension(Snapshot snapshot)
     {
-        public Blob[] ListBlobs(Fuzzy fuzzy)
+        public Blob[] ListBlobs(Regex? regex)
         {
             return snapshot.BlobReferences
                 .Select(br => br.Blob)
-                .Where(b => fuzzy.IsMatch(b.Name))
+                .Where(b => regex?.IsMatch(b.Name) ?? true)
                 .ToArray();
         }
 
-        public BlobReference[] ListBlobReferences(Fuzzy fuzzy)
+        public BlobReference[] ListBlobReferences(Regex? regex)
         {
             return snapshot.BlobReferences
-                .Where(b => fuzzy.IsMatch(b.Blob.Name))
+                .Where(b => regex?.IsMatch(b.Blob.Name) ?? true)
                 .ToArray();
         }
     }
@@ -111,17 +111,15 @@ internal static class Extensions
                 SnapshotStore.LatestSnapshotId);
         }
 
-        public bool TryInclude(out Fuzzy include)
+        public bool TryInclude(out Regex include)
         {
-            var success = consumer.TryStrings(
+            var success = consumer.TryString(
                 "--include",
-                "A list of fuzzy patterns for files to include",
-                out var includePatterns,
-                Array.Empty<string>());
+                "A regular expression for files to include",
+                out var pattern,
+                ".*");
 
-            include = success
-                ? new Fuzzy(includePatterns)
-                : new Fuzzy();
+            include = new Regex(pattern);
 
             return success;
         }

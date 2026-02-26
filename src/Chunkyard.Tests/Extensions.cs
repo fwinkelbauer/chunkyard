@@ -13,20 +13,20 @@ internal static class Extensions
             return snapshotStore.StoreSnapshot(
                 blobSystem,
                 Some.UtcNow(),
-                new Fuzzy());
+                null);
         }
 
         public bool CheckSnapshot(
             int snapshotId)
         {
-            return snapshotStore.CheckSnapshot(snapshotId, new Fuzzy());
+            return snapshotStore.CheckSnapshot(snapshotId, null);
         }
 
         public void RestoreSnapshot(
             IBlobSystem blobSystem,
             int snapshotId)
         {
-            snapshotStore.RestoreSnapshot(blobSystem, snapshotId, new Fuzzy());
+            snapshotStore.RestoreSnapshot(blobSystem, snapshotId, null);
         }
     }
 
