@@ -6,7 +6,7 @@ namespace Chunkyard;
 public sealed record CheckCommand(
     SnapshotStore SnapshotStore,
     int SnapshotId,
-    Fuzzy Include) : ICommand
+    Regex Include) : ICommand
 {
     public int Run()
     {
@@ -70,7 +70,7 @@ public sealed record DiffCommand(
     SnapshotStore SnapshotStore,
     int FirstSnapshotId,
     int SecondSnapshotId,
-    Fuzzy Include) : ICommand
+    Regex Include) : ICommand
 {
     public int Run()
     {
@@ -215,7 +215,7 @@ public sealed record RestoreCommand(
     SnapshotStore SnapshotStore,
     IBlobSystem BlobSystem,
     int SnapshotId,
-    Fuzzy Include) : ICommand
+    Regex Include) : ICommand
 {
     public int Run()
     {
@@ -246,7 +246,7 @@ public sealed record RestoreCommand(
 public sealed record ShowCommand(
     SnapshotStore SnapshotStore,
     int SnapshotId,
-    Fuzzy Include) : ICommand
+    Regex Include) : ICommand
 {
     public int Run()
     {
@@ -282,7 +282,7 @@ public sealed record ShowCommand(
 public sealed record StoreCommand(
     SnapshotStore SnapshotStore,
     IBlobSystem BlobSystem,
-    Fuzzy Include) : ICommand
+    Regex Include) : ICommand
 {
     public int Run()
     {

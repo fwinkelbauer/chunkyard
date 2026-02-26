@@ -45,11 +45,11 @@ public sealed class SnapshotStore
     public int StoreSnapshot(
         IBlobSystem blobSystem,
         DateTime utcNow,
-        Fuzzy fuzzy)
+        Regex? regex)
     {
         var snapshot = new Snapshot(
             utcNow,
-            StoreBlobs(blobSystem, fuzzy));
+            StoreBlobs(blobSystem, regex));
 
         var snapshotReference = new SnapshotReference(
             _crypto.Value.Salt,
@@ -95,11 +95,11 @@ public sealed class SnapshotStore
             GetSnapshotReference(snapshotId));
     }
 
-    public bool CheckSnapshot(int snapshotId, Fuzzy fuzzy)
+    public bool CheckSnapshot(int snapshotId, Regex? regex)
     {
         snapshotId = ResolveSnapshotId(snapshotId);
 
-        var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(fuzzy)
+        var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(regex)
             .CheckAll(CheckBlobReference);
 
         _probe.SnapshotValid(snapshotId, snapshotValid);
@@ -110,12 +110,12 @@ public sealed class SnapshotStore
     public void RestoreSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,
-        Fuzzy fuzzy)
+        Regex? regex)
     {
         snapshotId = ResolveSnapshotId(snapshotId);
 
         var blobReferencesToRestore = GetSnapshot(snapshotId)
-            .ListBlobReferences(fuzzy)
+            .ListBlobReferences(regex)
             .Where(br => !br.Blob.Equals(blobSystem.GetBlob(br.Blob.Name)));
 
         foreach (var blobReference in blobReferencesToRestore)
@@ -212,13 +212,13 @@ public sealed class SnapshotStore
 
     private BlobReference[] StoreBlobs(
         IBlobSystem blobSystem,
-        Fuzzy fuzzy)
+        Regex? regex)
     {
         var existingBlobReferences = TryLastSnapshotId(_repository, out var snapshotId)
             ? GetSnapshot(snapshotId).BlobReferences.ToDictionary(br => br.Blob, br => br)
             : new Dictionary<Blob, BlobReference>();
 
-        var blobs = blobSystem.ListBlobs(fuzzy);
+        var blobs = blobSystem.ListBlobs(regex);
         var blobReferences = new List<BlobReference>();
         var blobsToStore = new List<Blob>();
 
