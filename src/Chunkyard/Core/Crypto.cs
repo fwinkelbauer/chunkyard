@@ -36,12 +36,9 @@ public sealed class Crypto
         _key = PasswordToKey(password, salt, iterations);
         _hashedKey = SHA256.HashData(_key);
 
-        Password = password;
         Salt = Convert.ToBase64String(salt);
         Iterations = iterations;
     }
-
-    public string Password { get; }
 
     public string Salt { get; }
 
