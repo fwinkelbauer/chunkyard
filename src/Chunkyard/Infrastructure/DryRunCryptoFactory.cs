@@ -4,7 +4,7 @@ namespace Chunkyard.Infrastructure;
 /// A <see cref="ICryptoFactory"/> decorator that generates a password for empty
 /// repositories.
 /// </summary>
-public class DryRunCryptoFactory : ICryptoFactory
+public sealed class DryRunCryptoFactory : ICryptoFactory
 {
     private readonly ICryptoFactory _cryptoFactory;
 
