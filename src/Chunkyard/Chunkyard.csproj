@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Using Include="Chunkyard.Command" />
     <Using Include="Chunkyard.CommandLine" />
     <Using Include="Chunkyard.Core" />
     <Using Include="Chunkyard.Infrastructure" />
