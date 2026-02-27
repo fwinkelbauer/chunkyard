@@ -137,12 +137,14 @@ public sealed class SnapshotStore
 
     public void GarbageCollect()
     {
-        var unusedChunkIds = _repository.Chunks.UnorderedList()
-            .Except(ListChunkIds(_repository.Snapshots.UnorderedList()));
+        var usedChunkIds = ListChunkIds(_repository.Snapshots.UnorderedList());
 
-        foreach (var chunkId in unusedChunkIds)
+        foreach (var chunkId in _repository.Chunks.UnorderedList())
         {
-            _repository.Chunks.Remove(chunkId);
+            if (!usedChunkIds.Contains(chunkId))
+            {
+                _repository.Chunks.Remove(chunkId);
+            }
         }
     }
 
@@ -219,30 +221,16 @@ public sealed class SnapshotStore
             : new Dictionary<Blob, BlobReference>();
 
         var blobs = blobSystem.ListBlobs(regex);
-        var blobReferences = new List<BlobReference>();
-        var blobsToStore = new List<Blob>();
 
-        foreach (var blob in blobs)
-        {
-            if (existingBlobReferences.TryGetValue(blob, out var blobReference))
-            {
-                blobReferences.Add(blobReference);
-            }
-            else
-            {
-                blobsToStore.Add(blob);
-            }
-        }
-
-        blobReferences.AddRange(blobsToStore.Select(
-            b => StoreBlob(blobSystem, b)));
-
-        return blobReferences
+        return blobs
+            .Select(b => existingBlobReferences.TryGetValue(b, out var br)
+                ? br
+                : StoreBlob(blobSystem, b))
             .OrderBy(br => br.Blob.Name)
             .ToArray();
     }
 
-    private List<string> StoreSnapshot(Snapshot snapshot)
+    private string[] StoreSnapshot(Snapshot snapshot)
     {
         using var memoryStream = new MemoryStream(
             Serializer.SnapshotToBytes(snapshot));
@@ -277,10 +265,15 @@ public sealed class SnapshotStore
     private ReadOnlySpan<byte> RetrieveChunk(string chunkId)
     {
         using var stream = _repository.Chunks.OpenRead(chunkId);
+        var totalBytesRead = 0;
+        var bytesRead = 0;
 
-        var bytesRead = stream.Read(_cipherBuffer);
+        while ((bytesRead = stream.Read(_cipherBuffer)) > 0)
+        {
+            totalBytesRead += bytesRead;
+        }
 
-        return _cipherBuffer.AsSpan(0, bytesRead);
+        return _cipherBuffer.AsSpan(0, totalBytesRead);
     }
 
     private BlobReference StoreBlob(IBlobSystem blobSystem, Blob blob)
@@ -296,7 +289,7 @@ public sealed class SnapshotStore
         return blobReference;
     }
 
-    private List<string> StoreChunks(Stream stream)
+    private string[] StoreChunks(Stream stream)
     {
         var chunkIds = new List<string>();
         ReadOnlySpan<byte> chunk;
@@ -310,7 +303,7 @@ public sealed class SnapshotStore
             chunkIds.Add(chunkId);
         }
 
-        return chunkIds;
+        return chunkIds.ToArray();
     }
 
     private void RestoreBlob(
@@ -380,9 +373,10 @@ public sealed class SnapshotStore
         }
 
         var snapshotIds = _repository.Snapshots.UnorderedList();
-        var position = snapshotIds.Length + snapshotId;
 
         Array.Sort(snapshotIds);
+
+        var position = snapshotIds.Length + snapshotId;
 
         return snapshotIds[position];
     }
