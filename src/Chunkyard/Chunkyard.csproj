@@ -11,6 +11,7 @@
     <Using Include="Chunkyard.Core" />
     <Using Include="Chunkyard.Infrastructure" />
     <Using Include="System.Globalization" />
+    <Using Include="System.Numerics" />
     <Using Include="System.Reflection" />
     <Using Include="System.Security.Cryptography" />
     <Using Include="System.Text" />

@@ -278,19 +278,20 @@ public sealed class FastChunkerTests
         var avgSize = factor * 2 * 1024;
         var maxSize = factor * 4 * 1024;
 
-        using var chunker = new FastChunker(
+        using var stream = new MemoryStream(ExpectedBytes);
+
+        var chunker = new FastChunker(
             minSize,
             avgSize,
             maxSize,
-            GearTable,
-            new MemoryStream(ExpectedBytes));
+            GearTable);
 
         var actualChunkSizes = new List<int>();
         var actualBytes = new List<byte>();
         var buffer = new byte[maxSize];
         ReadOnlySpan<byte> chunk;
 
-        while ((chunk = chunker.Chunk(buffer)).Length != 0)
+        while ((chunk = chunker.Chunk(stream, buffer)).Length != 0)
         {
             actualChunkSizes.Add(chunk.Length);
             actualBytes.AddRange(chunk);
