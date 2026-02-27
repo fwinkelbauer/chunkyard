@@ -16,7 +16,7 @@ public sealed class SnapshotStore
     private readonly IRepository _repository;
     private readonly IProbe _probe;
     private readonly Lazy<Crypto> _crypto;
-    private readonly Lazy<uint[]> _gearTable;
+    private readonly Lazy<FastChunker> _chunker;
 
     private readonly byte[] _plainBuffer = new byte[DefaultMax];
     private readonly byte[] _cipherBuffer = new byte[DefaultMax + Crypto.CryptoBytes];
@@ -38,8 +38,8 @@ public sealed class SnapshotStore
             return cryptoFactory.Create(snapshotReference);
         });
 
-        _gearTable = new Lazy<uint[]>(
-            () => FastChunker.GenerateGearTable(_crypto.Value));
+        _chunker = new Lazy<FastChunker>(() =>
+            new FastChunker(DefaultMin, DefaultAvg, DefaultMax, _crypto.Value));
     }
 
     public int StoreSnapshot(
@@ -298,17 +298,10 @@ public sealed class SnapshotStore
 
     private List<string> StoreChunks(Stream stream)
     {
-        using var chunker = new FastChunker(
-            DefaultMin,
-            DefaultAvg,
-            DefaultMax,
-            _gearTable.Value,
-            stream);
-
         var chunkIds = new List<string>();
         ReadOnlySpan<byte> chunk;
 
-        while ((chunk = chunker.Chunk(_plainBuffer)).Length != 0)
+        while ((chunk = _chunker.Value.Chunk(stream, _plainBuffer)).Length != 0)
         {
             var cipher = _crypto.Value.Encrypt(chunk, _cipherBuffer);
             var chunkId = ToChunkId(cipher);

@@ -8,7 +8,7 @@ namespace Chunkyard.Core;
 ///
 /// The FastCdc algorithm can be used to split data into chunks.
 /// </summary>
-public sealed class FastChunker : IDisposable
+public sealed class FastChunker
 {
     private const int MinimumMin = 64;
     private const int MinimumMax = 64 * 1024 * 1024;
@@ -23,14 +23,12 @@ public sealed class FastChunker : IDisposable
     private readonly uint _maskS;
     private readonly uint _maskL;
     private readonly uint[] _gearTable;
-    private readonly Stream _stream;
 
     public FastChunker(
         int minSize,
         int avgSize,
         int maxSize,
-        uint[] gearTable,
-        Stream stream)
+        uint[] gearTable)
     {
         _minSize = EnsureBetween(minSize, MinimumMin, MinimumMax);
         _avgSize = EnsureBetween(avgSize, AverageMin, AverageMax);
@@ -42,49 +40,26 @@ public sealed class FastChunker : IDisposable
                 $"Invariant violation: {maxSize} - {minSize} > {avgSize}");
         }
 
-        var bits = Logarithm2(_avgSize);
+        var bits = BitOperations.Log2((uint)_avgSize);
         _maskS = Mask(bits + 1);
         _maskL = Mask(bits - 1);
         _gearTable = gearTable;
-        _stream = new BufferedStream(stream, _maxSize);
     }
 
-    public void Dispose()
+    public FastChunker(
+        int minSize,
+        int avgSize,
+        int maxSize,
+        Crypto crypto)
+        : this(minSize, avgSize, maxSize, GenerateGearTable(crypto))
     {
-        _stream.Dispose();
     }
 
-    // We encrypt an array of zeros using a given key to create reproducible
-    // "random" data. This means that the same cryptographic key will always
-    // produce the same output, while another key will produce a different
-    // output.
-    public static uint[] GenerateGearTable(Crypto crypto)
+    public ReadOnlySpan<byte> Chunk(Stream stream, Span<byte> buffer)
     {
-        var input = new byte[1024];
-
-        Crypto.Deconstruct(
-            crypto.Encrypt(input),
-            out _,
-            out var random,
-            out _);
-
-        var gearTable = new uint[256];
-        var mask = Mask(31);
-
-        for (var i = 0; i < gearTable.Length; i++)
-        {
-            var slice = random.Slice(i * 4, 4);
-            gearTable[i] = BitConverter.ToUInt32(slice) & mask;
-        }
-
-        return gearTable;
-    }
-
-    public ReadOnlySpan<byte> Chunk(Span<byte> buffer)
-    {
-        var bytesRead = _stream.Read(buffer);
+        var bytesRead = stream.Read(buffer);
         var chunkSize = Cut(buffer[..bytesRead]);
-        _stream.Position -= (bytesRead - chunkSize);
+        stream.Position -= (bytesRead - chunkSize);
 
         return buffer[..chunkSize];
     }
@@ -127,6 +102,32 @@ public sealed class FastChunker : IDisposable
         return buffer.Length;
     }
 
+    // We encrypt an array of zeros using a given key to create reproducible
+    // "random" data. This means that the same cryptographic key will always
+    // produce the same output, while another key will produce a different
+    // output.
+    private static uint[] GenerateGearTable(Crypto crypto)
+    {
+        var input = new byte[1024];
+
+        Crypto.Deconstruct(
+            crypto.Encrypt(input),
+            out _,
+            out var random,
+            out _);
+
+        var gearTable = new uint[256];
+        var mask = Mask(31);
+
+        for (var i = 0; i < gearTable.Length; i++)
+        {
+            var slice = random.Slice(i * 4, 4);
+            gearTable[i] = BitConverter.ToUInt32(slice) & mask;
+        }
+
+        return gearTable;
+    }
+
     private static int CenterSize(int average, int minimum, int sourceSize)
     {
         var offset = minimum + CeilDiv(minimum, 2);
@@ -140,16 +141,11 @@ public sealed class FastChunker : IDisposable
         return 1 + ((x - 1) / y);
     }
 
-    private static int Logarithm2(int value)
-    {
-        return (int)Math.Round(Math.Log(value, 2));
-    }
-
     private static uint Mask(int bits)
     {
         _ = EnsureBetween(bits, 1, 31);
 
-        return (uint)Math.Pow(2, bits) - 1;
+        return (1u << bits) - 1;
     }
 
     private static int EnsureBetween(int value, int min, int max)
