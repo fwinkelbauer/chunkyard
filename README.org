@@ -51,8 +51,6 @@ chunkyard remove --repository 'MyBackup' --snapshot 0
 chunkyard gc --repository 'MyBackup'
 #+end_src
 
-You can find examples of how I use Chunkyard in my [[https://florianwinkelbauer.com/notes/dotfiles][dotfiles]].
-
 * Development
 
 ** Build
