@@ -4,31 +4,28 @@ namespace Chunkyard.Core;
 /// A snapshot contains a list of references which describe the state of several
 /// blobs at a specific point in time.
 /// </summary>
-public sealed class Snapshot
+public sealed record Snapshot(
+    DateTime CreationTimeUtc,
+    IReadOnlyCollection<BlobReference> BlobReferences)
 {
-    public Snapshot(
-        DateTime creationTimeUtc,
-        IReadOnlyCollection<BlobReference> blobReferences)
+    public bool Equals(Snapshot? other)
     {
-        CreationTimeUtc = creationTimeUtc;
-        BlobReferences = blobReferences;
-    }
-
-    public DateTime CreationTimeUtc { get; }
-
-    public IReadOnlyCollection<BlobReference> BlobReferences { get; }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is Snapshot other
+        return other is not null
             && CreationTimeUtc.Equals(other.CreationTimeUtc)
             && BlobReferences.SequenceEqual(other.BlobReferences);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(
-            CreationTimeUtc,
-            BlobReferences);
+        var hash = new HashCode();
+
+        hash.Add(CreationTimeUtc);
+
+        foreach (var blobReference in BlobReferences)
+        {
+            hash.Add(blobReference);
+        }
+
+        return hash.ToHashCode();
     }
 }
