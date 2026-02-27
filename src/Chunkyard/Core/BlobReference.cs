@@ -4,29 +4,28 @@ namespace Chunkyard.Core;
 /// A reference which can be used to store binary data in a
 /// <see cref="SnapshotStore"/>.
 /// </summary>
-public sealed class BlobReference
+public sealed record BlobReference(
+    Blob Blob,
+    IReadOnlyCollection<string> ChunkIds)
 {
-    public BlobReference(
-        Blob blob,
-        IReadOnlyCollection<string> chunkIds)
+    public bool Equals(BlobReference? other)
     {
-        Blob = blob;
-        ChunkIds = chunkIds;
-    }
-
-    public Blob Blob { get; }
-
-    public IReadOnlyCollection<string> ChunkIds { get; }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is BlobReference other
+        return other is not null
             && Blob.Equals(other.Blob)
             && ChunkIds.SequenceEqual(other.ChunkIds);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Blob, ChunkIds);
+        var hash = new HashCode();
+
+        hash.Add(Blob);
+
+        foreach (var chunkId in ChunkIds)
+        {
+            hash.Add(chunkId);
+        }
+
+        return hash.ToHashCode();
     }
 }

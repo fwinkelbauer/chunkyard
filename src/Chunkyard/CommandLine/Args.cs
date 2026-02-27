@@ -9,32 +9,35 @@ namespace Chunkyard.CommandLine;
 ///
 /// e.g. my-command --some-flag param1 param2 --another-flag
 /// </summary>
-public sealed class Args
+public sealed record Args(
+    string Command,
+    IReadOnlyDictionary<string, IReadOnlyCollection<string>> Flags)
 {
-    public Args(
-        string command,
-        IReadOnlyDictionary<string, IReadOnlyCollection<string>> flags)
+    public bool Equals(Args? other)
     {
-        Command = command;
-        Flags = flags;
-    }
-
-    public string Command { get; }
-
-    public IReadOnlyDictionary<string, IReadOnlyCollection<string>> Flags { get; }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is Args other
+        return other is not null
             && Command.Equals(other.Command)
             && Flags.Keys.SequenceEqual(other.Flags.Keys)
-            && Flags.Values.SelectMany(v => v)
-                .SequenceEqual(other.Flags.Values.SelectMany(v => v));
+            && Flags.All(kv => kv.Value.SequenceEqual(other.Flags[kv.Key]));
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Command, Flags);
+        var hash = new HashCode();
+
+        hash.Add(Command);
+
+        foreach (var (key, values) in Flags)
+        {
+            hash.Add(key);
+
+            foreach (var value in values)
+            {
+                hash.Add(value);
+            }
+        }
+
+        return hash.ToHashCode();
     }
 
     public static Args? Parse(params string[] args)
@@ -54,11 +57,7 @@ public sealed class Args
                 && !int.TryParse(token, out _))
             {
                 currentFlag = token;
-
-                if (!flags.ContainsKey(currentFlag))
-                {
-                    flags.Add(currentFlag, new List<string>());
-                }
+                flags.TryAdd(currentFlag, new List<string>());
             }
             else if (string.IsNullOrEmpty(currentFlag))
             {

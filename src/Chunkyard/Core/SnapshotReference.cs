@@ -4,27 +4,14 @@ namespace Chunkyard.Core;
 /// A reference which can be used to retrieve a set of encrypted chunks from a
 /// <see cref="SnapshotStore"/>.
 /// </summary>
-public sealed class SnapshotReference
+public sealed record SnapshotReference(
+    string Salt,
+    int Iterations,
+    IReadOnlyCollection<string> ChunkIds)
 {
-    public SnapshotReference(
-        string salt,
-        int iterations,
-        IReadOnlyCollection<string> chunkIds)
+    public bool Equals(SnapshotReference? other)
     {
-        Salt = salt;
-        Iterations = iterations;
-        ChunkIds = chunkIds;
-    }
-
-    public string Salt { get; }
-
-    public int Iterations { get; }
-
-    public IReadOnlyCollection<string> ChunkIds { get; }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is SnapshotReference other
+        return other is not null
             && Salt.Equals(other.Salt)
             && Iterations == other.Iterations
             && ChunkIds.SequenceEqual(other.ChunkIds);
@@ -32,6 +19,16 @@ public sealed class SnapshotReference
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Salt, Iterations, ChunkIds);
+        var hash = new HashCode();
+
+        hash.Add(Salt);
+        hash.Add(Iterations);
+
+        foreach (var chunkId in ChunkIds)
+        {
+            hash.Add(chunkId);
+        }
+
+        return hash.ToHashCode();
     }
 }
