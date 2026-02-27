@@ -3,7 +3,7 @@ namespace Chunkyard.Core;
 /// <summary>
 /// A custom exception type.
 /// </summary>
-public class ChunkyardException : Exception
+public sealed class ChunkyardException : Exception
 {
     public ChunkyardException()
     {
