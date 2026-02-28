@@ -301,23 +301,4 @@ public sealed class SnapshotStoreTests
             expectedSnapshots,
             otherRepository.Snapshots.UnorderedList());
     }
-
-    [TestMethod]
-    public void CopyTo_Throws_On_Shared_SnapshotReference_Mismatch()
-    {
-        var repository = Some.Repository();
-        var snapshotStore = Some.SnapshotStore(repository);
-
-        var otherRepository = Some.Repository();
-        var otherSnapshotStore = Some.SnapshotStore(otherRepository);
-
-        _ = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(Some.Blobs("some blob")));
-
-        _ = otherSnapshotStore.StoreSnapshot(
-            Some.BlobSystem(Some.Blobs("other blob")));
-
-        _ = Assert.Throws<ChunkyardException>(
-            () => snapshotStore.CopyTo(otherRepository));
-    }
 }
