@@ -161,54 +161,21 @@ public sealed class SnapshotStore
         var chunkIds = _repository.Chunks.UnorderedList()
             .Except(otherRepository.Chunks.UnorderedList());
 
-        var snapshotIds = ListSnapshotIdsToCopy(otherRepository);
-
-        Copy(_repository.Chunks, otherRepository.Chunks, chunkIds);
-        Copy(_repository.Snapshots, otherRepository.Snapshots, snapshotIds);
-    }
-
-    private int[] ListSnapshotIdsToCopy(IRepository otherRepository)
-    {
-        var snapshotIds = ListSnapshotIds();
-        var otherSnapshotIds = otherRepository.Snapshots.UnorderedList();
-
-        var sharedSnapshotId = snapshotIds.Intersect(otherSnapshotIds)
-            .Max(id => id as int?);
-
-        if (sharedSnapshotId != null)
+        foreach (var chunkId in chunkIds)
         {
-            var bytes = _repository.Snapshots.Retrieve(
-                sharedSnapshotId.Value);
-
-            var otherBytes = otherRepository.Snapshots.Retrieve(
-                sharedSnapshotId.Value);
-
-            if (!bytes.SequenceEqual(otherBytes))
-            {
-                throw new ChunkyardException(
-                    "Copying data between different repositories is not supported");
-            }
+            otherRepository.Chunks.Write(
+                chunkId,
+                _repository.Chunks.Retrieve(chunkId));
         }
 
-        var otherSnapshotId = otherSnapshotIds.Max(id => id as int?);
+        var snapshotIds = _repository.Snapshots.UnorderedList()
+            .Except(otherRepository.Snapshots.UnorderedList());
 
-        var snapshotIdsToCopy = otherSnapshotId != null
-            ? snapshotIds
-                .Where(id => id > otherSnapshotId)
-                .ToArray()
-            : snapshotIds;
-
-        return snapshotIdsToCopy;
-    }
-
-    private static void Copy<T>(
-        IRepository<T> repository,
-        IRepository<T> other,
-        IEnumerable<T> keys)
-    {
-        foreach (var key in keys)
+        foreach (var snapshotId in snapshotIds)
         {
-            other.Write(key, repository.Retrieve(key));
+            otherRepository.Snapshots.Write(
+                snapshotId,
+                _repository.Snapshots.Retrieve(snapshotId));
         }
     }
 
@@ -372,10 +339,7 @@ public sealed class SnapshotStore
             return snapshotId;
         }
 
-        var snapshotIds = _repository.Snapshots.UnorderedList();
-
-        Array.Sort(snapshotIds);
-
+        var snapshotIds = ListSnapshotIds();
         var position = snapshotIds.Length + snapshotId;
 
         return snapshotIds[position];

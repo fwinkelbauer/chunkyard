@@ -85,7 +85,9 @@ public sealed class Crypto
     {
         var plain = new byte[cipher.Length - CryptoBytes];
 
-        return Decrypt(cipher, plain).ToArray();
+        Decrypt(cipher, plain);
+
+        return plain;
     }
 
     public ReadOnlySpan<byte> Decrypt(ReadOnlySpan<byte> cipher, Span<byte> plain)
