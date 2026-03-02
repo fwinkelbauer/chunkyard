@@ -5,31 +5,6 @@ namespace Chunkyard.Tests;
 /// </summary>
 internal static class Extensions
 {
-    extension(SnapshotStore snapshotStore)
-    {
-        public int StoreSnapshot(
-            IBlobSystem blobSystem)
-        {
-            return snapshotStore.StoreSnapshot(
-                blobSystem,
-                Some.UtcNow(),
-                null);
-        }
-
-        public bool CheckSnapshot(
-            int snapshotId)
-        {
-            return snapshotStore.CheckSnapshot(snapshotId, null);
-        }
-
-        public void RestoreSnapshot(
-            IBlobSystem blobSystem,
-            int snapshotId)
-        {
-            snapshotStore.RestoreSnapshot(blobSystem, snapshotId, null);
-        }
-    }
-
     extension<T>(IRepository<T> repository)
     {
         public void Missing(IEnumerable<T> keys)

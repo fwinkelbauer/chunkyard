@@ -44,12 +44,13 @@ public sealed class SnapshotStore
 
     public int StoreSnapshot(
         IBlobSystem blobSystem,
-        DateTime utcNow,
-        Regex? regex)
+        Regex? regex = null)
     {
+        var blobReferences = StoreBlobs(blobSystem, regex);
+
         var snapshot = new Snapshot(
-            utcNow,
-            StoreBlobs(blobSystem, regex));
+            blobReferences.Max(br => br.Blob.LastWriteTimeUtc),
+            blobReferences);
 
         var snapshotReference = new SnapshotReference(
             _crypto.Value.Salt,
@@ -95,7 +96,7 @@ public sealed class SnapshotStore
             GetSnapshotReference(snapshotId));
     }
 
-    public bool CheckSnapshot(int snapshotId, Regex? regex)
+    public bool CheckSnapshot(int snapshotId, Regex? regex = null)
     {
         snapshotId = ResolveSnapshotId(snapshotId);
 
@@ -110,7 +111,7 @@ public sealed class SnapshotStore
     public void RestoreSnapshot(
         IBlobSystem blobSystem,
         int snapshotId,
-        Regex? regex)
+        Regex? regex = null)
     {
         snapshotId = ResolveSnapshotId(snapshotId);
 

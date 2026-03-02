@@ -10,7 +10,7 @@ public sealed record StoreCommand(
 {
     public int Run()
     {
-        _ = SnapshotStore.StoreSnapshot(BlobSystem, DateTime.UtcNow, Include);
+        _ = SnapshotStore.StoreSnapshot(BlobSystem, Include);
 
         return 0;
     }
