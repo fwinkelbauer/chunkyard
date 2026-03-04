@@ -44,17 +44,6 @@ public sealed class Crypto
 
     public int Iterations { get; }
 
-    public static void Deconstruct(
-        ReadOnlySpan<byte> cipher,
-        out ReadOnlySpan<byte> nonce,
-        out ReadOnlySpan<byte> innerCipher,
-        out ReadOnlySpan<byte> tag)
-    {
-        nonce = cipher[..NonceBytes];
-        innerCipher = cipher.Slice(nonce.Length, cipher.Length - CryptoBytes);
-        tag = cipher.Slice(cipher.Length - TagBytes, TagBytes);
-    }
-
     public byte[] Encrypt(ReadOnlySpan<byte> plain)
     {
         var cipher = new byte[plain.Length + CryptoBytes];
@@ -92,7 +81,9 @@ public sealed class Crypto
 
     public ReadOnlySpan<byte> Decrypt(ReadOnlySpan<byte> cipher, Span<byte> plain)
     {
-        Deconstruct(cipher, out var nonce, out var innerCipher, out var tag);
+        var nonce = cipher[..NonceBytes];
+        var innerCipher = cipher.Slice(nonce.Length, cipher.Length - CryptoBytes);
+        var tag = cipher.Slice(cipher.Length - TagBytes, TagBytes);
 
         using var aesGcm = new AesGcm(_key, TagBytes);
 

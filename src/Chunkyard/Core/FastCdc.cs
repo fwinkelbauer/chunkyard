@@ -8,8 +8,12 @@ namespace Chunkyard.Core;
 ///
 /// The FastCdc algorithm can be used to split data into chunks.
 /// </summary>
-public sealed class FastChunker
+public sealed class FastCdc
 {
+    private const int DefaultMin = 4 * 1024 * 1024;
+    private const int DefaultAvg = 8 * 1024 * 1024;
+    private const int DefaultMax = 16 * 1024 * 1024;
+
     private const int MinimumMin = 64;
     private const int MinimumMax = 64 * 1024 * 1024;
     private const int AverageMin = 256;
@@ -17,43 +21,42 @@ public sealed class FastChunker
     private const int MaximumMin = 1024;
     private const int MaximumMax = 1024 * 1024 * 1024;
 
-    private readonly int _minSize;
-    private readonly int _avgSize;
-    private readonly int _maxSize;
     private readonly uint _maskS;
     private readonly uint _maskL;
     private readonly uint[] _gearTable;
 
-    public FastChunker(
+    public FastCdc(
         int minSize,
         int avgSize,
         int maxSize,
         uint[] gearTable)
     {
-        _minSize = EnsureBetween(minSize, MinimumMin, MinimumMax);
-        _avgSize = EnsureBetween(avgSize, AverageMin, AverageMax);
-        _maxSize = EnsureBetween(maxSize, MaximumMin, MaximumMax);
+        MinSize = EnsureBetween(minSize, MinimumMin, MinimumMax);
+        AvgSize = EnsureBetween(avgSize, AverageMin, AverageMax);
+        MaxSize = EnsureBetween(maxSize, MaximumMin, MaximumMax);
 
-        if (_maxSize - _minSize <= _avgSize)
+        if (MaxSize - MinSize <= AvgSize)
         {
             throw new ArgumentException(
                 $"Invariant violation: {maxSize} - {minSize} > {avgSize}");
         }
 
-        var bits = BitOperations.Log2((uint)_avgSize);
+        var bits = BitOperations.Log2((uint)AvgSize);
         _maskS = Mask(bits + 1);
         _maskL = Mask(bits - 1);
         _gearTable = gearTable;
     }
 
-    public FastChunker(
-        int minSize,
-        int avgSize,
-        int maxSize,
-        Crypto crypto)
-        : this(minSize, avgSize, maxSize, GenerateGearTable(crypto))
+    public FastCdc(uint[] gearTable)
+        : this(DefaultMin, DefaultAvg, DefaultMax, gearTable)
     {
     }
+
+    public int MinSize { get; }
+
+    public int AvgSize { get; }
+
+    public int MaxSize { get; }
 
     public ReadOnlySpan<byte> Chunk(Stream stream, Span<byte> buffer)
     {
@@ -66,14 +69,14 @@ public sealed class FastChunker
 
     private int Cut(ReadOnlySpan<byte> buffer)
     {
-        if (buffer.Length <= _minSize)
+        if (buffer.Length <= MinSize)
         {
             return buffer.Length;
         }
 
-        var center = CenterSize(_avgSize, _minSize, buffer.Length);
+        var center = CenterSize(AvgSize, MinSize, buffer.Length);
         uint hash = 0;
-        var offset = _minSize;
+        var offset = MinSize;
 
         while (offset < center)
         {
@@ -100,32 +103,6 @@ public sealed class FastChunker
         }
 
         return buffer.Length;
-    }
-
-    // We encrypt an array of zeros using a given key to create reproducible
-    // "random" data. This means that the same cryptographic key will always
-    // produce the same output, while another key will produce a different
-    // output.
-    private static uint[] GenerateGearTable(Crypto crypto)
-    {
-        var input = new byte[1024];
-
-        Crypto.Deconstruct(
-            crypto.Encrypt(input),
-            out _,
-            out var random,
-            out _);
-
-        var gearTable = new uint[256];
-        var mask = Mask(31);
-
-        for (var i = 0; i < gearTable.Length; i++)
-        {
-            var slice = random.Slice(i * 4, 4);
-            gearTable[i] = BitConverter.ToUInt32(slice) & mask;
-        }
-
-        return gearTable;
     }
 
     private static int CenterSize(int average, int minimum, int sourceSize)
