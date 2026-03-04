@@ -9,17 +9,9 @@ public sealed class SnapshotStore
     public const int LatestSnapshotId = -1;
     public const int SecondLatestSnapshotId = -2;
 
-    private const int DefaultMin = 4 * 1024 * 1024;
-    private const int DefaultAvg = 8 * 1024 * 1024;
-    private const int DefaultMax = 16 * 1024 * 1024;
-
     private readonly IRepository _repository;
     private readonly IProbe _probe;
-    private readonly Lazy<Crypto> _crypto;
-    private readonly Lazy<FastChunker> _chunker;
-
-    private readonly byte[] _plainBuffer = new byte[DefaultMax];
-    private readonly byte[] _cipherBuffer = new byte[DefaultMax + Crypto.CryptoBytes];
+    private readonly Lazy<Chunker> _chunker;
 
     public SnapshotStore(
         IRepository repository,
@@ -29,17 +21,16 @@ public sealed class SnapshotStore
         _repository = repository;
         _probe = probe;
 
-        _crypto = new(() =>
+        _chunker = new Lazy<Chunker>(() =>
         {
             var snapshotReference = TryLastSnapshotId(_repository, out var snapshotId)
                 ? GetSnapshotReference(snapshotId)
                 : null;
 
-            return cryptoFactory.Create(snapshotReference);
-        });
+            var crypto = cryptoFactory.Create(snapshotReference);
 
-        _chunker = new Lazy<FastChunker>(() =>
-            new FastChunker(DefaultMin, DefaultAvg, DefaultMax, _crypto.Value));
+            return new Chunker(_repository.Chunks, crypto);
+        });
     }
 
     public int StoreSnapshot(
@@ -53,8 +44,8 @@ public sealed class SnapshotStore
             blobReferences);
 
         var snapshotReference = new SnapshotReference(
-            _crypto.Value.Salt,
-            _crypto.Value.Iterations,
+            _chunker.Value.Salt,
+            _chunker.Value.Iterations,
             StoreSnapshot(snapshot));
 
         var snapshotId = StoreSnapshotReference(snapshotReference);
@@ -85,7 +76,7 @@ public sealed class SnapshotStore
     {
         using var memoryStream = new MemoryStream();
 
-        RestoreChunks(snapshotReference.ChunkIds, memoryStream);
+        _chunker.Value.RestoreChunks(snapshotReference.ChunkIds, memoryStream);
 
         return Serializer.BytesToSnapshot(memoryStream.ToArray());
     }
@@ -203,7 +194,7 @@ public sealed class SnapshotStore
         using var memoryStream = new MemoryStream(
             Serializer.SnapshotToBytes(snapshot));
 
-        return StoreChunks(memoryStream);
+        return _chunker.Value.StoreChunks(memoryStream);
     }
 
     private int StoreSnapshotReference(SnapshotReference snapshotReference)
@@ -221,27 +212,11 @@ public sealed class SnapshotStore
 
     private bool CheckBlobReference(BlobReference blobReference)
     {
-        var blobValid = blobReference.ChunkIds.CheckAll(
-            chunkId => _repository.Chunks.Exists(chunkId)
-                && chunkId.Equals(ToChunkId(RetrieveChunk(chunkId))));
+        var blobValid = blobReference.ChunkIds.CheckAll(_chunker.Value.CheckChunk);
 
         _probe.BlobValid(blobReference.Blob, blobValid);
 
         return blobValid;
-    }
-
-    private ReadOnlySpan<byte> RetrieveChunk(string chunkId)
-    {
-        using var stream = _repository.Chunks.OpenRead(chunkId);
-        var totalBytesRead = 0;
-        var bytesRead = 0;
-
-        while ((bytesRead = stream.Read(_cipherBuffer)) > 0)
-        {
-            totalBytesRead += bytesRead;
-        }
-
-        return _cipherBuffer.AsSpan(0, totalBytesRead);
     }
 
     private BlobReference StoreBlob(IBlobSystem blobSystem, Blob blob)
@@ -250,28 +225,11 @@ public sealed class SnapshotStore
 
         var blobReference = new BlobReference(
             blob,
-            StoreChunks(stream));
+            _chunker.Value.StoreChunks(stream));
 
         _probe.StoredBlob(blobReference.Blob);
 
         return blobReference;
-    }
-
-    private string[] StoreChunks(Stream stream)
-    {
-        var chunkIds = new List<string>();
-        ReadOnlySpan<byte> chunk;
-
-        while ((chunk = _chunker.Value.Chunk(stream, _plainBuffer)).Length != 0)
-        {
-            var cipher = _crypto.Value.Encrypt(chunk, _cipherBuffer);
-            var chunkId = ToChunkId(cipher);
-
-            _repository.Chunks.Write(chunkId, cipher);
-            chunkIds.Add(chunkId);
-        }
-
-        return chunkIds.ToArray();
     }
 
     private void RestoreBlob(
@@ -280,39 +238,10 @@ public sealed class SnapshotStore
     {
         using (var stream = blobSystem.OpenWrite(blobReference.Blob))
         {
-            RestoreChunks(blobReference.ChunkIds, stream);
+            _chunker.Value.RestoreChunks(blobReference.ChunkIds, stream);
         }
 
         _probe.RestoredBlob(blobReference.Blob);
-    }
-
-    private void RestoreChunks(
-        IEnumerable<string> chunkIds,
-        Stream outputStream)
-    {
-        foreach (var chunkId in chunkIds)
-        {
-            try
-            {
-                var plain = _crypto.Value.Decrypt(
-                    RetrieveChunk(chunkId),
-                    _plainBuffer);
-
-                outputStream.Write(plain);
-            }
-            catch (CryptographicException e)
-            {
-                throw new ChunkyardException(
-                    $"Could not decrypt chunk: {chunkId}",
-                    e);
-            }
-            catch (Exception e)
-            {
-                throw new ChunkyardException(
-                    $"Could not restore chunk: {chunkId}",
-                    e);
-            }
-        }
     }
 
     private HashSet<string> ListChunkIds(IEnumerable<int> snapshotIds)
@@ -356,11 +285,5 @@ public sealed class SnapshotStore
             : 0;
 
         return any;
-    }
-
-    private static string ToChunkId(ReadOnlySpan<byte> chunk)
-    {
-        return Convert.ToHexString(SHA256.HashData(chunk))
-            .ToLowerInvariant();
     }
 }

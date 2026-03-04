@@ -1,7 +1,7 @@
 namespace Chunkyard.Tests.Core;
 
 [TestClass]
-public sealed class FastChunkerTests
+public sealed class FastCdcTests
 {
     private static readonly byte[] ExpectedBytes = File.ReadAllBytes(
         "Assets/SekienAkashita.jpg");
@@ -280,7 +280,7 @@ public sealed class FastChunkerTests
 
         using var stream = new MemoryStream(ExpectedBytes);
 
-        var chunker = new FastChunker(
+        var chunker = new FastCdc(
             minSize,
             avgSize,
             maxSize,
