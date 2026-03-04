@@ -8,7 +8,7 @@ public sealed class CryptoTests
     [DataRow("")]
     public void Encrypt_And_Decrypt_Return_Input(string input)
     {
-        var crypto = Some.Crypto();
+        using var crypto = Some.Crypto();
 
         var plain = Encoding.UTF8.GetBytes(input);
         var encrypted = crypto.Encrypt(plain);
@@ -21,8 +21,8 @@ public sealed class CryptoTests
     [TestMethod]
     public void Decrypt_Throws_Given_Wrong_Key()
     {
-        var someCrypto = Some.Crypto("some secret");
-        var otherCrypto = Some.Crypto("other secret");
+        using var someCrypto = Some.Crypto("some secret");
+        using var otherCrypto = Some.Crypto("other secret");
 
         var encrypted = someCrypto.Encrypt("Hello!"u8);
 
@@ -33,7 +33,8 @@ public sealed class CryptoTests
     [TestMethod]
     public void Encrypt_Derives_Same_Nonce_For_Same_Input()
     {
-        var crypto = Some.Crypto();
+        using var crypto = Some.Crypto();
+
         var plain = "Hello!"u8;
 
         CollectionAssert.AreEqual(
