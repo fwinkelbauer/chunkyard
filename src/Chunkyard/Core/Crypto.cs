@@ -3,7 +3,7 @@ namespace Chunkyard.Core;
 /// <summary>
 /// Contains methods to encrypt and decrypt data.
 /// </summary>
-public sealed class Crypto
+public sealed class Crypto : IDisposable
 {
     public const int CryptoBytes = NonceBytes + TagBytes;
 
@@ -13,8 +13,8 @@ public sealed class Crypto
     private const int TagBytes = 16;
     private const int KeyBytes = 32;
 
-    private readonly byte[] _key;
     private readonly byte[] _hashedKey;
+    private readonly AesGcm _aesGcm;
 
     public Crypto(string password, string salt, int iterations)
         : this(password, Convert.FromBase64String(salt), iterations)
@@ -33,8 +33,9 @@ public sealed class Crypto
             throw new ArgumentException("Password cannot be null or empty");
         }
 
-        _key = PasswordToKey(password, salt, iterations);
-        _hashedKey = SHA256.HashData(_key);
+        var key = PasswordToKey(password, salt, iterations);
+        _hashedKey = SHA256.HashData(key);
+        _aesGcm = new AesGcm(key, TagBytes);
 
         Salt = Convert.ToBase64String(salt);
         Iterations = iterations;
@@ -43,6 +44,11 @@ public sealed class Crypto
     public string Salt { get; }
 
     public int Iterations { get; }
+
+    public void Dispose()
+    {
+        _aesGcm.Dispose();
+    }
 
     public byte[] Encrypt(ReadOnlySpan<byte> plain)
     {
@@ -63,9 +69,7 @@ public sealed class Crypto
         var innerCipher = cipher.Slice(nonce.Length, plain.Length);
         var tag = cipher.Slice(nonce.Length + plain.Length, TagBytes);
 
-        using var aesGcm = new AesGcm(_key, TagBytes);
-
-        aesGcm.Encrypt(nonce, plain, innerCipher, tag);
+        _aesGcm.Encrypt(nonce, plain, innerCipher, tag);
 
         return cipher[..(plain.Length + CryptoBytes)];
     }
@@ -85,9 +89,7 @@ public sealed class Crypto
         var innerCipher = cipher.Slice(nonce.Length, cipher.Length - CryptoBytes);
         var tag = cipher.Slice(cipher.Length - TagBytes, TagBytes);
 
-        using var aesGcm = new AesGcm(_key, TagBytes);
-
-        aesGcm.Decrypt(nonce, innerCipher, tag, plain[..innerCipher.Length]);
+        _aesGcm.Decrypt(nonce, innerCipher, tag, plain[..innerCipher.Length]);
 
         return plain[..innerCipher.Length];
     }

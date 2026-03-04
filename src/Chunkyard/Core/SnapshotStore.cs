@@ -78,7 +78,8 @@ public sealed class SnapshotStore
 
         _chunker.Value.RestoreChunks(snapshotReference.ChunkIds, memoryStream);
 
-        return Serializer.BytesToSnapshot(memoryStream.ToArray());
+        return Serializer.BytesToSnapshot(
+            memoryStream.GetBuffer().AsSpan(0, (int)memoryStream.Length));
     }
 
     public Snapshot GetSnapshot(int snapshotId)

@@ -80,15 +80,10 @@ public sealed class Chunker
     private ReadOnlySpan<byte> RetrieveChunk(string chunkId)
     {
         using var stream = _repository.OpenRead(chunkId);
-        var totalBytesRead = 0;
-        var bytesRead = 0;
 
-        while ((bytesRead = stream.Read(_cipherBuffer)) > 0)
-        {
-            totalBytesRead += bytesRead;
-        }
+        var bytesRead = stream.Read(_cipherBuffer);
 
-        return _cipherBuffer.AsSpan(0, totalBytesRead);
+        return _cipherBuffer.AsSpan(0, bytesRead);
     }
 
     // We encrypt an array of zeros using a given key to create reproducible
