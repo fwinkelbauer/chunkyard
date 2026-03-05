@@ -53,14 +53,9 @@ chunkyard gc --repository 'MyBackup'
 
 * Development
 
-** Build
-
-- Install [[https://dotnet.microsoft.com/en-us/download][.NET]]
-- Run ~dotnet build src~ and ~dotnet test src~ to build and test Chunkyard
-
 ** Publish
 
-- Optional: Create an annotated tag to define a new version number
+- Create an annotated tag to define a version number
 - Run ~./publish~ to create Linux and Windows binaries in the ~artifacts~ directory
 
 ** Architecture
