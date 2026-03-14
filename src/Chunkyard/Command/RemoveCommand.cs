@@ -17,9 +17,9 @@ public sealed record RemoveCommand(
     public static RemoveCommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TrySnapshot(out var snapshot))
+            & consumer.TrySnapshot(out var snapshotId))
         {
-            return new RemoveCommand(snapshotStore, snapshot);
+            return new RemoveCommand(snapshotStore, snapshotId);
         }
         else
         {

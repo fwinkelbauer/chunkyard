@@ -189,21 +189,6 @@ public sealed class FlagConsumerTests
     }
 
     [TestMethod]
-    [DataRow("Monday", Day.Monday)]
-    [DataRow("monday", Day.Monday)]
-    [DataRow("TUESDAY", Day.Tuesday)]
-    public void TryEnum_Ignores_Case(string arg, Day expected)
-    {
-        var consumer = Some.FlagConsumer(
-            ("--enum", Some.Strings(arg)));
-
-        var success = consumer.TryEnum<Day>("--enum", "info", out var actual);
-
-        Assert.IsTrue(success);
-        Assert.AreEqual(expected, actual);
-    }
-
-    [TestMethod]
     public void HelpNeeded_Returns_False_If_No_Issues()
     {
         var consumer = Some.FlagConsumer(

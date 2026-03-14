@@ -24,10 +24,10 @@ public sealed record ShowCommand(
     public static ShowCommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TrySnapshot(out var snapshot)
+            & consumer.TrySnapshot(out var snapshotId)
             & consumer.TryInclude(out var include))
         {
-            return new ShowCommand(snapshotStore, snapshot, include);
+            return new ShowCommand(snapshotStore, snapshotId, include);
         }
         else
         {

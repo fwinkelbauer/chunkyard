@@ -20,10 +20,10 @@ public sealed record RestoreCommand(
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
             & consumer.TryBlobSystem("--directory", "The directory to restore into", out var blobSystem)
-            & consumer.TrySnapshot(out var snapshot)
+            & consumer.TrySnapshot(out var snapshotId)
             & consumer.TryInclude(out var include))
         {
-            return new RestoreCommand(snapshotStore, blobSystem, snapshot, include);
+            return new RestoreCommand(snapshotStore, blobSystem, snapshotId, include);
         }
         else
         {
