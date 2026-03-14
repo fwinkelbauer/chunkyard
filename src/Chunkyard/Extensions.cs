@@ -67,6 +67,39 @@ internal static class Extensions
 
     extension(FlagConsumer consumer)
     {
+        public bool TryInt(
+            string flag,
+            string info,
+            out int value,
+            int? defaultValue = null)
+        {
+            return consumer.TryValue(
+                flag,
+                info,
+                out value,
+                int.Parse,
+                i => i.ToString(),
+                defaultValue);
+        }
+
+        public bool TryEnum<T>(
+            string flag,
+            string info,
+            out T value,
+            T? defaultValue = null)
+            where T : struct
+        {
+            var names = string.Join(", ", Enum.GetNames(typeof(T)));
+
+            return consumer.TryValue<T>(
+                flag,
+                $"{info}: {names}",
+                out value,
+                s => Enum.Parse<T>(s, true),
+                e => Enum.GetName(typeof(T), e)!,
+                defaultValue);
+        }
+
         public bool TrySnapshotStore(out SnapshotStore snapshotStore)
         {
             var success = consumer.TryRepository("--repository", "The repository path", out var repository)

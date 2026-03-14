@@ -21,14 +21,14 @@ public sealed class FlagConsumer
     public bool TryStrings(
         string flag,
         string info,
-        out string[] list,
-        string[]? defaultList = null)
+        out string[] values,
+        string[]? defaultValues = null)
     {
-        if (defaultList != null)
+        if (defaultValues != null)
         {
-            var line = defaultList.Length == 0
+            var line = defaultValues.Length == 0
                 ? "<empty>"
-                : string.Join(", ", defaultList);
+                : string.Join(", ", defaultValues);
 
             info = $"{info}. Default: {line}";
         }
@@ -37,24 +37,24 @@ public sealed class FlagConsumer
 
         if (_availableFlags.Remove(flag, out var value))
         {
-            list = value.ToArray();
+            values = value.ToArray();
             _consumedFlags[flag] = value;
             return true;
         }
         else if (_consumedFlags.TryGetValue(flag, out var consumed))
         {
-            list = consumed.ToArray();
+            values = consumed.ToArray();
             return true;
         }
-        else if (defaultList != null)
+        else if (defaultValues != null)
         {
-            list = defaultList;
+            values = defaultValues;
             return true;
         }
         else
         {
             _help.AddError($"Missing mandatory flag: {flag}");
-            list = Array.Empty<string>();
+            values = Array.Empty<string>();
             return false;
         }
     }
@@ -69,8 +69,6 @@ public sealed class FlagConsumer
             ? null
             : new[] { defaultValue };
 
-        value = "";
-
         if (TryStrings(flag, info, out var list, defaultList))
         {
             if (list.Length > 0)
@@ -84,23 +82,65 @@ public sealed class FlagConsumer
             }
         }
 
+        value = "";
         return false;
     }
 
-    public bool TryInt(
+    public bool TryValues<T>(
         string flag,
         string info,
-        out int value,
-        int? defaultValue = null)
+        out T[] values,
+        Func<string, T> fromString,
+        Func<T, string> toString,
+        T[]? defaultValues = null)
     {
-        return TryStruct(
-            flag,
-            info,
-            out value,
-            s => int.TryParse(s, out _),
-            int.Parse,
-            i => i.ToString(),
-            defaultValue);
+        var defaultStrings = defaultValues?.Select(toString).ToArray();
+
+        try
+        {
+            if (TryStrings(flag, info, out var strings, defaultStrings))
+            {
+                values = strings.Select(fromString).ToArray();
+                return true;
+            }
+        }
+        catch (Exception)
+        {
+            _help.AddError($"Invalid value for flag: {flag}");
+        }
+
+        values = Array.Empty<T>();
+        return false;
+    }
+
+    public bool TryValue<T>(
+        string flag,
+        string info,
+        out T value,
+        Func<string, T> fromString,
+        Func<T, string> toString,
+        T? defaultValue = null)
+        where T : struct
+    {
+        var defaultString = defaultValue.HasValue
+            ? toString(defaultValue.Value)
+            : null;
+
+        try
+        {
+            if (TryString(flag, info, out var str, defaultString))
+            {
+                value = fromString(str);
+                return true;
+            }
+        }
+        catch (Exception)
+        {
+            _help.AddError($"Invalid value for flag: {flag}");
+        }
+
+        value = default;
+        return false;
     }
 
     public bool TryBool(string flag, string info, out bool value)
@@ -125,34 +165,14 @@ public sealed class FlagConsumer
         }
         else
         {
-            return TryStruct(
+            return TryValue(
                 flag,
                 info,
                 out value,
-                s => bool.TryParse(s, out _),
                 bool.Parse,
                 b => b.ToString(),
                 false);
         }
-    }
-
-    public bool TryEnum<T>(
-        string flag,
-        string info,
-        out T value,
-        T? defaultValue = null)
-        where T : struct
-    {
-        var names = string.Join(", ", Enum.GetNames(typeof(T)));
-
-        return TryStruct(
-            flag,
-            $"{info}: {names}",
-            out value,
-            s => Enum.TryParse<T>(s, true, out _),
-            s => Enum.Parse<T>(s, true),
-            e => Enum.GetName(typeof(T), e)!,
-            defaultValue);
     }
 
     public bool HelpNeeded(out HelpCommand help)
@@ -173,37 +193,5 @@ public sealed class FlagConsumer
         help = _help.Build();
 
         return helpRequested || help.Errors.Count > 0;
-    }
-
-    private bool TryStruct<T>(
-        string flag,
-        string info,
-        out T value,
-        Func<string, bool> check,
-        Func<string, T> convertFrom,
-        Func<T, string> convertTo,
-        T? defaultValue = null)
-        where T : struct
-    {
-        var defaultStringValue = defaultValue == null
-            ? null
-            : convertTo(defaultValue.Value);
-
-        value = default;
-
-        if (TryString(flag, info, out var stringValue, defaultStringValue))
-        {
-            if (check(stringValue))
-            {
-                value = convertFrom(stringValue);
-                return true;
-            }
-            else
-            {
-                _help.AddError($"Invalid value for flag: {flag}");
-            }
-        }
-
-        return false;
     }
 }

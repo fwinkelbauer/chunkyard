@@ -23,7 +23,7 @@ public sealed class SnapshotStore
 
         _chunker = new Lazy<Chunker>(() =>
         {
-            var snapshotReference = TryLastSnapshotId(_repository, out var snapshotId)
+            var snapshotReference = TryLastSnapshotId(out var snapshotId)
                 ? GetSnapshotReference(snapshotId)
                 : null;
 
@@ -176,7 +176,7 @@ public sealed class SnapshotStore
         IBlobSystem blobSystem,
         Regex? regex)
     {
-        var existingBlobReferences = TryLastSnapshotId(_repository, out var snapshotId)
+        var existingBlobReferences = TryLastSnapshotId(out var snapshotId)
             ? GetSnapshot(snapshotId).BlobReferences.ToDictionary(br => br.Blob, br => br)
             : new Dictionary<Blob, BlobReference>();
 
@@ -200,7 +200,7 @@ public sealed class SnapshotStore
 
     private int StoreSnapshotReference(SnapshotReference snapshotReference)
     {
-        var nextId = TryLastSnapshotId(_repository, out var snapshotId)
+        var nextId = TryLastSnapshotId(out var snapshotId)
             ? snapshotId + 1
             : 0;
 
@@ -276,9 +276,9 @@ public sealed class SnapshotStore
         return snapshotIds[position];
     }
 
-    private static bool TryLastSnapshotId(IRepository repository, out int key)
+    private bool TryLastSnapshotId(out int key)
     {
-        var keys = repository.Snapshots.UnorderedList();
+        var keys = _repository.Snapshots.UnorderedList();
         var any = keys.Length > 0;
 
         key = any
