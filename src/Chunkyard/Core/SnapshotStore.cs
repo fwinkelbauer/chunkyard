@@ -6,9 +6,6 @@ namespace Chunkyard.Core;
 /// </summary>
 public sealed class SnapshotStore
 {
-    public const int LatestSnapshotId = -1;
-    public const int SecondLatestSnapshotId = -2;
-
     private readonly IRepository _repository;
     private readonly IProbe _probe;
     private readonly Lazy<Chunker> _chunker;
@@ -57,7 +54,6 @@ public sealed class SnapshotStore
 
     public SnapshotReference GetSnapshotReference(int snapshotId)
     {
-        snapshotId = ResolveSnapshotId(snapshotId);
         var bytes = _repository.Snapshots.Retrieve(snapshotId);
 
         try
@@ -90,8 +86,6 @@ public sealed class SnapshotStore
 
     public bool CheckSnapshot(int snapshotId, Regex? regex = null)
     {
-        snapshotId = ResolveSnapshotId(snapshotId);
-
         var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(regex)
             .CheckAll(CheckBlobReference);
 
@@ -105,8 +99,6 @@ public sealed class SnapshotStore
         int snapshotId,
         Regex? regex = null)
     {
-        snapshotId = ResolveSnapshotId(snapshotId);
-
         var blobReferencesToRestore = GetSnapshot(snapshotId)
             .ListBlobReferences(regex)
             .Where(br => !br.Blob.Equals(blobSystem.GetBlob(br.Blob.Name)));
@@ -143,8 +135,6 @@ public sealed class SnapshotStore
 
     public void RemoveSnapshot(int snapshotId)
     {
-        snapshotId = ResolveSnapshotId(snapshotId);
-
         _repository.Snapshots.Remove(snapshotId);
         _probe.RemovedSnapshot(snapshotId);
     }
@@ -261,19 +251,6 @@ public sealed class SnapshotStore
         }
 
         return chunkIds;
-    }
-
-    private int ResolveSnapshotId(int snapshotId)
-    {
-        if (snapshotId >= 0)
-        {
-            return snapshotId;
-        }
-
-        var snapshotIds = ListSnapshotIds();
-        var position = snapshotIds.Length + snapshotId;
-
-        return snapshotIds[position];
     }
 
     private bool TryLastSnapshotId(out int key)

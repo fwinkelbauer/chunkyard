@@ -44,8 +44,8 @@ public sealed record DiffCommand(
     public static DiffCommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TryInt("--first", "The first snapshot ID", out var firstSnapshotId, SnapshotStore.SecondLatestSnapshotId)
-            & consumer.TryInt("--second", "The second snapshot ID", out var secondSnapshotId, SnapshotStore.LatestSnapshotId)
+            & consumer.TryInt("--first", "The first snapshot ID", out var firstSnapshotId)
+            & consumer.TryInt("--second", "The second snapshot ID", out var secondSnapshotId)
             & consumer.TryInclude(out var include))
         {
             return new DiffCommand(snapshotStore, firstSnapshotId, secondSnapshotId, include);

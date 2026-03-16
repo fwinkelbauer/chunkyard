@@ -41,39 +41,6 @@ public sealed class SnapshotStoreTests
     }
 
     [TestMethod]
-    public void GetSnapshot_Accepts_Negative_SnapshotIds_With_Gaps()
-    {
-        var snapshotStore = Some.SnapshotStore();
-        var blobSystem = Some.BlobSystem(Some.Blobs());
-
-        var snapshotId1 = snapshotStore.StoreSnapshot(blobSystem);
-        var snapshotId2 = snapshotStore.StoreSnapshot(blobSystem);
-        var snapshotId3 = snapshotStore.StoreSnapshot(blobSystem);
-        snapshotStore.RemoveSnapshot(snapshotId2);
-
-        Assert.AreEqual(
-            snapshotStore.GetSnapshot(snapshotId1),
-            snapshotStore.GetSnapshot(SnapshotStore.SecondLatestSnapshotId));
-
-        Assert.AreEqual(
-            snapshotStore.GetSnapshot(snapshotId3),
-            snapshotStore.GetSnapshot(SnapshotStore.LatestSnapshotId));
-    }
-
-    [TestMethod]
-    public void GetSnapshot_Throws_When_Accessing_Out_Of_Bounds_Negative_SnapshotId()
-    {
-        var snapshotStore = Some.SnapshotStore();
-        var blobSystem = Some.BlobSystem(Some.Blobs());
-
-        _ = snapshotStore.StoreSnapshot(blobSystem);
-
-        _ = Assert.Throws<IndexOutOfRangeException>(
-            () => snapshotStore.GetSnapshot(
-                SnapshotStore.SecondLatestSnapshotId));
-    }
-
-    [TestMethod]
     public void CheckSnapshot_Detects_Valid_Snapshot()
     {
         var snapshotStore = Some.SnapshotStore();
@@ -216,16 +183,13 @@ public sealed class SnapshotStoreTests
     }
 
     [TestMethod]
-    public void RemoveSnapshot_Removes_Existing_Snapshots()
+    public void RemoveSnapshot_Removes_Snapshot()
     {
         var snapshotStore = Some.SnapshotStore();
         var blobSystem = Some.BlobSystem(Some.Blobs());
 
-        var snapshotId = snapshotStore.StoreSnapshot(blobSystem);
-        _ = snapshotStore.StoreSnapshot(blobSystem);
-
-        snapshotStore.RemoveSnapshot(snapshotId);
-        snapshotStore.RemoveSnapshot(SnapshotStore.LatestSnapshotId);
+        snapshotStore.RemoveSnapshot(
+            snapshotStore.StoreSnapshot(blobSystem));
 
         Assert.IsEmpty(snapshotStore.ListSnapshotIds());
     }

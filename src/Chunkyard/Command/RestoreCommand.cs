@@ -11,7 +11,11 @@ public sealed record RestoreCommand(
 {
     public int Run()
     {
-        SnapshotStore.RestoreSnapshot(BlobSystem, SnapshotId, Include);
+        var snapshotId = SnapshotId >= 0
+            ? SnapshotId
+            : SnapshotStore.ListSnapshotIds()[^1];
+
+        SnapshotStore.RestoreSnapshot(BlobSystem, snapshotId, Include);
 
         return 0;
     }
