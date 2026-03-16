@@ -141,7 +141,18 @@ internal static class Extensions
                 "--snapshot",
                 "The snapshot ID",
                 out snapshot,
-                SnapshotStore.LatestSnapshotId);
+                -1);
+        }
+
+        public bool TrySnapshots(out int[] snapshotIds)
+        {
+            return consumer.TryValues(
+                "--snapshot",
+                "The snapshot IDs",
+                out snapshotIds,
+                int.Parse,
+                i => i.ToString(),
+                Array.Empty<int>());
         }
 
         public bool TryInclude(out Regex include)

@@ -10,7 +10,11 @@ public sealed record CheckCommand(
 {
     public int Run()
     {
-        if (!SnapshotStore.CheckSnapshot(SnapshotId, Include))
+        var snapshotId = SnapshotId >= 0
+            ? SnapshotId
+            : SnapshotStore.ListSnapshotIds()[^1];
+
+        if (!SnapshotStore.CheckSnapshot(snapshotId, Include))
         {
             throw new ChunkyardException(
                 "Snapshot contains invalid or missing chunks");

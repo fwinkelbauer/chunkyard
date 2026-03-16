@@ -10,7 +10,11 @@ public sealed record ShowCommand(
 {
     public int Run()
     {
-        var blobs = SnapshotStore.GetSnapshot(SnapshotId)
+        var snapshotId = SnapshotId >= 0
+            ? SnapshotId
+            : SnapshotStore.ListSnapshotIds()[^1];
+
+        var blobs = SnapshotStore.GetSnapshot(snapshotId)
             .ListBlobs(Include);
 
         foreach (var blob in blobs)

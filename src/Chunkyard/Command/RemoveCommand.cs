@@ -1,15 +1,20 @@
 namespace Chunkyard.Command;
 
 /// <summary>
-/// An <see cref="ICommand"/> that removes a snapshot.
+/// An <see cref="ICommand"/> that removes snapshots.
 /// </summary>
 public sealed record RemoveCommand(
     SnapshotStore SnapshotStore,
-    int SnapshotId) : ICommand
+    IReadOnlyCollection<int> SnapshotIds) : ICommand
 {
     public int Run()
     {
-        SnapshotStore.RemoveSnapshot(SnapshotId);
+        foreach (var snapshotId in SnapshotIds)
+        {
+            SnapshotStore.RemoveSnapshot(snapshotId);
+        }
+
+        SnapshotStore.GarbageCollect();
 
         return 0;
     }
@@ -17,9 +22,9 @@ public sealed record RemoveCommand(
     public static RemoveCommand? Parse(FlagConsumer consumer)
     {
         if (consumer.TrySnapshotStore(out var snapshotStore)
-            & consumer.TrySnapshot(out var snapshotId))
+            & consumer.TrySnapshots(out var snapshotIds))
         {
-            return new RemoveCommand(snapshotStore, snapshotId);
+            return new RemoveCommand(snapshotStore, snapshotIds);
         }
         else
         {

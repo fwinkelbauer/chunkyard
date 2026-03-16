@@ -11,9 +11,8 @@ public static class Program
             .With("check", "Check if a snapshot is valid", CheckCommand.Parse)
             .With("copy", "Copy snapshots from one repository to another", CopyCommand.Parse)
             .With("diff", "Show the difference between two snapshots", DiffCommand.Parse)
-            .With("gc", "Remove unreferenced chunks", GarbageCollectCommand.Parse)
             .With("list", "List all snapshots", ListCommand.Parse)
-            .With("remove", "Remove a snapshot", RemoveCommand.Parse)
+            .With("remove", "Removes snapshots", RemoveCommand.Parse)
             .With("restore", "Restore a snapshot", RestoreCommand.Parse)
             .With("show", "Show the content of a snapshot", ShowCommand.Parse)
             .With("store", "Store a new snapshot", StoreCommand.Parse);
