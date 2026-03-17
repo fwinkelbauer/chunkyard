@@ -34,18 +34,28 @@ public sealed class SnapshotStore
         IBlobSystem blobSystem,
         Regex? regex = null)
     {
-        var blobReferences = StoreBlobs(blobSystem, regex);
+        var snapshotId = 0;
+        var previousBlobReferences = new Dictionary<Blob, BlobReference>();
+
+        if (TryLastSnapshotId(out var previousSnapshotId))
+        {
+            snapshotId = previousSnapshotId + 1;
+
+            previousBlobReferences = GetSnapshot(previousSnapshotId).BlobReferences
+                .ToDictionary(br => br.Blob, br => br);
+        }
+
+        var blobReferences = StoreBlobs(previousBlobReferences, blobSystem, regex);
 
         var snapshot = new Snapshot(
             blobReferences.Max(br => br.Blob.LastWriteTimeUtc),
             blobReferences);
 
-        var snapshotReference = new SnapshotReference(
-            _chunker.Value.Salt,
-            _chunker.Value.Iterations,
-            StoreSnapshot(snapshot));
+        var snapshotReference = StoreSnapshot(snapshot);
 
-        var snapshotId = StoreSnapshotReference(snapshotReference);
+        _repository.Snapshots.Write(
+            snapshotId,
+            Serializer.SnapshotReferenceToBytes(snapshotReference));
 
         _probe.StoredSnapshot(snapshotId);
 
@@ -70,12 +80,8 @@ public sealed class SnapshotStore
 
     public Snapshot GetSnapshot(SnapshotReference snapshotReference)
     {
-        using var memoryStream = new MemoryStream();
-
-        _chunker.Value.RestoreChunks(snapshotReference.ChunkIds, memoryStream);
-
         return Serializer.BytesToSnapshot(
-            memoryStream.GetBuffer().AsSpan(0, (int)memoryStream.Length));
+            _chunker.Value.RestoreChunks(snapshotReference.ChunkIds));
     }
 
     public Snapshot GetSnapshot(int snapshotId)
@@ -163,42 +169,27 @@ public sealed class SnapshotStore
     }
 
     private BlobReference[] StoreBlobs(
+        Dictionary<Blob, BlobReference> previousBlobReferences,
         IBlobSystem blobSystem,
         Regex? regex)
     {
-        var existingBlobReferences = TryLastSnapshotId(out var snapshotId)
-            ? GetSnapshot(snapshotId).BlobReferences.ToDictionary(br => br.Blob, br => br)
-            : new Dictionary<Blob, BlobReference>();
-
         var blobs = blobSystem.ListBlobs(regex);
 
         return blobs
-            .Select(b => existingBlobReferences.TryGetValue(b, out var br)
+            .Select(b => previousBlobReferences.TryGetValue(b, out var br)
                 ? br
                 : StoreBlob(blobSystem, b))
             .OrderBy(br => br.Blob.Name)
             .ToArray();
     }
 
-    private string[] StoreSnapshot(Snapshot snapshot)
+    private SnapshotReference StoreSnapshot(Snapshot snapshot)
     {
-        using var memoryStream = new MemoryStream(
-            Serializer.SnapshotToBytes(snapshot));
-
-        return _chunker.Value.StoreChunks(memoryStream);
-    }
-
-    private int StoreSnapshotReference(SnapshotReference snapshotReference)
-    {
-        var nextId = TryLastSnapshotId(out var snapshotId)
-            ? snapshotId + 1
-            : 0;
-
-        _repository.Snapshots.Write(
-            nextId,
-            Serializer.SnapshotReferenceToBytes(snapshotReference));
-
-        return nextId;
+        return new SnapshotReference(
+            _chunker.Value.Salt,
+            _chunker.Value.Iterations,
+            _chunker.Value.StoreChunks(
+                Serializer.SnapshotToBytes(snapshot)));
     }
 
     private bool CheckBlobReference(BlobReference blobReference)

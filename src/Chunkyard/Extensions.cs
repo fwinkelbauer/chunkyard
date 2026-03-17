@@ -25,6 +25,25 @@ internal static class Extensions
         }
     }
 
+    extension(Chunker chunker)
+    {
+        public string[] StoreChunks(byte[] bytes)
+        {
+            using var memoryStream = new MemoryStream(bytes);
+
+            return chunker.StoreChunks(memoryStream);
+        }
+
+        public byte[] RestoreChunks(IEnumerable<string> chunkIds)
+        {
+            using var memoryStream = new MemoryStream();
+
+            chunker.RestoreChunks(chunkIds, memoryStream);
+
+            return memoryStream.ToArray();
+        }
+    }
+
     extension<T>(IRepository<T> repository)
     {
         public byte[] Retrieve(T key)
