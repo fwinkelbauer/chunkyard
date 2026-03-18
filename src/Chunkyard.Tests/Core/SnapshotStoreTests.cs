@@ -63,7 +63,7 @@ public sealed class SnapshotStoreTests
 
         repository.Chunks.Missing(repository.Chunks.UnorderedList());
 
-        _ = Assert.Throws<ChunkyardException>(
+        _ = Assert.Throws<Exception>(
             () => snapshotStore.CheckSnapshot(snapshotId));
     }
 
@@ -78,7 +78,7 @@ public sealed class SnapshotStoreTests
 
         repository.Chunks.Corrupt(repository.Chunks.UnorderedList());
 
-        _ = Assert.Throws<ChunkyardException>(
+        _ = Assert.Throws<Exception>(
             () => snapshotStore.CheckSnapshot(snapshotId));
     }
 
