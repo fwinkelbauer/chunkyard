@@ -54,26 +54,9 @@ public sealed class Chunker
     {
         foreach (var chunkId in chunkIds)
         {
-            try
-            {
-                var plain = _crypto.Decrypt(
-                    RetrieveChunk(chunkId),
-                    _plainBuffer);
+            var plain = _crypto.Decrypt(RetrieveChunk(chunkId), _plainBuffer);
 
-                outputStream.Write(plain);
-            }
-            catch (CryptographicException e)
-            {
-                throw new ChunkyardException(
-                    $"Could not decrypt chunk: {chunkId}",
-                    e);
-            }
-            catch (Exception e)
-            {
-                throw new ChunkyardException(
-                    $"Could not read chunk: {chunkId}",
-                    e);
-            }
+            outputStream.Write(plain);
         }
     }
 

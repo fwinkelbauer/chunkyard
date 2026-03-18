@@ -41,11 +41,15 @@ public sealed class SnapshotStore
         {
             snapshotId = previousSnapshotId + 1;
 
-            previousBlobReferences = GetSnapshot(previousSnapshotId).BlobReferences
+            previousBlobReferences = GetSnapshot(previousSnapshotId)
+                .BlobReferences
                 .ToDictionary(br => br.Blob, br => br);
         }
 
-        var blobReferences = StoreBlobs(previousBlobReferences, blobSystem, regex);
+        var blobReferences = StoreBlobs(
+            previousBlobReferences,
+            blobSystem,
+            regex);
 
         var snapshot = new Snapshot(
             blobReferences.Max(br => br.Blob.LastWriteTimeUtc),
@@ -66,16 +70,7 @@ public sealed class SnapshotStore
     {
         var bytes = _repository.Snapshots.Retrieve(snapshotId);
 
-        try
-        {
-            return Serializer.BytesToSnapshotReference(bytes);
-        }
-        catch (Exception e)
-        {
-            throw new ChunkyardException(
-                $"Could not retrieve snapshot: #{snapshotId}",
-                e);
-        }
+        return Serializer.BytesToSnapshotReference(bytes);
     }
 
     public Snapshot GetSnapshot(SnapshotReference snapshotReference)
@@ -194,7 +189,8 @@ public sealed class SnapshotStore
 
     private bool CheckBlobReference(BlobReference blobReference)
     {
-        var blobValid = blobReference.ChunkIds.CheckAll(_chunker.Value.CheckChunk);
+        var blobValid = blobReference.ChunkIds.CheckAll(
+            _chunker.Value.CheckChunk);
 
         _probe.BlobValid(blobReference.Blob, blobValid);
 
