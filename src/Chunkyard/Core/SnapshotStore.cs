@@ -140,29 +140,6 @@ public sealed class SnapshotStore
         _probe.RemovedSnapshot(snapshotId);
     }
 
-    public void CopyTo(IRepository otherRepository)
-    {
-        var chunkIds = _repository.Chunks.UnorderedList()
-            .Except(otherRepository.Chunks.UnorderedList());
-
-        foreach (var chunkId in chunkIds)
-        {
-            otherRepository.Chunks.Write(
-                chunkId,
-                _repository.Chunks.Retrieve(chunkId));
-        }
-
-        var snapshotIds = _repository.Snapshots.UnorderedList()
-            .Except(otherRepository.Snapshots.UnorderedList());
-
-        foreach (var snapshotId in snapshotIds)
-        {
-            otherRepository.Snapshots.Write(
-                snapshotId,
-                _repository.Snapshots.Retrieve(snapshotId));
-        }
-    }
-
     private BlobReference[] StoreBlobs(
         Dictionary<Blob, BlobReference> previousBlobReferences,
         IBlobSystem blobSystem,

@@ -9,7 +9,7 @@ public static class Program
     {
         var parser = new CommandParser()
             .With("check", "Check if a snapshot is valid", CheckCommand.Parse)
-            .With("copy", "Copy snapshots from one repository to another", CopyCommand.Parse)
+            .With("sync", "Synchronizes repositories", SyncCommand.Parse)
             .With("diff", "Show the difference between two snapshots", DiffCommand.Parse)
             .With("list", "List all snapshots", ListCommand.Parse)
             .With("remove", "Removes snapshots", RemoveCommand.Parse)

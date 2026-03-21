@@ -55,6 +55,22 @@ internal static class Extensions
 
             return memoryStream.ToArray();
         }
+
+        public void Sync(IRepository<T> otherRepository)
+        {
+            var list = repository.UnorderedList();
+            var otherList = otherRepository.UnorderedList();
+
+            foreach (var item in list.Except(otherList))
+            {
+                otherRepository.Write(item, repository.Retrieve(item));
+            }
+
+            foreach (var item in otherList.Except(list))
+            {
+                repository.Write(item, otherRepository.Retrieve(item));
+            }
+        }
     }
 
     extension(IBlobSystem blobSystem)
