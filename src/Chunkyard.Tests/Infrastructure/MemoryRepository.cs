@@ -31,11 +31,6 @@ internal sealed class MemoryRepository<T> : IRepository<T>
 
     public void Write(T key, ReadOnlySpan<byte> value)
     {
-        if (_valuesPerKey.ContainsKey(key))
-        {
-            return;
-        }
-
         _valuesPerKey.Add(key, value.ToArray());
     }
 

@@ -35,7 +35,11 @@ public sealed class Chunker
             var cipher = _crypto.Encrypt(chunk, _cipherBuffer);
             var chunkId = ToChunkId(cipher);
 
-            _repository.Write(chunkId, cipher);
+            if (!_repository.Exists(chunkId))
+            {
+                _repository.Write(chunkId, cipher);
+            }
+
             chunkIds.Add(chunkId);
         }
 
