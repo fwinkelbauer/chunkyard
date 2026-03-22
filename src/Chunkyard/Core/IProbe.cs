@@ -10,13 +10,5 @@ public interface IProbe
 
     void RestoredBlob(Blob blob);
 
-    void BlobValid(Blob blob, bool valid);
-
-    void StoredSnapshot(int snapshotId);
-
-    void RestoredSnapshot(int snapshotId);
-
-    void SnapshotValid(int snapshotId, bool valid);
-
-    void RemovedSnapshot(int snapshotId);
+    void ValidatedBlob(Blob blob, bool valid);
 }

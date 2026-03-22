@@ -10,7 +10,8 @@ public sealed record StoreCommand(
 {
     public int Run()
     {
-        _ = SnapshotStore.StoreSnapshot(BlobSystem, Include);
+        var snapshotId = SnapshotStore.StoreSnapshot(BlobSystem, Include);
+        Console.Error.WriteLine($"Stored snapshot: #{snapshotId}");
 
         return 0;
     }
