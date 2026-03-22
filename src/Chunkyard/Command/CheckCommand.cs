@@ -14,15 +14,20 @@ public sealed record CheckCommand(
             ? SnapshotId
             : SnapshotStore.ListSnapshotIds()[^1];
 
-        if (!SnapshotStore.CheckSnapshot(snapshotId, Include))
+        if (SnapshotStore.CheckSnapshot(snapshotId, Include))
         {
             Console.Error.WriteLine(
-                "Snapshot contains invalid or missing chunks");
+                $"Validated snapshot: #{snapshotId}");
+
+            return 0;
+        }
+        else
+        {
+            Console.Error.WriteLine(
+                $"Snapshot #{snapshotId} contains invalid or missing chunks");
 
             return 1;
         }
-
-        return 0;
     }
 
     public static CheckCommand? Parse(FlagConsumer consumer)

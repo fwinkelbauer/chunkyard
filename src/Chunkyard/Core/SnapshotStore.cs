@@ -61,8 +61,6 @@ public sealed class SnapshotStore
             snapshotId,
             Serializer.SnapshotReferenceToBytes(snapshotReference));
 
-        _probe.StoredSnapshot(snapshotId);
-
         return snapshotId;
     }
 
@@ -90,8 +88,6 @@ public sealed class SnapshotStore
         var snapshotValid = GetSnapshot(snapshotId).ListBlobReferences(regex)
             .CheckAll(CheckBlobReference);
 
-        _probe.SnapshotValid(snapshotId, snapshotValid);
-
         return snapshotValid;
     }
 
@@ -108,8 +104,6 @@ public sealed class SnapshotStore
         {
             RestoreBlob(blobSystem, blobReference);
         }
-
-        _probe.RestoredSnapshot(snapshotId);
     }
 
     public int[] ListSnapshotIds()
@@ -137,7 +131,6 @@ public sealed class SnapshotStore
     public void RemoveSnapshot(int snapshotId)
     {
         _repository.Snapshots.Remove(snapshotId);
-        _probe.RemovedSnapshot(snapshotId);
     }
 
     private BlobReference[] StoreBlobs(
@@ -169,7 +162,7 @@ public sealed class SnapshotStore
         var blobValid = blobReference.ChunkIds.CheckAll(
             _chunker.Value.CheckChunk);
 
-        _probe.BlobValid(blobReference.Blob, blobValid);
+        _probe.ValidatedBlob(blobReference.Blob, blobValid);
 
         return blobValid;
     }

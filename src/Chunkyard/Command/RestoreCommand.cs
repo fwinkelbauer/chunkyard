@@ -16,6 +16,7 @@ public sealed record RestoreCommand(
             : SnapshotStore.ListSnapshotIds()[^1];
 
         SnapshotStore.RestoreSnapshot(BlobSystem, snapshotId, Include);
+        Console.Error.WriteLine($"Restored snapshot: #{snapshotId}");
 
         return 0;
     }

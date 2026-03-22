@@ -15,32 +15,10 @@ internal sealed class ConsoleProbe : IProbe
         Console.Error.WriteLine($"Restored blob: {blob.Name}");
     }
 
-    public void BlobValid(Blob blob, bool valid)
+    public void ValidatedBlob(Blob blob, bool valid)
     {
         Console.Error.WriteLine(valid
-            ? $"Valid blob: {blob.Name}"
-            : $"Invalid blob: {blob.Name}");
-    }
-
-    public void StoredSnapshot(int snapshotId)
-    {
-        Console.Error.WriteLine($"Stored snapshot: {snapshotId}");
-    }
-
-    public void RestoredSnapshot(int snapshotId)
-    {
-        Console.Error.WriteLine($"Restored snapshot: {snapshotId}");
-    }
-
-    public void SnapshotValid(int snapshotId, bool valid)
-    {
-        Console.Error.WriteLine(valid
-            ? $"Valid snapshot: {snapshotId}"
-            : $"Invalid snapshot: {snapshotId}");
-    }
-
-    public void RemovedSnapshot(int snapshotId)
-    {
-        Console.Error.WriteLine($"Removed snapshot: {snapshotId}");
+            ? $"Valid: {blob.Name}"
+            : $"Invalid: {blob.Name}");
     }
 }

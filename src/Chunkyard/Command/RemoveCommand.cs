@@ -12,6 +12,7 @@ public sealed record RemoveCommand(
         foreach (var snapshotId in SnapshotIds)
         {
             SnapshotStore.RemoveSnapshot(snapshotId);
+            Console.Error.WriteLine($"Removed snapshot: #{snapshotId}");
         }
 
         SnapshotStore.GarbageCollect();
