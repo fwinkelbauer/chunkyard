@@ -7,7 +7,7 @@ public sealed class Crypto : IDisposable
 {
     public const int CryptoBytes = NonceBytes + TagBytes;
 
-    private const int DefaultIterations = 100_000;
+    private const int DefaultIterations = 1_000_000;
     private const int SaltBytes = 12;
     private const int NonceBytes = 12;
     private const int TagBytes = 16;
