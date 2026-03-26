@@ -46,35 +46,19 @@ public sealed class SnapshotStore
                 .ToDictionary(br => br.Blob, br => br);
         }
 
-        var blobReferences = StoreBlobs(
-            previousBlobReferences,
-            blobSystem,
-            regex);
+        var blobReferences = blobSystem.ListBlobs(regex)
+            .Select(b => previousBlobReferences.TryGetValue(b, out var br)
+                ? br
+                : StoreBlob(blobSystem, b))
+            .ToArray();
 
         var snapshot = new Snapshot(
             blobReferences.Max(br => br.Blob.LastWriteTimeUtc),
             blobReferences);
 
-        var snapshotReference = StoreSnapshot(snapshot);
-
-        _repository.Snapshots.Write(
-            snapshotId,
-            Serializer.SnapshotReferenceToBytes(snapshotReference));
+        StoreSnapshotReference(snapshotId, snapshot);
 
         return snapshotId;
-    }
-
-    public SnapshotReference GetSnapshotReference(int snapshotId)
-    {
-        var bytes = _repository.Snapshots.Retrieve(snapshotId);
-
-        return Serializer.BytesToSnapshotReference(bytes);
-    }
-
-    public Snapshot GetSnapshot(SnapshotReference snapshotReference)
-    {
-        return Serializer.BytesToSnapshot(
-            _chunker.Value.RestoreChunks(snapshotReference.ChunkIds));
     }
 
     public Snapshot GetSnapshot(int snapshotId)
@@ -117,7 +101,7 @@ public sealed class SnapshotStore
 
     public void GarbageCollect()
     {
-        var usedChunkIds = ListChunkIds(_repository.Snapshots.UnorderedList());
+        var usedChunkIds = ListUsedChunkIds();
 
         foreach (var chunkId in _repository.Chunks.UnorderedList())
         {
@@ -133,38 +117,29 @@ public sealed class SnapshotStore
         _repository.Snapshots.Remove(snapshotId);
     }
 
-    private BlobReference[] StoreBlobs(
-        Dictionary<Blob, BlobReference> previousBlobReferences,
-        IBlobSystem blobSystem,
-        Regex? regex)
+    private void StoreSnapshotReference(int snapshotId, Snapshot snapshot)
     {
-        var blobs = blobSystem.ListBlobs(regex);
-
-        return blobs
-            .Select(b => previousBlobReferences.TryGetValue(b, out var br)
-                ? br
-                : StoreBlob(blobSystem, b))
-            .OrderBy(br => br.Blob.Name)
-            .ToArray();
-    }
-
-    private SnapshotReference StoreSnapshot(Snapshot snapshot)
-    {
-        return new SnapshotReference(
+        var snapshotReference = new SnapshotReference(
             _chunker.Value.Salt,
             _chunker.Value.Iterations,
             _chunker.Value.StoreChunks(
                 Serializer.SnapshotToBytes(snapshot)));
+
+        _repository.Snapshots.Write(
+            snapshotId,
+            Serializer.SnapshotReferenceToBytes(snapshotReference));
     }
 
-    private bool CheckBlobReference(BlobReference blobReference)
+    private SnapshotReference GetSnapshotReference(int snapshotId)
     {
-        var blobValid = blobReference.ChunkIds.CheckAll(
-            _chunker.Value.CheckChunk);
+        return Serializer.BytesToSnapshotReference(
+            _repository.Snapshots.Retrieve(snapshotId));
+    }
 
-        _probe.ValidatedBlob(blobReference.Blob, blobValid);
-
-        return blobValid;
+    private Snapshot GetSnapshot(SnapshotReference snapshotReference)
+    {
+        return Serializer.BytesToSnapshot(
+            _chunker.Value.RestoreChunks(snapshotReference.ChunkIds));
     }
 
     private BlobReference StoreBlob(IBlobSystem blobSystem, Blob blob)
@@ -180,6 +155,16 @@ public sealed class SnapshotStore
         return blobReference;
     }
 
+    private bool CheckBlobReference(BlobReference blobReference)
+    {
+        var blobValid = blobReference.ChunkIds.CheckAll(
+            _chunker.Value.CheckChunk);
+
+        _probe.ValidatedBlob(blobReference.Blob, blobValid);
+
+        return blobValid;
+    }
+
     private void RestoreBlob(
         IBlobSystem blobSystem,
         BlobReference blobReference)
@@ -192,11 +177,11 @@ public sealed class SnapshotStore
         _probe.RestoredBlob(blobReference.Blob);
     }
 
-    private HashSet<string> ListChunkIds(IEnumerable<int> snapshotIds)
+    private HashSet<string> ListUsedChunkIds()
     {
         var chunkIds = new HashSet<string>();
 
-        foreach (var snapshotId in snapshotIds)
+        foreach (var snapshotId in _repository.Snapshots.UnorderedList())
         {
             var snapshotReference = GetSnapshotReference(snapshotId);
 
