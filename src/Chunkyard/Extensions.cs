@@ -153,10 +153,8 @@ internal static class Extensions
             string info,
             out IRepository repository)
         {
-            var success = consumer.TryString(flag, info, out var path)
+            return consumer.TryString(flag, info, out var path)
                 & consumer.TryDryRun(new FileRepository(path), r => new DryRunRepository(r), out repository);
-
-            return success;
         }
 
         public bool TryBlobSystem(
@@ -164,10 +162,8 @@ internal static class Extensions
             string info,
             out IBlobSystem blobSystem)
         {
-            var success = consumer.TryStrings(flag, info, out var directories)
+            return consumer.TryStrings(flag, info, out var directories)
                 & consumer.TryDryRun(new FileBlobSystem(directories), b => new DryRunBlobSystem(b), out blobSystem);
-
-            return success;
         }
 
         public bool TrySnapshot(out int snapshot)
