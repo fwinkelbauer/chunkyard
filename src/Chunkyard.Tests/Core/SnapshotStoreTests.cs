@@ -91,12 +91,9 @@ public sealed class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        var snapshotReference = snapshotStore.GetSnapshotReference(snapshotId);
-
-        var chunkIds = snapshotStore.GetSnapshot(snapshotReference)
+        var chunkIds = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
-            .SelectMany(b => b.ChunkIds)
-            .Except(snapshotReference.ChunkIds);
+            .SelectMany(b => b.ChunkIds);
 
         repository.Chunks.Missing(chunkIds);
 
@@ -113,12 +110,9 @@ public sealed class SnapshotStoreTests
         var snapshotId = snapshotStore.StoreSnapshot(
             Some.BlobSystem(Some.Blobs()));
 
-        var snapshotReference = snapshotStore.GetSnapshotReference(snapshotId);
-
-        var chunkIds = snapshotStore.GetSnapshot(snapshotReference)
+        var chunkIds = snapshotStore.GetSnapshot(snapshotId)
             .BlobReferences
-            .SelectMany(b => b.ChunkIds)
-            .Except(snapshotReference.ChunkIds);
+            .SelectMany(b => b.ChunkIds);
 
         repository.Chunks.Corrupt(chunkIds);
 
@@ -161,24 +155,31 @@ public sealed class SnapshotStoreTests
     }
 
     [TestMethod]
-    public void GarbageCollect_Removes_Unused_Ids()
+    public void GarbageCollect_Removes_Unused_Data()
     {
         var repository = Some.Repository();
         var snapshotStore = Some.SnapshotStore(repository);
 
-        var snapshotId = snapshotStore.StoreSnapshot(
-            Some.BlobSystem(Some.Blobs()));
+        var snapshotId1 = snapshotStore.StoreSnapshot(
+            Some.BlobSystem(Some.Blobs("a")));
+
+        var snapshotId2 = snapshotStore.StoreSnapshot(
+            Some.BlobSystem(Some.Blobs("b")));
 
         snapshotStore.GarbageCollect();
 
-        Assert.IsTrue(snapshotStore.CheckSnapshot(snapshotId));
+        Assert.IsTrue(snapshotStore.CheckSnapshot(snapshotId1));
+        Assert.IsTrue(snapshotStore.CheckSnapshot(snapshotId2));
 
-        snapshotStore.RemoveSnapshot(snapshotId);
-
-        Assert.IsNotEmpty(repository.Chunks.UnorderedList());
-
+        snapshotStore.RemoveSnapshot(snapshotId1);
         snapshotStore.GarbageCollect();
 
+        Assert.IsTrue(snapshotStore.CheckSnapshot(snapshotId2));
+
+        snapshotStore.RemoveSnapshot(snapshotId2);
+        snapshotStore.GarbageCollect();
+
+        Assert.IsEmpty(repository.Chunks.UnorderedList());
         Assert.IsEmpty(repository.Snapshots.UnorderedList());
     }
 
