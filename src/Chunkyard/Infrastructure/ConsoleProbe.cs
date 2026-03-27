@@ -15,10 +15,10 @@ internal sealed class ConsoleProbe : IProbe
         Console.Error.WriteLine($"Restored blob: {blob.Name}");
     }
 
-    public void ValidatedBlob(Blob blob, bool valid)
+    public void CheckedBlob(Blob blob, bool ok)
     {
-        Console.Error.WriteLine(valid
-            ? $"Valid: {blob.Name}"
-            : $"Invalid: {blob.Name}");
+        Console.Error.WriteLine(ok
+            ? $"Ok: {blob.Name}"
+            : $"Defect: {blob.Name}");
     }
 }

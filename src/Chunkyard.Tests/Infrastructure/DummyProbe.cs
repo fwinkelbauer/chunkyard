@@ -13,7 +13,7 @@ internal sealed class DummyProbe : IProbe
     {
     }
 
-    public void ValidatedBlob(Blob blob, bool valid)
+    public void CheckedBlob(Blob blob, bool ok)
     {
     }
 }
