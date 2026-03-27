@@ -59,7 +59,7 @@ public sealed class CommandParser
 
     private static string GetInfo(Assembly assembly)
     {
-        var textInfo = new CultureInfo("en-US").TextInfo;
+        var textInfo = new CultureInfo("en-GB").TextInfo;
 
         var product = assembly
             .GetCustomAttributes<AssemblyProductAttribute>()
