@@ -10,5 +10,5 @@ public interface IProbe
 
     void RestoredBlob(Blob blob);
 
-    void ValidatedBlob(Blob blob, bool valid);
+    void CheckedBlob(Blob blob, bool ok);
 }

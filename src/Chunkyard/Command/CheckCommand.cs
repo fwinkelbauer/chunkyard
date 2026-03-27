@@ -17,7 +17,7 @@ public sealed record CheckCommand(
         if (SnapshotStore.CheckSnapshot(snapshotId, Include))
         {
             Console.Error.WriteLine(
-                $"Validated snapshot: #{snapshotId}");
+                $"Ok: #{snapshotId}");
 
             return 0;
         }

@@ -160,7 +160,7 @@ public sealed class SnapshotStore
         var blobValid = blobReference.ChunkIds.CheckAll(
             _chunker.Value.CheckChunk);
 
-        _probe.ValidatedBlob(blobReference.Blob, blobValid);
+        _probe.CheckedBlob(blobReference.Blob, blobValid);
 
         return blobValid;
     }
