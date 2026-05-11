@@ -3,9 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <AnalysisMode>All</AnalysisMode>
     <MSTestAnalysisMode>All</MSTestAnalysisMode>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableMSTestRunner>true</EnableMSTestRunner>
   </PropertyGroup>
 
 </Project>
