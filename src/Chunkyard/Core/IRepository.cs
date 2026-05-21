@@ -12,7 +12,7 @@ public interface IRepository
 
 /// <summary>
 /// Defines a basic contract to store and retrieve bytes. Stored data can be
-/// referenced using a key. A repository can handle parallel operations.
+/// referenced using a key.
 /// </summary>
 public interface IRepository<T>
 {

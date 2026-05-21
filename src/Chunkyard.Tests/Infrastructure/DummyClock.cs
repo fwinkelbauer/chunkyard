@@ -1,15 +1,13 @@
 namespace Chunkyard.Tests.Infrastructure;
 
-internal sealed class DummyWorld : IWorld
+internal sealed class DummyClock : IClock
 {
     private DateTime _now;
 
-    public DummyWorld()
+    public DummyClock()
     {
         _now = DateTime.UtcNow;
     }
-
-    public int Parallelism => 2;
 
     public DateTime UtcNow()
     {

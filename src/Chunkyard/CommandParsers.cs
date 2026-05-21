@@ -224,7 +224,6 @@ public static class ArgConsumerExtensions
     {
         var success = consumer.TryString("--repository", "The repository path", out var path)
             & consumer.TryEnum("--password", "The password prompt method", out Password password, Password.Console)
-            & consumer.TryInt("--parallel", "The degree of parallelism", out var parallel, 1)
             & consumer.TryDryRun<IRepository>(new FileRepository(path), r => new DryRunRepository(r), out var repository);
 
         ICryptoFactory cryptoFactory = password switch
@@ -238,7 +237,7 @@ public static class ArgConsumerExtensions
             repository,
             new SimpleChunker(),
             new ConsoleProbe(),
-            new RealWorld(parallel),
+            new RealClock(),
             cryptoFactory);
 
         return success;
