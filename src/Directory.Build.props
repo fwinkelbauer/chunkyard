@@ -8,6 +8,7 @@
     <MSTestAnalysisMode>All</MSTestAnalysisMode>
     <EnableMSTestRunner>true</EnableMSTestRunner>
     <ArtifactsPath>$(MSBuildThisFileDirectory)../artifacts</ArtifactsPath>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
 
 </Project>
