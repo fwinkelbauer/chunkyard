@@ -4,6 +4,10 @@ root = true
 charset = utf-8
 
 [*.cs]
+csharp_style_namespace_declarations = file_scoped
+
+dotnet_diagnostic.IDE0161.severity = warning
+
 dotnet_diagnostic.CA1031.severity = none
 dotnet_diagnostic.CA1062.severity = none
 dotnet_diagnostic.CA1303.severity = none
