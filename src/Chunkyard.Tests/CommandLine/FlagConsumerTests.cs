@@ -247,10 +247,4 @@ public sealed class FlagConsumerTests
         Assert.IsFalse(consumer.TryString("--some", "info", out _));
         Assert.IsTrue(consumer.HelpNeeded(out _));
     }
-
-    public enum Day
-    {
-        Monday = 0,
-        Tuesday = 1
-    }
 }

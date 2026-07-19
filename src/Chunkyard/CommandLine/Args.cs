@@ -47,7 +47,7 @@ public sealed record Args(
             return null;
         }
 
-        var command = "";
+        var commandWords = new List<string>();
         var currentFlag = "";
         var flags = new Dictionary<string, List<string>>();
 
@@ -61,7 +61,7 @@ public sealed record Args(
             }
             else if (string.IsNullOrEmpty(currentFlag))
             {
-                command = $"{command} {token}".Trim();
+                commandWords.Add(token);
             }
             else
             {
@@ -73,6 +73,6 @@ public sealed record Args(
             pair => pair.Key,
             IReadOnlyCollection<string> (pair) => pair.Value);
 
-        return new Args(command, flagsCasted);
+        return new Args(string.Join(' ', commandWords), flagsCasted);
     }
 }

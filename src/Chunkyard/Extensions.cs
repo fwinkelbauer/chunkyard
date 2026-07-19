@@ -117,24 +117,6 @@ internal static class Extensions
                 defaultValue);
         }
 
-        public bool TryEnum<T>(
-            string flag,
-            string info,
-            out T value,
-            T? defaultValue = null)
-            where T : struct
-        {
-            var names = string.Join(", ", Enum.GetNames(typeof(T)));
-
-            return consumer.TryValue<T>(
-                flag,
-                $"{info}: {names}",
-                out value,
-                s => Enum.Parse<T>(s, true),
-                e => Enum.GetName(typeof(T), e)!,
-                defaultValue);
-        }
-
         public bool TrySnapshotStore(out SnapshotStore snapshotStore)
         {
             var success = consumer.TryRepository("--repository", "The repository path", out var repository)
