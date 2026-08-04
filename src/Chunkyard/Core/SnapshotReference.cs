@@ -1,7 +1,7 @@
 namespace Chunkyard.Core;
 
 /// <summary>
-/// A reference which can be used to retrieve a set of encrypted chunks from a
+/// A reference that retrieves a set of encrypted chunks from a
 /// <see cref="SnapshotStore"/>.
 /// </summary>
 public sealed record SnapshotReference(

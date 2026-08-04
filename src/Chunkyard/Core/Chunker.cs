@@ -73,10 +73,9 @@ public sealed class Chunker
         return _cipherBuffer.AsSpan(0, bytesRead);
     }
 
-    // We encrypt an array of zeros using a given key to create reproducible
-    // "random" data. This means that the same cryptographic key will always
-    // produce the same output, while another key will produce a different
-    // output.
+    // Encrypting an array of zeros using a given key creates reproducible
+    // "random" data. This means that the same cryptographic key always produces
+    // the same output, while another key produces a different output.
     private static uint[] GenerateGearTable(Crypto crypto)
     {
         var input = new byte[1024 - Crypto.CryptoBytes];

@@ -7,7 +7,7 @@ internal static class Some
 {
     private static readonly Lock Lock = new();
 
-    // Randomize which infrastructure we use
+    // Select an infrastructure implementation at random
     private static readonly bool UseInMemory = RandomNumberGenerator.GetInt32(2) == 0;
 
     private static DateTime Clock = DateTime.UtcNow;

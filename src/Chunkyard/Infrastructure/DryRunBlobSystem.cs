@@ -1,7 +1,7 @@
 namespace Chunkyard.Infrastructure;
 
 /// <summary>
-/// A <see cref="IBlobSystem"/> decorator that does not retrieve or store data.
+/// A <see cref="IBlobSystem"/> decorator that doesn't retrieve or store data.
 /// </summary>
 public sealed class DryRunBlobSystem : IBlobSystem
 {

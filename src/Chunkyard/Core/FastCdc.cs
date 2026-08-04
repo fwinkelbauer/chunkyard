@@ -6,7 +6,7 @@ namespace Chunkyard.Core;
 /// https://github.com/nlfiedler/fastcdc-rs
 /// https://www.usenix.org/system/files/conference/atc16/atc16-paper-xia.pdf
 ///
-/// The FastCdc algorithm can be used to split data into chunks.
+/// The FastCdc algorithm splits data into chunks.
 /// </summary>
 public sealed class FastCdc
 {

@@ -1,7 +1,7 @@
 namespace Chunkyard.Core;
 
 /// <summary>
-/// Defines a set of events which are created while using an instance of a
+/// Defines a set of events raised while using an instance of a
 /// <see cref="SnapshotStore"/>.
 /// </summary>
 public interface IProbe

@@ -1,7 +1,7 @@
 namespace Chunkyard.Core;
 
 /// <summary>
-/// A reference which can be used to store binary data in a
+/// A reference that stores binary data in a
 /// <see cref="SnapshotStore"/>.
 /// </summary>
 public sealed record BlobReference(

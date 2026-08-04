@@ -1,8 +1,8 @@
 namespace Chunkyard.CommandLine;
 
 /// <summary>
-/// This class dispatches args to instances of a set of command parsers. Returns
-/// a <see cref="HelpCommand"/> if no matching parser can be found.
+/// This class dispatches arguments to instances of a set of command parsers.
+/// Returns a <see cref="HelpCommand"/> if no parser matches.
 /// </summary>
 public sealed class CommandParser
 {

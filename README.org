@@ -2,18 +2,18 @@
 
 Chunkyard is a backup application for Windows and Linux which stores files in an encrypted content addressable storage.
 
-*Note:* I am building Chunkyard for myself. You might want to consider more sophisticated tools. Here's a list of [[https://github.com/restic/others][options]].
+*Note:* Chunkyard is a personal project. You might want to consider more sophisticated tools. Here's a list of [[https://github.com/restic/others][options]].
 
 * Goals
 
-- Cross platform support. Chunkyard is shipped as two binaries ~chunkyard~ (Linux) and ~chunkyard.exe~ (Windows). They work without having to install .NET on your computer
+- Cross platform support. Chunkyard ships as a standalone binary that doesn't need a .NET runtime installed on your computer
 - Favour simplicity and readability over features and elaborate performance tricks
-- Strong symmetric encryption (AES Galois/Counter Mode using a 256 bit key)
+- Strong symmetric encryption (Advanced Encryption Standard Galois/Counter Mode using a 256 bit key)
 - Ability to copy from/to other repositories
 - Verifiable backups
 - No third-party dependencies
 
-* Non-Goals
+* Non-goals
 
 - Key management
 - Asymmetric encryption
@@ -21,7 +21,7 @@ Chunkyard is a backup application for Windows and Linux which stores files in an
 - Extended file system features such as OS specific flags or links
 - Extended "version control" features such as branching or tagging
 - Hiding file sizes
-- Concurrent operations on a single repository using more than one Chunkyard process (e.g. creating a new backup while garbage collecting unused data)
+- Concurrent operations on a single repository using more than one Chunkyard process (for example creating a new backup while garbage collecting unused data)
 
 * Usage
 
@@ -61,15 +61,15 @@ chunkyard remove --repository 'MyBackup' --snapshot 0
 
 *** Concepts
 
-- *Blob:* Binary data (e.g. the content of a file) with some meta data
+- *Blob:* Binary data (for example the content of a file) with some meta data
 - *Snapshot:* A set of BlobReferences. It describes the current state of a set of Blobs at a specific point in time
 - *Repository:* A store which Chunkyard uses to persist data
 - *Chunk:* An encrypted piece of a Blob or a Snapshot
-- *Chunk ID:* A hash address which can be used to retrieve Chunks
-- *BlobReference:* Contains Chunk IDs and meta data which can be used to restore a Blob
-- *SnapshotReference:* Contains Chunk IDs and meta data which can be used to restore a Snapshot
+- *Chunk ID:* A hash address that retrieves Chunks
+- *BlobReference:* Contains Chunk IDs and meta data that restore a Blob
+- *SnapshotReference:* Contains Chunk IDs and meta data that restore a Snapshot
 
-*** Main Components
+*** Main components
 
 These classes contain the most important logic:
 
@@ -77,13 +77,13 @@ These classes contain the most important logic:
 - [[./src/Chunkyard/Core/IBlobSystem.cs][IBlobSystem.cs]]: Provides an abstraction to read and write Blobs
 - [[./src/Chunkyard/Core/SnapshotStore.cs][SnapshotStore.cs]]: Chunks, encrypts, deduplicates and stores Blobs in an IRepository
 
-*** Backup Workflow
+*** Backup workflow
 
 - Take a set of files
 - Split files into encrypted chunks, store them in a repository and return a list of BlobReferences
 - Bundle all BlobReferences into a Snapshot, store this Snapshot as encrypted chunks and return a SnapshotReference
 
-*** Restore Workflow
+*** Restore workflow
 
 - Retrieve a Snapshot using a SnapshotReference
 - Retrieve, decrypt and reassemble all files using their BlobReferences of the given Snapshot

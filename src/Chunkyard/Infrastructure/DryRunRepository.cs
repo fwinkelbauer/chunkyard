@@ -1,7 +1,7 @@
 namespace Chunkyard.Infrastructure;
 
 /// <summary>
-/// A <see cref="IRepository"/> decorator that does not store or remove data.
+/// A <see cref="IRepository"/> decorator that doesn't store or remove data.
 /// </summary>
 public sealed class DryRunRepository : IRepository
 {
@@ -17,7 +17,7 @@ public sealed class DryRunRepository : IRepository
 }
 
 /// <summary>
-/// A <see cref="IRepository{T}"/> decorator that does not store or remove data.
+/// A <see cref="IRepository{T}"/> decorator that doesn't store or remove data.
 /// </summary>
 public sealed class DryRunRepository<T> : IRepository<T>
     where T : notnull

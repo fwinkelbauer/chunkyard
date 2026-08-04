@@ -3,11 +3,11 @@ namespace Chunkyard.CommandLine;
 /// <summary>
 /// A structured form of input arguments.
 ///
-/// Command line arguments are expected to have the following shape:
+/// Command line arguments follow this shape:
 ///
 /// [command] [flags]
 ///
-/// e.g. my-command --some-flag param1 param2 --another-flag
+/// Example: some-command --some-flag param1 param2 --another-flag
 /// </summary>
 public sealed record Args(
     string Command,
