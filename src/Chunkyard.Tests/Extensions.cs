@@ -42,4 +42,12 @@ internal static class Extensions
                 });
         }
     }
+
+    extension(SnapshotStore snapshotStore)
+    {
+        public int StoreSnapshot(IBlobSystem blobSystem)
+        {
+            return snapshotStore.StoreSnapshot(blobSystem, Some.UtcNow());
+        }
+    }
 }

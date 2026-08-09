@@ -32,6 +32,7 @@ public sealed class SnapshotStore
 
     public int StoreSnapshot(
         IBlobSystem blobSystem,
+        DateTime utcNow,
         Regex? regex = null)
     {
         var snapshotId = 0;
@@ -52,9 +53,7 @@ public sealed class SnapshotStore
                 : StoreBlob(blobSystem, b))
             .ToArray();
 
-        var snapshot = new Snapshot(
-            blobReferences.Max(br => br.Blob.LastWriteTimeUtc),
-            blobReferences);
+        var snapshot = new Snapshot(utcNow, blobReferences);
 
         StoreSnapshotReference(snapshotId, snapshot);
 
