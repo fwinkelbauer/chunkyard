@@ -10,10 +10,8 @@ cd "$(dirname "$BASH_SOURCE")"
 
 export DOTNET_CLI_TELEMETRY_OPTOUT='1'
 
-rm -rf 'artifacts'
-cd 'src'
-
 announce 'Build'
+rm -rf 'artifacts'
 dotnet build -p:TreatWarningsAsErrors=true
 
 announce 'Test'

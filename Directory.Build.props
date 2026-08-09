@@ -7,7 +7,7 @@
     <AnalysisMode>All</AnalysisMode>
     <MSTestAnalysisMode>All</MSTestAnalysisMode>
     <EnableMSTestRunner>true</EnableMSTestRunner>
-    <ArtifactsPath>$(MSBuildThisFileDirectory)../artifacts</ArtifactsPath>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)./Artifacts</ArtifactsPath>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <DebugType>embedded</DebugType>
     <PublishSingleFile>true</PublishSingleFile>

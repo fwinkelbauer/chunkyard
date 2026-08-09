@@ -73,9 +73,9 @@ chunkyard remove --repository 'MyBackup' --snapshot 0
 
 These classes contain the most important logic:
 
-- [[./src/Chunkyard/Core/IRepository.cs][IRepository.cs]]: Defines the underlying backup storage
-- [[./src/Chunkyard/Core/IBlobSystem.cs][IBlobSystem.cs]]: Provides an abstraction to read and write Blobs
-- [[./src/Chunkyard/Core/SnapshotStore.cs][SnapshotStore.cs]]: Chunks, encrypts, deduplicates and stores Blobs in an IRepository
+- [[./Chunkyard/Core/IRepository.cs][IRepository.cs]]: Defines the underlying backup storage
+- [[./Chunkyard/Core/IBlobSystem.cs][IBlobSystem.cs]]: Provides an abstraction to read and write Blobs
+- [[./Chunkyard/Core/SnapshotStore.cs][SnapshotStore.cs]]: Chunks, encrypts, deduplicates and stores Blobs in an IRepository
 
 *** Backup workflow
 
