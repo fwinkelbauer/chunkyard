@@ -85,7 +85,7 @@ public sealed class Chunker
         for (var i = 0; i < gearTable.Length; i++)
         {
             var slice = random.AsSpan(i * 4, 4);
-            gearTable[i] = BitConverter.ToUInt32(slice) & 0x7FFFFFFF;
+            gearTable[i] = BitConverter.ToUInt32(slice) & FastCdc.MaxGearTableValue;
         }
 
         return gearTable;

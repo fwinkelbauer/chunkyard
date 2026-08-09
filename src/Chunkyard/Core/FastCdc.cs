@@ -10,6 +10,8 @@ namespace Chunkyard.Core;
 /// </summary>
 public sealed class FastCdc
 {
+    public const uint MaxGearTableValue = 0x7FFFFFFF;
+
     private const int DefaultMin = 4 * 1024 * 1024;
     private const int DefaultAvg = 8 * 1024 * 1024;
     private const int DefaultMax = 16 * 1024 * 1024;
@@ -39,6 +41,12 @@ public sealed class FastCdc
         {
             throw new ArgumentException(
                 $"Invariant violation: {maxSize} - {minSize} > {avgSize}");
+        }
+
+        if (gearTable.Any(value => value > MaxGearTableValue))
+        {
+            throw new ArgumentException(
+                $"Gear table values must not exceed {MaxGearTableValue}");
         }
 
         var bits = BitOperations.Log2((uint)AvgSize);
