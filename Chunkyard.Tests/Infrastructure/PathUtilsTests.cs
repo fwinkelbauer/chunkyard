@@ -16,6 +16,11 @@ public sealed class PathUtilsTests
     [DataRow(new[] { "/foo", "/bar" }, "/")]
     [DataRow(new[] { "C:/foo", "D:/bar" }, "")]
     [DataRow(new[] { "C:/foo", "C:/bar" }, "C:")]
+    [DataRow(new[] { "/foo/bar/baz", "/foo/bar-baz" }, "/foo")]
+    [DataRow(new[] { "/foo/bar", "/foo/barbaz" }, "/foo")]
+    [DataRow(new[] { "/foo/bar/baz", "/foo/bar" }, "/foo/bar")]
+    [DataRow(new[] { "/foo", "foo" }, "")]
+    [DataRow(new[] { "//server/share/foo", "//server/share/bar" }, "//server/share")]
     public void GetCommon_Returns_Common_Name(
         string[] directories,
         string expected)

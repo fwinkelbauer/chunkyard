@@ -34,38 +34,27 @@ public static class PathUtils
             return directories[0];
         }
 
-        var common = "";
+        var root = GetRoot(directories[0], separatorChar);
+
+        if (directories.Any(d => !GetRoot(d, separatorChar).Equals(root)))
+        {
+            return "";
+        }
+
         var segments = directories
-            .OrderBy(d => d)
-            .Last()
-            .Split(separatorChar, StringSplitOptions.RemoveEmptyEntries)
+            .Select(d => d.Split(separatorChar, StringSplitOptions.RemoveEmptyEntries))
             .ToArray();
 
-        foreach (var segment in segments)
-        {
-            var newCommon = common + separatorChar + segment;
+        var commonSegments = segments[0]
+            .TakeWhile((segment, i) => segments.All(
+                s => i < s.Length && s[i].Equals(segment, StringComparison.Ordinal)))
+            .ToArray();
 
-            if (common.Length == 0
-                && directories.All(d => d.StartsWith(segment)))
-            {
-                common = segment;
-            }
-            else if (directories.All(d => d.StartsWith(newCommon)))
-            {
-                common = newCommon;
-            }
-            else
-            {
-                break;
-            }
-        }
+        return root + string.Join(separatorChar, commonSegments);
+    }
 
-        if (string.IsNullOrEmpty(common)
-            && directories.All(d => d.StartsWith(separatorChar)))
-        {
-            common += separatorChar;
-        }
-
-        return common;
+    private static string GetRoot(string directory, char separatorChar)
+    {
+        return directory[..^directory.TrimStart(separatorChar).Length];
     }
 }
