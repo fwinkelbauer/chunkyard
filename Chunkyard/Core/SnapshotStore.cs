@@ -168,10 +168,9 @@ public sealed class SnapshotStore
         IBlobSystem blobSystem,
         BlobReference blobReference)
     {
-        using (var stream = blobSystem.OpenWrite(blobReference.Blob))
-        {
-            _chunker.Value.RestoreChunks(blobReference.ChunkIds, stream);
-        }
+        blobSystem.Write(
+            blobReference.Blob,
+            stream => _chunker.Value.RestoreChunks(blobReference.ChunkIds, stream));
 
         _probe.RestoredBlob(blobReference.Blob);
     }

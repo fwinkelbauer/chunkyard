@@ -76,12 +76,10 @@ internal static class Some
 
         foreach (var blob in blobs)
         {
-            using var stream = blobSystem.OpenWrite(blob);
-
             content ??= RandomNumberGenerator.GetBytes(
                 RandomNumberGenerator.GetInt32(16, 32));
 
-            stream.Write(content);
+            blobSystem.Write(blob, stream => stream.Write(content));
         }
 
         return blobSystem;

@@ -41,13 +41,23 @@ public sealed class FileBlobSystem : IBlobSystem
             : null;
     }
 
-    public Stream OpenWrite(Blob blob)
+    public void Write(Blob blob, Action<Stream> write)
     {
         var file = ToFile(blob.Name);
 
         PathUtils.EnsureParent(file);
 
-        return new WriteStream(file, blob);
+        using (var stream = new FileStream(
+            file,
+            FileMode.Create,
+            FileAccess.Write))
+        {
+            write(stream);
+        }
+
+        File.SetLastWriteTimeUtc(
+            file,
+            blob.LastWriteTimeUtc);
     }
 
     private Blob ToBlob(string file)
@@ -74,25 +84,5 @@ public sealed class FileBlobSystem : IBlobSystem
     private string ToFile(string blobName)
     {
         return Path.Combine(_common.Value, blobName);
-    }
-
-    private sealed class WriteStream : FileStream
-    {
-        private readonly Blob _blob;
-
-        public WriteStream(string file, Blob blob)
-            : base(file, FileMode.Create, FileAccess.Write)
-        {
-            _blob = blob;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            File.SetLastWriteTimeUtc(
-                Name,
-                _blob.LastWriteTimeUtc);
-        }
     }
 }

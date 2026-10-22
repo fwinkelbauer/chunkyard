@@ -27,8 +27,8 @@ public sealed class DryRunBlobSystem : IBlobSystem
         return _blobSystem.GetBlob(blobName);
     }
 
-    public Stream OpenWrite(Blob blob)
+    public void Write(Blob blob, Action<Stream> write)
     {
-        return Stream.Null;
+        write(Stream.Null);
     }
 }
