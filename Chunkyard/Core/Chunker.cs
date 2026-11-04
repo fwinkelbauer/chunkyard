@@ -68,7 +68,10 @@ public sealed class Chunker
     {
         using var stream = _repository.OpenRead(chunkId);
 
-        var bytesRead = stream.Read(_cipherBuffer);
+        var bytesRead = stream.ReadAtLeast(
+            _cipherBuffer,
+            _cipherBuffer.Length,
+            throwOnEndOfStream: false);
 
         return _cipherBuffer.AsSpan(0, bytesRead);
     }

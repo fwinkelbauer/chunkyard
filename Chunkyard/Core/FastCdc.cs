@@ -68,7 +68,11 @@ public sealed class FastCdc
 
     public ReadOnlySpan<byte> Chunk(Stream stream, Span<byte> buffer)
     {
-        var bytesRead = stream.Read(buffer);
+        var bytesRead = stream.ReadAtLeast(
+            buffer,
+            buffer.Length,
+            throwOnEndOfStream: false);
+
         var chunkSize = Cut(buffer[..bytesRead]);
         stream.Position -= (bytesRead - chunkSize);
 
