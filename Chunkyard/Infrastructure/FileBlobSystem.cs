@@ -45,19 +45,13 @@ public sealed class FileBlobSystem : IBlobSystem
     {
         var file = ToFile(blob.Name);
 
-        PathUtils.EnsureParent(file);
-
-        using (var stream = new FileStream(
-            file,
-            FileMode.Create,
-            FileAccess.Write))
+        using (var atomicFile = new AtomicFile(file, overwrite: true))
         {
-            write(stream);
+            write(atomicFile.Stream);
+            atomicFile.Commit();
         }
 
-        File.SetLastWriteTimeUtc(
-            file,
-            blob.LastWriteTimeUtc);
+        File.SetLastWriteTimeUtc(file, blob.LastWriteTimeUtc);
     }
 
     private Blob ToBlob(string file)

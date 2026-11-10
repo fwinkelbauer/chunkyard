@@ -45,16 +45,10 @@ public sealed class FileRepository<T> : IRepository<T>
 
     public void Write(T key, ReadOnlySpan<byte> value)
     {
-        var file = ToFile(key);
+        using var atomicFile = new AtomicFile(ToFile(key), overwrite: false);
 
-        PathUtils.EnsureParent(file);
-
-        using var fileStream = new FileStream(
-            file,
-            FileMode.CreateNew,
-            FileAccess.Write);
-
-        fileStream.Write(value);
+        atomicFile.Stream.Write(value);
+        atomicFile.Commit();
     }
 
     public Stream OpenRead(T key)
