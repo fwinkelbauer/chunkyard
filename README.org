@@ -1,6 +1,6 @@
 #+TITLE: Chunkyard
 
-Chunkyard is a backup application for Windows and Linux which stores files in an encrypted content addressable storage.
+Chunkyard is a backup application which stores files in an encrypted content addressable storage.
 
 *Note:* Chunkyard is a personal project. You might want to consider more sophisticated tools. Here's a list of [[https://github.com/restic/others][options]].
 
@@ -21,7 +21,9 @@ Chunkyard is a backup application for Windows and Linux which stores files in an
 - Extended file system features such as OS specific flags or links
 - Extended "version control" features such as branching or tagging
 - Hiding file sizes
-- Concurrent operations on a single repository using more than one Chunkyard process (for example creating a new backup while garbage collecting unused data)
+- Skipping unreadable files to create incomplete snapshots
+- Handling file changes while Chunkyard is running
+- Concurrent operations on a single repository using more than one Chunkyard process
 
 * Usage
 
@@ -55,7 +57,7 @@ chunkyard remove --repository 'MyBackup' --snapshot 0
 ** Publish
 
 - Create an annotated tag to define a version number
-- Run ~./publish~ to create Linux and Windows binaries in the ~artifacts~ directory
+- Run ~./publish~ to populate the ~Artifacts~ directory
 
 ** Architecture
 
